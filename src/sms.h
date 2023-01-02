@@ -28,5 +28,4 @@ enum object_type {
 #include "sm_expression.h"
 #include "sm_gc.h"
 #include "sm_global.h"
-#include "sm_table_entry.h"
 #include "sm_terminal.h"
