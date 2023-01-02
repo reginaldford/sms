@@ -72,7 +72,7 @@ SETVAR  : SYM '=' EXPRESSION  {
 
   if(context_level == 0)
   {
-    sm_global_context(sm_set_var(sm_global_context(NULL),($1)->symbol_name,$3));
+    sm_global_context(sm_set_var(sm_global_context(NULL),($1)->name,$3));
     sm_print_table(sm_global_context(NULL));
     sm_garbage_collect();
     sm_prompt();
@@ -98,7 +98,7 @@ EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression2(sm_minus,(sm_obj
 	    }
 	  }
 	| '+' EXPRESSION {$$ = (sm_expression*)$2;}
-	| SYM { $$ = (sm_expression*) sm_new_symbol(($1) -> symbol_name); }
+	| SYM { $$ = (sm_expression*) sm_new_symbol(($1) -> name); }
 	| '(' EXPRESSION ')' { $$ = (sm_expression*) $2; }
 	| STRING { }
 	| SIN  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sin ,(sm_object*) $3 );}
