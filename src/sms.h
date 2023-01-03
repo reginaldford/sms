@@ -11,7 +11,7 @@ enum sm_object_type {
   sm_symbol_type,
   sm_array_type,
   sm_context_type,
-  sm_gco_type,
+  sm_pointer_type,
   sm_key_value_type
 };
 
@@ -25,6 +25,7 @@ enum sm_object_type {
 #include "sm_string.h"
 #include "sm_object.h"
 #include "sm_memory_heap.h"
+#include "sm_pointer.h"
 #include "sm_symbol.h"
 #include "sm_array.h"
 #include "sm_commands.h"

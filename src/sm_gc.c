@@ -2,18 +2,15 @@
 
 sm_object *sm_move_to_new_heap(sm_object *obj) {
   sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
-  // sm_object* new_obj = sm_realloc_obj(obj);
-
-  sm_gco *new_gco      = (sm_gco *)obj;
-  new_gco->my_type     = sm_gco_type;
-  new_gco->new_address = new_obj;
+  // overwrite the old object. sm_pointer is NOT larger
+  sm_new_pointer(obj,new_obj);
   return new_obj;
 }
 
 sm_object *sm_meet_object(sm_object *obj) {
   enum sm_object_type the_type = obj->my_type;
-  if (the_type == sm_gco_type)
-    return ((sm_gco *)obj)->new_address;
+  if (the_type == sm_pointer_type)
+    return ((sm_pointer *)obj)->address;
   else
     return sm_move_to_new_heap(obj);
 }
@@ -80,7 +77,7 @@ void sm_garbage_collect() {
     sm_move_to_new_heap((sm_object *)sm_global_context(NULL));
 
     // update global variables
-    sm_global_context((sm_context *)((sm_gco *)sm_global_context(NULL))->new_address);
+    sm_global_context((sm_context *)((sm_pointer *)sm_global_context(NULL))->address);
 
     // inflate
     sm_inflate_heap();
