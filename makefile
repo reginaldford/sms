@@ -18,9 +18,9 @@ CFLAGS= -lm -Ofast
 #Compiling for debugging info
 #CFLAGS=-lm -g
 
-SOURCES=src/lex.yy.c src/y.tab.c src/sm_object.c src/sm_symbol.c src/sm_memory_heap.c src/sm_string.c src/sm_array.c src/sm_expression.c src/sm_double.c src/sm_context.c src/sm_commands.c src/sm_global.c src/sm_gc.c src/sm_terminal.c src/sm_key_value.c
+SOURCES=src/lex.yy.c src/y.tab.c src/sm_object.c src/sm_symbol.c src/sm_memory_heap.c src/sm_string.c src/sm_array.c src/sm_expression.c src/sm_double.c src/sm_context.c src/sm_commands.c src/sm_global.c src/sm_gc.c src/sm_terminal.c src/sm_key_value.c src/sm_pointer.c
 
-HEADERS=src/sms.h src/sm_object.h src/sm_symbol.h src/sm_memory_heap.h src/sm_string.h src/sm_array.h src/sm_expression.h src/sm_double.h src/sm_context.h src/sm_global.h src/sm_gc.h src/sm_terminal.h src/sm_key_value.h
+HEADERS=src/sms.h src/sm_object.h src/sm_symbol.h src/sm_memory_heap.h src/sm_string.h src/sm_array.h src/sm_expression.h src/sm_double.h src/sm_context.h src/sm_global.h src/sm_gc.h src/sm_terminal.h src/sm_key_value.h src/sm_pointer.h
 
 all: sms
 

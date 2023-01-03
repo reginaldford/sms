@@ -3,7 +3,7 @@
 sm_string *sm_sm_object_type_str(enum sm_object_type t) {
   char *response_string[]     = {"sm_double",  "sm_expression", "sm_primitive",
                                  "sm_string",  "sm_symbol",     "sm_array",
-                                 "sm_context", "sm_gco",        "sm_key_value"};
+                                 "sm_context", "sm_pointer",    "sm_key_value"};
   int   response_string_len[] = {10, 13, 12, 9, 9, 8, 10, 6, 12};
   if (t >= 0 && t < sizeof(response_string) / sizeof(void *))
     return sm_new_string(response_string_len[t], response_string[t]);
@@ -15,7 +15,7 @@ sm_string *sm_object_to_string(sm_object *obj1) {
   enum sm_object_type t = obj1->my_type;
 
   if (t == sm_double_type) {
-    return sm_double_to_string((sm_double*)obj1);
+    return sm_double_to_string((sm_double *)obj1);
   } else if (t == sm_string_type) {
     sm_string *pss = (sm_string *)obj1;
     // 2 more characters for quotes, and 1 for the extra null char
@@ -61,8 +61,8 @@ int sm_sizeof(sm_object *obj1) {
   case sm_context_type:
     return sizeof(sm_context) + sizeof(sm_context_entry) * ((sm_context *)obj1)->capacity;
     break;
-  case sm_gco_type:
-    return sizeof(sm_gco);
+  case sm_pointer_type:
+    return sizeof(sm_pointer);
     break;
   default:
     printf("Cannot determine size of object of type %d\n", obj_type);
