@@ -19,6 +19,7 @@ enum math_op {
   sm_exp,
   sm_diff
 };
+
 enum print_mode {
   print_mode_immediate,
   print_mode_prefix,
@@ -26,13 +27,15 @@ enum print_mode {
   print_mode_postfix,
   print_mode_unknown
 };
+
 // Assumed to have num_args of pointers following the structure
 typedef struct sm_expression {
-  enum object_type my_type;
-  enum math_op     op;
-  int              capacity;
-  int              num_args;
+  enum sm_object_type my_type;
+  enum math_op        op;
+  unsigned int        capacity;
+  unsigned int        num_args;
 } sm_expression;
+
 sm_expression *sm_new_expression(enum math_op op1, sm_object *arg);
 sm_expression *sm_append_to_expression(sm_expression *expr, sm_object *arg);
 sm_expression *sm_new_expression2(enum math_op op1, sm_object *arg1, sm_object *arg2);

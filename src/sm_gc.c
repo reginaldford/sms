@@ -11,7 +11,7 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 }
 
 sm_object *sm_meet_object(sm_object *obj) {
-  enum object_type the_type = obj->my_type;
+  enum sm_object_type the_type = obj->my_type;
   if (the_type == sm_gco_type)
     return ((sm_gco *)obj)->new_address;
   else
@@ -27,7 +27,7 @@ void sm_inflate_heap() {
     sm_object *current_obj = (sm_object *)scan_cursor;
     switch (current_obj->my_type) {
     case sm_context_type: {
-      sm_table_entry *table = get_table_entries((sm_context *)current_obj);
+      sm_context_entry *table = get_context_entries((sm_context *)current_obj);
       for (int i = 0; i < ((sm_context *)current_obj)->size; i++) {
         table[i].name  = (sm_string *)sm_meet_object((sm_object *)table[i].name);
         table[i].value = sm_meet_object(table[i].value);
