@@ -1,9 +1,9 @@
 // Has (size) of sm_object* following this structure.
 typedef struct sm_array {
-  enum object_type my_type;
-  unsigned int     capacity;
-  unsigned int     size;
-  short            space; // make this struct 16 bytes
+  enum sm_object_type my_type;
+  unsigned int        capacity;
+  unsigned int        size;
+  short               space; // make this struct 16 bytes
 } sm_array;
 sm_array  *sm_resize_array(sm_array *array, int size);
 sm_array  *sm_new_array(int size, int capacity);

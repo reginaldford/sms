@@ -17,4 +17,10 @@ int main() {
   printf("sizeof %s is %d, effectively %d\n", "int", sizeof(int), sm_round_size(sizeof(int)));
   printf("sizeof %s is %d, effectively %d\n", "sm_symbol", sizeof(sm_symbol),
          sm_round_size(sizeof(sm_symbol)));
+  printf("sizeof %s is %d, effectively %d\n", "sm_context_entry", sizeof(sm_context_entry),
+         sm_round_size(sizeof(sm_context_entry)));
+
+  printf("sizeof %s is %d, effectively %d\n", "sm_key_value", sizeof(sm_key_value),
+         sm_round_size(sizeof(sm_key_value)));
+
 }
