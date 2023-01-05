@@ -1,5 +1,9 @@
 # STATUS QUO:
+<<<<<<< HEAD
 Compiling this C project will produce a terminal program that interprets commands like `a=4;` and `delete a;` to set and destroy variables, respectively.
+=======
+Compiling this C project will product a terminal program that interprets commands like `a=4;` and `delete a;` to set and destroy variables, respectively.
+>>>>>>> 9c860b4 (Update readme.md)
 
 To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. 
 The variable names must start with a letter and variables can store equations, strings, numbers, and arrays of those forementioned things.
@@ -21,6 +25,7 @@ You can try the following examples:
 
 
 # PLANS:
+<<<<<<< HEAD
 - Currently, there is no evaluation other than setting and unsetting variables. The only commands are SETVAR ( setting a variable like 'a' to a value like 5 (`a=5;`)) and DELETE (`delete a;`) . The right hand side is not evaluated. The interpreter stores the abstract syntax tree without modification. A syntax needs to allow for encapsulating the math when necessary. This will be the introduction of an evalutation engine. The right hand side will be evaluated and the result will be printed. 
 - Currently, the garbage collector only executes after a command. The plan is to have the garbage collector initiate when a new memory allocation would pass a threshold. Live objects must be tracked on a stack, which becomes a new member of the roots for inflating to the new heap at garbage collection. With this upgrade, the garbage collector would then run less often.
 - Currently, the garbage collector is not generational. The plan is to have an n-generation stop and copy garbage collector. With will make the garbage collector run less often for long-term objects.
@@ -39,6 +44,19 @@ You can try the following examples:
 - Arbitrary precision library written in sms.
 - Unicode support.
 - Graphics support.
+=======
+- Currently, ther is no evaluation. The only commands are SETVAR ( setting a variable like `a` to a value like `5` (a=5;)) and DELETE (`delete a;`) . The right hand side is not evaluated, and will stores the abstract syntax tree without modification. Instead, the right hand side should be evaluated. A syntax needs to allow for encapsulating the math when necessary. This will be the introduction of an evalutation engine.
+- Currently, the garbage collector only executes after a command. The plan is to have the garbage collector initiate when a new memory allocation would pass a threshold. Live objects must be tracked on a stack, which becomes a new member of the roots... No pun intended. The garbage collector would then run less often.
+- Currently, the garbage collector is not generational. The plan is to have an n-generation stop and copy garbage collector.
+- A diff command for taking derivatives.
+- A int command for taking integrals.
+- Support for floats and integers as opposed to just doubles.
+- Quad precision support.
+- Clean the string manipulations to avoid sprintf and strlen
+- General Guide.
+- Guide for adding your own command by adding C code.
+- Turing completeness.
+>>>>>>> 9c860b4 (Update readme.md)
 
 # HOW TO COMPILE
 
