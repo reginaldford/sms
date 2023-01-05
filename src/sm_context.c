@@ -10,7 +10,9 @@ struct sm_context *sm_new_context(unsigned int capacity) {
   return new_context;
 }
 
-sm_context_entry *get_context_entries(sm_context *context) { return (sm_context_entry *)&(context[1]); }
+sm_context_entry *get_context_entries(sm_context *context) {
+  return (sm_context_entry *)&(context[1]);
+}
 
 void sm_print_table(sm_context *context) {
   sm_context_entry *context_entries = get_context_entries(context);
@@ -56,15 +58,15 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
 }
 
 sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
-  sm_context     *current_context = context;
-  sm_context_entry *context_entries   = get_context_entries(current_context);
-  search_result   sr              = sm_find_var_index(current_context, name);
+  sm_context       *current_context = context;
+  sm_context_entry *context_entries = get_context_entries(current_context);
+  search_result     sr              = sm_find_var_index(current_context, name);
   if (sr.found == true) {
     context_entries[sr.index].value = val;
     return current_context;
   }
   if (current_context->size == current_context->capacity) {
-    int new_capacity = ((int)(current_context->capacity * sm_collection_growth_factor(0))) + 1;
+    int new_capacity = ((int)(current_context->capacity * sm_global_growth_factor(0))) + 1;
     current_context  = (sm_context *)sm_realloc(
        (sm_object *)current_context, sizeof(sm_context) + sizeof(sm_context_entry) * new_capacity);
     current_context->capacity = new_capacity;
@@ -81,7 +83,7 @@ sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
 bool sm_delete(sm_symbol *sym) {
   search_result sr = sm_find_var_index(sm_global_context(NULL), sym->name);
   if (sr.found == true) {
-    sm_context     *context       = sm_global_context(NULL);
+    sm_context       *context         = sm_global_context(NULL);
     sm_context_entry *context_entries = get_context_entries(context);
     for (int i = sr.index; i < context->size - 1; i++) {
       context_entries[i] = context_entries[i + 1];
@@ -99,32 +101,36 @@ sm_string *sm_context_to_string(sm_context *self) {
     sm_string *answer = sm_new_string(3, "{ }");
     return answer;
   }
-  int             object_length_sum = 0;
-  sm_string      *object_strings[self->size];
-  sm_context_entry *te = get_context_entries(self);
-  for (int object_index = 0; object_index < self->size; object_index++) {
-    sm_context_entry *current_object = &te[object_index];
-    object_strings[object_index]   = sm_context_entry_to_string(current_object);
+  int               object_length_sum = 0;
+  sm_string        *object_strings[self->size];
+  sm_context_entry *ce = get_context_entries(self);
+  for (unsigned int object_index = 0; object_index < self->size; object_index++) {
+    sm_context_entry *current_object = &ce[object_index];
+    object_strings[object_index]     = sm_context_entry_to_string(current_object);
     object_length_sum += object_strings[object_index]->size;
   }
   int   answer_length = 2 + object_length_sum + self->size * 2 + 1;
   char *buf           = malloc(sizeof(char) * answer_length);
   sprintf(buf, "{ ");
   int buffer_pos = 2;
-  for (int object_index = 0; object_index < self->size - 1; object_index++) {
-    sprintf(buf + buffer_pos, "%s, ", &(object_strings[object_index]->content));
-    //+2 for command and space
-    buffer_pos += object_strings[object_index]->size + 2;
+  if (self->size > 0) {
+    for (unsigned int object_index = 0; object_index <= self->size - 1; object_index++) {
+      sprintf(buf + buffer_pos, "%s ", &(object_strings[object_index]->content));
+      //+2 for command and space
+      buffer_pos += object_strings[object_index]->size + 1;
+    }
   }
-  sprintf(buf + buffer_pos, "%s }", &(object_strings[self->size - 1]->content));
-  buffer_pos += object_strings[self->size - 1]->size + 2;
+
+  sprintf(buf + buffer_pos, "}");
+  buffer_pos += 1;
+
   sm_string *answer = sm_new_string(buffer_pos, buf);
   free(buf);
   return answer;
 }
 
-sm_string *sm_context_entry_to_string(sm_context_entry *te) {
+sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
   char buf[50];
-  sprintf(buf, " %s : %s ", &(te->name->content), &(sm_object_to_string(te->value)->content));
+  sprintf(buf, "%s = %s;", &(ce->name->content), &(sm_object_to_string(ce->value)->content));
   return sm_new_string(strlen(buf), buf);
 }

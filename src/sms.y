@@ -17,36 +17,36 @@ int context_level=0;
   sm_double *num;
   sm_symbol *sym;
   sm_expression *expr;
-  sm_array *arr;
   sm_string *str;
   sm_context * context;
+  sm_key_value * kv;
 };
 
 %token CLEAR FORMAT LS NEWLINE EXIT
 
-%type <expr> SETVAR
+%type  <kv>       KEYVALUE
 %type  <context>  CONTEXT
-%type  <context>  CONTEXT_LIST
-%type  <expr> EXPRESSION
-%type  <expr> EXPRESSION_LIST
-%type  <arr>  ARRAY
-%token <num>  NUM
-%token <sym>  SYM
-%token <str>  STRING
-%token <expr> SIN
-%token <expr> COS
-%token <expr> TAN
-%token <expr> SINH
-%token <expr> COSH
-%token <expr> TANH
-%token <expr> SEC
-%token <expr> CSC
-%token <expr> COT
-%token <expr> LN
-%token <expr> EXP
-%token <expr> SQRT
-%token <expr> DIFF
-%token <expr> DELETE
+%type  <expr>     EXPRESSION
+%type  <expr>     EXPRESSION_LIST
+%type  <expr>     ARRAY
+%token <num>      NUM
+%token <sym>      SYM
+%token <str>      STRING
+%token <expr>     SIN
+%token <expr>     COS
+%token <expr>     TAN
+%token <expr>     SINH
+%token <expr>     COSH
+%token <expr>     TANH
+%token <expr>     SEC
+%token <expr>     CSC
+%token <expr>     COT
+%token <expr>     LN
+%token <expr>     EXP
+%token <expr>     SQRT
+%token <expr>     DIFF
+%token <expr>     DELETE
+%token <expr>     LET
 
 %left  '+' '-'
 %left  '*' '/'
@@ -56,37 +56,36 @@ int context_level=0;
 %%
 
 
-COMMAND : SETVAR            { }
+COMMAND : KEYVALUE            { 
+    //sm_global_context(sm_set_var(sm_global_context(NULL),((sm_symbol*)sm_get_expression_arg($1,0))->name,sm_get_expression_arg($1,1)));
+    sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,$1->value));
+    sm_print_table(sm_global_context(NULL));
+    sm_garbage_collect();
+    sm_prompt();
+
+}
   | DELETE SYM              {
       sm_delete((sm_symbol*)$2);
       sm_print_table(sm_global_context(NULL));
       sm_garbage_collect();
       sm_prompt();
       }
+  | LET SYM '=' EXPRESSION  { printf("Activated let command ! (incomplete) \n"); }
   | EXIT    ';'             { exit(0); }
   | error                   { yyerror("Bad syntax.");}
   | COMMAND ';' COMMAND ';' { }
   ;
 
-SETVAR  : SYM '=' EXPRESSION  {
-
-  if(context_level == 0)
-  {
-    sm_global_context(sm_set_var(sm_global_context(NULL),($1)->name,$3));
-    sm_print_table(sm_global_context(NULL));
-    sm_garbage_collect();
-    sm_prompt();
-  }
-  else
-    $$ = sm_new_expression2(sm_equals,   (sm_object*) $1, (sm_object*) $3 ) ;
+KEYVALUE  : SYM '=' EXPRESSION  {
+    $$ = sm_new_key_value($1->name,(sm_object*) $3 ) ;
 }
 ;
 
-EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
-	| EXPRESSION '+' EXPRESSION { $$ = sm_new_expression2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
-	| EXPRESSION '*' EXPRESSION { $$ = sm_new_expression2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
-	| EXPRESSION '/' EXPRESSION { $$ = sm_new_expression2(sm_divide,(sm_object*) $1, (sm_object*) $3 ) ; }
-	| EXPRESSION '^' EXPRESSION { $$ = sm_new_expression2(sm_pow,   (sm_object*) $1, (sm_object*) $3 ) ; }
+EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
+	| EXPRESSION '+' EXPRESSION { $$ = sm_new_expression_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
+	| EXPRESSION '*' EXPRESSION { $$ = sm_new_expression_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
+	| EXPRESSION '/' EXPRESSION { $$ = sm_new_expression_2(sm_divide,(sm_object*) $1, (sm_object*) $3 ) ; }
+	| EXPRESSION '^' EXPRESSION { $$ = sm_new_expression_2(sm_pow,   (sm_object*) $1, (sm_object*) $3 ) ; }
 	| NUM {  }
 	| '-' EXPRESSION {
 	    if(((sm_object*)$2)->my_type == sm_double_type){
@@ -94,7 +93,7 @@ EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression2(sm_minus,(sm_obj
 	      $$ = (sm_expression*)$2;
 	    }
 	    else {
-	      $$ = sm_new_expression2(sm_times,(sm_object*)sm_new_double(-1), (sm_object*)$2 );
+	      $$ = sm_new_expression_2(sm_times,(sm_object*)sm_new_double(-1), (sm_object*)$2 );
 	    }
 	  }
 	| '+' EXPRESSION {$$ = (sm_expression*)$2;}
@@ -114,27 +113,46 @@ EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression2(sm_minus,(sm_obj
 	| EXP  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_exp, (sm_object*) $3 );}
 	| SQRT '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sqrt,(sm_object*) $3 );}
 	| DIFF '(' EXPRESSION ')' { $$ = sm_new_expression(sm_diff,(sm_object*) $3 );}
-	| DIFF '(' EXPRESSION ',' SYM ')' {$$ = sm_new_expression2(sm_diff,(sm_object*)$3,(sm_object*)$5 );}
+	| DIFF '(' EXPRESSION ',' SYM ')' {$$ = sm_new_expression_2(sm_diff,(sm_object*)$3,(sm_object*)$5 );}
 	| EXPRESSION_LIST ')' { ; }
-	| '[' EXPRESSION ']'	{ $$=(sm_expression*)sm_new_array_with_1((sm_object*)$2);}
-	| '[' ']'							{ $$=(sm_expression*)sm_new_array(0,0);}
+	| '[' EXPRESSION ']'	{ $$ = (sm_expression*)sm_new_expression(sm_array,(sm_object*)$2);}
+	| '{' KEYVALUE ';' '}'	{
+	  sm_context * smc = sm_new_context(1);
+	  $$ = (sm_expression*)smc;
+	  sm_context * previous_context = sm_global_context(smc);
+	  sm_set_var(smc,$2->name,$2->value);
+	  sm_global_context(previous_context);
+	 }
+	| '[' ']'							{ $$ = sm_new_expression_n(sm_array,0,0);}
 	| ARRAY ']' {;}
-	| CONTEXT {};
-	| '{' '}'							{ $$=(sm_expression*)sm_new_context(0);}
+	| CONTEXT ';' '}'     {;}
+	| '{' '}'							{ $$ = (sm_expression*)sm_new_context(0);}
 
-EXPRESSION_LIST: '+' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
-  | '-' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression2(sm_minus,(sm_object*)$3,(sm_object*)$5 );}
-  | '*' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression2(sm_times,(sm_object*)$3,(sm_object*)$5 );}
-  | '/' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression2(sm_divide,(sm_object*)$3,(sm_object*)$5 );}
+EXPRESSION_LIST: '+' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
+  | '-' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_minus,(sm_object*)$3,(sm_object*)$5 );}
+  | '*' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_times,(sm_object*)$3,(sm_object*)$5 );}
+  | '/' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_divide,(sm_object*)$3,(sm_object*)$5 );}
   | EXPRESSION_LIST ',' EXPRESSION      {$$ = sm_append_to_expression((sm_expression*)$1,(sm_object*)$3);}
 
-CONTEXT:CONTEXT_LIST '}'
 
-CONTEXT_LIST: '{' EXPRESSION ','    {$$=sm_new_context(1);}
-  | CONTEXT_LIST ',' EXPRESSION  {printf("adding more...\n"); }
+ARRAY: '[' EXPRESSION ',' EXPRESSION {$$=sm_new_expression_2(sm_array,(sm_object*)$2,(sm_object*)$4);}
+| ARRAY ',' EXPRESSION {$$ = sm_append_to_expression($1,(sm_object*)$3);}
 
-ARRAY: '[' EXPRESSION ',' EXPRESSION {$$=sm_new_array_with_2((sm_object*)$2,(sm_object*)$4);}
-| ARRAY ',' EXPRESSION {$$ = sm_array_append($1,(sm_object*)$3);}
+
+CONTEXT: '{' KEYVALUE ';' KEYVALUE {
+	  sm_context * smc = sm_new_context(2);
+	  $$ = smc;
+	  sm_context * previous_context = sm_global_context(smc);
+	  sm_set_var(smc,$2->name,$2->value);
+	  sm_set_var(smc,$4->name,$4->value);
+	  sm_global_context(previous_context);
+}
+| CONTEXT ';' KEYVALUE {
+  printf("Appending to context...\n");
+}
+
+
+
 %%
 
 void yyerror(char *msg) {
