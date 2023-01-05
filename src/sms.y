@@ -142,13 +142,13 @@ ARRAY: '[' EXPRESSION ',' EXPRESSION {$$=sm_new_expression_2(sm_array,(sm_object
 CONTEXT: '{' KEYVALUE ';' KEYVALUE {
 	  sm_context * smc = sm_new_context(2);
 	  $$ = smc;
-	  sm_context * previous_context = sm_global_context(smc);
 	  sm_set_var(smc,$2->name,$2->value);
 	  sm_set_var(smc,$4->name,$4->value);
-	  sm_global_context(previous_context);
 }
 | CONTEXT ';' KEYVALUE {
-  printf("Appending to context...\n");
+  sm_context * smc = $1;
+  $$ = smc;
+  $$ = sm_set_var(smc,$3->name,$3->value);
 }
 
 

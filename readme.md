@@ -5,17 +5,39 @@ To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to r
 The variable names must start with a letter and variables can store equations, strings, numbers, and arrays of those forementioned things.
 After setting a variable, the garbage collector is executed, where all relevant objects are copied to a new contiguous space. This is a stop and copy garbage collector. 
 
-You can try the following examples:
+You can try the following examples.
+The spaces in the examples are optional, and are there for readability.
+
+
+Algebraic and trigonometric expressions:
 
 `a = sinh(a/b) + c ;`
 
-`b = sqrt(d/e) - 2 * a ;` 
+Demonstration of standard order of operations (look at the output):
 
-`c = + (1,2,sin(b)) ;`
+`b = sqrt(d/e) - 2 * a ^ 2 ;` 
 
-`d = [ 1,a ,"hello" ,*(a,b,c)];`
+Prefix sums:
+
+`c = + ( 1, 2, sin( b ) ) ;`
+
+Arrays and prefix products:
+
+`d = [1,a ,"hello",*(a,b,c)];`
+
+User objects (contexts):
+
+`car = { color = red; speed = 5; license_plate = "smthg_fnny"; } ; `
+
+Contexts can be nested:
+
+`nested = { example={ x = [ 1, 2 ]; }; k = 5; } ;`
+
+Variables can be removed from the current context:
 
 `delete c; `
+
+Exit the program with:
 
 `exit; `
 
