@@ -55,7 +55,7 @@ int sm_gc_count(int increase) {
 // New capacity assumes this increment:
 // new_cap = old_cap * growth_factor + 1;
 // Lowest possible value for replacement setting is 1.
-double sm_collection_growth_factor(double replacement) {
+double sm_global_growth_factor(double replacement) {
   static double factor = 1.25;
   if (replacement >= 1.0) {
     int previous_factor = factor;

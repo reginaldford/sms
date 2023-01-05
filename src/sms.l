@@ -19,6 +19,7 @@ exit           {return EXIT;}
 clear          {return CLEAR;}
 ls             {return LS;}
 format         {return FORMAT;}
+let            {return LET;}
 
 sin         {return SIN;}
 cos         {return COS;}
@@ -35,8 +36,11 @@ sqrt        {return SQRT;}
 diff        {return DIFF;}
 delete      {return DELETE;}
 
-{digit}+(\.{digit}+)?([eE]{digit}+)?  {
+\.?{digit}+(\.{digit}+)?([eE]{digit}+)?  {
       yylval.num = sm_new_double(atof(yytext));
+      if(yytext[0]=='.'){
+        printf("detected a leading decimal\n");
+      }
       return NUM;
     }
 
