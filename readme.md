@@ -52,7 +52,7 @@ Exit the program with:
 - [ ] A integral command for taking integrals.
 - [ ] Support for floats and integers as opposed to just doubles.
 - [ ] Quad precision support.
-- [ x ] User contexts, which allow for the user to create a new context with lexical scoping.
+- [x] User contexts, which allow for the user to create a new context with lexical scoping.
 - [ ] Memory serialization support (starting with a populated heap from the file system for faster booting).
 - [ ] Clean the string manipulations to avoid sprintf and strlen.
 - [ ] General Guide.
