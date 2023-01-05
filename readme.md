@@ -43,6 +43,7 @@ Exit the program with:
 
 
 # PLANS:
+
 - [ ] Currently, there is no evaluation other than setting and unsetting variables. The only commands are SETVAR ( setting a variable like 'a' to a value like 5 (`a=5;`)) and DELETE (`delete a;`) . The right hand side is not evaluated. The interpreter stores the abstract syntax tree without modification. A syntax needs to allow for encapsulating the math when necessary. This will be the introduction of an evalutation engine. The right hand side will be evaluated and the result will be printed. 
 - [ ] Currently, the garbage collector only executes after a command. The plan is to have the garbage collector initiate when a new memory allocation would pass a threshold. Live objects must be tracked on a stack, which becomes a new member of the roots for inflating to the new heap at garbage collection. With this upgrade, the garbage collector would then run less often.
 - [ ] Currently, the garbage collector is not generational. The plan is to have an n-generation stop and copy garbage collector. With will make the garbage collector run less often for long-term objects.
