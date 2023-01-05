@@ -1,61 +1,44 @@
 #include "sms.h"
 
-sm_expression *sm_new_expression(enum math_op op1, sm_object *arg) {
-  sm_expression *new_expr = (sm_expression *)sm_malloc(sizeof(sm_expression) + sizeof(void *));
-  new_expr->my_type       = sm_expression_type;
-  new_expr->op            = op1;
-  new_expr->num_args      = 1;
-  new_expr->capacity      = 1;
-  return sm_set_expression_arg(new_expr, 0, arg);
-}
-
 // make sure to put the arguments in afterward.
-sm_expression *sm_new_expression_n(enum math_op op1, int capacity, int num_args) {
+sm_expression *sm_new_expression_n(enum math_op op, unsigned int size, unsigned int capacity) {
   sm_expression *new_expr =
-      (sm_expression *)sm_malloc(sizeof(sm_expression) + sizeof(void *) * capacity);
+    (sm_expression *)sm_malloc(sizeof(sm_expression) + sizeof(void *) * capacity);
   new_expr->my_type  = sm_expression_type;
-  new_expr->op       = op1;
-  new_expr->num_args = num_args;
+  new_expr->op       = op;
+  new_expr->size     = size;
   new_expr->capacity = capacity;
   return new_expr;
 }
 
+sm_expression *sm_new_expression(enum math_op op, sm_object *arg) {
+  sm_expression *new_expr = sm_new_expression_n(op, 1, 1);
+  return sm_set_expression_arg(new_expr, 0, arg);
+}
+
 sm_expression *sm_append_to_expression(sm_expression *expr, sm_object *arg) {
-  if (expr->num_args == expr->capacity) {
-    int new_capacity        = ((int)(expr->capacity * sm_collection_growth_factor(0))) + 1;
-    sm_expression *new_expr = sm_new_expression_n(expr->op, new_capacity, expr->num_args + 1);
-    new_expr = (sm_expression *)sm_malloc(sizeof(sm_expression) + sizeof(void *) * new_capacity);
-    new_expr->my_type  = sm_expression_type;
-    new_expr->op       = expr->op;
-    new_expr->num_args = expr->num_args + 1;
-    new_expr->capacity = new_capacity;
-    for (int i = 0; i < expr->num_args; i++) {
+  if (expr->size == expr->capacity) {
+    unsigned int   new_capacity = ((int)(expr->capacity * sm_global_growth_factor(0))) + 1;
+    sm_expression *new_expr     = sm_new_expression_n(expr->op, expr->size + 1, new_capacity);
+    for (unsigned int i = 0; i < expr->size; i++) {
       sm_set_expression_arg(new_expr, i, sm_get_expression_arg(expr, i));
     }
-    return sm_set_expression_arg(new_expr, new_expr->num_args - 1, arg);
+    return sm_set_expression_arg(new_expr, new_expr->size - 1, arg);
   } else {
-    expr->num_args += 1;
-    return sm_set_expression_arg(expr, expr->num_args - 1, arg);
+    expr->size += 1;
+    return sm_set_expression_arg(expr, expr->size - 1, arg);
   }
 }
 
-sm_expression *sm_new_expression2(enum math_op op1, sm_object *arg1, sm_object *arg2) {
-  sm_expression *new_expr = (sm_expression *)sm_malloc(sizeof(sm_expression) + sizeof(void *) * 2);
-  new_expr->my_type       = sm_expression_type;
-  new_expr->op            = op1;
-  new_expr->num_args      = 2;
-  new_expr->capacity      = 2;
+sm_expression *sm_new_expression_2(enum math_op op, sm_object *arg1, sm_object *arg2) {
+  sm_expression *new_expr = sm_new_expression_n(op, 2, 2);
   sm_set_expression_arg(new_expr, 0, arg1);
   return sm_set_expression_arg(new_expr, 1, arg2);
 }
 
-sm_expression *sm_new_expression3(enum math_op op1, sm_object *arg1, sm_object *arg2,
-                                  sm_object *arg3) {
-  sm_expression *new_expr = (sm_expression *)sm_malloc(sizeof(sm_expression) + sizeof(void *) * 3);
-  new_expr->my_type       = sm_expression_type;
-  new_expr->op            = op1;
-  new_expr->num_args      = 3;
-  new_expr->capacity      = 3;
+sm_expression *sm_new_expression_3(enum math_op op, sm_object *arg1, sm_object *arg2,
+                                   sm_object *arg3) {
+  sm_expression *new_expr = sm_new_expression_n(op, 2, 2);
   sm_set_expression_arg(new_expr, 0, arg1);
   sm_set_expression_arg(new_expr, 1, arg2);
   return sm_set_expression_arg(new_expr, 2, arg3);
@@ -108,32 +91,51 @@ bool sm_is_infix(enum math_op op) {
     return false;
   case sm_sqrt:
     return false;
+  case sm_array:
+    return false;
   default:
     return NULL;
   }
 }
 
 sm_string *sm_prefix_to_string(sm_expression *expr, sm_string *op) {
-  int arg_length_sum = 0;
-  sm_string *arg_strings[expr->num_args];
-  for (int arg_index = 0; arg_index < expr->num_args; arg_index++) {
+  int        arg_length_sum = 0;
+  sm_string *arg_strings[expr->size];
+  for (int arg_index = 0; arg_index < expr->size; arg_index++) {
     sm_object *o1          = sm_get_expression_arg(expr, arg_index);
     arg_strings[arg_index] = sm_object_to_string(o1);
     arg_length_sum += arg_strings[arg_index]->size;
   }
   // 2 surrounding spaces and 2 separating characters
-  arg_length_sum += 2 + 2 * (expr->num_args - 1);
+  arg_length_sum += 2 + 2 * (expr->size - 1);
 
   //(spaced operators)+(spaced arguments)+ (NULL character)
-  int answer_length = op->size + 2 + arg_length_sum + expr->num_args * 2 + 1;
-  char *buf         = malloc(sizeof(char) * answer_length);
-  sprintf(buf, "%s( ", &(op->content));
-  int buffer_pos = op->size + 2;
-  for (int arg_index = 0; arg_index < expr->num_args - 1; arg_index++) {
-    sprintf(buf + buffer_pos, "%s, ", &(arg_strings[arg_index]->content));
-    buffer_pos += arg_strings[arg_index]->size + 2;
+  int   answer_length = op->size + 2 + arg_length_sum + expr->size * 2 + 1;
+  char *buf           = malloc(sizeof(char) * answer_length);
+  int   buffer_pos    = op->size + 2;
+  if (strcmp(&(op->content), "array") == 0) {
+    sprintf(buf, "[ ");
+    buffer_pos = 2; // op size is effectively 0
+  } else
+    sprintf(buf, "%s( ", &(op->content));
+  // unsigned 0 - 1 is a high number. Handling this case.
+  if (expr->size > 1) {
+    for (unsigned int arg_index = 0; arg_index < expr->size - 1; arg_index++) {
+      sprintf(buf + buffer_pos, "%s, ", &(arg_strings[arg_index]->content));
+      buffer_pos += arg_strings[arg_index]->size + 2;
+    }
   }
-  sprintf(buf + buffer_pos, "%s )", &(arg_strings[expr->num_args - 1]->content));
+  if (expr->size > 0) {
+    if (strcmp(&(op->content), "array") == 0) {
+      sprintf(buf + buffer_pos, "%s ]", &(arg_strings[expr->size - 1]->content));
+    } else
+      sprintf(buf + buffer_pos, "%s )", &(arg_strings[expr->size - 1]->content));
+  } else { //size is 0
+    if (strcmp(&(op->content), "array") == 0) {
+      sprintf(buf + buffer_pos, "]");
+    } else
+      sprintf(buf + buffer_pos, ")");
+  }
   // temporary fix. Need to use sm_strcat etc. to avoid strlen
   answer_length     = strlen(buf);
   sm_string *answer = sm_new_string(answer_length, buf);
@@ -144,7 +146,7 @@ sm_string *sm_prefix_to_string(sm_expression *expr, sm_string *op) {
 sm_string *sm_infix_to_string(sm_expression *expr, sm_string *op) {
   // If we have more than 2, it's prefix.
   // So, adding an arg to 1 + 1 => +( 1, 1, x )
-  if (expr->num_args > 2)
+  if (expr->size > 2)
     return sm_prefix_to_string(expr, op);
 
   sm_object *o1 = sm_get_expression_arg(expr, 0);
@@ -153,10 +155,10 @@ sm_string *sm_infix_to_string(sm_expression *expr, sm_string *op) {
   sm_string *left_sm_string  = sm_object_to_string(o1);
   sm_string *right_sm_string = sm_object_to_string(o2);
 
-  char *op_str      = &(op->content);
-  char *left_str    = &(left_sm_string->content);
-  char *right_str   = &(right_sm_string->content);
-  int string_length = 0;
+  char *op_str        = &(op->content);
+  char *left_str      = &(left_sm_string->content);
+  char *right_str     = &(right_sm_string->content);
+  int   string_length = 0;
   char *buf;
   if (o1->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o1)->op) &&
       o2->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o2)->op)) {
@@ -219,6 +221,8 @@ sm_string *sm_expression_to_string(sm_expression *expr) {
     return sm_prefix_to_string(expr, sm_new_string(4, "sqrt"));
   case sm_diff:
     return sm_prefix_to_string(expr, sm_new_string(4, "diff"));
+  case sm_array:
+    return sm_prefix_to_string(expr, sm_new_string(5, "array"));
   default:
     return sm_new_string(2, "??");
   }

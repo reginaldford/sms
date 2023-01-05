@@ -33,7 +33,7 @@ void sm_inflate_heap() {
     }
     case sm_expression_type: {
       sm_expression *expr = (sm_expression *)current_obj;
-      for (int i = 0; i < expr->num_args; i++) {
+      for (int i = 0; i < expr->size; i++) {
         sm_expression *new_expr = (sm_expression *)sm_meet_object(sm_get_expression_arg(expr, i));
         sm_set_expression_arg(expr, i, (sm_object *)new_expr);
       }
@@ -42,14 +42,6 @@ void sm_inflate_heap() {
     case sm_symbol_type: {
       sm_symbol *sym = (sm_symbol *)current_obj;
       sym->name      = (sm_string *)sm_meet_object((sm_object *)sym->name);
-      break;
-    }
-    case sm_array_type: {
-      sm_array *arr = (sm_array *)current_obj;
-      for (int i = 0; i < arr->size; i++) {
-        sm_object *new_obj = sm_meet_object(sm_array_get(arr, i));
-        sm_array_set(arr, i, new_obj);
-      }
       break;
     }
 
