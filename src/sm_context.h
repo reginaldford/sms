@@ -27,4 +27,4 @@ search_result sm_find_var_index(struct sm_context *context, struct sm_string *va
 sm_context   *sm_set_var(struct sm_context *context, struct sm_string *name, void *val);
 bool          sm_delete(sm_symbol *sym);
 sm_string    *sm_context_to_string(sm_context *self);
-sm_string    *sm_context_entry_to_string(sm_context_entry *te);
+sm_string    *sm_context_entry_to_string(sm_context_entry *ce);

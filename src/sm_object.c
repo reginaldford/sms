@@ -2,9 +2,9 @@
 
 sm_string *sm_sm_object_type_str(enum sm_object_type t) {
   char *response_string[]     = {"sm_double",  "sm_expression", "sm_primitive",
-                                 "sm_string",  "sm_symbol",     "sm_array",
+                                 "sm_string",  "sm_symbol",
                                  "sm_context", "sm_pointer",    "sm_key_value"};
-  int   response_string_len[] = {10, 13, 12, 9, 9, 8, 10, 6, 12};
+  int   response_string_len[] = {10, 13, 12, 9, 9, 10, 6, 12};
   if (t >= 0 && t < sizeof(response_string) / sizeof(void *))
     return sm_new_string(response_string_len[t], response_string[t]);
   else
@@ -28,9 +28,7 @@ sm_string *sm_object_to_string(sm_object *obj1) {
     return sm_expression_to_string((sm_expression *)obj1);
   } else if (t == sm_symbol_type) {
     return ((sm_symbol *)obj1)->name;
-  } else if (t == sm_array_type) {
-    return sm_array_to_string((sm_array *)obj1);
-  } else if (t == sm_context_type) {
+  }else if (t == sm_context_type) {
     return sm_context_to_string((sm_context *)obj1);
   } else {
     return sm_new_string(5, "other");
@@ -44,16 +42,13 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(sm_double);
     break;
   case sm_expression_type:
-    return sizeof(sm_expression) + sizeof(sm_object *) * ((sm_expression *)obj1)->num_args;
+    return sizeof(sm_expression) + sizeof(sm_object *) * ((sm_expression *)obj1)->size;
     break;
   case sm_primitive_type:
     return sizeof(sm_expression);
     break;
   case sm_string_type:
     return sm_round_size(sizeof(sm_string) + ((sm_string *)obj1)->size + 1);
-    break;
-  case sm_array_type:
-    return sizeof(sm_array) + sizeof(void *) * ((sm_array *)obj1)->capacity;
     break;
   case sm_symbol_type:
     return sizeof(sm_symbol);
