@@ -9,8 +9,6 @@
 extern int yylex();
 void yyerror(char *msg);
 
-int context_level=0;
-
 %}
 
 %union {
@@ -57,19 +55,17 @@ int context_level=0;
 
 
 COMMAND : KEYVALUE            { 
-    //sm_global_context(sm_set_var(sm_global_context(NULL),((sm_symbol*)sm_get_expression_arg($1,0))->name,sm_get_expression_arg($1,1)));
     sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,$1->value));
     sm_print_table(sm_global_context(NULL));
     sm_garbage_collect();
     sm_prompt();
-
-}
+  }
   | DELETE SYM              {
       sm_delete((sm_symbol*)$2);
       sm_print_table(sm_global_context(NULL));
       sm_garbage_collect();
       sm_prompt();
-      }
+  }
   | LET SYM '=' EXPRESSION  { printf("Activated let command ! (incomplete) \n"); }
   | EXIT    ';'             { exit(0); }
   | error                   { yyerror("Bad syntax.");}
@@ -117,11 +113,7 @@ EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_ob
 	| EXPRESSION_LIST ')' { ; }
 	| '[' EXPRESSION ']'	{ $$ = (sm_expression*)sm_new_expression(sm_array,(sm_object*)$2);}
 	| '{' KEYVALUE ';' '}'	{
-	  sm_context * smc = sm_new_context(1);
-	  $$ = (sm_expression*)smc;
-	  sm_context * previous_context = sm_global_context(smc);
-	  sm_set_var(smc,$2->name,$2->value);
-	  sm_global_context(previous_context);
+	  $$ = (sm_expression*)sm_set_var(sm_new_context(1),$2->name,$2->value);
 	 }
 	| '[' ']'							{ $$ = sm_new_expression_n(sm_array,0,0);}
 	| ARRAY ']' {;}
@@ -140,15 +132,12 @@ ARRAY: '[' EXPRESSION ',' EXPRESSION {$$=sm_new_expression_2(sm_array,(sm_object
 
 
 CONTEXT: '{' KEYVALUE ';' KEYVALUE {
-	  sm_context * smc = sm_new_context(2);
-	  $$ = smc;
-	  sm_set_var(smc,$2->name,$2->value);
-	  sm_set_var(smc,$4->name,$4->value);
+	  $$ = sm_new_context(2);
+	  $$ = sm_set_var(($$),$2->name,$2->value);
+	  $$ = sm_set_var(($$),$4->name,$4->value);
 }
 | CONTEXT ';' KEYVALUE {
-  sm_context * smc = $1;
-  $$ = smc;
-  $$ = sm_set_var(smc,$3->name,$3->value);
+  $$ = sm_set_var($1,$3->name,$3->value);
 }
 
 
@@ -162,7 +151,7 @@ void yyerror(char *msg) {
 
 int main(){
   //set the current mem heap to a new mem heap
-	sm_global_current_heap(sm_new_memory_heap(2500));
+	sm_global_current_heap(sm_new_memory_heap(5500));
 
 	//set the global context to a new context
   sm_global_context(sm_new_context(0));
