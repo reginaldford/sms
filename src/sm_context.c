@@ -20,7 +20,7 @@ void sm_print_table(sm_context *context) {
   fflush(stdout);
   for (unsigned int i = 0; i < context->size; i++) {
     sm_object *value    = context_entries[i].value;
-    char      *var_type = &(sm_sm_object_type_str(value->my_type)->content);
+    char      *var_type = &(sm_object_type_str(value->my_type)->content);
     char      *var_name = &((context_entries[i].name)->content);
     char      *desc     = &(sm_object_to_string(value)->content);
     printf("%s : %s : %s\n", var_name, var_type, desc);

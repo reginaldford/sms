@@ -45,7 +45,7 @@ delete      {return DELETE;}
     }
 
 [-+*/=\^\;\[\]\(\)\{\},]                   {return yytext[0];}
-{alpha}+({digit}?+{alpha}?+)?+\'?+    {
+_?+{alpha}+({digit}?+{alpha}?+_?+)?+\'?+    {
       yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
       return SYM;
     }
