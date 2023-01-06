@@ -9,43 +9,41 @@ After setting a variable, the garbage collector is executed, where all relevant 
 You can try the following examples.
 The spaces in the examples are optional, and are there for readability.
 
-Algebraic and trigonometric expressions:
+Storage of double precision numbers:
+`a=4;`
+`b=sqrt(7)`
+`c=a+b`
 
+Hyperbolic trigonometric expressions:
 `a = sinh(a/b) + c ;`
 
 Demonstration of standard order of operations (look at the output):
+`b = sqrt(a/b) - 2 * a ^ 2 ;` 
 
-`b = sqrt(d/e) - 2 * a ^ 2 ;` 
+Storage of mathematical expressions:
+`formula = [ a ^ 2 + b ^ 2 ];`
 
 Prefix sums:
-
 `c = + ( 1, 2, sin( b ) ) ;`
 
 Arrays and prefix products:
-
 `d = [1,a ,"hello",*(a,b,c)];`
 
 User objects (contexts):
-
 `car = { color = red; speed = 5; license_plate = "smthg_fnny"; } ; `
 
 Contexts can be nested:
-
 `nested = { example={ x = [ 1, 2 ]; }; k = 5; } ;`
 
 Variables can be removed from the current context:
-
 `delete c; `
 
 Exit the program with:
-
 `exit; `
 
 
 # PLANS:
-
-
-- [ ] Currently, there is no evaluation other than setting and unsetting variables. The only commands are SETVAR ( setting a variable like 'a' to a value like 5 (`a=5;`)) and DELETE (`delete a;`) . The right hand side is not evaluated. The interpreter stores the abstract syntax tree without modification. A syntax needs to allow for encapsulating the math when necessary. This will be the introduction of an evalutation engine. The right hand side will be evaluated and the result will be printed. 
+- [x] Mathematical evaluation is implemented. Commands like a=4*sin(3.14/8) will evaluate to a decimal number.
 - [ ] Currently, the garbage collector only executes after a command. The plan is to have the garbage collector initiate when a new memory allocation would pass a threshold. Live objects must be tracked on a stack, which becomes a new member of the roots for inflating to the new heap at garbage collection. With this upgrade, the garbage collector would then run less often.
 - [ ] Currently, the garbage collector is not generational. The plan is to have an n-generation stop and copy garbage collector. With will make the garbage collector run less often for long-term objects.
 - [ ] Currently, syntax errors are entirely vague and repeat for every token after an error up until the next semicolon. Errors will be handled more gracefully, with useful responses for particular cases.
@@ -54,7 +52,7 @@ Exit the program with:
 - [ ] A integral command for taking integrals.
 - [ ] Support for floats and integers as opposed to just doubles.
 - [ ] Quad precision support.
-- [x] User contexts, which allow for the user to create a new context with lexical scoping.
+- [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
 - [ ] Memory serialization support (starting with a populated heap from the file system for faster booting).
 - [ ] Clean the string manipulations to avoid sprintf and strlen.
 - [ ] General Guide.
@@ -73,12 +71,12 @@ Bison
 GCC or CLANG compiler
 GNU MAKE compatible build program
 
-By default, the makefile is set to use clang. Change the comments to switch the file to use gcc if necessary.
+By default, the makefile is set to use clang.
+Edit the first lines of the makefile to set for your compiler and make program if necessary.
 
-
-To build, run 
+Once you have the necessary packages installed,
+Change directory to the top level of the project (where readme.md is located) and run:
 `make`
-While in the directory of the makefile.
 
 # HOW TO INSTALL:
 If you are ok with installing the binary to /usr/bin/sms , then enter:
