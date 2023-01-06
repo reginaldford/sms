@@ -10,12 +10,12 @@ struct sm_context *sm_new_context(unsigned int capacity) {
   return new_context;
 }
 
-sm_context_entry *get_context_entries(sm_context *context) {
+sm_context_entry *sm_context_entries(sm_context *context) {
   return (sm_context_entry *)&(context[1]);
 }
 
 void sm_print_table(sm_context *context) {
-  sm_context_entry *context_entries = get_context_entries(context);
+  sm_context_entry *context_entries = sm_context_entries(context);
   printf("## SYMBOL TABLE: ##\n");
   fflush(stdout);
   for (unsigned int i = 0; i < context->size; i++) {
@@ -28,7 +28,7 @@ void sm_print_table(sm_context *context) {
 }
 
 search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
-  sm_context_entry *context_entries = get_context_entries(context);
+  sm_context_entry *context_entries = sm_context_entries(context);
   if (context->size == 0)
     return (search_result){.found = false, .index = 0};
   char        *var_name    = &(var_string->content);
@@ -60,7 +60,7 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
 
 sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
   sm_context       *current_context = context;
-  sm_context_entry *context_entries = get_context_entries(current_context);
+  sm_context_entry *context_entries = sm_context_entries(current_context);
   search_result     sr              = sm_find_var_index(current_context, name);
   if (sr.found == true) {
     context_entries[sr.index].value = val;
@@ -73,7 +73,7 @@ sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
     current_context->capacity = new_capacity;
   }
   current_context->size += 1;
-  context_entries = get_context_entries(current_context);
+  context_entries = sm_context_entries(current_context);
   for (int i = current_context->size - 1; i > sr.index; i--)
     context_entries[i] = context_entries[i - 1];
   context_entries[sr.index].name  = name;
@@ -85,7 +85,7 @@ bool sm_delete(sm_symbol *sym) {
   search_result sr = sm_find_var_index(sm_global_context(NULL), sym->name);
   if (sr.found == true) {
     sm_context       *context         = sm_global_context(NULL);
-    sm_context_entry *context_entries = get_context_entries(context);
+    sm_context_entry *context_entries = sm_context_entries(context);
     for (int i = sr.index; i < context->size - 1; i++) {
       context_entries[i] = context_entries[i + 1];
     }
@@ -104,7 +104,7 @@ sm_string *sm_context_to_string(sm_context *self) {
   }
   int               object_length_sum = 0;
   sm_string        *object_strings[self->size];
-  sm_context_entry *ce = get_context_entries(self);
+  sm_context_entry *ce = sm_context_entries(self);
   for (unsigned int object_index = 0; object_index < self->size; object_index++) {
     sm_context_entry *current_object = &ce[object_index];
     object_strings[object_index]     = sm_context_entry_to_string(current_object);

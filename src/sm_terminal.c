@@ -1,6 +1,6 @@
 #include "sms.h"
 
-void sm_prompt() {
+void sm_terminal_prompt() {
   printf("\n> ");
   fflush(stdout);
 }

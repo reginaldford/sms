@@ -38,9 +38,6 @@ delete      {return DELETE;}
 
 \.?{digit}+(\.{digit}+)?([eE]{digit}+)?  {
       yylval.num = sm_new_double(atof(yytext));
-      if(yytext[0]=='.'){
-        printf("detected a leading decimal\n");
-      }
       return NUM;
     }
 
@@ -50,8 +47,47 @@ _?+{alpha}+({digit}?+{alpha}?+_?+)?+\'?+    {
       return SYM;
     }
 
-\".?+\" {
-    yylval.str = sm_new_string(yyleng-2,&(yytext[1]));
+\"([^"\\]|\\.)*\" {
+  //Text after the first quotation will be at &(yytext[1])
+  //We also have string length yyleng-2, for trimming quotes.
+  char *text = &(yytext[1]) ;
+  
+  // Replace the escape codes in place
+  int i = 0;       //index during the scan of input string
+  int final_i = 0; //index of output
+  while (i < yyleng-2) {
+    if (text[i] == '\\') {
+      // This is an escape code. Replace it with the appropriate character.
+      switch (text[i+1]) {
+        case 'n':
+          text[final_i] = '\n';
+          break;
+        case 't':
+          text[final_i] = '\t';
+         break;
+        case 'r':
+          text[final_i] = '\r';
+         break;
+        case '\\':
+         text[final_i] = '\\';
+         break;
+        case '"':
+         text[final_i] = '\"';
+         break;
+        default: //unrecognized escape. placing backslash as default
+         text[final_i] = '\\';
+         break;
+        }
+        i += 2;  // Skip the escape code
+      } else {
+        // Pass through regular characters
+        text[final_i] = text[i];
+        i ++;
+      }
+    final_i ++;
+  }
+    //use the output here
+    yylval.str = sm_new_string(final_i,text);
     return STRING;
   }
 

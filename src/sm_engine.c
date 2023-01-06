@@ -95,7 +95,7 @@ sm_object *sm_engine_eval(sm_object *input) {
     sm_string    *var_name = sym->name;
     search_result sr       = sm_find_var_index(sm_global_context(NULL), var_name);
     if (sr.found == true) {
-      return get_context_entries(sm_global_context(NULL))[sr.index].value;
+      return sm_context_entries(sm_global_context(NULL))[sr.index].value;
     } else {
       // should return error object;
       printf("Could not find variable: %s\n", &(var_name->content));
