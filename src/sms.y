@@ -73,7 +73,7 @@ COMMAND : KEYVALUE            {
   ;
 
 KEYVALUE  : SYM '=' EXPRESSION  {
-    $$ = sm_new_key_value($1->name,(sm_object*) $3 ) ;
+    $$ = sm_new_key_value($1->name,sm_engine_eval((sm_object*)$3) ) ;
 }
 ;
 

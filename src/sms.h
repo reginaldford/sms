@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 enum sm_object_type {
   sm_double_type,
@@ -35,3 +36,4 @@ enum sm_object_type {
 #include "sm_global.h"
 #include "sm_terminal.h"
 #include "sm_key_value.h"
+#include "sm_engine.h"
