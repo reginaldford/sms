@@ -11,8 +11,10 @@ The spaces in the examples are optional, and are there for readability.
 
 Storage of double precision numbers:
 `a=4;`
-`b=sqrt(7)`
-`c=a+b`
+
+`b=sqrt(7);`
+
+`c=a+b;`
 
 Hyperbolic trigonometric expressions:
 
