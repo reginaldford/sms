@@ -1,5 +1,8 @@
 #Must have gcc/clang, make, flex , bison
 
+#Where would you put your binary executable?
+INSTALL_DIR=/usr/bin
+
 #Uncomment this to use gcc
 # CC=gcc
 
@@ -9,14 +12,19 @@ CC=clang
 #OR Uncomment this if you are using gcc on OpenBSD:
 # CC=egcc
 
-#Where would you put your binary executable?
-INSTALL_DIR=/usr/bin
+#OR targeting Windows from linux
+# CC=x86_64-w64-mingw32-gcc
+
 
 #Compiling for speed:
 CFLAGS= -lm -Ofast
 
 #Compiling for debugging info
 #CFLAGS=-lm -g
+
+#ncurses experiments:
+#CFLAGS= -lm -lncurses -Ofast
+
 
 SOURCES=src/lex.yy.c src/y.tab.c src/sm_object.c src/sm_symbol.c src/sm_memory_heap.c src/sm_string.c src/sm_expression.c src/sm_double.c src/sm_context.c src/sm_commands.c src/sm_global.c src/sm_gc.c src/sm_terminal.c src/sm_key_value.c src/sm_pointer.c src/sm_engine.c
 

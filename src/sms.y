@@ -58,21 +58,21 @@ COMMAND : KEYVALUE            {
     sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,$1->value));
     sm_print_table(sm_global_context(NULL));
     sm_garbage_collect();
-    sm_prompt();
+    sm_terminal_prompt();
   }
   | EXPRESSION {
     printf("%s\n",&(sm_object_to_string(sm_engine_eval((sm_object*)$1))->content));
     sm_garbage_collect();
-    sm_prompt();
+    sm_terminal_prompt();
   }
   | DELETE SYM              {
       sm_delete((sm_symbol*)$2);
       sm_print_table(sm_global_context(NULL));
       sm_garbage_collect();
-      sm_prompt();
+      sm_terminal_prompt();
   }
   | LET SYM '=' EXPRESSION  { printf("Activated let command ! (incomplete) \n"); }
-  | EXIT    ';'             { exit(0); }
+  | EXIT    ';'             { sm_mem_cleanup(); exit(0); }
   | error                   { yyerror("Bad syntax.");}
   | COMMAND ';' COMMAND ';' { }
   ;
@@ -163,7 +163,7 @@ int main(){
   
   printf("Symbolic Math System\n");
   printf("Version 0.1\n");
-  sm_prompt();
+  sm_terminal_prompt();
 
   return yyparse();
 }

@@ -21,7 +21,7 @@ typedef struct search_result {
 
 sm_context              *sm_global_context(sm_context *replacement);
 sm_context              *sm_new_context(unsigned int capacity);
-struct sm_context_entry *get_context_entries(struct sm_context *context);
+struct sm_context_entry *sm_context_entries(struct sm_context *context);
 void                     sm_print_table(struct sm_context *context);
 search_result sm_find_var_index(struct sm_context *context, struct sm_string *var_string);
 sm_context   *sm_set_var(struct sm_context *context, struct sm_string *name, void *val);
