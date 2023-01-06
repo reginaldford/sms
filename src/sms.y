@@ -60,6 +60,10 @@ COMMAND : KEYVALUE            {
     sm_garbage_collect();
     sm_prompt();
   }
+  | EXPRESSION {
+    printf("%s\n",&(sm_object_to_string(sm_engine_eval((sm_object*)$1))->content));
+    sm_prompt();
+  }
   | DELETE SYM              {
       sm_delete((sm_symbol*)$2);
       sm_print_table(sm_global_context(NULL));

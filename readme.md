@@ -8,8 +8,13 @@ After setting a variable, the garbage collector is executed, where all relevant 
 
 You can try the following examples.
 The spaces in the examples are optional, and are there for readability.
+All commands end with a semicolon.
 
-Storage of double precision numbers:
+Direct computations, where the resulting value will not be stored for later use:
+`2+sqrt(7);`
+
+Calculation and storage of double precision numbers:
+
 `a=4;`
 
 `b=sqrt(7);`
