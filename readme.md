@@ -15,34 +15,44 @@ Storage of double precision numbers:
 `c=a+b`
 
 Hyperbolic trigonometric expressions:
+
 `a = sinh(a/b) + c ;`
 
 Demonstration of standard order of operations (look at the output):
+
 `b = sqrt(a/b) - 2 * a ^ 2 ;` 
 
 Storage of mathematical expressions:
+
 `formula = [ a ^ 2 + b ^ 2 ];`
 
 Prefix sums:
+
 `c = + ( 1, 2, sin( b ) ) ;`
 
 Arrays and prefix products:
+
 `d = [1,a ,"hello",*(a,b,c)];`
 
 User objects (contexts):
+
 `car = { color = red; speed = 5; license_plate = "smthg_fnny"; } ; `
 
 Contexts can be nested:
+
 `nested = { example={ x = [ 1, 2 ]; }; k = 5; } ;`
 
 Variables can be removed from the current context:
+
 `delete c; `
 
 Exit the program with:
+
 `exit; `
 
 
 # PLANS:
+
 - [x] Mathematical evaluation is implemented. Commands like a=4*sin(3.14/8) will evaluate to a decimal number.
 - [ ] Currently, the garbage collector only executes after a command. The plan is to have the garbage collector initiate when a new memory allocation would pass a threshold. Live objects must be tracked on a stack, which becomes a new member of the roots for inflating to the new heap at garbage collection. With this upgrade, the garbage collector would then run less often.
 - [ ] Currently, the garbage collector is not generational. The plan is to have an n-generation stop and copy garbage collector. With will make the garbage collector run less often for long-term objects.
