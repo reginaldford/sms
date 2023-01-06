@@ -33,7 +33,7 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
     return (search_result){.found = false, .index = 0};
   char        *var_name    = &(var_string->content);
   unsigned int lower_limit = 0;
-  unsigned int upper_limit = context->size - 1;
+  unsigned int upper_limit = context->size == 0 ? 0 : context->size - 1;
   int          comparison  = 1;
   unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
   while (lower_limit < upper_limit && comparison != 0) {
@@ -41,7 +41,8 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
     if (comparison == 0)
       return (search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
-      upper_limit = guess_point - 1;
+      // guess_point is unsigned, so we need to check against unsigned 0 - 1 here
+      upper_limit = guess_point == 0 ? 0 : guess_point - 1;
     else
       lower_limit = guess_point + 1;
     guess_point = (upper_limit + lower_limit) / 2.0;
