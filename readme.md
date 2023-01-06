@@ -1,16 +1,16 @@
 # STATUS QUO:
 SMS is a terminal program that interprets commands like `a=4;` and `delete a;` to set and destroy variables, respectively.
-The program currently parses and stores mathematical expressions and strings.
+The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts.
 
 To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. 
-The variable names must start with a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
-After setting a variable, the garbage collector is executed, where all relevant objects are copied to a new contiguous space. The garbage collector uses the stop and copy algorithm. 
+The variable names must start with underscores or a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
+After a command, the garbage collector is executed, where all relevant objects are copied to a new contiguous space. The garbage collector uses the stop and copy algorithm. 
 
-You can try the following examples.
-The spaces in the examples are optional, and are there for readability.
+The spaces in provided examples are optional, and are there for readability.
 All commands end with a semicolon.
+You can try the following examples:
 
-Direct computations, where the resulting value will not be stored for later use:
+Direct computations. The resulting value will not be stored for later use:
 `2+sqrt(7);`
 
 Calculation and storage of double precision numbers:
@@ -35,7 +35,7 @@ Storage of mathematical expressions:
 
 Prefix sums:
 
-`c = + ( 1, 2, sin( b ) ) ;`
+`c = + ( 1, sin( b ) ) ;`
 
 Arrays and prefix products:
 
@@ -83,10 +83,14 @@ Exit the program with:
 # HOW TO COMPILE
 
 Requirements:
-Flex
-Bison
-GCC or CLANG compiler
-GNU MAKE compatible build program
+
+- Flex
+
+- Bison
+
+- GCC or CLANG compiler
+
+- GNU MAKE compatible build program
 
 By default, the makefile is set to use clang.
 Edit the first lines of the makefile to set for your compiler and make program if necessary.

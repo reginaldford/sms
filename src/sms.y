@@ -62,6 +62,7 @@ COMMAND : KEYVALUE            {
   }
   | EXPRESSION {
     printf("%s\n",&(sm_object_to_string(sm_engine_eval((sm_object*)$1))->content));
+    sm_garbage_collect();
     sm_prompt();
   }
   | DELETE SYM              {
