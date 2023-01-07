@@ -76,9 +76,12 @@ COMMAND : KEYVALUE            {
   | LET SYM '=' EXPRESSION  { printf("Activated let command ! (incomplete) \n"); }
   | EXIT    ';'             { sm_signal_handler(SIGQUIT); }
   | error                   { yyerror("Bad syntax.");}
-  | COMMAND ';' COMMAND ';' { }
-	| META                {;}
-  ;
+  | COMMAND ';' COMMAND ';' {;}
+	| META                    {
+    printf("%s\n",&(sm_object_to_string(sm_engine_eval((sm_object*)$1))->content));
+    sm_garbage_collect();
+    sm_terminal_prompt();
+	}
 
 KEYVALUE  : SYM '=' EXPRESSION  {
     $$ = sm_new_key_value($1->name,sm_engine_eval((sm_object*)$3) ) ;
@@ -89,9 +92,9 @@ KEYVALUE  : SYM '=' EXPRESSION  {
 
 
 META: ':' EXPRESSION {
-  $$ = (sm_expression*) sm_new_meta( 1, (sm_object*) $2 );
-  printf("constructed a meta\n");
-}
+    $$ = (sm_expression*) sm_new_meta( 1, (sm_object*) $2 );
+    printf("constructed a meta\n");
+  }
 
 EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
 	| EXPRESSION '+' EXPRESSION { $$ = sm_new_expression_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
@@ -129,8 +132,8 @@ EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_ob
 	| EXPRESSION_LIST ')' { ; }
 	| '[' EXPRESSION ']'	{ $$ = (sm_expression*)sm_new_expression(sm_array,(sm_object*)$2);}
 	| '{' KEYVALUE ';' '}'	{
-	  $$ = (sm_expression*)sm_set_var(sm_new_context(1),$2->name,$2->value);
-	 }
+	    $$ = (sm_expression*)sm_set_var(sm_new_context(1),$2->name,$2->value);
+	  }
 	| '[' ']'							{ $$ = sm_new_expression_n(sm_array,0,0);}
 	| ARRAY ']' {;}
 	| CONTEXT ';' '}'     {;}
@@ -157,8 +160,6 @@ CONTEXT: '{' KEYVALUE ';' KEYVALUE {
   }
 
 
-
-
 %%
 
 void yyerror(char *msg) {
@@ -183,4 +184,7 @@ int main(){
 
   //Start the parser. 
   yyparse();
+
+  //Exit gracefully.
+  sm_signal_handler(SIGQUIT);
 }
