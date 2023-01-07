@@ -58,7 +58,7 @@ void yyerror(char *msg);
 
 
 COMMAND : KEYVALUE            { 
-    sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,$1->value));
+    sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,sm_engine_eval($1->value)));
     sm_print_table(sm_global_context(NULL));
     sm_garbage_collect();
     sm_terminal_prompt();
@@ -82,7 +82,7 @@ COMMAND : KEYVALUE            {
 
 
 KEYVALUE  : SYM '=' EXPRESSION  {
-    $$ = sm_new_key_value($1->name,sm_engine_eval((sm_object*)$3) ) ;
+    $$ = sm_new_key_value($1->name,(sm_object*)$3 ) ;
   }
 
 

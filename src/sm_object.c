@@ -1,10 +1,9 @@
 #include "sms.h"
 
 sm_string *sm_object_type_str(enum sm_object_type t) {
-  char *response_string[]     = {"sm_double",  "sm_expression", "sm_primitive",
-                                 "sm_string",  "sm_symbol",     "sm_context",
-                                 "sm_pointer", "sm_key_value",  "sm_meta"};
-  int   response_string_len[] = {10, 13, 12, 9, 9, 10, 6, 12, 7};
+  char *response_string[]     = {"double",  "expression", "primitive", "string", "symbol",
+                                 "context", "pointer",    "key_value", "meta"};
+  int   response_string_len[] = {7, 10, 9, 6, 6, 7, 3, 9, 4};
   if (t >= 0 && t < sizeof(response_string) / sizeof(void *))
     return sm_new_string(response_string_len[t], response_string[t]);
   else
