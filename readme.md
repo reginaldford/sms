@@ -29,17 +29,24 @@ Demonstration of standard order of operations (look at the output):
 
 `b = sqrt(a/b) - 2 * a ^ 2 ;` 
 
-Storage of mathematical expressions:
+Store an expression with the meta operator (:) :
+`expression = : +(a,b,c);`
 
-`formula = [ a ^ 2 + b ^ 2 ];`
+Storage of mathematical expressions in an array:
+
+`formula = : [ a ^ 2 + b ^ 2 , cos(a/b) ];`
 
 Prefix sums:
 
 `c = + ( 1, sin( b ) ) ;`
 
-Arrays and prefix products:
+Arrays can hold various objects:
 
-`d = [1,a ,"hello",*(a,b,c)];`
+`d = :[ a, sinh(a/b), "this", 5 , { x = "x"; }];`
+
+Without the meta operator, each element of the array will be evaluated:
+
+`d = [ a, sinh(a/b), "this", 5 , { x = "x"; }];`
 
 User objects (contexts):
 
