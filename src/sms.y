@@ -167,22 +167,20 @@ void yyerror(char *msg) {
 }
 
 int main(){
-  //register the signal handler
+  //Register the signal handler
   sm_register_signals();
   
-  //set the current mem heap to a new mem heap
+  //Set the current mem heap to a new mem heap
   sm_global_current_heap(sm_new_memory_heap(5500));
 
-  //set the global context to a new context
+  //Set the global context to a new context
   sm_global_context(sm_new_context(0));
-
-  sm_signal_handler(SIGQUIT);
-  //set on_exit signal response
 
   //Introduction and prompt
   printf("Symbolic Math System\n");
   printf("Version 0.1\n");
   sm_terminal_prompt();
 
+  //Start the parser. 
   yyparse();
 }
