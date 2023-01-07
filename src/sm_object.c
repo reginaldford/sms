@@ -31,7 +31,7 @@ sm_string *sm_object_to_string(sm_object *obj1) {
   } else if (t == sm_context_type) {
     return sm_context_to_string((sm_context *)obj1);
   } else if (t == sm_meta_type) {
-    sm_string *obj_str = sm_object_to_string(obj1);
+    sm_string *obj_str = sm_object_to_string(((sm_meta *)obj1)->address);
     char      *str_buf = malloc(sizeof(char) * obj_str->size + 2);
     sprintf(str_buf, ":%s", &(obj_str->content));
     sm_string *answer = sm_new_string(obj_str->size + 1, str_buf);
@@ -65,6 +65,9 @@ int sm_sizeof(sm_object *obj1) {
     break;
   case sm_pointer_type:
     return sizeof(sm_pointer);
+    break;
+  case sm_meta_type:
+    return sizeof(sm_meta);
     break;
   default:
     printf("Cannot determine size of object of type %d\n", obj_type);

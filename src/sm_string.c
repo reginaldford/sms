@@ -20,8 +20,19 @@ sm_string *sm_new_string(unsigned int size, char *str) {
   return newstr;
 }
 
+
+sm_string *sm_string_resize(sm_string *str, unsigned int new_size) {
+  struct sm_string *newstr =
+    (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + new_size + 1));
+  newstr->my_type = sm_string_type;
+  newstr->size    = new_size;
+  sm_strncpy(&(newstr->content), &(str->content), MIN(str->size, new_size));
+  return newstr;
+}
+
 sm_string *sm_concat_strings(sm_string *str1, sm_string *str2) {
-  unsigned int size_sum = str1->size + str2->size;
-  char *buf             = malloc(size_sum);
-  return sm_new_string(size_sum, buf);
+  unsigned int size_sum   = str1->size + str2->size;
+  sm_string   *new_string = sm_string_resize(str1, size_sum);
+  sm_strncpy(&(new_string->content) + str1->size, &(str2->content), str2->size);
+  return new_string;
 }

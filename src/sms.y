@@ -23,7 +23,7 @@ void yyerror(char *msg);
 
 %token CLEAR FORMAT LS NEWLINE EXIT
 
-%type  <expr>     META
+%type  <meta>     META_EXPRESSION
 %type  <kv>       KEYVALUE
 %type  <context>  CONTEXT
 %type  <expr>     EXPRESSION
@@ -51,6 +51,7 @@ void yyerror(char *msg);
 %left  '+' '-'
 %left  '*' '/'
 %right '^'
+%left ':'
 
 
 %%
@@ -77,26 +78,19 @@ COMMAND : KEYVALUE            {
   | EXIT    ';'             { sm_signal_handler(SIGQUIT); }
   | error                   { yyerror("Bad syntax.");}
   | COMMAND ';' COMMAND ';' {;}
-	| META                    {
-    printf("%s\n",&(sm_object_to_string(sm_engine_eval((sm_object*)$1))->content));
-    sm_garbage_collect();
-    sm_terminal_prompt();
-	}
+
+
 
 KEYVALUE  : SYM '=' EXPRESSION  {
     $$ = sm_new_key_value($1->name,sm_engine_eval((sm_object*)$3) ) ;
   }
-	| SYM '=' META                {
-    $$ = sm_new_key_value($1->name,sm_engine_eval((sm_object*)$3) ) ;
-	}
 
 
-META: ':' EXPRESSION {
-    $$ = (sm_expression*) sm_new_meta( 1, (sm_object*) $2 );
-    printf("constructed a meta\n");
+META_EXPRESSION : ':' EXPRESSION {
+        $$ = sm_new_meta((sm_object*) $2 ) ;
   }
 
-EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
+EXPRESSION : EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
 	| EXPRESSION '+' EXPRESSION { $$ = sm_new_expression_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
 	| EXPRESSION '*' EXPRESSION { $$ = sm_new_expression_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
 	| EXPRESSION '/' EXPRESSION { $$ = sm_new_expression_2(sm_divide,(sm_object*) $1, (sm_object*) $3 ) ; }
@@ -111,7 +105,6 @@ EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_ob
 	      $$ = sm_new_expression_2(sm_times,(sm_object*)sm_new_double(-1), (sm_object*)$2 );
 	    }
 	  }
-	| '+' EXPRESSION {$$ = (sm_expression*)$2;}
 	| SYM { $$ = (sm_expression*) sm_new_symbol(($1) -> name); }
 	| '(' EXPRESSION ')' { $$ = (sm_expression*) $2; }
 	| STRING { }
@@ -138,13 +131,13 @@ EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_ob
 	| ARRAY ']' {;}
 	| CONTEXT ';' '}'     {;}
 	| '{' '}'							{ $$ = (sm_expression*)sm_new_context(0);}
-
+  | META_EXPRESSION {;}
+  
 EXPRESSION_LIST: '+' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
   | '-' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_minus,(sm_object*)$3,(sm_object*)$5 );}
   | '*' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_times,(sm_object*)$3,(sm_object*)$5 );}
   | '/' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_divide,(sm_object*)$3,(sm_object*)$5 );}
   | EXPRESSION_LIST ',' EXPRESSION      {$$ = sm_append_to_expression((sm_expression*)$1,(sm_object*)$3);}
-
 
 ARRAY: '[' EXPRESSION ',' EXPRESSION {$$=sm_new_expression_2(sm_array,(sm_object*)$2,(sm_object*)$4);}
   | ARRAY ',' EXPRESSION {$$ = sm_append_to_expression($1,(sm_object*)$3);}
@@ -155,7 +148,7 @@ CONTEXT: '{' KEYVALUE ';' KEYVALUE {
 	  $$ = sm_set_var(($$),$2->name,$2->value);
 	  $$ = sm_set_var(($$),$4->name,$4->value);
   }
-| CONTEXT ';' KEYVALUE {
+  | CONTEXT ';' KEYVALUE {
     $$ = sm_set_var($1,$3->name,$3->value);
   }
 
