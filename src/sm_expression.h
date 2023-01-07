@@ -48,3 +48,4 @@ sm_string     *sm_infix_to_string(sm_expression *expr, sm_string *op);
 sm_string     *sm_expression_to_string(sm_expression *expr);
 sm_expression *sm_set_expression_arg(sm_expression *expr, unsigned int index, sm_object *value);
 sm_object     *sm_get_expression_arg(sm_expression *expr, unsigned int index);
+bool           sm_is_infix(enum math_op op);
