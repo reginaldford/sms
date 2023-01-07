@@ -35,8 +35,8 @@ bool sm_is_within_heap(sm_object *obj, sm_memory_heap *heap) {
 }
 
 int sm_mem_dump(sm_memory_heap *heap, char *name) {
-  void *buffer      = heap->storage;
-  int buffer_length = heap->used;
+  void *buffer        = heap->storage;
+  int   buffer_length = heap->used;
 
   // Open a file for writing
   FILE *fp = fopen(name, "wb");
@@ -48,7 +48,7 @@ int sm_mem_dump(sm_memory_heap *heap, char *name) {
 }
 
 void sm_dump_and_count() {
-  char fname[20];
+  char       fname[20];
   static int index = 0;
   sprintf(fname, "current_%i.mem", index);
   sm_mem_dump(sm_global_current_heap(NULL), fname);

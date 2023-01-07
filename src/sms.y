@@ -18,10 +18,12 @@ void yyerror(char *msg);
   sm_string *str;
   sm_context * context;
   sm_key_value * kv;
+  sm_meta * meta;
 };
 
 %token CLEAR FORMAT LS NEWLINE EXIT
 
+%type  <expr>     META
 %type  <kv>       KEYVALUE
 %type  <context>  CONTEXT
 %type  <expr>     EXPRESSION
@@ -72,15 +74,24 @@ COMMAND : KEYVALUE            {
       sm_terminal_prompt();
   }
   | LET SYM '=' EXPRESSION  { printf("Activated let command ! (incomplete) \n"); }
-  | EXIT    ';'             { sm_mem_cleanup(); exit(0); }
+  | EXIT    ';'             { sm_signal_handler(SIGQUIT); }
   | error                   { yyerror("Bad syntax.");}
   | COMMAND ';' COMMAND ';' { }
+	| META                {;}
   ;
 
 KEYVALUE  : SYM '=' EXPRESSION  {
     $$ = sm_new_key_value($1->name,sm_engine_eval((sm_object*)$3) ) ;
+  }
+	| SYM '=' META                {
+    $$ = sm_new_key_value($1->name,sm_engine_eval((sm_object*)$3) ) ;
+	}
+
+
+META: ':' EXPRESSION {
+  $$ = (sm_expression*) sm_new_meta( 1, (sm_object*) $2 );
+  printf("constructed a meta\n");
 }
-;
 
 EXPRESSION :EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
 	| EXPRESSION '+' EXPRESSION { $$ = sm_new_expression_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
@@ -133,17 +144,18 @@ EXPRESSION_LIST: '+' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(s
 
 
 ARRAY: '[' EXPRESSION ',' EXPRESSION {$$=sm_new_expression_2(sm_array,(sm_object*)$2,(sm_object*)$4);}
-| ARRAY ',' EXPRESSION {$$ = sm_append_to_expression($1,(sm_object*)$3);}
+  | ARRAY ',' EXPRESSION {$$ = sm_append_to_expression($1,(sm_object*)$3);}
 
 
 CONTEXT: '{' KEYVALUE ';' KEYVALUE {
 	  $$ = sm_new_context(2);
 	  $$ = sm_set_var(($$),$2->name,$2->value);
 	  $$ = sm_set_var(($$),$4->name,$4->value);
-}
+  }
 | CONTEXT ';' KEYVALUE {
-  $$ = sm_set_var($1,$3->name,$3->value);
-}
+    $$ = sm_set_var($1,$3->name,$3->value);
+  }
+
 
 
 
@@ -155,15 +167,22 @@ void yyerror(char *msg) {
 }
 
 int main(){
-  //set the current mem heap to a new mem heap
-	sm_global_current_heap(sm_new_memory_heap(5500));
-
-	//set the global context to a new context
-  sm_global_context(sm_new_context(0));
+  //register the signal handler
+  sm_register_signals();
   
+  //set the current mem heap to a new mem heap
+  sm_global_current_heap(sm_new_memory_heap(5500));
+
+  //set the global context to a new context
+  sm_global_context(sm_new_context(0));
+
+  sm_signal_handler(SIGQUIT);
+  //set on_exit signal response
+
+  //Introduction and prompt
   printf("Symbolic Math System\n");
   printf("Version 0.1\n");
   sm_terminal_prompt();
 
-  return yyparse();
+  yyparse();
 }

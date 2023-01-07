@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +13,8 @@ enum sm_object_type {
   sm_symbol_type,
   sm_context_type,
   sm_pointer_type,
-  sm_key_value_type
+  sm_key_value_type,
+  sm_meta_type,
 };
 
 #define DEBUG_HERE(note)                                                                           \
@@ -37,3 +39,5 @@ enum sm_object_type {
 #include "sm_terminal.h"
 #include "sm_key_value.h"
 #include "sm_engine.h"
+#include "sm_meta.h"
+#include "sm_signal.h"

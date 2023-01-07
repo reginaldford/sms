@@ -3,7 +3,7 @@
 sm_object *sm_move_to_new_heap(sm_object *obj) {
   sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
   // overwrite the old object. sm_pointer is NOT larger
-  sm_new_pointer(obj,new_obj);
+  sm_new_pointer(obj, new_obj);
   return new_obj;
 }
 
@@ -42,6 +42,11 @@ void sm_inflate_heap() {
     case sm_symbol_type: {
       sm_symbol *sym = (sm_symbol *)current_obj;
       sym->name      = (sm_string *)sm_meet_object((sm_object *)sym->name);
+      break;
+    }
+    case sm_meta_type: {
+      sm_meta *meta = (sm_meta *)current_obj;
+      meta->address = (sm_object *)sm_meet_object(meta->address);
       break;
     }
 
