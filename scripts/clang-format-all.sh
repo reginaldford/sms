@@ -1,2 +1,2 @@
-find ../src -type f -name '*.c' -o -name '*.h' -exec clang-format -i {} \;
-find ../src/tests -type f -name '*.c' -o -name '*.h' -exec clang-format -i {} \;
+clang-format --verbose -i ../src/*.c ../src/*.h
+clang-format --verbose -i ../src/tests/*.c # ../src/tests/*.h

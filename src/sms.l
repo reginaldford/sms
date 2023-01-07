@@ -36,7 +36,7 @@ sqrt        {return SQRT;}
 diff        {return DIFF;}
 delete      {return DELETE;}
 
-\.?{digit}+(\.{digit}+)?([eE]{digit}+)?  {
+\.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
       yylval.num = sm_new_double(atof(yytext));
       return NUM;
     }

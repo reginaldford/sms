@@ -2,9 +2,9 @@
 
 sm_string *sm_object_type_str(enum sm_object_type t) {
   char *response_string[]     = {"sm_double",  "sm_expression", "sm_primitive",
-                                 "sm_string",  "sm_symbol",
-                                 "sm_context", "sm_pointer",    "sm_key_value"};
-  int   response_string_len[] = {10, 13, 12, 9, 9, 10, 6, 12};
+                                 "sm_string",  "sm_symbol",     "sm_context",
+                                 "sm_pointer", "sm_key_value",  "sm_meta"};
+  int   response_string_len[] = {10, 13, 12, 9, 9, 10, 6, 12, 7};
   if (t >= 0 && t < sizeof(response_string) / sizeof(void *))
     return sm_new_string(response_string_len[t], response_string[t]);
   else
@@ -28,8 +28,15 @@ sm_string *sm_object_to_string(sm_object *obj1) {
     return sm_expression_to_string((sm_expression *)obj1);
   } else if (t == sm_symbol_type) {
     return ((sm_symbol *)obj1)->name;
-  }else if (t == sm_context_type) {
+  } else if (t == sm_context_type) {
     return sm_context_to_string((sm_context *)obj1);
+  } else if (t == sm_meta_type) {
+    sm_string *obj_str = sm_object_to_string(obj1);
+    char      *str_buf = malloc(sizeof(char) * obj_str->size + 2);
+    sprintf(str_buf, ":%s", &(obj_str->content));
+    sm_string *answer = sm_new_string(obj_str->size + 1, str_buf);
+    free(str_buf);
+    return answer;
   } else {
     return sm_new_string(5, "other");
   }

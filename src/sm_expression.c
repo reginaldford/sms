@@ -130,7 +130,7 @@ sm_string *sm_prefix_to_string(sm_expression *expr, sm_string *op) {
       sprintf(buf + buffer_pos, "%s ]", &(arg_strings[expr->size - 1]->content));
     } else
       sprintf(buf + buffer_pos, "%s )", &(arg_strings[expr->size - 1]->content));
-  } else { //size is 0
+  } else { // size is 0
     if (strcmp(&(op->content), "array") == 0) {
       sprintf(buf + buffer_pos, "]");
     } else
