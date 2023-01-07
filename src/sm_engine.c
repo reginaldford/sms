@@ -111,6 +111,13 @@ sm_object *sm_engine_eval(sm_object *input) {
       return (sm_object *)sm_new_double(0);
     }
   }
+  case sm_context_type: {
+    sm_context       *cx = (sm_context *)input;
+    sm_context_entry *ce = sm_context_entries(cx);
+    for (unsigned int i = 0; i < cx->size; i++) {
+      ce[i].value = sm_engine_eval(ce[i].value);
+    }
+  }
   default: // literals are passed through
     return input;
   }

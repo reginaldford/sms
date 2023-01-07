@@ -32,6 +32,12 @@ Demonstration of standard order of operations (look at the output):
 Store an expression with the meta operator (:) :
 `expression = : +(a,b,c);`
 
+Store structured data with no evaluation:
+`x=5;`
+`:{name="power graph"; value=cos(x);};`
+
+Removing the meta operator (:) above will lead to a different result.
+
 Storage of mathematical expressions in an array:
 
 `formula = : [ a ^ 2 + b ^ 2 , cos(a/b) ];`
@@ -44,9 +50,7 @@ Arrays can hold various objects:
 
 `d = :[ a, sinh(a/b), "this", 5 , { x = "x"; }];`
 
-Without the meta operator, each element of the array will be evaluated:
-
-`d = [ a, sinh(a/b), "this", 5 , { x = "x"; }];`
+Without the meta operator above, each element of the array will be evaluated.
 
 User objects (contexts):
 
