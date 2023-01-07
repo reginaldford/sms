@@ -47,14 +47,17 @@ sm_object *sm_engine_eval(sm_object *input) {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
       // we may need to manually invert these 3 trig functions.
       // return (sm_object *)sm_new_double(sec(left_side->value));
+      break;
     }
     case sm_csc: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
       // return (sm_object *)sm_new_double(csc(left_side->value));
+      break;
     }
     case sm_cot: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
       // return (sm_object *)sm_new_double(cot(left_side->value));
+      break;
     }
     case sm_sinh: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
@@ -80,7 +83,13 @@ sm_object *sm_engine_eval(sm_object *input) {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
       return (sm_object *)sm_new_double(sqrt(left_side->value));
     }
-
+    case sm_array: {
+      for (unsigned int i = 0; i < sme->size; i++) {
+        sm_object *new_val = sm_engine_eval(sm_get_expression_arg(sme, i));
+        sm_set_expression_arg(sme, i, new_val);
+      }
+      return (sm_object *)sme;
+    }
     default:
       return input;
     }

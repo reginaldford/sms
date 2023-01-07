@@ -1,14 +1,21 @@
 #include "sms.h"
 
 void sm_signal_handler(int signal_number) {
+  char *signal_name = "";
   switch (signal_number) {
   case SIGABRT:
+    signal_name = "SIGABRT";
   case SIGHUP:
+    signal_name = "SIGHUP";
   case SIGILL:
+    signal_name = "SIGILL";
   case SIGINT:
+    signal_name = "SIGINT";
   case SIGQUIT:
+    signal_name = "SIGQUIT";
   case SIGTERM: {
-    printf("\n<RECEIVED SIGNAL: %i. EXITING.>\n", signal_number);
+    signal_name = "SIGTERM";
+    printf("\n<Received signal: %s. Exiting.>\n", signal_name);
     sm_mem_cleanup();
     exit(0);
     break;
