@@ -27,6 +27,11 @@ enum sm_object_type {
 #define MAX(x, y) (x > y ? x : y)
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x))
 
+// Windows lacks these signals
+// in <signal.h> because it isn't even POSIX
+#define SIGHUP 1
+#define SIGQUIT 3
+
 #include "sm_string.h"
 #include "sm_object.h"
 #include "sm_memory_heap.h"
