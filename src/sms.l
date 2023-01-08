@@ -20,6 +20,7 @@ clear          {return CLEAR;}
 ls             {return LS;}
 format         {return FORMAT;}
 let            {return LET;}
+self           {return SELF;}
 
 sin         {return SIN;}
 cos         {return COS;}
