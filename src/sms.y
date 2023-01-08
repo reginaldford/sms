@@ -21,7 +21,8 @@ void yyerror(char *msg);
   sm_meta * meta;
 };
 
-%token CLEAR FORMAT LS NEWLINE EXIT
+%token CLEAR FORMAT LS NEWLINE EXIT SELF
+
 
 %type  <meta>     META_EXPRESSION
 %type  <kv>       KEYVALUE
@@ -59,7 +60,6 @@ void yyerror(char *msg);
 
 COMMAND : KEYVALUE            { 
     sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,sm_engine_eval($1->value)));
-    sm_print_table(sm_global_context(NULL));
     sm_garbage_collect();
     sm_terminal_prompt();
   }
@@ -70,15 +70,13 @@ COMMAND : KEYVALUE            {
   }
   | DELETE SYM              {
       sm_delete((sm_symbol*)$2);
-      sm_print_table(sm_global_context(NULL));
       sm_garbage_collect();
       sm_terminal_prompt();
   }
   | LET SYM '=' EXPRESSION  { printf("Activated let command ! (incomplete) \n"); }
-  | EXIT    ';'             { sm_signal_handler(SIGQUIT); }
   | error                   { yyerror("Bad syntax.");}
   | COMMAND ';' COMMAND ';' {;}
-
+  | EXIT    ';'             { sm_signal_handler(SIGQUIT); }
 
 
 KEYVALUE  : SYM '=' EXPRESSION  {
@@ -90,8 +88,9 @@ META_EXPRESSION : ':' EXPRESSION {
         $$ = sm_new_meta((sm_object*) $2 ) ;
   }
 
-EXPRESSION : EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
-	| EXPRESSION '+' EXPRESSION { $$ = sm_new_expression_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
+EXPRESSION : SELF { $$ = (sm_expression*)sm_global_context(NULL); }
+  | EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
+  | EXPRESSION '+' EXPRESSION { $$ = sm_new_expression_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
 	| EXPRESSION '*' EXPRESSION { $$ = sm_new_expression_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
 	| EXPRESSION '/' EXPRESSION { $$ = sm_new_expression_2(sm_divide,(sm_object*) $1, (sm_object*) $3 ) ; }
 	| EXPRESSION '^' EXPRESSION { $$ = sm_new_expression_2(sm_pow,   (sm_object*) $1, (sm_object*) $3 ) ; }
@@ -172,7 +171,7 @@ int main(){
 
   //Introduction and prompt
   printf("Symbolic Math System\n");
-  printf("Version 0.1\n");
+  printf("Version 0.11\n");
   sm_terminal_prompt();
 
   //Start the parser. 

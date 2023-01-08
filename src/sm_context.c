@@ -14,21 +14,12 @@ sm_context_entry *sm_context_entries(sm_context *context) {
   return (sm_context_entry *)&(context[1]);
 }
 
-void sm_print_table(sm_context *context) {
-  sm_context_entry *context_entries = sm_context_entries(context);
-  printf("## SYMBOL TABLE: ##\n");
-  fflush(stdout);
-  for (unsigned int i = 0; i < context->size; i++) {
-    sm_object *value    = context_entries[i].value;
-    char      *var_type = &(sm_object_type_str(value->my_type)->content);
-    char      *var_name = &((context_entries[i].name)->content);
-    char      *desc     = &(sm_object_to_string(value)->content);
-    printf("%s : %s : %s\n", var_name, var_type, desc);
-  }
-}
+
+sm_string *spaces(int how_many) { return sm_new_string_of(how_many, sm_new_string(1, " ")); }
 
 search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
   sm_context_entry *context_entries = sm_context_entries(context);
+
   if (context->size == 0)
     return (search_result){.found = false, .index = 0};
   char        *var_name    = &(var_string->content);
@@ -99,42 +90,22 @@ bool sm_delete(sm_symbol *sym) {
 
 sm_string *sm_context_to_string(sm_context *self) {
   if (self->size == 0) {
-    sm_string *answer = sm_new_string(3, "{ }");
-    return answer;
+    return sm_new_string(3, "{ }");
   }
-  int               object_length_sum = 0;
-  sm_string        *object_strings[self->size];
-  sm_context_entry *ce = sm_context_entries(self);
-  for (unsigned int object_index = 0; object_index < self->size; object_index++) {
-    sm_context_entry *current_object = &ce[object_index];
-    object_strings[object_index]     = sm_context_entry_to_string(current_object);
-    object_length_sum += object_strings[object_index]->size;
-  }
-  int   answer_length = 2 + object_length_sum + self->size * 2 + 1;
-  char *buf           = malloc(sizeof(char) * answer_length);
-  sprintf(buf, "{ ");
-  int buffer_pos = 2;
+  sm_context_entry *ce     = sm_context_entries(self);
+  sm_string        *answer = sm_new_string(2, "{ ");
   if (self->size > 0) {
     for (unsigned int object_index = 0; object_index <= self->size - 1; object_index++) {
-      sprintf(buf + buffer_pos, "%s ", &(object_strings[object_index]->content));
-      //+2 for command and space
-      buffer_pos += object_strings[object_index]->size + 1;
+      answer = sm_concat_strings(answer, sm_context_entry_to_string(&(ce[object_index])));
     }
   }
-
-  sprintf(buf + buffer_pos, "}");
-  buffer_pos += 1;
-
-  sm_string *answer = sm_new_string(buffer_pos, buf);
-  free(buf);
-  return answer;
+  return sm_concat_strings(answer, sm_new_string(1, "}"));
 }
 
 sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
-  char buf[50];
-  sprintf(buf, "%s = %s;", &(ce->name->content), &(sm_object_to_string(ce->value)->content));
   sm_string *output_str = ce->name;
   output_str            = sm_concat_strings(output_str, sm_new_string(3, " = "));
   output_str            = sm_concat_strings(output_str, sm_object_to_string(ce->value));
+  output_str            = sm_concat_strings(output_str, sm_new_string(2, "; "));
   return output_str;
 }

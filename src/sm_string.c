@@ -26,3 +26,15 @@ sm_string *sm_concat_strings(sm_string *str1, sm_string *str2) {
   sm_strncpy(&(new_string->content) + str1->size, &(str2->content), str2->size);
   return new_string;
 }
+
+sm_string *sm_new_string_of(unsigned int size, sm_string *str) {
+  // We add a null character that is not included in the size
+  sm_string *new_str = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
+  new_str->my_type   = sm_string_type;
+  new_str->size      = size;
+
+  for (unsigned int index = 0; index < str->size; index++) {
+    ((char *)&(new_str->content))[index] = ((char *)&(str->content))[index % str->size];
+  }
+  return new_str;
+}

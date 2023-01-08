@@ -9,3 +9,4 @@ typedef struct sm_string {
 char      *sm_strncpy(char *dest, const char *src, unsigned int n);
 sm_string *sm_new_string(unsigned int size, char *str);
 sm_string *sm_concat_strings(sm_string *str1, sm_string *str2);
+sm_string *sm_new_string_of(unsigned int size, sm_string *str);
