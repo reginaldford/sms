@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 #include "sms.h"
 
 sm_string *sm_object_type_str(enum sm_object_type t) {

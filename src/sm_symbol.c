@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 #include "sms.h"
 
 sm_symbol *sm_new_symbol(sm_string *sym_name) {

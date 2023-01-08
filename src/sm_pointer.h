@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 typedef struct sm_pointer {
   int        my_type;
   sm_object *address;

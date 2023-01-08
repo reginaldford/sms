@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 #include "sms.h"
 
 sm_key_value *sm_new_key_value(sm_string *key, sm_object *value) {

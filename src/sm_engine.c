@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 #include "sms.h"
 
 sm_object *sm_engine_eval(sm_object *input) {
@@ -49,18 +50,17 @@ sm_object *sm_engine_eval(sm_object *input) {
     }
     case sm_sec: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
-      // we may need to manually invert these 3 trig functions.
-      // return (sm_object *)sm_new_double(sec(left_side->value));
+      return (sm_object *)sm_new_double(1.0 / cos(left_side->value));
       break;
     }
     case sm_csc: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
-      // return (sm_object *)sm_new_double(csc(left_side->value));
+      return (sm_object *)sm_new_double(1.0 / sin(left_side->value));
       break;
     }
     case sm_cot: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
-      // return (sm_object *)sm_new_double(cot(left_side->value));
+      return (sm_object *)sm_new_double(1.0 / tan(left_side->value));
       break;
     }
     case sm_sinh: {
@@ -119,7 +119,8 @@ sm_object *sm_engine_eval(sm_object *input) {
     sm_context       *cx = (sm_context *)input;
     sm_context_entry *ce = sm_context_entries(cx);
     for (unsigned int i = 0; i < cx->size; i++) {
-      ce[i].value = sm_engine_eval(ce[i].value);
+      if (((sm_context *)ce[i].value) != cx)
+        ce[i].value = sm_engine_eval(ce[i].value);
     }
   }
   default: // literals are passed through

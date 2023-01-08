@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 enum math_op {
   sm_plus,
   sm_minus,

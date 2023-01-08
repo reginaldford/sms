@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 #include "sms.h"
 
 // make sure to put the arguments in afterward.

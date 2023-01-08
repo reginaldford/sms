@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 // Null termination character excluded in size field.
 // Zero size string still has NULL termination.
 typedef struct sm_string {
