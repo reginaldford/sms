@@ -1,25 +1,26 @@
 # STATUS QUO:
-SMS is a terminal program that interprets commands like `a=4;` and `delete a;` to set and destroy variables, respectively.
+SMS is a terminal program that interprets commands like `a=4*cos(0.5);` and `delete a;` to set and destroy variables, respectively.
 The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts.
 
 To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. 
 The variable names must start with underscores or a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
 After a command, the garbage collector is executed, where all relevant objects are copied to a new contiguous space. The garbage collector uses the stop and copy algorithm. 
 
-The spaces in provided examples are optional, and are there for readability.
-All commands end with a semicolon.
+The whitespace characters in the provided examples are optional, and are for readability.
+All commands end with a semicolon (;) .
 You can try the following examples:
 
 Direct computations. The resulting value will not be stored for later use:
-`2+sqrt(7);`
+
+`2 + sqrt(7);`
 
 Calculation and storage of double precision numbers:
 
-`a=4;`
+`a = 4;`
 
-`b=sqrt(7);`
+`b = sqrt(7);`
 
-`c=a+b;`
+`c = a + b;`
 
 To see which variables are currently set, enter:
 
@@ -34,10 +35,13 @@ Demonstration of standard order of operations (look at the output):
 `b = sqrt(a/b) - 2 * a ^ 2 ;` 
 
 Store an expression with the meta operator (:) :
+
 `expression = : +(a,b,c);`
 
 Store structured data with no evaluation:
+
 `x=5;`
+
 `:{name="power graph"; value=cos(x);};`
 
 Removing the meta operator (:) above will lead to a different result.
@@ -86,7 +90,7 @@ Exit the program with:
 - [ ] Quad precision support.
 - [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
 - [ ] Memory serialization support (starting with a populated heap from the file system for faster booting).
-- [ ] Clean the string manipulations to avoid sprintf and strlen.
+- [x] Clean the string manipulations to avoid sprintf and strlen.
 - [ ] General Guide.
 - [ ] Guide for adding your own command by adding C code.
 - [ ] Turing completeness.
