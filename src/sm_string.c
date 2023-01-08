@@ -28,6 +28,13 @@ sm_string *sm_concat_strings(sm_string *str1, sm_string *str2) {
   return new_string;
 }
 
+sm_string *sm_concat_strings_conserving(sm_string *str1, sm_string *str2) {
+  sm_string *new_string = sm_concat_strings(str1, str2);
+  sm_new_spacer(str1, sizeof(str1));
+  sm_new_spacer(str2, sizeof(str2));
+  return new_string;
+}
+
 sm_string *sm_new_string_of(unsigned int size, sm_string *str) {
   // We add a null character that is not included in the size
   sm_string *new_str = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));

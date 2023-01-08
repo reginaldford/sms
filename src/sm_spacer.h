@@ -5,4 +5,4 @@ typedef struct sm_spacer {
   unsigned int        size;
 } sm_spacer;
 
-sm_spacer *sm_new_spacer(unsigned int size);
+sm_spacer *sm_new_spacer(void *trash, unsigned int size);
