@@ -16,13 +16,10 @@ sm_string *sm_object_to_string(sm_object *obj1) {
   if (t == sm_double_type) {
     return sm_double_to_string((sm_double *)obj1);
   } else if (t == sm_string_type) {
-    sm_string *pss = (sm_string *)obj1;
-    // 2 more characters for quotes, and 1 for the extra null char
-    char *str_buf = malloc(sizeof(char) * (pss->size + 3));
-    sprintf(str_buf, "\"%s\"", &(pss->content));
-    sm_string *answer = sm_new_string(pss->size + 2, str_buf);
-    free(str_buf);
-    return answer;
+    sm_string *pss     = (sm_string *)obj1;
+    sm_string *new_str = sm_concat_strings(sm_new_string(1, "\""), pss);
+    new_str            = sm_concat_strings(new_str, sm_new_string(1, "\""));
+    return new_str;
   } else if (t == sm_expression_type) {
     return sm_expression_to_string((sm_expression *)obj1);
   } else if (t == sm_symbol_type) {

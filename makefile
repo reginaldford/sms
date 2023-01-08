@@ -20,7 +20,7 @@ CC=clang
 CFLAGS= -lm -Ofast
 
 #Compiling for debugging info
-#CFLAGS=-lm -g
+# CFLAGS=-lm -g
 
 #ncurses experiments:
 #CFLAGS= -lm -lncurses -Ofast
@@ -35,9 +35,12 @@ all: sms
 sms: src/y.tab.c src/lex.yy.c $(SOURCES) $(HEADERS)
 	$(CC) -o sms $(SOURCES) $(CFLAGS)
 
+#For counterexamples during bison conflicts:
+#Some versions of bison do not have this
+#bison -dy -Wcounterexamples -o src/y.tab.c src/sms.y
 #y.tab.h is also produced by bison.
 src/y.tab.c: src/sms.y
-	bison -dy -Wcounterexamples -o src/y.tab.c src/sms.y
+	bison -dy -o src/y.tab.c src/sms.y
 
 src/lex.yy.c: src/y.tab.h src/y.tab.c src/sms.l
 	flex --yylineno -o src/lex.yy.c src/sms.l
