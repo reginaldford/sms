@@ -78,10 +78,15 @@ bool sm_delete(sm_symbol *sym) {
   if (sr.found == true) {
     sm_context       *context         = sm_global_context(NULL);
     sm_context_entry *context_entries = sm_context_entries(context);
-    for (int i = sr.index; i < context->size - 1; i++) {
+    for (unsigned int i = sr.index; i < context->size - 1; i++) {
       context_entries[i] = context_entries[i + 1];
     }
     context->size -= 1;
+    // putting a spacer for remaining space
+    context->capacity     = context->size;
+    sm_spacer *new_spacer = (sm_spacer *)(&context_entries[context->size]);
+    new_spacer->my_type   = sm_spacer_type;
+    new_spacer->size      = sizeof(sm_context_entry);
     return true;
   } else {
     printf("Could not find variable to delete: %s\n", &(sym->name->content));
