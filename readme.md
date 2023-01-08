@@ -21,6 +21,10 @@ Calculation and storage of double precision numbers:
 
 `c=a+b;`
 
+To see which variables are currently set, enter:
+
+`self ;`
+
 Hyperbolic trigonometric expressions:
 
 `a = sinh(a/b) + c ;`
