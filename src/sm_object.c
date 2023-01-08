@@ -3,8 +3,8 @@
 
 sm_string *sm_object_type_str(enum sm_object_type t) {
   char *response_string[]     = {"double",  "expression", "primitive", "string", "symbol",
-                                 "context", "pointer",    "key_value", "meta"};
-  int   response_string_len[] = {7, 10, 9, 6, 6, 7, 3, 9, 4};
+                                 "context", "pointer",    "key_value", "meta",   "spacer"};
+  int   response_string_len[] = {7, 10, 9, 6, 6, 7, 3, 9, 4, 6};
   if (t >= 0 && t < sizeof(response_string) / sizeof(void *))
     return sm_new_string(response_string_len[t], response_string[t]);
   else
@@ -61,6 +61,10 @@ int sm_sizeof(sm_object *obj1) {
   case sm_meta_type:
     return sizeof(sm_meta);
     break;
+  case sm_spacer_type:
+    return ((sm_spacer *)obj1)->size;
+    break;
+
   default:
     printf("Cannot determine size of object of type %d\n", obj_type);
     exit(0);

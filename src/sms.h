@@ -16,6 +16,7 @@ enum sm_object_type {
   sm_pointer_type,
   sm_key_value_type,
   sm_meta_type,
+  sm_spacer_type
 };
 
 #define DEBUG_HERE(note)                                                                           \
@@ -32,6 +33,7 @@ enum sm_object_type {
 #include "sm_pointer.h"
 #include "sm_symbol.h"
 #include "sm_commands.h"
+#include "sm_spacer.h"
 #include "sm_context.h"
 #include "sm_double.h"
 #include "sm_expression.h"

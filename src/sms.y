@@ -1,4 +1,6 @@
 %{
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -91,45 +93,45 @@ META_EXPRESSION : ':' EXPRESSION {
 EXPRESSION : SELF { $$ = (sm_expression*)sm_global_context(NULL); }
   | EXPRESSION '-' EXPRESSION { $$ = sm_new_expression_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
   | EXPRESSION '+' EXPRESSION { $$ = sm_new_expression_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
-	| EXPRESSION '*' EXPRESSION { $$ = sm_new_expression_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
-	| EXPRESSION '/' EXPRESSION { $$ = sm_new_expression_2(sm_divide,(sm_object*) $1, (sm_object*) $3 ) ; }
-	| EXPRESSION '^' EXPRESSION { $$ = sm_new_expression_2(sm_pow,   (sm_object*) $1, (sm_object*) $3 ) ; }
-	| NUM {  }
-	| '-' EXPRESSION {
-	    if(((sm_object*)$2)->my_type == sm_double_type){
-	      ((sm_double*)$2)->value *= -1;
-	      $$ = (sm_expression*)$2;
-	    }
-	    else {
-	      $$ = sm_new_expression_2(sm_times,(sm_object*)sm_new_double(-1), (sm_object*)$2 );
-	    }
-	  }
-	| SYM { $$ = (sm_expression*) sm_new_symbol(($1) -> name); }
-	| '(' EXPRESSION ')' { $$ = (sm_expression*) $2; }
-	| STRING { }
-	| SIN  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sin ,(sm_object*) $3 );}
-	| COS  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_cos ,(sm_object*) $3 );}
-	| TAN  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_tan ,(sm_object*) $3 );}
-	| SINH '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sinh,(sm_object*) $3 );}
-	| COSH '(' EXPRESSION ')' { $$ = sm_new_expression(sm_cosh,(sm_object*) $3 );}
-	| TANH '(' EXPRESSION ')' { $$ = sm_new_expression(sm_tanh,(sm_object*) $3 );}
-	| SEC  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sec, (sm_object*) $3 );}
-	| CSC  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_csc, (sm_object*) $3 );}
-	| COT  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_cot, (sm_object*) $3 );}
-	| LN   '(' EXPRESSION ')' { $$ = sm_new_expression(sm_ln,  (sm_object*) $3 );}
-	| EXP  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_exp, (sm_object*) $3 );}
-	| SQRT '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sqrt,(sm_object*) $3 );}
-	| DIFF '(' EXPRESSION ')' { $$ = sm_new_expression(sm_diff,(sm_object*) $3 );}
-	| DIFF '(' EXPRESSION ',' SYM ')' {$$ = sm_new_expression_2(sm_diff,(sm_object*)$3,(sm_object*)$5 );}
-	| EXPRESSION_LIST ')' { ; }
-	| '[' EXPRESSION ']'	{ $$ = (sm_expression*)sm_new_expression(sm_array,(sm_object*)$2);}
-	| '{' KEYVALUE ';' '}'	{
-	    $$ = (sm_expression*)sm_set_var(sm_new_context(1),$2->name,$2->value);
-	  }
-	| '[' ']'							{ $$ = sm_new_expression_n(sm_array,0,0);}
-	| ARRAY ']' {;}
-	| CONTEXT ';' '}'     {;}
-	| '{' '}'							{ $$ = (sm_expression*)sm_new_context(0);}
+  | EXPRESSION '*' EXPRESSION { $$ = sm_new_expression_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
+  | EXPRESSION '/' EXPRESSION { $$ = sm_new_expression_2(sm_divide,(sm_object*) $1, (sm_object*) $3 ) ; }
+  | EXPRESSION '^' EXPRESSION { $$ = sm_new_expression_2(sm_pow,   (sm_object*) $1, (sm_object*) $3 ) ; }
+  | NUM {  }
+  | '-' EXPRESSION {
+  if(((sm_object*)$2)->my_type == sm_double_type){
+     ((sm_double*)$2)->value *= -1;
+     $$ = (sm_expression*)$2;
+    }
+    else {
+     $$ = sm_new_expression_2(sm_times,(sm_object*)sm_new_double(-1), (sm_object*)$2 );
+    }
+  }
+  | SYM { $$ = (sm_expression*) sm_new_symbol(($1) -> name); }
+  | '(' EXPRESSION ')' { $$ = (sm_expression*) $2; }
+  | STRING { }
+  | SIN  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sin ,(sm_object*) $3 );}
+  | COS  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_cos ,(sm_object*) $3 );}
+  | TAN  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_tan ,(sm_object*) $3 );}
+  | SINH '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sinh,(sm_object*) $3 );}
+  | COSH '(' EXPRESSION ')' { $$ = sm_new_expression(sm_cosh,(sm_object*) $3 );}
+  | TANH '(' EXPRESSION ')' { $$ = sm_new_expression(sm_tanh,(sm_object*) $3 );}
+  | SEC  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sec, (sm_object*) $3 );}
+  | CSC  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_csc, (sm_object*) $3 );}
+  | COT  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_cot, (sm_object*) $3 );}
+  | LN   '(' EXPRESSION ')' { $$ = sm_new_expression(sm_ln,  (sm_object*) $3 );}
+  | EXP  '(' EXPRESSION ')' { $$ = sm_new_expression(sm_exp, (sm_object*) $3 );}
+  | SQRT '(' EXPRESSION ')' { $$ = sm_new_expression(sm_sqrt,(sm_object*) $3 );}
+  | DIFF '(' EXPRESSION ')' { $$ = sm_new_expression(sm_diff,(sm_object*) $3 );}
+  | DIFF '(' EXPRESSION ',' SYM ')' {$$ = sm_new_expression_2(sm_diff,(sm_object*)$3,(sm_object*)$5 );}
+  | EXPRESSION_LIST ')' { ; }
+  | '[' EXPRESSION ']'	{ $$ = (sm_expression*)sm_new_expression(sm_array,(sm_object*)$2);}
+  | '{' KEYVALUE ';' '}'	{
+    $$ = (sm_expression*)sm_set_var(sm_new_context(1),$2->name,$2->value);
+  }
+  | '[' ']'							{ $$ = sm_new_expression_n(sm_array,0,0);}
+  | ARRAY ']' {;}
+  | CONTEXT ';' '}'     {;}
+  | '{' '}'							{ $$ = (sm_expression*)sm_new_context(0);}
   | META_EXPRESSION {;}
   
 EXPRESSION_LIST: '+' '('  EXPRESSION ',' EXPRESSION  {$$ = sm_new_expression_2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
