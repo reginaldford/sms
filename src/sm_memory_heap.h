@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 typedef struct sm_memory_heap {
   unsigned int capacity;
   unsigned int used;

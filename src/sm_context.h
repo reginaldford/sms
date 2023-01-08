@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 // sm_context_entry structs follow the sm_context struct in memory
 typedef struct sm_context {
   enum sm_object_type my_type;

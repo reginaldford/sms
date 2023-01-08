@@ -1,3 +1,4 @@
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 
 typedef struct sm_key_value {
   enum sm_object_type my_type;
