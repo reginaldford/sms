@@ -7,24 +7,28 @@ sm_object *sm_engine_eval(sm_object *input) {
     sm_expression *sme = (sm_expression *)input;
     switch (sme->op) {
     case sm_plus: {
-      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
-      sm_double *right_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 1));
-      return (sm_object *)sm_new_double(left_side->value + right_side->value);
+      double sum = 0;
+      for (unsigned int i = 0; i < sme->size; i++)
+        sum += ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, i)))->value;
+      return (sm_object *)sm_new_double(sum);
     }
     case sm_minus: {
-      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
-      sm_double *right_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 1));
-      return (sm_object *)sm_new_double(left_side->value - right_side->value);
+      double sum = ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0)))->value;
+      for (unsigned int i = 1; i < sme->size; i++)
+        sum -= ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, i)))->value;
+      return (sm_object *)sm_new_double(sum);
     }
     case sm_times: {
-      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
-      sm_double *right_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 1));
-      return (sm_object *)sm_new_double(left_side->value * right_side->value);
+      double product = ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0)))->value;
+      for (unsigned int i = 1; i < sme->size; i++)
+        product *= ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, i)))->value;
+      return (sm_object *)sm_new_double(product);
     }
     case sm_divide: {
-      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
-      sm_double *right_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 1));
-      return (sm_object *)sm_new_double(left_side->value / right_side->value);
+      double quotient = ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0)))->value;
+      for (unsigned int i = 1; i < sme->size; i++)
+        quotient /= ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, i)))->value;
+      return (sm_object *)sm_new_double(quotient);
     }
     case sm_pow: {
       sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
