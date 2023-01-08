@@ -15,7 +15,6 @@ sm_context_entry *sm_context_entries(sm_context *context) {
   return (sm_context_entry *)&(context[1]);
 }
 
-
 sm_string *spaces(int how_many) { return sm_new_string_of(how_many, sm_new_string(1, " ")); }
 
 search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
@@ -82,11 +81,10 @@ bool sm_delete(sm_symbol *sym) {
       context_entries[i] = context_entries[i + 1];
     }
     context->size -= 1;
+    context->capacity = context->size;
     // putting a spacer for remaining space
-    context->capacity     = context->size;
-    sm_spacer *new_spacer = (sm_spacer *)(&context_entries[context->size]);
-    new_spacer->my_type   = sm_spacer_type;
-    new_spacer->size      = sizeof(sm_context_entry);
+    sm_new_spacer(&(context_entries[context->size]), sizeof(sm_context_entry));
+    // TODO: register the spacer here.
     return true;
   } else {
     printf("Could not find variable to delete: %s\n", &(sym->name->content));
@@ -102,16 +100,17 @@ sm_string *sm_context_to_string(sm_context *self) {
   sm_string        *answer = sm_new_string(2, "{ ");
   if (self->size > 0) {
     for (unsigned int object_index = 0; object_index <= self->size - 1; object_index++) {
-      answer = sm_concat_strings(answer, sm_context_entry_to_string(&(ce[object_index])));
+      answer =
+        sm_concat_strings_conserving(answer, sm_context_entry_to_string(&(ce[object_index])));
     }
   }
-  return sm_concat_strings(answer, sm_new_string(1, "}"));
+  return sm_concat_strings_conserving(answer, sm_new_string(1, "}"));
 }
 
 sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
   sm_string *output_str = ce->name;
-  output_str            = sm_concat_strings(output_str, sm_new_string(3, " = "));
-  output_str            = sm_concat_strings(output_str, sm_object_to_string(ce->value));
-  output_str            = sm_concat_strings(output_str, sm_new_string(2, "; "));
+  output_str            = sm_concat_strings_conserving(output_str, sm_new_string(3, " = "));
+  output_str            = sm_concat_strings_conserving(output_str, sm_object_to_string(ce->value));
+  output_str            = sm_concat_strings_conserving(output_str, sm_new_string(2, "; "));
   return output_str;
 }

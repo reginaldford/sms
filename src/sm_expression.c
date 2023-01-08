@@ -149,29 +149,29 @@ sm_string *sm_infix_to_string(sm_expression *expr, sm_string *op) {
 
   if (o1->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o1)->op) &&
       o2->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o2)->op)) {
-    str = sm_concat_strings(sm_new_string(2, "( "), left_string);
-    str = sm_concat_strings(str, sm_new_string(3, " ) "));
-    str = sm_concat_strings(str, op);
-    str = sm_concat_strings(str, sm_new_string(2, " ( "));
-    str = sm_concat_strings(str, right_string);
-    str = sm_concat_strings(str, sm_new_string(2, " )"));
+    str = sm_concat_strings_conserving(sm_new_string(2, "( "), left_string);
+    str = sm_concat_strings_conserving(str, sm_new_string(3, " ) "));
+    str = sm_concat_strings_conserving(str, op);
+    str = sm_concat_strings_conserving(str, sm_new_string(2, " ( "));
+    str = sm_concat_strings_conserving(str, right_string);
+    str = sm_concat_strings_conserving(str, sm_new_string(2, " )"));
   } else if (o1->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o1)->op)) {
-    str = sm_concat_strings(sm_new_string(2, "( "), left_string);
-    str = sm_concat_strings(str, sm_new_string(3, " ) "));
-    str = sm_concat_strings(str, op);
-    str = sm_concat_strings(str, sm_new_string(1, " "));
-    str = sm_concat_strings(str, right_string);
+    str = sm_concat_strings_conserving(sm_new_string(2, "( "), left_string);
+    str = sm_concat_strings_conserving(str, sm_new_string(3, " ) "));
+    str = sm_concat_strings_conserving(str, op);
+    str = sm_concat_strings_conserving(str, sm_new_string(1, " "));
+    str = sm_concat_strings_conserving(str, right_string);
   } else if (o2->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o2)->op)) {
-    str = sm_concat_strings(left_string, sm_new_string(1, " "));
-    str = sm_concat_strings(str, op);
-    str = sm_concat_strings(str, sm_new_string(2, " ( "));
-    str = sm_concat_strings(str, right_string);
-    str = sm_concat_strings(str, sm_new_string(2, " )"));
+    str = sm_concat_strings_conserving(left_string, sm_new_string(1, " "));
+    str = sm_concat_strings_conserving(str, op);
+    str = sm_concat_strings_conserving(str, sm_new_string(2, " ( "));
+    str = sm_concat_strings_conserving(str, right_string);
+    str = sm_concat_strings_conserving(str, sm_new_string(2, " )"));
   } else {
-    str = sm_concat_strings(left_string, sm_new_string(1, " "));
-    str = sm_concat_strings(str, op);
-    str = sm_concat_strings(str, sm_new_string(1, " "));
-    str = sm_concat_strings(str, right_string);
+    str = sm_concat_strings_conserving(left_string, sm_new_string(1, " "));
+    str = sm_concat_strings_conserving(str, op);
+    str = sm_concat_strings_conserving(str, sm_new_string(1, " "));
+    str = sm_concat_strings_conserving(str, right_string);
   }
   return str;
 }
