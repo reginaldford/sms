@@ -99,48 +99,37 @@ bool sm_is_infix(enum math_op op) {
 }
 
 sm_string *sm_prefix_to_string(sm_expression *expr, sm_string *op) {
-  int        arg_length_sum = 0;
   sm_string *arg_strings[expr->size];
-  for (int arg_index = 0; arg_index < expr->size; arg_index++) {
+  for (unsigned int arg_index = 0; arg_index < expr->size; arg_index++) {
     sm_object *o1          = sm_get_expression_arg(expr, arg_index);
     arg_strings[arg_index] = sm_object_to_string(o1);
-    arg_length_sum += arg_strings[arg_index]->size;
   }
-  // 2 surrounding spaces and 2 separating characters
-  arg_length_sum += 2 + 2 * (expr->size - 1);
-
-  //(spaced operators)+(spaced arguments)+ (NULL character)
-  int   answer_length = op->size + 2 + arg_length_sum + expr->size * 2 + 1;
-  char *buf           = malloc(sizeof(char) * answer_length);
-  int   buffer_pos    = op->size + 2;
-  if (strcmp(&(op->content), "array") == 0) {
-    sprintf(buf, "[ ");
-    buffer_pos = 2; // op size is effectively 0
-  } else
-    sprintf(buf, "%s( ", &(op->content));
+  sm_string *str = sm_new_string(0, NULL);
+  if (expr->op == sm_array) {
+    str = sm_new_string(2, "[ ");
+  } else {
+    str = sm_concat_strings(op, sm_new_string(2, "( "));
+  }
   // unsigned 0 - 1 is a high number. Handling this case.
   if (expr->size > 1) {
     for (unsigned int arg_index = 0; arg_index < expr->size - 1; arg_index++) {
-      sprintf(buf + buffer_pos, "%s, ", &(arg_strings[arg_index]->content));
-      buffer_pos += arg_strings[arg_index]->size + 2;
+      str = sm_concat_strings(str, arg_strings[arg_index]);
+      str = sm_concat_strings(str, sm_new_string(2, ", "));
     }
   }
   if (expr->size > 0) {
-    if (strcmp(&(op->content), "array") == 0) {
-      sprintf(buf + buffer_pos, "%s ]", &(arg_strings[expr->size - 1]->content));
+    str = sm_concat_strings(str, arg_strings[expr->size - 1]);
+    if (expr->op == sm_array) {
+      str = sm_concat_strings(str, sm_new_string(2, " ]"));
     } else
-      sprintf(buf + buffer_pos, "%s )", &(arg_strings[expr->size - 1]->content));
+      str = sm_concat_strings(str, sm_new_string(2, " )"));
   } else { // size is 0
-    if (strcmp(&(op->content), "array") == 0) {
-      sprintf(buf + buffer_pos, "]");
+    if (expr->op == sm_array) {
+      str = sm_concat_strings(str, sm_new_string(1, "]"));
     } else
-      sprintf(buf + buffer_pos, ")");
+      str = sm_concat_strings(str, sm_new_string(1, ")"));
   }
-  // temporary fix. Need to use sm_strcat etc. to avoid strlen
-  answer_length     = strlen(buf);
-  sm_string *answer = sm_new_string(answer_length, buf);
-  free(buf);
-  return answer;
+  return str;
 }
 
 sm_string *sm_infix_to_string(sm_expression *expr, sm_string *op) {
@@ -152,35 +141,38 @@ sm_string *sm_infix_to_string(sm_expression *expr, sm_string *op) {
   sm_object *o1 = sm_get_expression_arg(expr, 0);
   sm_object *o2 = sm_get_expression_arg(expr, 1);
 
-  sm_string *left_sm_string  = sm_object_to_string(o1);
-  sm_string *right_sm_string = sm_object_to_string(o2);
+  sm_string *left_string  = sm_object_to_string(o1);
+  sm_string *right_string = sm_object_to_string(o2);
 
-  char *op_str        = &(op->content);
-  char *left_str      = &(left_sm_string->content);
-  char *right_str     = &(right_sm_string->content);
-  int   string_length = 0;
-  char *buf;
+  sm_string *str;
+
   if (o1->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o1)->op) &&
       o2->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o2)->op)) {
-    string_length = left_sm_string->size + right_sm_string->size + 13;
-    buf           = malloc(sizeof(char) * string_length + 1);
-    sprintf(buf, "( %s ) %s ( %s )", left_str, op_str, right_str);
+    str = sm_concat_strings(sm_new_string(2, "( "), left_string);
+    str = sm_concat_strings(str, sm_new_string(3, " ) "));
+    str = sm_concat_strings(str, op);
+    str = sm_concat_strings(str, sm_new_string(2, " ( "));
+    str = sm_concat_strings(str, right_string);
+    str = sm_concat_strings(str, sm_new_string(2, " )"));
   } else if (o1->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o1)->op)) {
-    string_length = left_sm_string->size + right_sm_string->size + 9;
-    buf           = malloc(sizeof(char) * string_length + 1);
-    sprintf(buf, "( %s ) %s %s", left_str, op_str, right_str);
+    str = sm_concat_strings(sm_new_string(2, "( "), left_string);
+    str = sm_concat_strings(str, sm_new_string(3, " ) "));
+    str = sm_concat_strings(str, op);
+    str = sm_concat_strings(str, sm_new_string(1, " "));
+    str = sm_concat_strings(str, right_string);
   } else if (o2->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o2)->op)) {
-    string_length = left_sm_string->size + right_sm_string->size + 9;
-    buf           = malloc(sizeof(char) * string_length + 1);
-    sprintf(buf, "%s %s ( %s )", left_str, op_str, right_str);
+    str = sm_concat_strings(left_string, sm_new_string(1, " "));
+    str = sm_concat_strings(str, op);
+    str = sm_concat_strings(str, sm_new_string(2, " ( "));
+    str = sm_concat_strings(str, right_string);
+    str = sm_concat_strings(str, sm_new_string(2, " )"));
   } else {
-    string_length = left_sm_string->size + right_sm_string->size + 5;
-    buf           = malloc(sizeof(char) * string_length + 1);
-    sprintf(buf, "%s %s %s", left_str, op_str, right_str);
+    str = sm_concat_strings(left_string, sm_new_string(1, " "));
+    str = sm_concat_strings(str, op);
+    str = sm_concat_strings(str, sm_new_string(1, " "));
+    str = sm_concat_strings(str, right_string);
   }
-  sm_string *answer = sm_new_string(string_length, buf);
-  free(buf);
-  return answer;
+  return str;
 }
 
 sm_string *sm_expression_to_string(sm_expression *expr) {

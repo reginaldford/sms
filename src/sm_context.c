@@ -133,5 +133,8 @@ sm_string *sm_context_to_string(sm_context *self) {
 sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
   char buf[50];
   sprintf(buf, "%s = %s;", &(ce->name->content), &(sm_object_to_string(ce->value)->content));
-  return sm_new_string(strlen(buf), buf);
+  sm_string *output_str = ce->name;
+  output_str            = sm_concat_strings(output_str, sm_new_string(3, " = "));
+  output_str            = sm_concat_strings(output_str, sm_object_to_string(ce->value));
+  return output_str;
 }
