@@ -13,12 +13,19 @@ sm_memory_heap *sm_new_memory_heap(unsigned int capacity) {
 }
 
 void *sm_malloc(unsigned int size) {
+  static unsigned short int stack_level = 0;
   if (sm_global_current_heap(NULL)->used + size > sm_global_current_heap(NULL)->capacity) {
+    stack_level++;
+    if (stack_level == 3) {
+      printf("We ran out of memory. malloc is looping.\n");
+      sm_signal_handler(SIGQUIT);
+    }
     printf("We ran out of memory. gc time.\n");
     fflush(stdout);
     sm_garbage_collect();
-    // TODO: check if space is good, if not, implement heap compaction
-    return sm_malloc(size); // This can turn into an infinite loop!
+    void *space = sm_malloc(size); // This can turn into an infinite loop!
+    stack_level--;
+    return space;
   } else {
     unsigned int bytes_used = sm_global_current_heap(NULL)->used;
     sm_global_current_heap(NULL)->used += size;

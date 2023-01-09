@@ -1,4 +1,5 @@
 // This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+
 #include "sms.h"
 
 /* GLOBALS
@@ -64,4 +65,17 @@ double sm_global_growth_factor(double replacement) {
     return previous_factor;
   }
   return factor;
+}
+
+
+// the global spacer table
+sm_spacer_table *sm_global_spacer_table(sm_spacer_table *replacement) {
+  static sm_spacer_table *spacer_table = NULL;
+  if (replacement != NULL) {
+    sm_spacer_table *temp = spacer_table;
+    spacer_table          = replacement;
+    return temp;
+  } else {
+    return spacer_table;
+  }
 }

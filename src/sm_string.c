@@ -30,8 +30,8 @@ sm_string *sm_concat_strings(sm_string *str1, sm_string *str2) {
 
 sm_string *sm_concat_strings_conserving(sm_string *str1, sm_string *str2) {
   sm_string *new_string = sm_concat_strings(str1, str2);
-  sm_new_spacer(str1, sizeof(str1));
-  sm_new_spacer(str2, sizeof(str2));
+  sm_new_spacer(str1, sm_round_size(sizeof(sm_string) + str1->size + 1));
+  sm_new_spacer(str2, sm_round_size(sizeof(sm_string) + str2->size + 1));
   return new_string;
 }
 
@@ -40,7 +40,6 @@ sm_string *sm_new_string_of(unsigned int size, sm_string *str) {
   sm_string *new_str = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
   new_str->my_type   = sm_string_type;
   new_str->size      = size;
-
   for (unsigned int index = 0; index < str->size; index++) {
     ((char *)&(new_str->content))[index] = ((char *)&(str->content))[index % str->size];
   }

@@ -1,4 +1,5 @@
 // This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+
 #include "sms.h"
 
 sm_object *sm_move_to_new_heap(sm_object *obj) {
@@ -82,6 +83,9 @@ void sm_garbage_collect() {
 
     // for tracking purposes
     sm_gc_count(1);
+
+    // reset the spacer table
+    sm_global_spacer_table(NULL)->size = 0;
   }
 
   printf("%i bytes used after gc.\n", sm_global_current_heap(NULL)->used);

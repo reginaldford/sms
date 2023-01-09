@@ -1,4 +1,5 @@
 // This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+
 // all garbage collected objects start with this
 typedef struct sm_object {
   enum sm_object_type my_type;

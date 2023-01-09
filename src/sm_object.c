@@ -1,4 +1,5 @@
 // This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+
 #include "sms.h"
 
 sm_string *sm_object_type_str(enum sm_object_type t) {
@@ -29,6 +30,8 @@ sm_string *sm_object_to_string(sm_object *obj1) {
     return sm_context_to_string((sm_context *)obj1);
   } else if (t == sm_meta_type) {
     return sm_meta_to_string((sm_meta *)obj1);
+  } else if (t == sm_spacer_type) {
+    return sm_spacer_to_string((sm_spacer *)obj1);
   } else {
     return sm_new_string(5, "other");
   }
