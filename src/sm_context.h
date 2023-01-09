@@ -1,4 +1,5 @@
 // This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+
 // sm_context_entry structs follow the sm_context struct in memory
 typedef struct sm_context {
   enum sm_object_type my_type;
@@ -16,8 +17,8 @@ typedef struct sm_context_entry {
 // search_result allows binary search to return "would be here"
 // by setting found to false and using index to indicate where it would be
 typedef struct search_result {
-  bool found;
-  int  index;
+  bool         found;
+  unsigned int index;
 } search_result;
 
 sm_context              *sm_global_context(sm_context *replacement);

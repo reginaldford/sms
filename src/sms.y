@@ -165,11 +165,14 @@ int main(){
   //Register the signal handler
   sm_register_signals();
   
-  //Set the current mem heap to a new mem heap
-  sm_global_current_heap(sm_new_memory_heap(5500));
+  //Initialize the current mem heap
+  sm_global_current_heap(sm_new_memory_heap(7500));
 
-  //Set the global context to a new context
+  //Initialize the global context
   sm_global_context(sm_new_context(0));
+
+  //Initialize the global spacer table
+  sm_global_spacer_table(sm_new_spacer_table(0,100));
 
   //Introduction and prompt
   printf("Symbolic Math System\n");

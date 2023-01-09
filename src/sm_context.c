@@ -1,4 +1,5 @@
 // This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+
 #include "sms.h"
 
 struct sm_context *sm_new_context(unsigned int capacity) {
@@ -84,7 +85,6 @@ bool sm_delete(sm_symbol *sym) {
     context->capacity = context->size;
     // putting a spacer for remaining space
     sm_new_spacer(&(context_entries[context->size]), sizeof(sm_context_entry));
-    // TODO: register the spacer here.
     return true;
   } else {
     printf("Could not find variable to delete: %s\n", &(sym->name->content));
@@ -109,8 +109,7 @@ sm_string *sm_context_to_string(sm_context *self) {
 
 sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
   sm_string *output_str = ce->name;
-  output_str            = sm_concat_strings_conserving(output_str, sm_new_string(3, " = "));
+  output_str            = sm_concat_strings(output_str, sm_new_string(3, " = "));
   output_str            = sm_concat_strings_conserving(output_str, sm_object_to_string(ce->value));
-  output_str            = sm_concat_strings_conserving(output_str, sm_new_string(2, "; "));
-  return output_str;
+  return sm_concat_strings_conserving(output_str, sm_new_string(2, "; "));
 }
