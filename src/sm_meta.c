@@ -13,12 +13,12 @@ sm_string *sm_meta_to_string(sm_meta *meta) {
   if (meta->address->my_type == sm_expression_type) {
     if (sm_is_infix(((sm_expression *)meta->address)->op)) {
       if (((sm_expression *)meta->address)->size < 3) {
-        result_string = sm_concat_strings(sm_new_string(3, ":( "), result_string);
-        result_string = sm_concat_strings(result_string, sm_new_string(2, " )"));
+        result_string = sm_concat_strings_recycle(sm_new_string(3, ":( "), result_string);
+        result_string = sm_concat_strings_recycle(result_string, sm_new_string(2, " )"));
         return result_string;
       }
     }
   }
-  result_string = sm_concat_strings(sm_new_string(1, ":"), result_string);
+  result_string = sm_concat_strings_recycle(sm_new_string(1, ":"), result_string);
   return result_string;
 }
