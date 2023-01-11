@@ -12,25 +12,56 @@ sm_memory_heap *sm_new_memory_heap(unsigned int capacity) {
   return new_heap;
 }
 
-void *sm_malloc(unsigned int size) {
-  static unsigned short int stack_level = 0;
-  if (sm_global_current_heap(NULL)->used + size > sm_global_current_heap(NULL)->capacity) {
-    stack_level++;
-    if (stack_level == 3) {
-      printf("We ran out of memory. malloc is looping.\n");
-      sm_signal_handler(SIGQUIT);
+sm_space *check_space(unsigned int size, unsigned int index) {
+  if (index + 1 <= sm_global_space(NULL)->size) {
+    unsigned int space_size = sm_get_space_array(sm_global_space(NULL))[index]->size;
+    if (space_size >= size) {
+      sm_space *good_space = sm_get_space_array(sm_global_space(NULL))[index];
+      sm_delete_space_by_index(sm_global_space(NULL), index);
+      // making the new space for the remaining space
+      unsigned int remaining_size = space_size > size ? space_size - size : 0;
+      if (remaining_size > 0)
+        sm_new_space((((char *)good_space) + size), remaining_size);
+      return good_space;
     }
-    printf("We ran out of memory. gc time.\n");
-    fflush(stdout);
-    sm_garbage_collect();
-    void *space = sm_malloc(size); // This can turn into an infinite loop!
-    stack_level--;
-    return space;
-  } else {
-    unsigned int bytes_used = sm_global_current_heap(NULL)->used;
-    sm_global_current_heap(NULL)->used += size;
-    return (void *)(((char *)sm_global_current_heap(NULL)->storage) + bytes_used);
+    return NULL;
   }
+  return NULL;
+}
+
+void *sm_malloc(unsigned int size) {
+  if (sm_global_space(NULL)->size > 0) {
+    search_result sr = sm_space_array_find(sm_global_space(NULL), size);
+    if (sr.found == true) {
+      sm_space *good_space = sm_get_space_array(sm_global_space(NULL))[sr.index];
+      // deleting space by its index
+      sm_delete_space_by_index(sm_global_space(NULL), sr.index);
+      return good_space;
+    }
+    sm_space *result_space = check_space(size, sr.index);
+    if (result_space != NULL) {
+      return result_space;
+    } else {
+      // try higher
+      if (sr.index + 2 <= sm_global_space(NULL)->size) {
+        sm_space *result_space = check_space(size, sr.index + 1);
+        if (result_space != NULL) {
+          return result_space;
+        }
+      }
+      // try lower
+      if (sr.index > 0) {
+        sm_space *result_space = check_space(size, sr.index - 1);
+        if (result_space != NULL) {
+          return result_space;
+        }
+      }
+    }
+  }
+  // If no spaces were found, fall back to classic copy gc allocation
+  unsigned int bytes_used = sm_global_current_heap(NULL)->used;
+  sm_global_current_heap(NULL)->used += size;
+  return (void *)(((char *)sm_global_current_heap(NULL)->storage) + bytes_used);
 }
 
 sm_object *sm_realloc(sm_object *obj, unsigned int size) {

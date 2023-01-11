@@ -66,8 +66,8 @@ sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
   }
   current_context->size += 1;
   context_entries = sm_context_entries(current_context);
-  for (int i = current_context->size - 1; i > sr.index; i--)
-    context_entries[i] = context_entries[i - 1];
+  for (unsigned int i = current_context->size; i > sr.index + 1; i--)
+    context_entries[i - 1] = context_entries[i - 2];
   context_entries[sr.index].name  = name;
   context_entries[sr.index].value = val;
   return current_context;
@@ -78,13 +78,13 @@ bool sm_delete(sm_symbol *sym) {
   if (sr.found == true) {
     sm_context       *context         = sm_global_context(NULL);
     sm_context_entry *context_entries = sm_context_entries(context);
-    for (unsigned int i = sr.index; i < context->size - 1; i++) {
+    for (unsigned int i = sr.index; i + 1 < context->size; i++) {
       context_entries[i] = context_entries[i + 1];
     }
     context->size -= 1;
     context->capacity = context->size;
-    // putting a spacer for remaining space
-    sm_new_spacer(&(context_entries[context->size]), sizeof(sm_context_entry));
+    // putting a space for remaining space
+    sm_new_space(&(context_entries[context->capacity]), sizeof(sm_context_entry));
     return true;
   } else {
     printf("Could not find variable to delete: %s\n", &(sym->name->content));
@@ -98,18 +98,15 @@ sm_string *sm_context_to_string(sm_context *self) {
   }
   sm_context_entry *ce     = sm_context_entries(self);
   sm_string        *answer = sm_new_string(2, "{ ");
-  if (self->size > 0) {
-    for (unsigned int object_index = 0; object_index <= self->size - 1; object_index++) {
-      answer =
-        sm_concat_strings_conserving(answer, sm_context_entry_to_string(&(ce[object_index])));
-    }
+  for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
+    answer = sm_concat_strings_recycle(answer, sm_context_entry_to_string(&(ce[object_index])));
   }
-  return sm_concat_strings_conserving(answer, sm_new_string(1, "}"));
+  return sm_concat_strings_recycle(answer, sm_new_string(1, "}"));
 }
 
 sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
   sm_string *output_str = ce->name;
-  output_str            = sm_concat_strings(output_str, sm_new_string(3, " = "));
-  output_str            = sm_concat_strings_conserving(output_str, sm_object_to_string(ce->value));
-  return sm_concat_strings_conserving(output_str, sm_new_string(2, "; "));
+  output_str            = sm_concat_strings_recycle_2nd(output_str, sm_new_string(3, " = "));
+  output_str            = sm_concat_strings_recycle(output_str, sm_object_to_string(ce->value));
+  return sm_concat_strings_recycle(output_str, sm_new_string(2, "; "));
 }

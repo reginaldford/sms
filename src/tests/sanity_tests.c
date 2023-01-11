@@ -15,5 +15,5 @@ int main() {
   printf("sizeof %s is %d\n", "sm_context_entry", (int)sizeof(sm_context_entry));
   printf("sizeof %s is %d\n", "sm_key_value", (int)sizeof(sm_key_value));
   printf("sizeof %s is %d\n", "sm_expression", (int)sizeof(sm_expression));
-  printf("sizeof %s is %d\n", "sm_spacer", (int)sizeof(sm_spacer));
+  printf("sizeof %s is %d\n", "sm_space", (int)sizeof(sm_space));
 }
