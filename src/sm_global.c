@@ -68,7 +68,7 @@ double sm_global_growth_factor(double replacement) {
 }
 
 // the global space array sorted by size
-sm_space_array *sm_global_space(sm_space_array *replacement) {
+sm_space_array *sm_global_space_array(sm_space_array *replacement) {
   static sm_space_array *spaces = NULL;
   if (replacement != NULL) {
     sm_space_array *temp = spaces;

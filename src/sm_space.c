@@ -10,7 +10,7 @@ sm_space *sm_new_space(void *trash, unsigned int size) {
   if (size >= sizeof(sm_space)) {
     new_space->my_type = sm_space_type;
     new_space->size    = size;
-    sm_global_space(sm_add_space(new_space, sm_global_space(NULL)));
+    sm_global_space_array(sm_add_space(new_space, sm_global_space_array(NULL)));
     return new_space;
   } else
     return NULL;

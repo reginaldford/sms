@@ -71,7 +71,7 @@ void sm_garbage_collect() {
     sm_global_current_heap(NULL)->used = 0;
 
     // reset the space array
-    sm_global_space(NULL)->size = 0;
+    sm_global_space_array(NULL)->size = 0;
 
     // copy roots
     sm_move_to_new_heap((sm_object *)sm_global_context(NULL));

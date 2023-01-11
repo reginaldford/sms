@@ -13,11 +13,11 @@ sm_memory_heap *sm_new_memory_heap(unsigned int capacity) {
 }
 
 sm_space *check_space(unsigned int size, unsigned int index) {
-  if (index + 1 <= sm_global_space(NULL)->size) {
-    unsigned int space_size = sm_get_space_array(sm_global_space(NULL))[index]->size;
+  if (index + 1 <= sm_global_space_array(NULL)->size) {
+    unsigned int space_size = sm_get_space_array(sm_global_space_array(NULL))[index]->size;
     if (space_size >= size) {
-      sm_space *good_space = sm_get_space_array(sm_global_space(NULL))[index];
-      sm_delete_space_by_index(sm_global_space(NULL), index);
+      sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[index];
+      sm_delete_space_by_index(sm_global_space_array(NULL), index);
       // making the new space for the remaining space
       unsigned int remaining_size = space_size > size ? space_size - size : 0;
       if (remaining_size > 0)
@@ -30,12 +30,12 @@ sm_space *check_space(unsigned int size, unsigned int index) {
 }
 
 void *sm_malloc(unsigned int size) {
-  if (sm_global_space(NULL)->size > 0) {
-    search_result sr = sm_space_array_find(sm_global_space(NULL), size);
+  if (sm_global_space_array(NULL)->size > 0) {
+    search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
     if (sr.found == true) {
-      sm_space *good_space = sm_get_space_array(sm_global_space(NULL))[sr.index];
+      sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];
       // deleting space by its index
-      sm_delete_space_by_index(sm_global_space(NULL), sr.index);
+      sm_delete_space_by_index(sm_global_space_array(NULL), sr.index);
       return good_space;
     }
     sm_space *result_space = check_space(size, sr.index);
@@ -43,7 +43,7 @@ void *sm_malloc(unsigned int size) {
       return result_space;
     } else {
       // try higher
-      if (sr.index + 2 <= sm_global_space(NULL)->size) {
+      if (sr.index + 2 <= sm_global_space_array(NULL)->size) {
         sm_space *result_space = check_space(size, sr.index + 1);
         if (result_space != NULL) {
           return result_space;
