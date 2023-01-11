@@ -76,11 +76,11 @@ void sm_garbage_collect() {
     // copy roots
     sm_move_to_new_heap((sm_object *)sm_global_context(NULL));
 
-    // update global variables
-    sm_global_context((sm_context *)((sm_pointer *)sm_global_context(NULL))->address);
-
     // inflate
     sm_inflate_heap();
+
+    // update global variables
+    sm_global_context((sm_context *)((sm_pointer *)sm_global_context(NULL))->address);
 
     // for tracking purposes
     sm_gc_count(1);

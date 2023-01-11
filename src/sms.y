@@ -171,9 +171,6 @@ int main(){
   //Initialize the global space arrays
   sm_global_space_array(sm_new_space_array(0,100));
 
-  //Full space mode doesnt work
-  //sm_new_space(sm_global_current_heap(NULL)->storage, sm_global_current_heap(NULL)->capacity);
-
   //Initialize the global context
   sm_global_context(sm_new_context(0));
 
