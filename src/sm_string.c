@@ -57,3 +57,8 @@ sm_string *sm_new_string_of(unsigned int size, sm_string *str) {
   }
   return new_str;
 }
+
+sm_string *sm_string_to_string(sm_string *str) {
+  sm_string *new_str = sm_concat_strings_recycle_1st(sm_new_string(1, "\""), str);
+  return sm_concat_strings_recycle(new_str, sm_new_string(1, "\""));
+}

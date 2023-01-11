@@ -2,7 +2,7 @@
 
 #include "sms.h"
 
-// overwrites an existing object
+// overwrites an existing object to create a spacer or returns NULL
 sm_space *sm_new_space(void *trash, unsigned int size) {
   // Size sets the whole obj size manually
   // Size must be more than sizeof(sm_space)
@@ -16,6 +16,7 @@ sm_space *sm_new_space(void *trash, unsigned int size) {
     return NULL;
 }
 
+// create a new array designed to hold spaces, sorted by size
 sm_space_array *sm_new_space_array(unsigned int size, unsigned int capacity) {
   sm_space_array *new_table = malloc(sizeof(sm_space_array) + sizeof(sm_space *) * capacity);
   new_table->size           = size;
@@ -23,6 +24,7 @@ sm_space_array *sm_new_space_array(unsigned int size, unsigned int capacity) {
   return new_table;
 }
 
+// resize the space array
 sm_space_array *sm_resize_space_array(sm_space_array *table, unsigned int new_capacity) {
   sm_space_array *new_table =
     realloc(table, sizeof(sm_space_array) + sizeof(sm_space *) * new_capacity);
@@ -31,6 +33,7 @@ sm_space_array *sm_resize_space_array(sm_space_array *table, unsigned int new_ca
   return new_table;
 }
 
+// get the c array. we need to work on terminology here
 sm_space **sm_get_space_array(sm_space_array *table) { return (sm_space **)&(table[1]); }
 
 sm_string *sm_space_to_string(sm_space *self) {
@@ -41,6 +44,7 @@ sm_string *sm_space_to_string(sm_space *self) {
   return answer;
 }
 
+// find a matching space by size in the size sorted array
 search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
   sm_space **table_entries = sm_get_space_array(table);
 
@@ -74,6 +78,7 @@ search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
   }
 }
 
+// add a space to the space array, keeping it sorted
 sm_space_array *sm_add_space(sm_space *space, sm_space_array *table) {
   search_result sr            = sm_space_array_find(table, space->size);
   sm_space    **table_entries = sm_get_space_array(table);
@@ -94,6 +99,7 @@ sm_space_array *sm_add_space(sm_space *space, sm_space_array *table) {
   return table;
 }
 
+// use sm_space_array_find to get a space index
 void sm_delete_space_by_index(sm_space_array *spt, unsigned int index_to_delete) {
   sm_space **ptr_array = sm_get_space_array(spt);
   for (unsigned int i = index_to_delete; i + 2 < spt->size; i++) {

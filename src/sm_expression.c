@@ -110,13 +110,13 @@ sm_string *sm_prefix_to_string(sm_expression *expr, sm_string *op) {
 
   for (unsigned int arg_index = 0; arg_index + 1 < expr->size; arg_index++) {
     sm_string *obj_str = sm_object_to_string(sm_get_expression_arg(expr, arg_index));
-    str                = sm_concat_strings(str, obj_str);
+    str                = sm_concat_strings_recycle(str, obj_str);
     str                = sm_concat_strings_recycle(str, sm_new_string(2, ", "));
   }
 
   if (expr->size > 0) {
     sm_string *obj_str = sm_object_to_string(sm_get_expression_arg(expr, expr->size - 1));
-    str                = sm_concat_strings_recycle_1st(str, obj_str);
+    str                = sm_concat_strings_recycle(str, obj_str);
     if (expr->op == sm_array) {
       str = sm_concat_strings_recycle(str, sm_new_string(2, " ]"));
     } else
@@ -151,26 +151,25 @@ sm_string *sm_infix_to_string(sm_expression *expr, sm_string *op) {
     str = sm_concat_strings_recycle_1st(str, op);
     str = sm_concat_strings_recycle(str, sm_new_string(2, " ( "));
     str = sm_concat_strings_recycle_1st(str, right_string);
-    str = sm_concat_strings_recycle(str, sm_new_string(2, " )"));
+    return sm_concat_strings_recycle(str, sm_new_string(2, " )"));
   } else if (o1->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o1)->op)) {
     str = sm_concat_strings_recycle_1st(sm_new_string(2, "( "), left_string);
     str = sm_concat_strings_recycle(str, sm_new_string(3, " ) "));
     str = sm_concat_strings_recycle_1st(str, op);
     str = sm_concat_strings_recycle(str, sm_new_string(1, " "));
-    str = sm_concat_strings_recycle_1st(str, right_string);
+    return sm_concat_strings_recycle_1st(str, right_string);
   } else if (o2->my_type == sm_expression_type && sm_is_infix(((sm_expression *)o2)->op)) {
     str = sm_concat_strings_recycle_2nd(left_string, sm_new_string(1, " "));
     str = sm_concat_strings_recycle_1st(str, op);
     str = sm_concat_strings_recycle(str, sm_new_string(2, " ( "));
     str = sm_concat_strings_recycle_1st(str, right_string);
-    str = sm_concat_strings_recycle(str, sm_new_string(2, " )"));
+    return sm_concat_strings_recycle(str, sm_new_string(2, " )"));
   } else {
     str = sm_concat_strings_recycle(left_string, sm_new_string(1, " "));
     str = sm_concat_strings_recycle_1st(str, op);
     str = sm_concat_strings_recycle(str, sm_new_string(1, " "));
-    str = sm_concat_strings_recycle(str, right_string);
+    return sm_concat_strings_recycle(str, right_string);
   }
-  return str;
 }
 
 sm_string *sm_expression_to_string(sm_expression *expr) {

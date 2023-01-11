@@ -18,10 +18,7 @@ sm_string *sm_object_to_string(sm_object *obj1) {
   if (t == sm_double_type) {
     return sm_double_to_string((sm_double *)obj1);
   } else if (t == sm_string_type) {
-    sm_string *pss     = (sm_string *)obj1;
-    sm_string *new_str = sm_concat_strings_recycle_1st(sm_new_string(1, "\""), pss);
-    new_str            = sm_concat_strings_recycle(new_str, sm_new_string(1, "\""));
-    return new_str;
+    return sm_string_to_string((sm_string *)obj1);
   } else if (t == sm_expression_type) {
     return sm_expression_to_string((sm_expression *)obj1);
   } else if (t == sm_symbol_type) {
