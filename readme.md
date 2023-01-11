@@ -1,13 +1,14 @@
 # STATUS QUO:
-SMS is a terminal program that interprets commands like `a=4*cos(0.5);` and `delete a;` to set and destroy variables, respectively.
-The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts.
 
-To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. 
-The variable names must start with underscores or a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
-After a command, the garbage collector is executed, where all relevant objects are copied to a new contiguous space. The garbage collector uses the stop and copy algorithm. 
+SMS is a terminal program that interprets commands like `a = 4 * cos(0.5);` and `delete a;` to set and destroy variables, respectively.
 
-The whitespace characters in the provided examples are optional, and are for readability.
-All commands end with a semicolon (;) .
+The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts. Contexts are user defined objects with key-value pairs.
+
+To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. The variable names must start with underscores or a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
+
+After a command, the garbage collector is executed. The garbage collector uses the stop and copy algorithm. 
+
+The whitespace characters in the provided examples are optional, and are for readability. All commands end with a semicolon (;) .
 You can try the following examples:
 
 Direct computations. The resulting value will not be stored for later use:
@@ -18,7 +19,7 @@ Calculation and storage of double precision numbers:
 
 `a = 4;`
 
-`b = sqrt(7);`
+`b = sqrt(a);`
 
 `c = a + b;`
 
@@ -30,19 +31,17 @@ Hyperbolic trigonometric expressions:
 
 `a = sinh(a/b) + c ;`
 
-Demonstration of standard order of operations (look at the output):
+This command demonstrates standard order of operations:
 
 `b = sqrt(a/b) - 2 * a ^ 2 ;` 
 
-Store an expression with the meta operator (:) :
+The meta operator (:) stores expressions :
 
 `expression = : +(a,b,c);`
 
 Store structured data with no evaluation:
 
-`x=5;`
-
-`:{name="power graph"; value=cos(x);};`
+`x= : {name="power graph"; value=cos(b);};`
 
 Removing the meta operator (:) above will lead to a different result.
 
@@ -98,10 +97,12 @@ Exit the program with:
 - [ ] Unicode support.
 - [ ] Graphics support.
 
+# HOW TO DOWNLOAD & RUN / Install
+- At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, FreeBSD, and Windows. You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
 
 # HOW TO COMPILE
 
-Requirements:
+Required Packages:
 
 - Flex
 
@@ -109,16 +110,20 @@ Requirements:
 
 - GCC or CLANG compiler
 
-- GNU MAKE compatible build program
+- GNU Make compatible build program
 
-By default, the makefile is set to use clang.
-Edit the first lines of the makefile to set for your compiler and make program if necessary.
+The makefile uses clang by default.
+Edit the first lines of the makefile to use your preferred compiler and make program if necessary.
 
 Once you have the necessary packages installed,
-Change directory to the top level of the project (where readme.md is located) and run:
+Change directory to the top level of the project (where LICENSE.txt is located) and run:
+
 `make`
 
-# HOW TO INSTALL:
-If you are ok with installing the binary to /usr/bin/sms , then enter:
+Upon success, you will have a portable executable called 'sms'.
+
+On Linux/Unix systems, You may be able to build and install in one step:
+
 `sudo make install`
-Otherwise, just copy the file to your prefered path.
+
+This just copies the executable to /usr/bin/sms after compilation.

@@ -67,15 +67,14 @@ double sm_global_growth_factor(double replacement) {
   return factor;
 }
 
-
-// the global spacer table
-sm_spacer_table *sm_global_spacer_table(sm_spacer_table *replacement) {
-  static sm_spacer_table *spacer_table = NULL;
+// the global space array sorted by size
+sm_space_array *sm_global_space(sm_space_array *replacement) {
+  static sm_space_array *spaces = NULL;
   if (replacement != NULL) {
-    sm_spacer_table *temp = spacer_table;
-    spacer_table          = replacement;
+    sm_space_array *temp = spaces;
+    spaces               = replacement;
     return temp;
   } else {
-    return spacer_table;
+    return spaces;
   }
 }

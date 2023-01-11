@@ -4,7 +4,7 @@
 
 sm_string *sm_object_type_str(enum sm_object_type t) {
   char *response_string[]     = {"double",  "expression", "primitive", "string", "symbol",
-                                 "context", "pointer",    "key_value", "meta",   "spacer"};
+                                 "context", "pointer",    "key_value", "meta",   "space"};
   int   response_string_len[] = {7, 10, 9, 6, 6, 7, 3, 9, 4, 6};
   if (t >= 0 && t < sizeof(response_string) / sizeof(void *))
     return sm_new_string(response_string_len[t], response_string[t]);
@@ -30,8 +30,8 @@ sm_string *sm_object_to_string(sm_object *obj1) {
     return sm_context_to_string((sm_context *)obj1);
   } else if (t == sm_meta_type) {
     return sm_meta_to_string((sm_meta *)obj1);
-  } else if (t == sm_spacer_type) {
-    return sm_spacer_to_string((sm_spacer *)obj1);
+  } else if (t == sm_space_type) {
+    return sm_space_to_string((sm_space *)obj1);
   } else {
     return sm_new_string(5, "other");
   }
@@ -64,8 +64,8 @@ int sm_sizeof(sm_object *obj1) {
   case sm_meta_type:
     return sizeof(sm_meta);
     break;
-  case sm_spacer_type:
-    return ((sm_spacer *)obj1)->size;
+  case sm_space_type:
+    return ((sm_space *)obj1)->size;
     break;
 
   default:

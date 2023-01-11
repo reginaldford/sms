@@ -28,10 +28,22 @@ sm_string *sm_concat_strings(sm_string *str1, sm_string *str2) {
   return new_string;
 }
 
-sm_string *sm_concat_strings_conserving(sm_string *str1, sm_string *str2) {
+sm_string *sm_concat_strings_recycle(sm_string *str1, sm_string *str2) {
   sm_string *new_string = sm_concat_strings(str1, str2);
-  sm_new_spacer(str1, sm_round_size(sizeof(sm_string) + str1->size + 1));
-  sm_new_spacer(str2, sm_round_size(sizeof(sm_string) + str2->size + 1));
+  sm_new_space(str1, sm_sizeof((sm_object *)str1));
+  sm_new_space(str2, sm_sizeof((sm_object *)str2));
+  return new_string;
+}
+
+sm_string *sm_concat_strings_recycle_1st(sm_string *str1, sm_string *str2) {
+  sm_string *new_string = sm_concat_strings(str1, str2);
+  sm_new_space(str1, sm_sizeof((sm_object *)str1));
+  return new_string;
+}
+
+sm_string *sm_concat_strings_recycle_2nd(sm_string *str1, sm_string *str2) {
+  sm_string *new_string = sm_concat_strings(str1, str2);
+  sm_new_space(str2, sm_sizeof((sm_object *)str2));
   return new_string;
 }
 

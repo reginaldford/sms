@@ -1,4 +1,6 @@
 %{
+// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "sms.h"
@@ -61,7 +63,7 @@ _?+{alpha}+({digit}?+{alpha}?+_?+)?+\'?+    {
   // Replace the escape codes in place
   int i = 0;       // Index during the scan of input string
   int final_i = 0; // Index of output
-  while (i < yyleng - 2) {
+  while (i + 2 < yyleng) {
     if (text[i] == '\\') {
       // This is an escape code. Replace it with the appropriate character.
       switch (text[i + 1]) {

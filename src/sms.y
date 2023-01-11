@@ -168,11 +168,11 @@ int main(){
   //Initialize the current mem heap
   sm_global_current_heap(sm_new_memory_heap(7500));
 
+  //Initialize the global space arrays
+  sm_global_space(sm_new_space_array(0,100));
+
   //Initialize the global context
   sm_global_context(sm_new_context(0));
-
-  //Initialize the global spacer table
-  sm_global_spacer_table(sm_new_spacer_table(0,100));
 
   //Introduction and prompt
   printf("Symbolic Math System\n");

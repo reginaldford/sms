@@ -27,7 +27,7 @@ void sm_inflate_heap() {
     switch (current_obj->my_type) {
     case sm_context_type: {
       sm_context_entry *table = sm_context_entries((sm_context *)current_obj);
-      for (int i = 0; i < ((sm_context *)current_obj)->size; i++) {
+      for (unsigned int i = 0; i < ((sm_context *)current_obj)->size; i++) {
         table[i].name  = (sm_string *)sm_meet_object((sm_object *)table[i].name);
         table[i].value = sm_meet_object(table[i].value);
       }
@@ -35,7 +35,7 @@ void sm_inflate_heap() {
     }
     case sm_expression_type: {
       sm_expression *expr = (sm_expression *)current_obj;
-      for (int i = 0; i < expr->size; i++) {
+      for (unsigned int i = 0; i < expr->size; i++) {
         sm_expression *new_expr = (sm_expression *)sm_meet_object(sm_get_expression_arg(expr, i));
         sm_set_expression_arg(expr, i, (sm_object *)new_expr);
       }
@@ -51,7 +51,6 @@ void sm_inflate_heap() {
       meta->address = (sm_object *)sm_meet_object(meta->address);
       break;
     }
-
     default:
       break;
     }
@@ -59,10 +58,9 @@ void sm_inflate_heap() {
   }
 }
 
-// copying gc
 void sm_garbage_collect() {
   if (sm_global_current_heap(NULL)->used != 0) {
-    // build new space if necessary, same size as current
+    // build "to" heap if necessary, same size as current
     if (sm_global_other_heap(NULL) == NULL)
       sm_global_other_heap(sm_new_memory_heap(sm_global_current_heap(NULL)->capacity));
 
@@ -71,6 +69,9 @@ void sm_garbage_collect() {
 
     // consider this heap empty now
     sm_global_current_heap(NULL)->used = 0;
+
+    // reset the space array
+    sm_global_space(NULL)->size = 0;
 
     // copy roots
     sm_move_to_new_heap((sm_object *)sm_global_context(NULL));
@@ -83,10 +84,6 @@ void sm_garbage_collect() {
 
     // for tracking purposes
     sm_gc_count(1);
-
-    // reset the spacer table
-    sm_global_spacer_table(NULL)->size = 0;
   }
-
   printf("%i bytes used after gc.\n", sm_global_current_heap(NULL)->used);
 }
