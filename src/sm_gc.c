@@ -33,11 +33,11 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case sm_expression_type: {
-      sm_expression *expr = (sm_expression *)current_obj;
+    case sm_expr_type: {
+      sm_expr *expr = (sm_expr *)current_obj;
       for (unsigned int i = 0; i < expr->size; i++) {
-        sm_expression *new_expr = (sm_expression *)sm_meet_object(sm_get_expression_arg(expr, i));
-        sm_set_expression_arg(expr, i, (sm_object *)new_expr);
+        sm_expr *new_expr = (sm_expr *)sm_meet_object(sm_get_expr_arg(expr, i));
+        sm_set_expr_arg(expr, i, (sm_object *)new_expr);
       }
       break;
     }
@@ -62,7 +62,7 @@ void sm_garbage_collect() {
   if (sm_global_current_heap(NULL)->used != 0) {
     // build "to" heap if necessary, same size as current
     if (sm_global_other_heap(NULL) == NULL)
-      sm_global_other_heap(sm_new_memory_heap(sm_global_current_heap(NULL)->capacity));
+      sm_global_other_heap(sm_new_heap(sm_global_current_heap(NULL)->capacity));
 
     // swap heaps now
     sm_global_other_heap(sm_global_current_heap(sm_global_other_heap(NULL)));

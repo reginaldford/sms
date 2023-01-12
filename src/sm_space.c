@@ -2,7 +2,7 @@
 
 #include "sms.h"
 
-// overwrites an existing object to create a spacer or returns NULL
+// Overwrites an existing object to create a space or returns NULL
 sm_space *sm_new_space(void *trash, unsigned int size) {
   // Size sets the whole obj size manually
   // Size must be more than sizeof(sm_space)
@@ -14,6 +14,13 @@ sm_space *sm_new_space(void *trash, unsigned int size) {
     return new_space;
   } else
     return NULL;
+}
+
+// New space just after the given object
+sm_space *sm_new_space_after(void *object, unsigned int size) {
+  // Size sets the whole obj size manually
+  // Size must be more than sizeof(sm_space)
+  return sm_new_space((sm_space *)((char *)object) + sm_sizeof(object), size);
 }
 
 // create a new array designed to hold spaces, sorted by size
@@ -39,8 +46,8 @@ sm_space **sm_get_space_array(sm_space_array *table) { return (sm_space **)&(tab
 sm_string *sm_space_to_string(sm_space *self) {
   sm_string *answer = sm_new_string(7, "space(");
   sm_string *size   = sm_double_to_string(sm_new_double((double)self->size));
-  answer            = sm_concat_strings_recycle(answer, size);
-  answer            = sm_concat_strings_recycle(answer, sm_new_string(1, ")"));
+  answer            = sm_string_add_recycle(answer, size);
+  answer            = sm_string_add_recycle(answer, sm_new_string(1, ")"));
   return answer;
 }
 

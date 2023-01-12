@@ -21,28 +21,28 @@ sm_string *sm_new_string(unsigned int size, char *str) {
   return newstr;
 }
 
-sm_string *sm_concat_strings(sm_string *str1, sm_string *str2) {
+sm_string *sm_string_add(sm_string *str1, sm_string *str2) {
   unsigned int size_sum   = str1->size + str2->size;
   sm_string   *new_string = sm_new_string(size_sum, &(str1->content));
   sm_strncpy(&(new_string->content) + str1->size, &(str2->content), str2->size);
   return new_string;
 }
 
-sm_string *sm_concat_strings_recycle(sm_string *str1, sm_string *str2) {
-  sm_string *new_string = sm_concat_strings(str1, str2);
+sm_string *sm_string_add_recycle(sm_string *str1, sm_string *str2) {
+  sm_string *new_string = sm_string_add(str1, str2);
   sm_new_space(str1, sm_sizeof((sm_object *)str1));
   sm_new_space(str2, sm_sizeof((sm_object *)str2));
   return new_string;
 }
 
-sm_string *sm_concat_strings_recycle_1st(sm_string *str1, sm_string *str2) {
-  sm_string *new_string = sm_concat_strings(str1, str2);
+sm_string *sm_string_add_recycle_1st(sm_string *str1, sm_string *str2) {
+  sm_string *new_string = sm_string_add(str1, str2);
   sm_new_space(str1, sm_sizeof((sm_object *)str1));
   return new_string;
 }
 
-sm_string *sm_concat_strings_recycle_2nd(sm_string *str1, sm_string *str2) {
-  sm_string *new_string = sm_concat_strings(str1, str2);
+sm_string *sm_string_add_recycle_2nd(sm_string *str1, sm_string *str2) {
+  sm_string *new_string = sm_string_add(str1, str2);
   sm_new_space(str2, sm_sizeof((sm_object *)str2));
   return new_string;
 }
@@ -59,6 +59,6 @@ sm_string *sm_new_string_of(unsigned int size, sm_string *str) {
 }
 
 sm_string *sm_string_to_string(sm_string *str) {
-  sm_string *new_str = sm_concat_strings_recycle_1st(sm_new_string(1, "\""), str);
-  return sm_concat_strings_recycle(new_str, sm_new_string(1, "\""));
+  sm_string *new_str = sm_string_add_recycle_1st(sm_new_string(1, "\""), str);
+  return sm_string_add_recycle(new_str, sm_new_string(1, "\""));
 }

@@ -23,3 +23,4 @@ search_result   sm_space_array_find_by_pos(sm_space_array *table, sm_space *spac
 search_result   sm_space_array_find(sm_space_array *table, unsigned int size);
 bool            sm_delete_space_by_pos(sm_space *space);
 void            sm_delete_space_by_index(sm_space_array *spt, unsigned int index_to_delete);
+sm_space       *sm_new_space_after(void *object, unsigned int size);

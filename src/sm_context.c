@@ -2,6 +2,7 @@
 
 #include "sms.h"
 
+// Create a new context, essentially an array of key_values , sorted by key
 struct sm_context *sm_new_context(unsigned int capacity) {
   sm_context *new_context =
     (sm_context *)sm_malloc(sizeof(sm_context) + sizeof(sm_context_entry) * capacity);
@@ -12,12 +13,13 @@ struct sm_context *sm_new_context(unsigned int capacity) {
   return new_context;
 }
 
+// Retreive the tailing array
 sm_context_entry *sm_context_entries(sm_context *context) {
   return (sm_context_entry *)&(context[1]);
 }
 
-sm_string *spaces(int how_many) { return sm_new_string_of(how_many, sm_new_string(1, " ")); }
-
+// Binary search to find the index with this key
+// Else, return the position where it should be added
 search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
   sm_context_entry *context_entries = sm_context_entries(context);
 
@@ -50,6 +52,8 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
   }
 }
 
+// If the key exists, mutate the key_value to have the new value.
+// Else, add a key_value with this key and value
 sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
   sm_context       *current_context = context;
   sm_context_entry *context_entries = sm_context_entries(current_context);
@@ -73,6 +77,7 @@ sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
   return current_context;
 }
 
+// Remove a key_value identified by the key
 bool sm_delete(sm_symbol *sym) {
   search_result sr = sm_find_var_index(sm_global_context(NULL), sym->name);
   if (sr.found == true) {
@@ -84,7 +89,7 @@ bool sm_delete(sm_symbol *sym) {
     context->size -= 1;
     context->capacity = context->size;
     // putting a space for remaining space
-    sm_new_space(&(context_entries[context->capacity]), sizeof(sm_context_entry));
+    sm_new_space_after(context, sizeof(sm_context_entry));
     return true;
   } else {
     printf("Could not find variable to delete: %s\n", &(sym->name->content));
@@ -92,21 +97,23 @@ bool sm_delete(sm_symbol *sym) {
   }
 }
 
+// Return a new string describing this context
 sm_string *sm_context_to_string(sm_context *self) {
   if (self->size == 0) {
-    return sm_new_string(3, "{ }");
+    return sm_new_string(2, "{}");
   }
   sm_context_entry *ce     = sm_context_entries(self);
-  sm_string        *answer = sm_new_string(2, "{ ");
+  sm_string        *answer = sm_new_string(1, "{");
   for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
-    answer = sm_concat_strings_recycle(answer, sm_context_entry_to_string(&(ce[object_index])));
+    answer = sm_string_add_recycle(answer, sm_context_entry_to_string(&(ce[object_index])));
   }
-  return sm_concat_strings_recycle(answer, sm_new_string(1, "}"));
+  return sm_string_add_recycle(answer, sm_new_string(1, "}"));
 }
 
+// Return a new string describing this context entry
 sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
   sm_string *output_str = ce->name;
-  output_str            = sm_concat_strings_recycle_2nd(output_str, sm_new_string(3, " = "));
-  output_str            = sm_concat_strings_recycle(output_str, sm_object_to_string(ce->value));
-  return sm_concat_strings_recycle(output_str, sm_new_string(2, "; "));
+  output_str            = sm_string_add_recycle_2nd(output_str, sm_new_string(1, "="));
+  output_str            = sm_string_add_recycle(output_str, sm_object_to_string(ce->value));
+  return sm_string_add_recycle(output_str, sm_new_string(1, ";"));
 }

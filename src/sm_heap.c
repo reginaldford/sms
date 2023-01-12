@@ -6,11 +6,11 @@
 int sm_round_size(int size) { return ((size) + 3) & ~3; }
 
 // Create a new heap of some capacity
-sm_memory_heap *sm_new_memory_heap(unsigned int capacity) {
-  sm_memory_heap *new_heap = (sm_memory_heap *)malloc(sizeof(sm_memory_heap));
-  new_heap->capacity       = capacity;
-  new_heap->used           = 0;
-  new_heap->storage        = malloc(capacity);
+sm_heap *sm_new_heap(unsigned int capacity) {
+  sm_heap *new_heap  = (sm_heap *)malloc(sizeof(sm_heap));
+  new_heap->capacity = capacity;
+  new_heap->used     = 0;
+  new_heap->storage  = malloc(capacity);
   return new_heap;
 }
 
@@ -61,13 +61,13 @@ sm_object *sm_realloc(sm_object *obj, unsigned int size) {
   return memcpy(new_space, obj, size);
 }
 
-// Is the object within this memory heap?
-bool sm_is_within_heap(sm_object *obj, sm_memory_heap *heap) {
+// Is the object within this heap?
+bool sm_is_within_heap(sm_object *obj, sm_heap *heap) {
   return ((void *)obj >= (void *)heap) && ((void *)obj < (void *)((char *)heap) + heap->used);
 }
 
 // For advanced debugging, run this at any point and examine the heap snapshot as a file
-int sm_mem_dump(sm_memory_heap *heap, char *name) {
+int sm_mem_dump(sm_heap *heap, char *name) {
   void *buffer        = heap->storage;
   int   buffer_length = heap->used;
 

@@ -9,7 +9,7 @@
 
 enum sm_object_type {
   sm_double_type,
-  sm_expression_type,
+  sm_expr_type,
   sm_primitive_type,
   sm_string_type,
   sm_symbol_type,
@@ -38,12 +38,12 @@ enum sm_object_type {
 #include "sm_object.h"
 #include "sm_symbol.h"
 #include "sm_context.h"
-#include "sm_memory_heap.h"
+#include "sm_heap.h"
 #include "sm_pointer.h"
 #include "sm_commands.h"
 #include "sm_space.h"
 #include "sm_double.h"
-#include "sm_expression.h"
+#include "sm_expr.h"
 #include "sm_gc.h"
 #include "sm_global.h"
 #include "sm_terminal.h"

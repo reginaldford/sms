@@ -16,33 +16,30 @@ sm_context *sm_global_context(sm_context *replacement) {
     sm_context *temp = global_context;
     global_context   = replacement;
     return temp;
-  } else {
-    return global_context;
   }
+  return global_context;
 }
 
-// the current memory heap
-sm_memory_heap *sm_global_current_heap(sm_memory_heap *replacement) {
-  static sm_memory_heap *current_heap = NULL;
+// the current heap
+sm_heap *sm_global_current_heap(sm_heap *replacement) {
+  static sm_heap *current_heap = NULL;
   if (replacement != NULL) {
-    sm_memory_heap *temp = current_heap;
-    current_heap         = replacement;
+    sm_heap *temp = current_heap;
+    current_heap  = replacement;
     return temp;
-  } else {
-    return current_heap;
   }
+  return current_heap;
 }
 
-// the 'other' memory heap
-sm_memory_heap *sm_global_other_heap(sm_memory_heap *replacement) {
-  static sm_memory_heap *other_heap = NULL;
+// the 'other' heap
+sm_heap *sm_global_other_heap(sm_heap *replacement) {
+  static sm_heap *other_heap = NULL;
   if (replacement != NULL) {
-    sm_memory_heap *temp = other_heap;
-    other_heap           = replacement;
+    sm_heap *temp = other_heap;
+    other_heap    = replacement;
     return temp;
-  } else {
-    return other_heap;
   }
+  return other_heap;
 }
 
 // tracking number of garbage collections
@@ -74,7 +71,17 @@ sm_space_array *sm_global_space_array(sm_space_array *replacement) {
     sm_space_array *temp = spaces;
     spaces               = replacement;
     return temp;
-  } else {
-    return spaces;
   }
+  return spaces;
+}
+
+// the global object stack
+sm_expr *sm_global_obj_stack(sm_expr *replacement) {
+  static sm_expr *expr = NULL;
+  if (replacement != NULL) {
+    sm_expr *temp = expr;
+    expr          = replacement;
+    return temp;
+  }
+  return expr;
 }
