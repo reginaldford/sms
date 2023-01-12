@@ -187,20 +187,23 @@ sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op) {
 sm_string *sm_expr_to_string(sm_expr *expr) {
   static char             *response[]     = {"+",   "-",   "*",    "/",    "=",    "sqrt", "sin",
                                              "cos", "tan", "sinh", "cosh", "tanh", "pow",  "csc",
-                                             "sec", "cot", "ln",   "exp",  "diff", "array"};
+                                             "sec", "cot", "ln",   "exp",  "diff"};
   static long unsigned int response_len[] = {1, 1, 1, 1, 1, 4, 3, 3, 3, 4,
-                                             4, 4, 3, 3, 3, 3, 2, 3, 4, 5};
-  if (expr->op < ARRAY_SIZE(response)) {
-    sm_string *op_string = sm_new_string(response_len[expr->op], response[expr->op]);
+                                             4, 4, 3, 3, 3, 3, 2, 3, 4};
 
-    if (expr->op == sm_array) {
-      return sm_expr_array_to_string(expr);
-    } else if (sm_is_infix(expr->op))
-      return sm_infix_to_string(expr, op_string);
-    else
-      return sm_prefix_to_string(expr, op_string);
-  } else
-    return sm_prefix_to_string(expr, sm_new_string(6, "?expr?"));
+  if (expr->op == sm_array) {
+    return sm_expr_array_to_string(expr);
+  } else {
+    if (expr->op < ARRAY_SIZE(response) && expr->op) {
+      sm_string *op_string = sm_new_string(response_len[expr->op], response[expr->op]);
+      if (sm_is_infix(expr->op))
+        return sm_infix_to_string(expr, op_string);
+      else
+        return sm_prefix_to_string(expr, op_string);
+    } else {
+      return sm_new_string(17, "unrecognized expr");
+    }
+  }
 }
 
 // Remove and return the object with the highest index
