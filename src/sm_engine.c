@@ -4,93 +4,93 @@
 sm_object *sm_engine_eval(sm_object *input) {
   enum sm_object_type input_type = input->my_type;
   switch (input_type) {
-  case sm_expression_type: {
-    sm_expression *sme = (sm_expression *)input;
+  case sm_expr_type: {
+    sm_expr *sme = (sm_expr *)input;
     switch (sme->op) {
     case sm_plus: {
       double sum = 0;
       for (unsigned int i = 0; i < sme->size; i++)
-        sum += ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, i)))->value;
+        sum += ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, i)))->value;
       return (sm_object *)sm_new_double(sum);
     }
     case sm_minus: {
-      double sum = ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0)))->value;
+      double sum = ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0)))->value;
       for (unsigned int i = 1; i < sme->size; i++)
-        sum -= ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, i)))->value;
+        sum -= ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, i)))->value;
       return (sm_object *)sm_new_double(sum);
     }
     case sm_times: {
-      double product = ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0)))->value;
+      double product = ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0)))->value;
       for (unsigned int i = 1; i < sme->size; i++)
-        product *= ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, i)))->value;
+        product *= ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, i)))->value;
       return (sm_object *)sm_new_double(product);
     }
     case sm_divide: {
-      double quotient = ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0)))->value;
+      double quotient = ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0)))->value;
       for (unsigned int i = 1; i < sme->size; i++)
-        quotient /= ((sm_double *)sm_engine_eval(sm_get_expression_arg(sme, i)))->value;
+        quotient /= ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, i)))->value;
       return (sm_object *)sm_new_double(quotient);
     }
     case sm_pow: {
-      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
-      sm_double *right_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 1));
+      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
+      sm_double *right_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 1));
       return (sm_object *)sm_new_double(pow(left_side->value, right_side->value));
     }
     case sm_sin: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(sin(left_side->value));
     }
     case sm_cos: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(cos(left_side->value));
     }
     case sm_tan: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(tan(left_side->value));
     }
     case sm_sec: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(1.0 / cos(left_side->value));
       break;
     }
     case sm_csc: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(1.0 / sin(left_side->value));
       break;
     }
     case sm_cot: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(1.0 / tan(left_side->value));
       break;
     }
     case sm_sinh: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(sinh(left_side->value));
     }
     case sm_cosh: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(cosh(left_side->value));
     }
     case sm_tanh: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(tanh(left_side->value));
     }
     case sm_ln: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(log(left_side->value));
     }
     case sm_exp: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(exp(left_side->value));
     }
     case sm_sqrt: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expression_arg(sme, 0));
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(sqrt(left_side->value));
     }
     case sm_array: {
       for (unsigned int i = 0; i < sme->size; i++) {
-        sm_object *new_val = sm_engine_eval(sm_get_expression_arg(sme, i));
-        sm_set_expression_arg(sme, i, new_val);
+        sm_object *new_val = sm_engine_eval(sm_get_expr_arg(sme, i));
+        sm_set_expr_arg(sme, i, new_val);
       }
       return (sm_object *)sme;
     }
@@ -99,7 +99,7 @@ sm_object *sm_engine_eval(sm_object *input) {
     }
   }
   case sm_primitive_type: {
-    // sm_expression *smp= (sm_primitive*)input;
+    // sm_expr *smp= (sm_primitive*)input;
     printf("Primitives are not developed yet\n");
     fflush(stdout);
   }
