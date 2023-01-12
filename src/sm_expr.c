@@ -114,7 +114,7 @@ sm_string *sm_expr_contents_to_string(sm_expr *sme) {
   else
     return sm_new_string(0, "");
   for (unsigned int arg_index = 1; arg_index < sme->size; arg_index++) {
-    result_str         = sm_string_add_recycle(result_str, sm_new_string(2, ", "));
+    result_str         = sm_string_add_recycle(result_str, sm_new_string(1, ","));
     sm_string *obj_str = sm_object_to_string(sm_get_expr_arg(sme, arg_index));
     result_str         = sm_string_add_recycle(result_str, obj_str);
   }
