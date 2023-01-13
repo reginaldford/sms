@@ -194,7 +194,7 @@ sm_string *sm_expr_to_string(sm_expr *expr) {
   if (expr->op == sm_array) {
     return sm_expr_array_to_string(expr);
   } else {
-    if (expr->op < ARRAY_SIZE(response) && expr->op) {
+    if (expr->op < ARRAY_SIZE(response)) {
       sm_string *op_string = sm_new_string(response_len[expr->op], response[expr->op]);
       if (sm_is_infix(expr->op))
         return sm_infix_to_string(expr, op_string);
