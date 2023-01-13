@@ -187,7 +187,8 @@ sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op) {
     str            = sm_string_add_recycle(str, op);
     return sm_string_add_recycle(str, right_string);
   } else if (o2->my_type == sm_expr_type && op_level(((sm_expr *)o2)->op) <= 2) {
-    sm_string *str = sm_string_add_recycle(op, sm_new_string(1, "("));
+    sm_string *str = sm_string_add_recycle(left_string,op);
+    str = sm_string_add_recycle(str, sm_new_string(1, "("));
     str            = sm_string_add_recycle(str, right_string);
     return sm_string_add_recycle(str, sm_new_string(1, ")"));
   } else {
