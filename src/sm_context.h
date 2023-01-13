@@ -1,4 +1,4 @@
-// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
 
 // sm_context_entry structs follow the sm_context struct in memory
 typedef struct sm_context {

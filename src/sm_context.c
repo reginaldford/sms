@@ -1,8 +1,8 @@
-// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
 
 #include "sms.h"
 
-// Create a new context, essentially an array of key_values , sorted by key
+// Create a new context, an array of key_values sorted by key
 struct sm_context *sm_new_context(unsigned int capacity) {
   sm_context *new_context =
     (sm_context *)sm_malloc(sizeof(sm_context) + sizeof(sm_context_entry) * capacity);
