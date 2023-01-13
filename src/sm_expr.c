@@ -156,7 +156,7 @@ unsigned short int op_level(enum sm_expr_type op_type) {
   case sm_ln:
     return 3;
   default:
-    return 0;
+    return 4;
   }
 }
 
@@ -173,22 +173,25 @@ sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op) {
   sm_string *left_string  = sm_object_to_string(o1);
   sm_string *right_string = sm_object_to_string(o2);
 
-  if (o1->my_type == sm_expr_type && op_level(((sm_expr *)o1)->op) <= 2 &&
-      o2->my_type == sm_expr_type && op_level(((sm_expr *)o2)->op) <= 2) {
+  int mid_op_level   = op_level(expr->op);
+  int left_op_level  = o1->my_type == sm_expr_type ? op_level(((sm_expr *)o1)->op) : 5;
+  int right_op_level = o2->my_type == sm_expr_type ? op_level(((sm_expr *)o1)->op) : 5;
+
+  if (left_op_level <= 2 && right_op_level <= 2 && left_op_level != mid_op_level) {
     sm_string *str = sm_string_add_recycle(sm_new_string(1, "("), left_string);
     str            = sm_string_add_recycle(str, sm_new_string(1, ")"));
     str            = sm_string_add_recycle(str, op);
     str            = sm_string_add_recycle(str, sm_new_string(1, "("));
     str            = sm_string_add_recycle(str, right_string);
     return sm_string_add_recycle(str, sm_new_string(1, ")"));
-  } else if (o1->my_type == sm_expr_type && op_level(((sm_expr *)o1)->op) <= 2) {
+  } else if (left_op_level <= 2 && left_op_level != mid_op_level) {
     sm_string *str = sm_string_add_recycle(sm_new_string(1, "("), left_string);
     str            = sm_string_add_recycle(str, sm_new_string(1, ")"));
     str            = sm_string_add_recycle(str, op);
     return sm_string_add_recycle(str, right_string);
-  } else if (o2->my_type == sm_expr_type && op_level(((sm_expr *)o2)->op) <= 2) {
-    sm_string *str = sm_string_add_recycle(left_string,op);
-    str = sm_string_add_recycle(str, sm_new_string(1, "("));
+  } else if (right_op_level <= 2 && right_op_level != mid_op_level) {
+    sm_string *str = sm_string_add_recycle(left_string, op);
+    str            = sm_string_add_recycle(str, sm_new_string(1, "("));
     str            = sm_string_add_recycle(str, right_string);
     return sm_string_add_recycle(str, sm_new_string(1, ")"));
   } else {
@@ -199,9 +202,8 @@ sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op) {
 
 // New string describing this expression
 sm_string *sm_expr_to_string(sm_expr *expr) {
-  static char *response[] = {"+",   "-",   "*",    "/",    "=",    "sqrt", "sin",
-                             "cos", "tan", "sinh", "cosh", "tanh", "^",    "csc",
-                             "sec", "cot", "ln",   "exp",  "diff"};
+  static char *response[] = {"+",    "-",    "*", "/",   "=",   "sqrt", "sin", "cos", "tan", "sinh",
+                             "cosh", "tanh", "^", "csc", "sec", "cot",  "ln",  "exp", "diff"};
   static long unsigned int response_len[] = {1, 1, 1, 1, 1, 4, 3, 3, 3, 4,
                                              4, 4, 1, 3, 3, 3, 2, 3, 4};
 

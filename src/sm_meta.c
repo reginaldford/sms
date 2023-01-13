@@ -13,8 +13,8 @@ sm_string *sm_meta_to_string(sm_meta *meta) {
   if (meta->address->my_type == sm_expr_type) {
     if (sm_is_infix(((sm_expr *)meta->address)->op)) {
       if (((sm_expr *)meta->address)->size < 3) {
-        result_string = sm_string_add_recycle(sm_new_string(3, ":( "), result_string);
-        result_string = sm_string_add_recycle(result_string, sm_new_string(2, " )"));
+        result_string = sm_string_add_recycle(sm_new_string(2, ":("), result_string);
+        result_string = sm_string_add_recycle(result_string, sm_new_string(1, ")"));
         return result_string;
       }
     }
