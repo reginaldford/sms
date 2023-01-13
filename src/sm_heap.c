@@ -21,16 +21,53 @@ sm_space *check_space(unsigned int size, unsigned int index) {
     unsigned int space_size = sm_get_space_array(sm_global_space_array(NULL))[index]->size;
     if (space_size >= size) {
       sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[index];
-      sm_delete_space_by_index(sm_global_space_array(NULL), index);
-      // If there is enough space remaining, make a new registered space for the remainder
-      unsigned int remaining_size = space_size - size;
-      if (remaining_size >= sizeof(sm_space))
-        sm_new_space((((char *)good_space) + size), remaining_size);
       return good_space;
     }
     return NULL;
   }
   return NULL;
+}
+
+// Binary search for space in a size ordered space array
+search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
+                                       unsigned int lower_limit, unsigned int upper_limit) {
+  sm_space   **space_array = sm_get_space_array(ssa);
+  int          comparison  = 1;
+  unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
+  while (lower_limit < upper_limit && comparison != 0) {
+    comparison = space_array[guess_point]->size - size;
+    if (comparison == 0)
+      return (search_result){.found = true, .index = guess_point};
+    else if (comparison > 0)
+      upper_limit = guess_point == 0 ? 0 : guess_point - 1;
+    else
+      lower_limit = guess_point + 1;
+    guess_point = (upper_limit + lower_limit) / 2.0;
+  }
+  comparison = space_array[guess_point]->size - size;
+  if (comparison == 0)
+    return (search_result){.found = true, .index = guess_point};
+  if (comparison < 0) {
+    return (search_result){.found = false, .index = guess_point + 1};
+  } else { // comparison > 0
+    return (search_result){.found = false, .index = guess_point};
+  }
+}
+
+// Sort the space array that is unsorted by the 1 space at off_index
+void sort_1_off(sm_space_array *ssa, unsigned int off_index) {
+  unsigned int space_size = sm_get_space_array(ssa)[off_index]->size;
+  // Now, to binary search the remaining portion of the array
+  search_result sr = find_space_within_bounds(ssa, space_size, 0, off_index - 1);
+  // Use search result to sort this 1-off array
+  sm_space   **space_array = sm_get_space_array(ssa);
+  sm_space    *off_space   = space_array[off_index];
+  unsigned int upper_index = off_index;
+  unsigned int lower_index = sr.index;
+  for (unsigned int i = upper_index; i > lower_index; i--) {
+    space_array[i] = space_array[i - 1];
+  }
+  space_array[lower_index] = off_space;
 }
 
 // Internal 'malloc'. checks space array first, else move the 'used' integer up
@@ -46,6 +83,16 @@ void *sm_malloc(unsigned int size) {
     }
     sm_space *result_space = check_space(size, sr.index);
     if (result_space != NULL) {
+      unsigned int remaining_size = result_space->size - size;
+      if (remaining_size >= sizeof(sm_space)) {
+        sm_space *new_space = (sm_space *)((char *)result_space) + size;
+        new_space->my_type  = sm_space_type;
+        new_space->size     = remaining_size;
+        sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
+        sort_1_off(sm_global_space_array(NULL), sr.index);
+      } else {
+        sm_delete_space_by_index(sm_global_space_array(NULL), sr.index);
+      }
       return result_space;
     }
   }

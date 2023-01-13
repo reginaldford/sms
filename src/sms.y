@@ -55,7 +55,6 @@ void yyerror(char *msg);
 %left  '*' '/'
 %right '^'
 %left ':'
-%left '='
 
 
 %%
