@@ -1,4 +1,4 @@
-// This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
+// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
 
 // all garbage collected objects start with this
 typedef struct sm_object {
