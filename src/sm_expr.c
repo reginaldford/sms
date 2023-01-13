@@ -121,7 +121,6 @@ sm_string *sm_expr_contents_to_string(sm_expr *sme) {
   return result_str;
 }
 
-
 // New string containing array description
 sm_string *sm_expr_array_to_string(sm_expr *expr) {
   if (expr->size == 0)
@@ -143,6 +142,23 @@ sm_string *sm_prefix_to_string(sm_expr *expr, sm_string *op) {
   return sm_string_add_recycle(result_str, sm_new_string(1, ")"));
 }
 
+// Useful for making decisions about parenthesis
+unsigned short int op_level(enum sm_expr_type op_type) {
+  switch (op_type) {
+  case sm_plus:
+  case sm_minus:
+    return 1;
+  case sm_times:
+  case sm_divide:
+    return 2;
+  case sm_pow:
+  case sm_exp:
+  case sm_ln:
+    return 3;
+  default:
+    return 0;
+  }
+}
 
 // New String containing infix description
 // If there are more than 2 arguments, defaults to prefix
@@ -157,25 +173,22 @@ sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op) {
   sm_string *left_string  = sm_object_to_string(o1);
   sm_string *right_string = sm_object_to_string(o2);
 
-  sm_string *str;
-
-  if (o1->my_type == sm_expr_type && sm_is_infix(((sm_expr *)o1)->op) &&
-      o2->my_type == sm_expr_type && sm_is_infix(((sm_expr *)o2)->op)) {
-    str = sm_string_add_recycle_1st(sm_new_string(1, "("), left_string);
-    str = sm_string_add_recycle(str, sm_new_string(1, ")"));
-    str = sm_string_add_recycle(str, op);
-    str = sm_string_add_recycle(str, sm_new_string(1, "("));
-    str = sm_string_add_recycle(str, right_string);
+  if (o1->my_type == sm_expr_type && op_level(((sm_expr *)o1)->op) <= 2 &&
+      o2->my_type == sm_expr_type && op_level(((sm_expr *)o2)->op) <= 2) {
+    sm_string *str = sm_string_add_recycle(sm_new_string(1, "("), left_string);
+    str            = sm_string_add_recycle(str, sm_new_string(1, ")"));
+    str            = sm_string_add_recycle(str, op);
+    str            = sm_string_add_recycle(str, sm_new_string(1, "("));
+    str            = sm_string_add_recycle(str, right_string);
     return sm_string_add_recycle(str, sm_new_string(1, ")"));
-  } else if (o1->my_type == sm_expr_type && sm_is_infix(((sm_expr *)o1)->op)) {
-    str = sm_string_add_recycle(sm_new_string(1, "("), left_string);
-    str = sm_string_add_recycle(str, sm_new_string(1, ")"));
-    str = sm_string_add_recycle(str, op);
+  } else if (o1->my_type == sm_expr_type && op_level(((sm_expr *)o1)->op) <= 2) {
+    sm_string *str = sm_string_add_recycle(sm_new_string(1, "("), left_string);
+    str            = sm_string_add_recycle(str, sm_new_string(1, ")"));
+    str            = sm_string_add_recycle(str, op);
     return sm_string_add_recycle(str, right_string);
-  } else if (o2->my_type == sm_expr_type && sm_is_infix(((sm_expr *)o2)->op)) {
-    str = sm_string_add_recycle(op, sm_new_string(1, "("));
-    str = sm_string_add_recycle(str, sm_new_string(1, "("));
-    str = sm_string_add_recycle(str, right_string);
+  } else if (o2->my_type == sm_expr_type && op_level(((sm_expr *)o2)->op) <= 2) {
+    sm_string *str = sm_string_add_recycle(op, sm_new_string(1, "("));
+    str            = sm_string_add_recycle(str, right_string);
     return sm_string_add_recycle(str, sm_new_string(1, ")"));
   } else {
     sm_string *left_and_op = sm_string_add_recycle(left_string, op);
@@ -185,11 +198,11 @@ sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op) {
 
 // New string describing this expression
 sm_string *sm_expr_to_string(sm_expr *expr) {
-  static char             *response[]     = {"+",   "-",   "*",    "/",    "=",    "sqrt", "sin",
-                                             "cos", "tan", "sinh", "cosh", "tanh", "pow",  "csc",
-                                             "sec", "cot", "ln",   "exp",  "diff"};
+  static char *response[] = {"+",   "-",   "*",    "/",    "=",    "sqrt", "sin",
+                             "cos", "tan", "sinh", "cosh", "tanh", "^",    "csc",
+                             "sec", "cot", "ln",   "exp",  "diff"};
   static long unsigned int response_len[] = {1, 1, 1, 1, 1, 4, 3, 3, 3, 4,
-                                             4, 4, 3, 3, 3, 3, 2, 3, 4};
+                                             4, 4, 1, 3, 3, 3, 2, 3, 4};
 
   if (expr->op == sm_array) {
     return sm_expr_array_to_string(expr);
