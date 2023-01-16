@@ -2,6 +2,7 @@
 
 #include "sms.h"
 
+// Return the object type as a string.
 sm_string *sm_object_type_str(unsigned short int t) {
   static char *response_string[]     = {"double",  "expression", "primitive", "string", "symbol",
                                         "context", "pointer",    "key_value", "meta",   "space"};
@@ -20,7 +21,7 @@ sm_string *sm_object_to_string(sm_object *obj1) {
   return new_str;
 }
 
-// Return the exact length of string that sm_context_entry would produce
+// Return the length of string that sm_context_entry would produce
 unsigned int sm_object_to_string_len(sm_object *obj1) {
   switch (obj1->my_type) {
   case sm_double_type:
@@ -40,7 +41,8 @@ unsigned int sm_object_to_string_len(sm_object *obj1) {
   }
 }
 
-// Return a new sm_cstring describing the object
+// Print to a string buffer the object description
+// Return the length of the string
 unsigned int sm_object_sprint(sm_object *obj1, char *buffer) {
   switch (obj1->my_type) {
   case sm_double_type:
@@ -71,7 +73,7 @@ int sm_sizeof(sm_object *obj1) {
   if (obj_type == sm_double_type)
     return sizeof(sm_double);
   if (obj_type == sm_expr_type)
-    return sizeof(sm_expr) + sizeof(sm_object *) * ((sm_expr *)obj1)->size;
+    return sizeof(sm_expr) + sizeof(sm_object *) * ((sm_expr *)obj1)->capacity;
   if (obj_type == sm_primitive_type)
     return sizeof(sm_expr);
   if (obj_type == sm_string_type)
