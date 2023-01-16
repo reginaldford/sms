@@ -20,7 +20,7 @@ sm_context *sm_global_context(sm_context *replacement) {
   return global_context;
 }
 
-// the current heap
+// Current heap. Objects here are live
 sm_heap *sm_global_current_heap(sm_heap *replacement) {
   static sm_heap *current_heap = NULL;
   if (replacement != NULL) {
@@ -31,7 +31,7 @@ sm_heap *sm_global_current_heap(sm_heap *replacement) {
   return current_heap;
 }
 
-// the 'other' heap
+// 'other' heap, also known as 'to' heap
 sm_heap *sm_global_other_heap(sm_heap *replacement) {
   static sm_heap *other_heap = NULL;
   if (replacement != NULL) {
@@ -84,4 +84,23 @@ sm_expr *sm_global_obj_stack(sm_expr *replacement) {
     return temp;
   }
   return expr;
+}
+
+// primitive_names. read only
+char *sm_global_fn_name(unsigned short int which) {
+  static char *response[] = {"+",    "-",    "*", "/",   "=",   "sqrt", "sin", "cos", "tan", "sinh",
+                             "cosh", "tanh", "^", "csc", "sec", "cot",  "ln",  "exp", "diff"};
+  return response[which];
+}
+
+// corresponding string length of the string that would come from the sm_global_fn_name(which)
+unsigned int sm_global_fn_name_len(unsigned short int which) {
+  static long unsigned int response_len[] = {1, 1, 1, 1, 1, 4, 3, 3, 3, 4,
+                                             4, 4, 1, 3, 3, 3, 2, 3, 4};
+  return response_len[which];
+}
+
+unsigned int sm_global_num_fns() {
+  static int num_fns = 19;
+  return num_fns;
 }

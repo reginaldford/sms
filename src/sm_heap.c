@@ -18,7 +18,8 @@ sm_heap *sm_new_heap(unsigned int capacity) {
 // If it is acceptable,  delete it from the space array and return the space, else return NULL
 sm_space *check_space(unsigned int size, unsigned int index) {
   if (index + 1 <= sm_global_space_array(NULL)->size) {
-    unsigned int space_size = sm_get_space_array(sm_global_space_array(NULL))[index]->size;
+    unsigned int space_size =
+      sm_get_space_array(sm_global_space_array(NULL))[index]->my_type - sm_space_type;
     if (space_size >= size) {
       sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[index];
       return good_space;
@@ -35,7 +36,7 @@ search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
   int          comparison  = 1;
   unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
   while (lower_limit < upper_limit && comparison != 0) {
-    comparison = space_array[guess_point]->size - size;
+    comparison = space_array[guess_point]->my_type - sm_space_type - size;
     if (comparison == 0)
       return (search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
@@ -44,7 +45,7 @@ search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
       lower_limit = guess_point + 1;
     guess_point = (upper_limit + lower_limit) / 2.0;
   }
-  comparison = space_array[guess_point]->size - size;
+  comparison = space_array[guess_point]->my_type - sm_space_type - size;
   if (comparison == 0)
     return (search_result){.found = true, .index = guess_point};
   if (comparison < 0) {
@@ -56,7 +57,7 @@ search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
 
 // Sort the space array that is unsorted by the 1 space at off_index
 void sort_1_off(sm_space_array *ssa, unsigned int off_index) {
-  unsigned int space_size = sm_get_space_array(ssa)[off_index]->size;
+  unsigned int space_size = sm_get_space_array(ssa)[off_index]->my_type - sm_space_type;
   // Now, to binary search the remaining portion of the array
   search_result sr = find_space_within_bounds(ssa, space_size, 0, off_index - 1);
   // Use search result to sort this 1-off array
@@ -83,11 +84,10 @@ void *sm_malloc(unsigned int size) {
     }
     sm_space *result_space = check_space(size, sr.index);
     if (result_space != NULL) {
-      unsigned int remaining_size = result_space->size - size;
+      unsigned int remaining_size = (result_space->my_type - sm_space_type) - size;
       if (remaining_size >= sizeof(sm_space)) {
         sm_space *new_space = (sm_space *)((char *)result_space) + size;
-        new_space->my_type  = sm_space_type;
-        new_space->size     = remaining_size;
+        new_space->my_type  = sm_space_type + remaining_size;
         sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
         sort_1_off(sm_global_space_array(NULL), sr.index);
       } else {
@@ -103,14 +103,14 @@ void *sm_malloc(unsigned int size) {
 }
 
 // Reallocate memory space for resizing or recreating objects
-sm_object *sm_realloc(sm_object *obj, unsigned int size) {
+void *sm_realloc(void *obj, unsigned int size) {
   sm_object *new_space = sm_malloc(size);
   return memcpy(new_space, obj, size);
 }
 
 // Is the object within this heap?
-bool sm_is_within_heap(sm_object *obj, sm_heap *heap) {
-  return ((void *)obj >= (void *)heap) && ((void *)obj < (void *)((char *)heap) + heap->used);
+bool sm_is_within_heap(void *obj, sm_heap *heap) {
+  return (obj >= (void *)heap) && (obj < (void *)((char *)heap) + heap->used);
 }
 
 // For advanced debugging, run this at any point and examine the heap snapshot as a file

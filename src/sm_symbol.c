@@ -12,3 +12,10 @@ sm_symbol *sm_new_symbol(sm_string *sym_name) {
 sm_string *sm_symbol_to_string(sm_symbol *self) {
   return sm_new_string(self->name->size, &(self->name->content));
 }
+
+unsigned int sm_symbol_sprint(sm_symbol *self, char *buffer) {
+  sm_strncpy(buffer, &(self->name->content), self->name->size);
+  return self->name->size;
+}
+
+unsigned int sm_symbol_to_string_len(sm_symbol *self) { return self->name->size; }

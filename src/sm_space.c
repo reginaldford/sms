@@ -6,11 +6,11 @@
 sm_space *sm_new_space(void *trash, unsigned int size) {
   // Size sets the whole obj size manually
   // Size must be more than sizeof(sm_space)
-  sm_space *new_space = (sm_space *)trash;
   if (size >= sizeof(sm_space)) {
-    new_space->my_type = sm_space_type;
-    new_space->size    = size;
-    sm_global_space_array(sm_add_space(new_space, sm_global_space_array(NULL)));
+    sm_space *new_space = (sm_space *)trash;
+    // sm_space needs to be the highest type value
+    new_space->my_type = sm_space_type + size;
+    sm_global_space_array(sm_space_add(new_space, sm_global_space_array(NULL)));
     return new_space;
   } else
     return NULL;
@@ -45,7 +45,7 @@ sm_space **sm_get_space_array(sm_space_array *table) { return (sm_space **)&(tab
 
 sm_string *sm_space_to_string(sm_space *self) {
   sm_string *answer = sm_new_string(7, "space(");
-  sm_string *size   = sm_double_to_string(sm_new_double((double)self->size));
+  sm_string *size   = sm_double_to_string(sm_new_double((double)self->my_type - sm_space_type));
   answer            = sm_string_add_recycle(answer, size);
   answer            = sm_string_add_recycle(answer, sm_new_string(1, ")"));
   return answer;
@@ -64,17 +64,16 @@ search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
   unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
 
   while (lower_limit < upper_limit && comparison != 0) {
-    comparison = table_entries[guess_point]->size - size;
+    comparison = table_entries[guess_point]->my_type - sm_space_type - size;
     if (comparison == 0)
       return (search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
-      // checking against unsigned 0 - 1 at guess_point
       upper_limit = guess_point == 0 ? 0 : guess_point - 1;
     else
       lower_limit = guess_point + 1;
     guess_point = (upper_limit + lower_limit) / 2.0;
   }
-  comparison = table_entries[guess_point]->size - size;
+  comparison = table_entries[guess_point]->my_type - sm_space_type - size;
 
   if (comparison == 0)
     return (search_result){.found = true, .index = guess_point};
@@ -86,8 +85,8 @@ search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
 }
 
 // add a space to the space array, keeping it sorted
-sm_space_array *sm_add_space(sm_space *space, sm_space_array *table) {
-  search_result sr            = sm_space_array_find(table, space->size);
+sm_space_array *sm_space_add(sm_space *space, sm_space_array *table) {
+  search_result sr            = sm_space_array_find(table, space->my_type - sm_space_type);
   sm_space    **table_entries = sm_get_space_array(table);
 
   if (table->size == table->capacity) {
@@ -108,10 +107,12 @@ sm_space_array *sm_add_space(sm_space *space, sm_space_array *table) {
 
 // use sm_space_array_find to get a space index
 void sm_delete_space_by_index(sm_space_array *spt, unsigned int index_to_delete) {
-  sm_space **ptr_array = sm_get_space_array(spt);
-  for (unsigned int i = index_to_delete; i + 2 < spt->size; i++) {
-    ptr_array[i] = ptr_array[i + 1];
+  if (index_to_delete < spt->size) {
+    sm_space **ptr_array = sm_get_space_array(spt);
+    spt->size--;
+    for (unsigned int i = index_to_delete; i + 2 <= spt->size; i++) {
+      ptr_array[i] = ptr_array[i + 1];
+    }
+    return;
   }
-  if (index_to_delete + 1 <= spt->size)
-    spt->size = spt->size == 0 ? 0 : spt->size - 1;
 }
