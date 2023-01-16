@@ -10,7 +10,7 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 }
 
 sm_object *sm_meet_object(sm_object *obj) {
-  enum sm_object_type the_type = obj->my_type;
+  unsigned short int the_type = obj->my_type;
   if (the_type == sm_pointer_type)
     return ((sm_pointer *)obj)->address;
   else
@@ -54,7 +54,13 @@ void sm_inflate_heap() {
     default:
       break;
     }
-    scan_cursor += sm_sizeof(current_obj);
+
+    if (current_obj->my_type <= sm_space_type)
+      scan_cursor += sm_sizeof(current_obj);
+    else {
+      printf("Error: Ending inflation on unrecognized object type: %i\n", current_obj->my_type);
+      return;
+    }
   }
 }
 

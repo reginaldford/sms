@@ -17,13 +17,13 @@ CC=clang
 
 
 #Compiling for speed:
-CFLAGS= -lm -Ofast
+CFLAGS= -lm -Ofast -fshort-enums
 
 #Compiling for debugging info
-# CFLAGS=-lm -g
+# CFLAGS=-lm -g -fshort-enums
 
 #ncurses experiments:
-#CFLAGS= -lm -lncurses -Ofast
+#CFLAGS= -lm -lncurses -Ofast -fshort-enums
 
 
 SOURCES=src/lex.yy.c src/y.tab.c src/sm_object.c src/sm_symbol.c src/sm_heap.c src/sm_string.c src/sm_expr.c src/sm_double.c src/sm_context.c src/sm_commands.c src/sm_global.c src/sm_gc.c src/sm_terminal.c src/sm_key_value.c src/sm_pointer.c src/sm_engine.c src/sm_meta.c src/sm_signal.c src/sm_space.c

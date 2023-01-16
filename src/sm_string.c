@@ -1,4 +1,5 @@
 // The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+
 #include "sms.h"
 
 // safe string copy
@@ -17,6 +18,16 @@ sm_string *sm_new_string(unsigned int size, char *str) {
   struct sm_string *newstr = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
   newstr->my_type          = sm_string_type;
   newstr->size             = size;
+  sm_strncpy(&(newstr->content), str, size);
+  return newstr;
+}
+
+// expecting a null terminated string!
+sm_string *sm_new_string_find_length(unsigned int size, char *str) {
+  // We add a null character that is not included in the size
+  sm_string *newstr = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
+  newstr->my_type   = sm_string_type;
+  newstr->size      = size;
   sm_strncpy(&(newstr->content), str, size);
   return newstr;
 }
@@ -61,4 +72,11 @@ sm_string *sm_new_string_of(unsigned int size, sm_string *str) {
 sm_string *sm_string_to_string(sm_string *str) {
   sm_string *new_str = sm_string_add_recycle_1st(sm_new_string(1, "\""), str);
   return sm_string_add_recycle(new_str, sm_new_string(1, "\""));
+}
+
+// Adds a c string describing the string to the buffer
+// Returns the length
+unsigned int sm_string_sprint(sm_string *self, char *buffer) {
+  sprintf(buffer, "\"%s\"", &(self->content));
+  return self->size + 2;
 }

@@ -20,14 +20,13 @@ enum sm_object_type {
   sm_space_type
 };
 
-#define DEBUG_HERE(note)                                                                           \
-  printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
-  fflush(stdout);
-
-
+// Useful macros
 #define MIN(x, y) (x < y ? x : y)
 #define MAX(x, y) (x > y ? x : y)
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x))
+#define DEBUG_HERE(note)                                                                           \
+  printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
+  fflush(stdout);
 
 // Windows lacks these signals
 // in <signal.h> because it isn't even POSIX
@@ -35,10 +34,10 @@ enum sm_object_type {
 #define SIGQUIT 3
 
 #include "sm_string.h"
+#include "sm_heap.h"
 #include "sm_object.h"
 #include "sm_symbol.h"
 #include "sm_context.h"
-#include "sm_heap.h"
 #include "sm_pointer.h"
 #include "sm_commands.h"
 #include "sm_space.h"

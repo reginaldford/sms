@@ -2,10 +2,10 @@
 
 // sm_context_entry structs follow the sm_context struct in memory
 typedef struct sm_context {
-  enum sm_object_type my_type;
-  struct sm_context  *parent;
-  unsigned int        size;
-  unsigned int        capacity;
+  short int          my_type;
+  struct sm_context *parent;
+  unsigned int       size;
+  unsigned int       capacity;
 } sm_context;
 
 // key and value pair
@@ -29,4 +29,8 @@ search_result sm_find_var_index(struct sm_context *context, struct sm_string *va
 sm_context   *sm_set_var(struct sm_context *context, struct sm_string *name, void *val);
 bool          sm_delete(sm_symbol *sym);
 sm_string    *sm_context_to_string(sm_context *self);
+unsigned int  sm_context_sprint(sm_context *self, char *buffer);
+unsigned int  sm_context_to_string_len(sm_context *self);
 sm_string    *sm_context_entry_to_string(sm_context_entry *ce);
+unsigned int  sm_context_entry_sprint(sm_context_entry *ce, char *buffer);
+unsigned int  sm_context_entry_to_string_len(sm_context_entry *ce);

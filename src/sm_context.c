@@ -35,8 +35,7 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
     if (comparison == 0)
       return (search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
-      // guess_point is unsigned, so we need to check against unsigned 0 - 1 here
-      upper_limit = guess_point == 0 ? 0 : guess_point - 1;
+      upper_limit = context->size == 0 ? 0 : context->size - 1;
     else
       lower_limit = guess_point + 1;
     guess_point = (upper_limit + lower_limit) / 2.0;
@@ -102,18 +101,58 @@ sm_string *sm_context_to_string(sm_context *self) {
   if (self->size == 0) {
     return sm_new_string(2, "{}");
   }
-  sm_context_entry *ce     = sm_context_entries(self);
-  sm_string        *answer = sm_new_string(1, "{");
-  for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
-    answer = sm_string_add_recycle(answer, sm_context_entry_to_string(&(ce[object_index])));
+  sm_string * new_str=sm_new_string(sm_context_to_string_len((sm_context*)self),"");
+  sm_context_sprint(self,(char*)&(new_str[1]));
+  (&new_str->content)[new_str->size] = '\0';
+  return new_str;
+}
+
+unsigned int sm_context_sprint(sm_context *self, char *buffer) {
+  buffer[0] = '{';
+  if (self->size == 0) {
+    buffer[1] = '}';
+    return 2;
   }
-  return sm_string_add_recycle(answer, sm_new_string(1, "}"));
+  sm_context_entry *ce     = sm_context_entries(self);
+  unsigned int      cursor = 1;
+  for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
+    cursor += sm_context_entry_sprint(&(ce[object_index]), &(buffer[cursor]));
+  }
+  buffer[cursor++] = '}';
+  return cursor;
+}
+
+unsigned int sm_context_to_string_len(sm_context *self) {
+  if (self->size == 0) {
+    return 2;
+  }
+  sm_context_entry *ce  = sm_context_entries(self);
+  unsigned int      sum = 2;
+  for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
+    sum += sm_context_entry_to_string_len(&(ce[object_index]));
+  }
+  return sum;
 }
 
 // Return a new string describing this context entry
 sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
-  sm_string *output_str = ce->name;
-  output_str            = sm_string_add_recycle_2nd(output_str, sm_new_string(1, "="));
-  output_str            = sm_string_add_recycle(output_str, sm_object_to_string(ce->value));
-  return sm_string_add_recycle(output_str, sm_new_string(1, ";"));
+  sm_string *output_str = sm_string_add_recycle_2nd(ce->name, sm_new_string(1, "="));
+  output_str            = sm_string_add(output_str, sm_object_to_string(ce->value));
+  return sm_string_add(output_str, sm_new_string(1, ";"));
+}
+
+unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer) {
+  sm_strncpy(buffer, &(ce->name->content), ce->name->size);
+  int cursor       = ce->name->size;
+  buffer[cursor++] = '=';
+  cursor += sm_object_sprint((sm_object *)ce->value, &(buffer[cursor]));
+  buffer[cursor++] = ';';
+  return cursor;
+}
+
+// Return the length of string that sm_context_entry would produce
+unsigned int sm_context_entry_to_string_len(sm_context_entry *ce) {
+  unsigned int sum = ce->name->size;
+  sum += sm_object_to_string_len(ce->value);
+  return sum + 2;
 }

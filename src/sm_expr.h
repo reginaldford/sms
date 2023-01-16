@@ -27,10 +27,10 @@ enum sm_expr_type {
 // Head of an expression
 // Assumed to have size of pointers following the structure
 typedef struct sm_expr {
-  enum sm_object_type my_type;
-  enum sm_expr_type   op;
-  unsigned int        capacity;
-  unsigned int        size;
+  short int         my_type;
+  enum sm_expr_type op;
+  unsigned int      capacity;
+  unsigned int      size;
 } sm_expr;
 
 sm_expr   *sm_new_expr_n(enum sm_expr_type op1, unsigned int size, unsigned int capacity);
@@ -39,8 +39,14 @@ sm_expr   *sm_append_to_expr(sm_expr *expr, sm_object *arg);
 sm_expr   *sm_new_expr_2(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2);
 sm_expr   *sm_new_expr_3(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
 sm_string *sm_prefix_to_string(sm_expr *expr, sm_string *op);
-sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op);
-sm_string *sm_expr_to_string(sm_expr *expr);
-sm_expr   *sm_set_expr_arg(sm_expr *expr, unsigned int index, sm_object *value);
-sm_object *sm_get_expr_arg(sm_expr *expr, unsigned int index);
-bool       sm_is_infix(enum sm_expr_type op);
+unsigned int sm_prefix_sprint(sm_expr *self, char *buffer);
+sm_string   *sm_infix_to_string(sm_expr *expr, sm_string *op);
+unsigned int sm_infix_sprint(sm_expr *expr, char *buffer);
+sm_string   *sm_expr_to_string(sm_expr *expr);
+unsigned int sm_expr_sprint(sm_expr *self, char *buffer);
+unsigned int sm_expr_to_string_len(sm_expr *expr);
+sm_expr     *sm_set_expr_arg(sm_expr *expr, unsigned int index, sm_object *value);
+sm_object   *sm_get_expr_arg(sm_expr *expr, unsigned int index);
+bool         sm_is_infix(enum sm_expr_type op);
+sm_object   *sm_expr_pop(sm_expr *sme);
+sm_object   *sm_expr_pop_recycle(sm_expr *sme);

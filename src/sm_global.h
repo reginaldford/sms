@@ -7,3 +7,6 @@ int             sm_gc_count(int increase);
 double          sm_global_growth_factor(double replacement);
 sm_space_array *sm_global_space_array(sm_space_array *replacement);
 sm_expr        *sm_global_obj_stack(sm_expr *replacement);
+char           *sm_global_fn_name(unsigned short int which);
+unsigned int    sm_global_fn_name_len(unsigned short int which);
+unsigned int    sm_global_num_fns();
