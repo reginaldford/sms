@@ -2,7 +2,7 @@
 
 #include "sms.h"
 
-// safe string copy
+// Safe string copy
 char *sm_strncpy(char *dest, const char *src, unsigned int n) {
   unsigned int i;
   for (i = 0; i < n && src[i] != '\0'; i++)
@@ -12,7 +12,7 @@ char *sm_strncpy(char *dest, const char *src, unsigned int n) {
   return dest;
 }
 
-// expecting a null terminated string!
+// Expecting a null terminated string
 sm_string *sm_new_string(unsigned int size, char *str) {
   // We add a null character that is not included in the size
   struct sm_string *newstr = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
@@ -22,16 +22,7 @@ sm_string *sm_new_string(unsigned int size, char *str) {
   return newstr;
 }
 
-// expecting a null terminated string!
-sm_string *sm_new_string_find_length(unsigned int size, char *str) {
-  // We add a null character that is not included in the size
-  sm_string *newstr = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
-  newstr->my_type   = sm_string_type;
-  newstr->size      = size;
-  sm_strncpy(&(newstr->content), str, size);
-  return newstr;
-}
-
+// Return a new string: str1+str2
 sm_string *sm_string_add(sm_string *str1, sm_string *str2) {
   unsigned int size_sum   = str1->size + str2->size;
   sm_string   *new_string = sm_new_string(size_sum, &(str1->content));
@@ -39,6 +30,8 @@ sm_string *sm_string_add(sm_string *str1, sm_string *str2) {
   return new_string;
 }
 
+// Return a new string: str1+str2
+// Replace the previous strings with new spaces
 sm_string *sm_string_add_recycle(sm_string *str1, sm_string *str2) {
   sm_string *new_string = sm_string_add(str1, str2);
   sm_new_space(str1, sm_sizeof((sm_object *)str1));
@@ -46,37 +39,62 @@ sm_string *sm_string_add_recycle(sm_string *str1, sm_string *str2) {
   return new_string;
 }
 
+// Recycle only str1
 sm_string *sm_string_add_recycle_1st(sm_string *str1, sm_string *str2) {
   sm_string *new_string = sm_string_add(str1, str2);
   sm_new_space(str1, sm_sizeof((sm_object *)str1));
   return new_string;
 }
 
+// Recycle only str2
 sm_string *sm_string_add_recycle_2nd(sm_string *str1, sm_string *str2) {
   sm_string *new_string = sm_string_add(str1, str2);
   sm_new_space(str2, sm_sizeof((sm_object *)str2));
   return new_string;
 }
 
-sm_string *sm_new_string_of(unsigned int size, sm_string *str) {
-  // We add a null character that is not included in the size
-  sm_string *new_str = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
-  new_str->my_type   = sm_string_type;
-  new_str->size      = size;
-  for (unsigned int index = 0; index < str->size; index++) {
-    ((char *)&(new_str->content))[index] = ((char *)&(str->content))[index % str->size];
-  }
-  return new_str;
-}
-
+// Adds quotes
+// TODO: put escape codes back into the string
 sm_string *sm_string_to_string(sm_string *str) {
   sm_string *new_str = sm_string_add_recycle_1st(sm_new_string(1, "\""), str);
   return sm_string_add_recycle(new_str, sm_new_string(1, "\""));
 }
 
-// Adds a c string describing the string to the buffer
+// Adds a c string describing the string
+// Unescapes back to the c-style escape codes
 // Returns the length
-unsigned int sm_string_sprint(sm_string *self, char *buffer) {
-  sprintf(buffer, "\"%s\"", &(self->content));
-  return self->size + 2;
+unsigned int sm_string_sprint(sm_string *self, char *to_str) {
+  char *from_str = &(self->content);
+  to_str[0]      = '\"';
+  // i for from_str , j for to_str
+  unsigned int i, j;
+  for (i = 0, j = 1; i < self->size; i++, j++) {
+    if (from_str[i] == '\n' || from_str[i] == '\r' || from_str[i] == '\t' || from_str[i] == '\\' ||
+        from_str[i] == '\"') {
+      to_str[j++] = '\\';
+      switch (from_str[i]) {
+      case '\n':
+        to_str[j] = 'n';
+        break;
+      case '\r':
+        to_str[j] = 'r';
+        break;
+      case '\t':
+        to_str[j] = 't';
+        break;
+      case '\\':
+        to_str[j] = '\\';
+        break;
+      case '\"':
+        to_str[j] = '\"';
+        break;
+      default:
+        to_str[j] = from_str[i];
+      }
+    } else {
+      to_str[j] = from_str[i];
+    }
+  }
+  to_str[j]     = '\"';
+  return j + 1;
 }

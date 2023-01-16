@@ -16,8 +16,8 @@ sm_string *sm_object_type_str(unsigned short int t) {
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
   sm_string *new_str = sm_new_string(sm_object_to_string_len(obj1), "");
-  sm_object_sprint(obj1, &(new_str->content));
-  (&new_str->content)[new_str->size] = '\0';
+  unsigned int len = sm_object_sprint(obj1, &(new_str->content));
+  (&new_str->content)[len] = '\0';
   return new_str;
 }
 
