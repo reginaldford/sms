@@ -53,11 +53,13 @@ sm_string *sm_string_add_recycle_2nd(sm_string *str1, sm_string *str2) {
   return new_string;
 }
 
-// Adds quotes
-// TODO: put escape codes back into the string
+// Adds quotes, unescapes, produces a new sm_string
 sm_string *sm_string_to_string(sm_string *str) {
-  sm_string *new_str = sm_string_add_recycle_1st(sm_new_string(1, "\""), str);
-  return sm_string_add_recycle(new_str, sm_new_string(1, "\""));
+  const unsigned int final_len = str->size + 2;
+  sm_string         *new_str   = sm_new_string(final_len, "");
+  sm_string_sprint(str, &(new_str->content));
+  (&new_str->content)[final_len] = '\0';
+  return new_str;
 }
 
 // Adds a c string describing the string
@@ -95,6 +97,6 @@ unsigned int sm_string_sprint(sm_string *self, char *to_str) {
       to_str[j] = from_str[i];
     }
   }
-  to_str[j]     = '\"';
+  to_str[j] = '\"';
   return j + 1;
 }

@@ -126,7 +126,6 @@ sm_string *sm_expr_array_to_string(sm_expr *expr) {
   return sm_string_add_recycle(result_str, sm_new_string(1, "]"));
 }
 
-
 // Print to a cstring buffer the description of array
 // Return the resulting length
 unsigned int sm_expr_array_sprint(sm_expr *expr, char *buffer) {
@@ -139,7 +138,6 @@ unsigned int sm_expr_array_sprint(sm_expr *expr, char *buffer) {
   buffer[1 + len] = ']';
   return 2 + len;
 }
-
 
 // New string containing prefix description
 sm_string *sm_prefix_to_string(sm_expr *expr, sm_string *op) {
@@ -166,7 +164,7 @@ unsigned int sm_prefix_sprint(sm_expr *expr, char *buffer) {
   return cursor;
 }
 
-// Return length of string from sm_prefix_to_string
+// Return length of string from hypothetical call to sm_prefix_to_string
 unsigned int sm_prefix_to_string_len(sm_expr *expr, unsigned int op_length) {
   if (expr->size == 0)
     return op_length + 2;                                      // f();
@@ -231,6 +229,8 @@ sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op) {
   }
 }
 
+// Print infix to c string buffer
+// Return length
 unsigned int sm_infix_sprint(sm_expr *expr, char *buffer) {
   if (expr->size > 2) {
     return sm_prefix_sprint(expr, buffer);
@@ -281,8 +281,7 @@ unsigned int sm_infix_sprint(sm_expr *expr, char *buffer) {
   }
 }
 
-
-// Return the length of string from sm_infix_to_string
+// Return the length of string from a hypothetical call to sm_infix_to_string
 unsigned int sm_infix_to_string_len(sm_expr *expr, unsigned int op_len) {
   if (expr->size > 2)
     return sm_prefix_to_string_len(expr, op_len);
@@ -311,25 +310,15 @@ unsigned int sm_infix_to_string_len(sm_expr *expr, unsigned int op_len) {
   }
 }
 
-
 // New string describing this expression
 sm_string *sm_expr_to_string(sm_expr *expr) {
-  if (expr->op == sm_array) {
-    return sm_expr_array_to_string(expr);
-  } else {
-    if (expr->op < sm_global_num_fns()) {
-      sm_string *op_string =
-        sm_new_string(sm_global_fn_name_len(expr->op), sm_global_fn_name(expr->op));
-      if (sm_is_infix(expr->op))
-        return sm_infix_to_string(expr, op_string);
-      else
-        return sm_prefix_to_string(expr, op_string);
-    } else {
-      return sm_new_string(17, "unrecognized expr");
-    }
-  }
+  sm_string *new_str = sm_new_string(sm_expr_to_string_len(expr), "");
+  sm_expr_sprint(expr, &(new_str->content));
+  (&new_str->content)[new_str->size] = '\0';
+  return new_str;
 }
 
+// Return length of hypothetical call to sm_expr_to_string
 unsigned int sm_expr_to_string_len(sm_expr *expr) {
   if (expr->op == sm_array) {
     return 2 + sm_expr_contents_to_string_len(expr);

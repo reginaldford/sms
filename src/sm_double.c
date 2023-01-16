@@ -11,14 +11,10 @@ sm_double *sm_new_double(double value) {
 
 // Return an sm_string describing this double
 sm_string *sm_double_to_string(sm_double *self) {
-  char         buf[20];
-  unsigned int str_len = sm_double_sprint(self, buf);
-  sm_string   *result  = sm_new_string(str_len, buf);
-  result->size         = str_len;
-  if (sm_round_size(result->size) != 20) {
-    sm_new_space_after(result, 20 - sm_round_size(result->size));
-  }
-  return result;
+  sm_string *new_str = sm_new_string(sm_double_to_string_len(self), "");
+  sm_double_sprint(self, &(new_str->content));
+  (&new_str->content)[new_str->size] = '\0';
+  return new_str;
 }
 
 // Return an sm_string describing this double

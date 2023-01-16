@@ -107,6 +107,8 @@ sm_string *sm_context_to_string(sm_context *self) {
   return new_str;
 }
 
+// Print to string buffer a description of this context
+// Return the string length
 unsigned int sm_context_sprint(sm_context *self, char *buffer) {
   buffer[0] = '{';
   if (self->size == 0) {
@@ -122,6 +124,7 @@ unsigned int sm_context_sprint(sm_context *self, char *buffer) {
   return cursor;
 }
 
+// Return hypothetical string length resulting from sm_context_to_string(this)
 unsigned int sm_context_to_string_len(sm_context *self) {
   if (self->size == 0) {
     return 2;
@@ -141,6 +144,7 @@ sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
   return sm_string_add(output_str, sm_new_string(1, ";"));
 }
 
+// Print to string buffer a description of this context entry
 unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer) {
   sm_strncpy(buffer, &(ce->name->content), ce->name->size);
   int cursor       = ce->name->size;
