@@ -88,6 +88,5 @@ int sm_sizeof(sm_object *obj1) {
     return ((sm_space *)obj1)->my_type - sm_space_type;
 
   printf("Cannot determine size of object of type %d\n", obj_type);
-  sm_mem_dump(sm_global_current_heap(NULL), "memory.dat");
   exit(0);
 }

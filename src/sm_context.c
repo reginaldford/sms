@@ -35,7 +35,7 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
     if (comparison == 0)
       return (search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
-      upper_limit = context->size == 0 ? 0 : context->size - 1;
+      upper_limit = guess_point - 1;
     else
       lower_limit = guess_point + 1;
     guess_point = (upper_limit + lower_limit) / 2.0;
