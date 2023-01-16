@@ -35,7 +35,7 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
     if (comparison == 0)
       return (search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
-      upper_limit = guess_point - 1;
+      upper_limit = guess_point == 0 ? 0 : guess_point - 1;
     else
       lower_limit = guess_point + 1;
     guess_point = (upper_limit + lower_limit) / 2.0;
@@ -101,8 +101,8 @@ sm_string *sm_context_to_string(sm_context *self) {
   if (self->size == 0) {
     return sm_new_string(2, "{}");
   }
-  sm_string * new_str=sm_new_string(sm_context_to_string_len((sm_context*)self),"");
-  sm_context_sprint(self,(char*)&(new_str[1]));
+  sm_string *new_str = sm_new_string(sm_context_to_string_len((sm_context *)self), "");
+  sm_context_sprint(self, (char *)&(new_str[1]));
   (&new_str->content)[new_str->size] = '\0';
   return new_str;
 }
