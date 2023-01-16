@@ -1,6 +1,8 @@
 // The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+
 #include "sms.h"
 
+// New meta, a pointer to an object
 sm_meta *sm_new_meta(sm_object *address) {
   sm_meta *smm = sm_malloc(sizeof(sm_meta));
   smm->my_type = sm_meta_type;
@@ -8,19 +10,16 @@ sm_meta *sm_new_meta(sm_object *address) {
   return smm;
 }
 
+// New string with description of this meta
 sm_string *sm_meta_to_string(sm_meta *meta) {
-  sm_string *result_string = sm_object_to_string(meta->address);
-  if (meta->address->my_type == sm_expr_type) {
-    if (sm_is_infix(((sm_expr *)meta->address)->op)) {
-      if (((sm_expr *)meta->address)->size < 3) {
-        result_string = sm_string_add_recycle(sm_new_string(2, ":("), result_string);
-        return sm_string_add_recycle(result_string, sm_new_string(1, ")"));
-      }
-    }
-  }
-  return sm_string_add_recycle(sm_new_string(1, ":"), result_string);
+  const unsigned int final_len = sm_meta_to_string_len(meta);
+  sm_string         *new_str   = sm_new_string(final_len, "");
+  sm_meta_sprint(meta, &(new_str->content));
+  (&new_str->content)[final_len] = '\0';
+  return new_str;
 }
 
+// Print to c string buffer a description of this meta
 unsigned int sm_meta_sprint(sm_meta *meta, char *buffer) {
   buffer[0] = ':';
   if (meta->address->my_type == sm_expr_type) {
@@ -37,6 +36,7 @@ unsigned int sm_meta_sprint(sm_meta *meta, char *buffer) {
   return len + 1;
 }
 
+// Return the hypothetical length of the result of sm_meta_to_string(this)
 unsigned int sm_meta_to_string_len(sm_meta *self) {
   unsigned int result = sm_object_to_string_len(self->address);
   if (self->address->my_type == sm_expr_type) {
