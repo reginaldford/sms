@@ -1,6 +1,7 @@
 // This project is licensed under the BSD 2 clause license. See LICENSE.txt for more information.
 #include "../sms.h"
 int main() {
+  printf("sizeof %s is %d\n", "enum", (int)sizeof(enum sm_object_type));
   printf("sizeof %s is %d\n", "long", (int)sizeof(long));
   printf("sizeof %s is %d\n", "int", (int)sizeof(int));
   printf("sizeof %s is %d\n", "short", (int)sizeof(int));

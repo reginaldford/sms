@@ -52,11 +52,11 @@ sm_string *sm_space_to_string(sm_space *self) {
 }
 
 // find a matching space by size in the size sorted array
-search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
+sm_search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
   sm_space **table_entries = sm_get_space_array(table);
 
   if (table->size == 0)
-    return (search_result){.found = false, .index = 0};
+    return (sm_search_result){.found = false, .index = 0};
 
   unsigned int lower_limit = 0;
   unsigned int upper_limit = table->size == 0 ? 0 : table->size - 1;
@@ -66,7 +66,7 @@ search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
   while (lower_limit < upper_limit && comparison != 0) {
     comparison = table_entries[guess_point]->my_type - sm_space_type - size;
     if (comparison == 0)
-      return (search_result){.found = true, .index = guess_point};
+      return (sm_search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
       upper_limit = guess_point == 0 ? 0 : guess_point - 1;
     else
@@ -76,18 +76,18 @@ search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
   comparison = table_entries[guess_point]->my_type - sm_space_type - size;
 
   if (comparison == 0)
-    return (search_result){.found = true, .index = guess_point};
+    return (sm_search_result){.found = true, .index = guess_point};
   if (comparison < 0) {
-    return (search_result){.found = false, .index = guess_point + 1};
+    return (sm_search_result){.found = false, .index = guess_point + 1};
   } else { // comparison > 0
-    return (search_result){.found = false, .index = guess_point};
+    return (sm_search_result){.found = false, .index = guess_point};
   }
 }
 
 // add a space to the space array, keeping it sorted
 sm_space_array *sm_space_add(sm_space *space, sm_space_array *table) {
-  search_result sr            = sm_space_array_find(table, space->my_type - sm_space_type);
-  sm_space    **table_entries = sm_get_space_array(table);
+  sm_search_result sr            = sm_space_array_find(table, space->my_type - sm_space_type);
+  sm_space       **table_entries = sm_get_space_array(table);
 
   if (table->size == table->capacity) {
     int new_capacity = ((int)(table->capacity * sm_global_growth_factor(0))) + 1;
