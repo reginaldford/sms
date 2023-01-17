@@ -17,7 +17,7 @@ Direct computations. The resulting value will not be stored for later use:
 
 Calculation and storage of double precision numbers:
 
-`a = 4;`
+`a = 4E-2;`
 
 `b = sqrt(a);`
 
@@ -31,9 +31,6 @@ Hyperbolic trigonometric expressions:
 
 `a = sinh(a/b) + c ;`
 
-This command demonstrates standard order of operations:
-
-`b = sqrt(a/b) - 2 * a ^ 2 ;` 
 
 The meta operator (:) stores expressions :
 
@@ -47,11 +44,15 @@ Removing the meta operator (:) above will lead to a different result.
 
 Storage of mathematical expressions in an array:
 
-`formula = : [ a ^ 2 + b ^ 2 , cos(a/b) ];`
+`formula = : [ a ^ 2 + b ^ 2 , ln(a/b) ];`
 
 Prefix sums:
 
 `c = + ( 1, sin( b ) ) ;`
+
+Set many variables to the same object:
+
+`a=b=c=d={same="object";};`
 
 Arrays can hold various objects:
 
@@ -69,7 +70,28 @@ Contexts can be nested:
 
 Variables can be removed from the current context:
 
-`delete c; `
+`delete c;`
+
+Define a function:
+
+`parabolic=:*(a,x^2);`
+
+`a=4;`
+
+`x=2;`
+
+After setting `a` and `x`, the following will call the `parabolic` function. 
+
+`parabolic{};`
+
+Since there are no variables provided in the context following 'parabolic', the dynmic scoping algorithm will go up to the global context for the values associated with the keys `a` and `x`.
+
+The values can be overridden individually:
+
+`parabolic { a = 2 ; };`
+
+`parabolic { a = 2 ; x = 1 ; };`
+
 
 Exit the program with:
 
