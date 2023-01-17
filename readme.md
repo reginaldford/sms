@@ -2,7 +2,7 @@
 
 SMS is a terminal program that interprets commands like `a = 4 * cos(0.5);` and `delete a;` to set and destroy variables, respectively.
 
-The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts. Contexts are user defined objects with key-value pairs.
+The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts. Contexts are user defined objects with key-value pairs. Functions can also be called with dynamic scoping for the variables.
 
 To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. The variable names must start with underscores or a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
 
@@ -84,7 +84,7 @@ After setting `a` and `x`, the following will call the `parabolic` function.
 
 `parabolic{};`
 
-Since there are no variables provided in the context following 'parabolic', the dynmic scoping algorithm will go up to the global context for the values associated with the keys `a` and `x`.
+Since there are no variables provided in the context following 'parabolic', the dynamic scoping algorithm will go up to the global context for the values associated with the keys `a` and `x`.
 
 The values can be overridden individually:
 
