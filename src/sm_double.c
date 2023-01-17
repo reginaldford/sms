@@ -20,7 +20,7 @@ sm_string *sm_double_to_string(sm_double *self) {
 // Return an sm_string describing this double
 // Unfortunately requires expressing the double ahead of time
 unsigned int sm_double_to_string_len(sm_double *self) {
-  char buffer[17];
+  char buffer[22];
   return sm_double_sprint(self, buffer);
 }
 
@@ -29,7 +29,7 @@ unsigned int sm_double_to_string_len(sm_double *self) {
 unsigned int sm_double_sprint(sm_double *self, char *buffer) {
   sprintf(buffer, "%.*g", 16, self->value);
   unsigned short int count = 0;
-  for (; count < 18 && buffer[count] != '\0'; count++)
+  for (; count < 22 && buffer[count] != '\0'; count++)
     ;
   return count;
 }
