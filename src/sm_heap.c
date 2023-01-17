@@ -30,15 +30,15 @@ sm_space *check_space(unsigned int size, unsigned int index) {
 }
 
 // Binary search for space in a size ordered space array
-search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
-                                       unsigned int lower_limit, unsigned int upper_limit) {
+sm_search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
+                                          unsigned int lower_limit, unsigned int upper_limit) {
   sm_space   **space_array = sm_get_space_array(ssa);
   int          comparison  = 1;
   unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
   while (lower_limit < upper_limit && comparison != 0) {
     comparison = space_array[guess_point]->my_type - sm_space_type - size;
     if (comparison == 0)
-      return (search_result){.found = true, .index = guess_point};
+      return (sm_search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
       upper_limit = guess_point == 0 ? 0 : guess_point - 1;
     else
@@ -47,11 +47,11 @@ search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
   }
   comparison = space_array[guess_point]->my_type - sm_space_type - size;
   if (comparison == 0)
-    return (search_result){.found = true, .index = guess_point};
+    return (sm_search_result){.found = true, .index = guess_point};
   if (comparison < 0) {
-    return (search_result){.found = false, .index = guess_point + 1};
+    return (sm_search_result){.found = false, .index = guess_point + 1};
   } else { // comparison > 0
-    return (search_result){.found = false, .index = guess_point};
+    return (sm_search_result){.found = false, .index = guess_point};
   }
 }
 
@@ -59,7 +59,7 @@ search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
 void sort_1_off(sm_space_array *ssa, unsigned int off_index) {
   unsigned int space_size = sm_get_space_array(ssa)[off_index]->my_type - sm_space_type;
   // Now, to binary search the remaining portion of the array
-  search_result sr = find_space_within_bounds(ssa, space_size, 0, off_index - 1);
+  sm_search_result sr = find_space_within_bounds(ssa, space_size, 0, off_index - 1);
   // Use search result to sort this 1-off array
   sm_space   **space_array = sm_get_space_array(ssa);
   sm_space    *off_space   = space_array[off_index];
@@ -74,7 +74,7 @@ void sort_1_off(sm_space_array *ssa, unsigned int off_index) {
 // Internal 'malloc'. checks space array first, else move the 'used' integer up
 void *sm_malloc(unsigned int size) {
   if (sm_global_space_array(NULL)->size > 0) {
-    search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
+    sm_search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
     // sr.found is true for exact matches
     if (sr.found == true) {
       sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];

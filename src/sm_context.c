@@ -20,11 +20,12 @@ sm_context_entry *sm_context_entries(sm_context *context) {
 
 // Binary search to find the index with this key
 // Else, return the position where it should be added
-search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
+// For variable reference on lhs
+sm_search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
   sm_context_entry *context_entries = sm_context_entries(context);
 
   if (context->size == 0)
-    return (search_result){.found = false, .index = 0};
+    return (sm_search_result){.found = false, .index = 0};
   char        *var_name    = &(var_string->content);
   unsigned int lower_limit = 0;
   unsigned int upper_limit = context->size == 0 ? 0 : context->size - 1;
@@ -33,7 +34,7 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
   while (lower_limit < upper_limit && comparison != 0) {
     comparison = strcmp(&(context_entries[guess_point].name->content), var_name);
     if (comparison == 0)
-      return (search_result){.found = true, .index = guess_point};
+      return (sm_search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
       upper_limit = guess_point == 0 ? 0 : guess_point - 1;
     else
@@ -43,20 +44,34 @@ search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
   comparison = strcmp(&(context_entries[guess_point].name->content), var_name);
 
   if (comparison == 0)
-    return (search_result){.found = true, .index = guess_point};
+    return (sm_search_result){.found = true, .index = guess_point};
   if (comparison < 0) {
-    return (search_result){.found = false, .index = guess_point + 1};
+    return (sm_search_result){.found = false, .index = guess_point + 1};
   } else { // comparison > 0
-    return (search_result){.found = false, .index = guess_point};
+    return (sm_search_result){.found = false, .index = guess_point};
   }
 }
 
-// If the key exists, mutate the key_value to have the new value.
+// Search for a variable, and traverse the 'parent' pointers to search
+// Used for variable reference on rhs
+sm_search_result_cascading sm_find_var_cascading(sm_context *context, sm_string *var_string) {
+  sm_search_result sr = sm_find_var_index(context, var_string);
+  if (sr.found == true) {
+    return (sm_search_result_cascading){.found = true, .index = sr.index, .context = context};
+  } else if (context->parent != NULL) {
+    return sm_find_var_cascading(context->parent, var_string);
+  } else {
+    return (sm_search_result_cascading){.found = false, .index = 0, .context = context};
+  }
+}
+
+
+// If the key exists, mutate the key_value to have the new value
 // Else, add a key_value with this key and value
 sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
   sm_context       *current_context = context;
   sm_context_entry *context_entries = sm_context_entries(current_context);
-  search_result     sr              = sm_find_var_index(current_context, name);
+  sm_search_result  sr              = sm_find_var_index(current_context, name);
   if (sr.found == true) {
     context_entries[sr.index].value = val;
     return current_context;
@@ -78,7 +93,7 @@ sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
 
 // Remove a key_value identified by the key
 bool sm_delete(sm_symbol *sym) {
-  search_result sr = sm_find_var_index(sm_global_context(NULL), sym->name);
+  sm_search_result sr = sm_find_var_index(sm_global_context(NULL), sym->name);
   if (sr.found == true) {
     sm_context       *context         = sm_global_context(NULL);
     sm_context_entry *context_entries = sm_context_entries(context);
@@ -87,7 +102,7 @@ bool sm_delete(sm_symbol *sym) {
     }
     context->size -= 1;
     context->capacity = context->size;
-    // putting a space for remaining space
+    // Putting a space for remaining space
     sm_new_space_after(context, sizeof(sm_context_entry));
     return true;
   } else {

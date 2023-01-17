@@ -14,23 +14,32 @@ typedef struct sm_context_entry {
   sm_object *value;
 } sm_context_entry;
 
-// search_result allows binary search to return "would be here"
+// sm_search_result allows binary search to return "would be here"
 // by setting found to false and using index to indicate where it would be
-typedef struct search_result {
+typedef struct sm_search_result {
   bool         found;
   unsigned int index;
-} search_result;
+} sm_search_result;
+
+// For cascading searches.
+// If the variable is found, the sm_contex containing the variable is set as 'context'
+typedef struct sm_search_result_cascading {
+  bool         found;
+  unsigned int index;
+  sm_context  *context;
+} sm_search_result_cascading;
 
 sm_context              *sm_global_context(sm_context *replacement);
 sm_context              *sm_new_context(unsigned int capacity);
 struct sm_context_entry *sm_context_entries(struct sm_context *context);
 void                     sm_print_table(struct sm_context *context);
-search_result sm_find_var_index(struct sm_context *context, struct sm_string *var_string);
-sm_context   *sm_set_var(struct sm_context *context, struct sm_string *name, void *val);
-bool          sm_delete(sm_symbol *sym);
-sm_string    *sm_context_to_string(sm_context *self);
-unsigned int  sm_context_sprint(sm_context *self, char *buffer);
-unsigned int  sm_context_to_string_len(sm_context *self);
-sm_string    *sm_context_entry_to_string(sm_context_entry *ce);
-unsigned int  sm_context_entry_sprint(sm_context_entry *ce, char *buffer);
-unsigned int  sm_context_entry_to_string_len(sm_context_entry *ce);
+sm_search_result sm_find_var_index(struct sm_context *context, struct sm_string *var_string);
+sm_search_result_cascading sm_find_var_cascading(sm_context *context, sm_string *var_string);
+sm_context  *sm_set_var(struct sm_context *context, struct sm_string *name, void *val);
+bool         sm_delete(sm_symbol *sym);
+sm_string   *sm_context_to_string(sm_context *self);
+unsigned int sm_context_sprint(sm_context *self, char *buffer);
+unsigned int sm_context_to_string_len(sm_context *self);
+sm_string   *sm_context_entry_to_string(sm_context_entry *ce);
+unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer);
+unsigned int sm_context_entry_to_string_len(sm_context_entry *ce);

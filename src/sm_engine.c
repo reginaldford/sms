@@ -1,4 +1,5 @@
 // The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+
 #include "sms.h"
 
 sm_object *sm_engine_eval(sm_object *input) {
@@ -100,11 +101,11 @@ sm_object *sm_engine_eval(sm_object *input) {
     return input;
   }
   if (input_type == sm_symbol_type) {
-    sm_symbol    *sym      = (sm_symbol *)input;
-    sm_string    *var_name = sym->name;
-    search_result sr       = sm_find_var_index(sm_global_context(NULL), var_name);
+    sm_symbol                 *sym      = (sm_symbol *)input;
+    sm_string                 *var_name = sym->name;
+    sm_search_result_cascading sr       = sm_find_var_cascading(sm_global_context(NULL), var_name);
     if (sr.found == true) {
-      return sm_context_entries(sm_global_context(NULL))[sr.index].value;
+      return sm_context_entries(sr.context)[sr.index].value;
     } else {
       // should return error object;
       printf("Could not find variable: %s\n", &(var_name->content));
