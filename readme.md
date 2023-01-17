@@ -80,9 +80,11 @@ Define a function:
 
 `x=2;`
 
-After setting a and x, the following will call the paracolic function. Since there are no variables provided in the context following 'parabolic', the dynmic scoping algorithm will go up to the global context for the keys `a` and `x`. 
+After setting `a` and `x`, the following will call the `parabolic` function. 
 
 `parabolic{};`
+
+Since there are no variables provided in the context following 'parabolic', the dynmic scoping algorithm will go up to the global context for the values associated with the keys `a` and `x`.
 
 The values can be overridden individually:
 
