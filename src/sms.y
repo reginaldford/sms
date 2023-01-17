@@ -268,7 +268,7 @@ int main(){
 
   //Introduction and prompt
   printf("Symbolic Math System\n");
-  printf("Version 0.11\n");
+  printf("Version 0.12\n");
   sm_terminal_prompt();
 
   //Start the parser. 
