@@ -25,13 +25,15 @@ void yyerror(char *msg);
 
 %token CLEAR FORMAT LS NEWLINE EXIT SELF
 
-
+%type  <expr>     FUNCALL
 %type  <meta>     META_EXPR
 %type  <kv>       KEYVALUE
 %type  <context>  CONTEXT
+%type  <context>  CONTEXT_LIST
 %type  <expr>     EXPR
 %type  <expr>     EXPR_LIST
 %type  <expr>     ARRAY
+%type  <expr>     ARRAY_LIST
 %token <num>      NUM
 %token <sym>      SYM
 %token <str>      STRING
@@ -80,17 +82,12 @@ COMMAND : KEYVALUE            {
   | COMMAND ';' COMMAND ';' {;}
   | EXIT    ';'             { sm_signal_handler(SIGQUIT); }
 
-
 KEYVALUE  : SYM '=' EXPR  {
     $$ = sm_new_key_value($1->name,(sm_object*)$3 ) ;
   }
 
-
-META_EXPR : ':' EXPR {
-        $$ = sm_new_meta((sm_object*) $2 ) ;
-  }
-
 EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
+
   | EXPR '-' EXPR { $$ = sm_new_expr_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
   | EXPR '+' EXPR { $$ = sm_new_expr_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
   | EXPR '*' EXPR { $$ = sm_new_expr_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
@@ -124,20 +121,16 @@ EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
   | DIFF '(' EXPR ')' { $$ = sm_new_expr(sm_diff,(sm_object*) $3 );}
   | DIFF '(' EXPR ',' SYM ')' {$$ = sm_new_expr_2(sm_diff,(sm_object*)$3,(sm_object*)$5 );}
   | EXPR_LIST ')' { ; }
+  | CONTEXT   {;}
   | '[' EXPR ']'	{ $$ = (sm_expr*)sm_new_expr(sm_array,(sm_object*)$2);}
-  | '{' KEYVALUE ';' '}'	{
-    $$ = (sm_expr*)sm_set_var(sm_new_context(1),$2->name,$2->value);
-  }
   | '[' ']'							{ $$ = sm_new_expr_n(sm_array,0,0);}
-  | ARRAY ']' {;}
-  | CONTEXT ';' '}'     {;}
-  | '{' '}'							{ $$ = (sm_expr*)sm_new_context(0);}
+  | ARRAY     {;}
   | META_EXPR {;}
   | KEYVALUE {
     $$ =(sm_expr*) $1->value;
     sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,sm_engine_eval($1->value)));
   }
-
+  | FUNCALL   {;}
   
 EXPR_LIST: '+' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
   | '-' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_minus,(sm_object*)$3,(sm_object*)$5 );}
@@ -145,21 +138,110 @@ EXPR_LIST: '+' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_plus,(sm_object*)$3,(s
   | '/' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_divide,(sm_object*)$3,(sm_object*)$5 );}
   | EXPR_LIST ',' EXPR      {$$ = sm_append_to_expr((sm_expr*)$1,(sm_object*)$3);}
 
-ARRAY: '[' EXPR ',' EXPR {$$=sm_new_expr_2(sm_array,(sm_object*)$2,(sm_object*)$4);}
-  | ARRAY ',' EXPR {$$ = sm_append_to_expr($1,(sm_object*)$3);}
+FUNCALL: META_EXPR CONTEXT {
+    sm_context * previous_context = sm_global_context($2);
+    $$=(sm_expr*)sm_engine_eval(((sm_meta*)$1)->address);
+    sm_global_context(previous_context);
+  }
+  | META_EXPR SYM {
+    sm_string    *var_name = ($2)->name;
+    search_result sr       = sm_find_var_index(sm_global_context(NULL), var_name);
+    if (sr.found == true) {
+      sm_object * found = sm_context_entries(sm_global_context(NULL))[sr.index].value;
+      if(found->my_type==sm_context_type){
+        sm_context * previous_context = sm_global_context((sm_context*)found);
+        $$=(sm_expr*)sm_engine_eval(((sm_meta*)$1)->address);
+        sm_global_context(previous_context);
+      } else {
+          printf("Variable is not a context: %s ", &(var_name->content));
+          printf("If a variable follows a meta expression, the variable must point to a context.\n");
+          $$= (sm_expr *)sm_new_double(0);
+        }
+    } else {
+      printf("Could not find variable: %s\n", &(var_name->content));
+      printf("In this expression, %s should be set to a context for this syntax to be valid.\n", &(var_name->content));
+      $$= (sm_expr *)sm_new_double(0);
+    }
+  }
+  | SYM CONTEXT  {
+    sm_string    *var_name = ($1)->name;
+    search_result sr       = sm_find_var_index(sm_global_context(NULL), var_name);
+    if (sr.found == true) {
+      sm_object * found = sm_context_entries(sm_global_context(NULL))[sr.index].value;
+      if(found->my_type==sm_meta_type){
+        sm_context * previous_context = sm_global_context($2);
+        $$=(sm_expr*)sm_engine_eval(((sm_meta*)found)->address);
+        sm_global_context(previous_context);
+      }
+    } else {
+      printf("Could not find variable: %s\n", &(var_name->content));
+      printf(", which should be set to a meta object for this syntax to be valid.\n");
+      $$= (sm_expr *)sm_new_double(0);
+    }
+  }
+   | SYM SYM  {
+    sm_string    *var_name  =  ($1)->name;
+    sm_string    *var_name2 = ($2)->name;
+    search_result sr        = sm_find_var_index(sm_global_context(NULL), var_name);
+    search_result sr2       = sm_find_var_index(sm_global_context(NULL), var_name2);
+    if (sr.found == true && sr2.found == true) {
+      sm_object * found = sm_context_entries(sm_global_context(NULL))[sr.index].value;
+      if(found->my_type==sm_meta_type){
+        sm_object * found2 = sm_context_entries(sm_global_context(NULL))[sr2.index].value;
+        if(found2->my_type==sm_context_type){
+          sm_context * previous_context = sm_global_context((sm_context*)found2);
+          $$=(sm_expr*)sm_engine_eval(((sm_meta*)found)->address);
+          sm_global_context(previous_context);
+        }else{
+              printf("Second variable is not a context: %s\n",&(var_name2->content));
+             $$= (sm_expr *)sm_new_double(0);
+        }
+      } else {
+        printf("First variable, \'%s\' needs to be a meta function.\n",&(var_name->content));
+        $$= (sm_expr *)sm_new_double(0);
+      }
+    } else {
+      if(sr.found==false)
+        printf("Could not find variable: %s\n", &(var_name->content));
+      if(sr2.found==false)
+        printf("Could not find variable: %s\n", &(var_name2->content));
+      printf("Two adjacent values are considered a function call.\n");
+      printf("The variable \'%s\' must be set to a meta function.\nAlso, the variable ",&(var_name->content));
+      printf("\'%s\' must be set to a context.\n",&(var_name2->content) );
+      $$= (sm_expr *)sm_new_double(0);
+    }
+  }
+
+META_EXPR : ':' EXPR {
+        $$ = sm_new_meta((sm_object*) $2 ) ;
+  }
 
 
-CONTEXT: '{' KEYVALUE ';' KEYVALUE {
+ARRAY: ARRAY_LIST ']' { ; }
+
+ARRAY_LIST: '[' EXPR ',' EXPR {$$=sm_new_expr_2(sm_array,(sm_object*)$2,(sm_object*)$4);}
+  | ARRAY_LIST ',' EXPR {$$ = sm_append_to_expr($1,(sm_object*)$3);}
+
+
+CONTEXT: CONTEXT_LIST ';' '}'     {;}
+  | '{' KEYVALUE ';' '}'	{
+    $$ = sm_set_var(sm_new_context(1),$2->name,$2->value);
+  }
+  | '{' '}'							{ $$ = sm_new_context(0);}
+
+CONTEXT_LIST: '{' KEYVALUE ';' KEYVALUE {
 	  $$ = sm_new_context(2);
 	  $$ = sm_set_var(($$),$2->name,$2->value);
 	  $$ = sm_set_var(($$),$4->name,$4->value);
   }
-  | CONTEXT ';' KEYVALUE {
+  | CONTEXT_LIST ';' KEYVALUE {
     $$ = sm_set_var($1,$3->name,$3->value);
   }
 
 
+
 %%
+
 
 void yyerror(char *msg) {
 	//Use this function to investigate the error.
