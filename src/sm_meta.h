@@ -1,9 +1,9 @@
 // The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
 
 typedef struct sm_meta {
-  int        my_type;
-  int        meta_level;
-  sm_object *address;
+  int         my_type;
+  sm_object  *address;
+  sm_context *data;
 } sm_meta;
 
 sm_meta     *sm_new_meta(sm_object *address);

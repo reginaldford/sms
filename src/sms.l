@@ -16,14 +16,14 @@ digit [0-9]
 
 %%
 
-[ \t\f\v\n]    { ; }
-exit           {return EXIT;}
-clear          {return CLEAR;}
-ls             {return LS;}
-format         {return FORMAT;}
-let            {return LET;}
-self           {return SELF;}
-
+[ \t\f\v\n] { ; }
+exit        {return EXIT;}
+clear       {return CLEAR;}
+ls          {return LS;}
+format      {return FORMAT;}
+let         {return LET;}
+self        {return SELF;}
+if          {return IF;}
 sin         {return SIN;}
 cos         {return COS;}
 tan         {return TAN;}

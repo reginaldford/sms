@@ -23,9 +23,10 @@ void yyerror(char *msg);
   sm_meta * meta;
 };
 
-%token CLEAR FORMAT LS NEWLINE EXIT SELF
+%token CLEAR FORMAT LS NEWLINE EXIT SELF IF
 
 %type  <expr>     FUNCALL
+%type  <expr>     IF_STATEMENT
 %type  <meta>     META_EXPR
 %type  <kv>       KEYVALUE
 %type  <context>  CONTEXT
@@ -34,6 +35,7 @@ void yyerror(char *msg);
 %type  <expr>     EXPR_LIST
 %type  <expr>     ARRAY
 %type  <expr>     ARRAY_LIST
+%type  <expr>     EQUAL
 %token <num>      NUM
 %token <sym>      SYM
 %token <str>      STRING
@@ -56,7 +58,7 @@ void yyerror(char *msg);
 %left  '+' '-'
 %left  '*' '/'
 %right '^'
-%left ':'
+%left  ':'
 
 
 
@@ -88,10 +90,11 @@ KEYVALUE  : SYM '=' EXPR  {
     $$ = sm_new_key_value($1->name,(sm_object*)$3 ) ;
   }
 
-EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
 
-  | EXPR '-' EXPR { $$ = sm_new_expr_2(sm_minus,(sm_object*)$1,(sm_object*)$3); }
+
+EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
   | EXPR '+' EXPR { $$ = sm_new_expr_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
+  | EXPR '-' EXPR { $$ = sm_new_expr_2(sm_minus, (sm_object*) $1, (sm_object*) $3 ) ; }
   | EXPR '*' EXPR { $$ = sm_new_expr_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
   | EXPR '/' EXPR { $$ = sm_new_expr_2(sm_divide,(sm_object*) $1, (sm_object*) $3 ) ; }
   | EXPR '^' EXPR { $$ = sm_new_expr_2(sm_pow,   (sm_object*) $1, (sm_object*) $3 ) ; }
@@ -133,7 +136,21 @@ EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
     sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,sm_engine_eval($1->value)));
   }
   | FUNCALL   {;}
-  
+  | IF_STATEMENT {;}
+  | EQUAL {;}
+
+EQUAL : '=' '(' EXPR ',' EXPR ')' {
+    $$ = sm_new_expr_2(sm_equals,(sm_object*)$3,(sm_object*)$5);
+  }
+
+IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
+    $$ = sm_new_expr_2(sm_if,(sm_object*)($3),(sm_object*)($5));
+  }
+  | IF '(' EXPR ',' EXPR ',' EXPR ')' {
+    $$ = sm_new_expr_3(sm_if,(sm_object*)($3),(sm_object*)($5),(sm_object*)($7));
+  }
+
+
 EXPR_LIST: '+' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
   | '-' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_minus,(sm_object*)$3,(sm_object*)$5 );}
   | '*' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_times,(sm_object*)$3,(sm_object*)$5 );}
