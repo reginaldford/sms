@@ -43,7 +43,7 @@ sm_expr *sm_new_expr_2(enum sm_expr_type op, sm_object *arg1, sm_object *arg2) {
 
 // New expression with 3 arguments
 sm_expr *sm_new_expr_3(enum sm_expr_type op, sm_object *arg1, sm_object *arg2, sm_object *arg3) {
-  sm_expr *new_expr = sm_new_expr_n(op, 2, 2);
+  sm_expr *new_expr = sm_new_expr_n(op, 3, 3);
   sm_set_expr_arg(new_expr, 0, arg1);
   sm_set_expr_arg(new_expr, 1, arg2);
   return sm_set_expr_arg(new_expr, 2, arg3);

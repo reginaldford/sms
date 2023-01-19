@@ -8,8 +8,8 @@ sm_object *sm_engine_eval(sm_object *input) {
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     if (op == sm_plus) {
-      double sum = 0;
-      for (unsigned int i = 0; i < sme->size; i++)
+      double sum = ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0)))->value;
+      for (unsigned int i = 1; i < sme->size; i++)
         sum += ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, i)))->value;
       return (sm_object *)sm_new_double(sum);
     }
@@ -83,6 +83,32 @@ sm_object *sm_engine_eval(sm_object *input) {
     if (op == sm_sqrt) {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(sqrt(left_side->value));
+    }
+    if (op == sm_equals) {
+      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
+      sm_double *right_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 1));
+      if (left_side->value == right_side->value) {
+        return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(4, "true")));
+      } else {
+        return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+      }
+    }
+    if (op == sm_if) {
+      sm_object *condition_result = sm_engine_eval(sm_get_expr_arg(sme, 0));
+      // TODO: implement singletons.
+      if (condition_result->my_type == sm_meta_type) {
+        sm_meta *meta = (sm_meta *)condition_result;
+        if (meta->address->my_type == sm_symbol_type) {
+          sm_symbol *sym = (sm_symbol *)meta->address;
+          if (strncmp(&(sym->name->content), "true", 4) == 0) {
+            return sm_engine_eval(sm_get_expr_arg(sme, 1));
+          }
+        }
+      }
+      if (sme->size > 2)
+        return sm_engine_eval(sm_get_expr_arg(sme, 2));
+      else
+        return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
     }
     if (op == sm_array) {
       for (unsigned int i = 0; i < sme->size; i++) {

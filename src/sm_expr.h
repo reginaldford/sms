@@ -21,7 +21,8 @@ enum sm_expr_type {
   sm_ln,
   sm_exp,
   sm_diff,
-  sm_array
+  sm_array,
+  sm_if
 };
 
 // Head of an expression
