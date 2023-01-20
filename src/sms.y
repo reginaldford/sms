@@ -66,7 +66,7 @@ void yyerror(char *msg);
 
 
 
-COMMAND : KEYVALUE            { 
+COMMAND : KEYVALUE { 
     sm_global_context(sm_set_var(sm_global_context(NULL),$1->name,sm_engine_eval($1->value)));
     sm_garbage_collect();
     sm_terminal_prompt();
@@ -76,21 +76,19 @@ COMMAND : KEYVALUE            {
     sm_garbage_collect();
     sm_terminal_prompt();
   }
-  | DELETE SYM              {
-      sm_delete((sm_symbol*)$2);
-      sm_garbage_collect();
-      sm_terminal_prompt();
+  | DELETE SYM {
+    sm_delete((sm_symbol*)$2);
+    sm_garbage_collect();
+    sm_terminal_prompt();
   }
-  | LET SYM '=' EXPR  { printf("Activated let command ! (incomplete) \n"); }
+  | LET SYM '=' EXPR { printf("Activated let command ! (incomplete) \n"); }
   | error                   { yyerror("Bad syntax.");}
   | COMMAND ';' COMMAND ';' {;}
   | EXIT    ';'             { sm_signal_handler(SIGQUIT); }
 
-KEYVALUE  : SYM '=' EXPR  {
+KEYVALUE  : SYM '=' EXPR {
     $$ = sm_new_key_value($1->name,(sm_object*)$3 ) ;
   }
-
-
 
 EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
   | EXPR '+' EXPR { $$ = sm_new_expr_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
@@ -108,7 +106,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
      $$ = sm_new_expr_2(sm_times,(sm_object*)sm_new_double(-1), (sm_object*)$2 );
     }
   }
-  | SYM { $$ = (sm_expr*) sm_new_symbol(($1) -> name); }
+  | SYM { ; }
   | '(' EXPR ')' { $$ = (sm_expr*) $2; }
   | STRING { }
   | SIN  '(' EXPR ')' { $$ = sm_new_expr(sm_sin ,(sm_object*) $3 );}
@@ -147,9 +145,8 @@ IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
     $$ = sm_new_expr_2(sm_if,(sm_object*)($3),(sm_object*)($5));
   }
   | IF '(' EXPR ',' EXPR ',' EXPR ')' {
-    $$ = sm_new_expr_3(sm_if,(sm_object*)($3),(sm_object*)($5),(sm_object*)($7));
+    $$ = sm_new_expr_3(sm_if_else,(sm_object*)($3),(sm_object*)($5),(sm_object*)($7));
   }
-
 
 EXPR_LIST: '+' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
   | '-' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_minus,(sm_object*)$3,(sm_object*)$5 );}
@@ -158,94 +155,30 @@ EXPR_LIST: '+' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_plus,(sm_object*)$3,(s
   | EXPR_LIST ',' EXPR      {$$ = sm_append_to_expr((sm_expr*)$1,(sm_object*)$3);}
 
 FUNCALL: META_EXPR CONTEXT {
-    ($2)->parent = sm_global_context($2);
-    $$=(sm_expr*)sm_engine_eval(((sm_meta*)$1)->address);
-    sm_global_context(($2)->parent);
+    $$=sm_new_expr_2(sm_funcall_l_l, (sm_object *)($1), (sm_object *)($2));
   }
   | META_EXPR SYM {
-    sm_string    *var_name = ($2)->name;
-    sm_search_result sr       = sm_find_var_index(sm_global_context(NULL), var_name);
-    if (sr.found == true) {
-      sm_object * found = sm_context_entries(sm_global_context(NULL))[sr.index].value;
-      if(found->my_type==sm_context_type){
-        sm_context *found_cx = (sm_context*)found;
-        found_cx->parent = sm_global_context(found_cx);
-        $$=(sm_expr*)sm_engine_eval(((sm_meta*)$1)->address);
-        sm_global_context(found_cx->parent);
-      } else {
-          printf("Variable is not a context: %s ", &(var_name->content));
-          printf("If a variable follows a meta expression, the variable must point to a context.\n");
-          $$= (sm_expr *)sm_new_double(0);
-        }
-    } else {
-      printf("Could not find variable: %s\n", &(var_name->content));
-      printf("In this expression, %s should be set to a context for this syntax to be valid.\n", &(var_name->content));
-      $$= (sm_expr *)sm_new_double(0);
-    }
+    $$=sm_new_expr_2(sm_funcall_l_v, (sm_object *)($1), (sm_object *)($2));
   }
   | SYM CONTEXT  {
-    sm_string    *var_name = ($1)->name;
-    sm_search_result sr       = sm_find_var_index(sm_global_context(NULL), var_name);
-    if (sr.found == true) {
-      sm_object * found = sm_context_entries(sm_global_context(NULL))[sr.index].value;
-      if(found->my_type==sm_meta_type){
-        sm_meta* found_meta = (sm_meta*)found;
-        ($2)->parent = sm_global_context($2);
-        $$=(sm_expr*)sm_engine_eval(found_meta->address);
-        sm_global_context(($2)->parent);
-      }
-    } else {
-      printf("Could not find variable: %s\n", &(var_name->content));
-      printf(", which should be set to a meta object for this syntax to be valid.\n");
-      $$= (sm_expr *)sm_new_double(0);
-    }
+    $$=sm_new_expr_2(sm_funcall_v_l, (sm_object *)($1), (sm_object *)($2));
   }
- | SYM SYM  {
-  sm_string    *var_name  =  ($1)->name;
-  sm_string    *var_name2 = ($2)->name;
-  sm_search_result sr        = sm_find_var_index(sm_global_context(NULL), var_name);
-  sm_search_result sr2       = sm_find_var_index(sm_global_context(NULL), var_name2);
-  if (sr.found == true && sr2.found == true) {
-    sm_object * found = sm_context_entries(sm_global_context(NULL))[sr.index].value;
-    if(found->my_type==sm_meta_type){
-      sm_object * found2 = sm_context_entries(sm_global_context(NULL))[sr2.index].value;
-      if(found2->my_type==sm_context_type){
-        sm_meta * found_meta = (sm_meta*)found;
-        sm_context *given_cx = (sm_context*)found2;
-        given_cx->parent = sm_global_context(given_cx);
-        $$=(sm_expr*)sm_engine_eval(found_meta->address);
-        sm_global_context(given_cx->parent);
-      }else{
-        printf("Second variable is not a context: %s\n",&(var_name2->content));
-        $$= (sm_expr *)sm_new_double(0);
-      }
-    } else {
-      printf("First variable, \'%s\' needs to be a meta function.\n",&(var_name->content));
-      $$= (sm_expr *)sm_new_double(0);
-    }
-  } else {
-      if(sr.found==false)
-        printf("Could not find variable: %s\n", &(var_name->content));
-      if(sr2.found==false)
-        printf("Could not find variable: %s\n", &(var_name2->content));
-      printf("Two adjacent values are considered a function call.\n");
-      printf("The variable \'%s\' must be set to a meta function.\nAlso, the variable ",&(var_name->content));
-      printf("\'%s\' must be set to a context.\n",&(var_name2->content) );
-      $$= (sm_expr *)sm_new_double(0);
-    }
+  | SYM SYM  {
+    $$=sm_new_expr_2(sm_funcall_v_v, (sm_object *)($1), (sm_object *)($2));
   }
 
 META_EXPR : ':' EXPR {
         $$ = sm_new_meta((sm_object*) $2 ) ;
   }
 
-ARRAY: ARRAY_LIST ']' { ; }
-
+ARRAY: ARRAY_LIST ']'  { ; }
+  | ARRAY_LIST ',' ']' { ; }
 ARRAY_LIST: '[' EXPR ',' EXPR {$$=sm_new_expr_2(sm_array,(sm_object*)$2,(sm_object*)$4);}
   | ARRAY_LIST ',' EXPR {$$ = sm_append_to_expr($1,(sm_object*)$3);}
 
-CONTEXT: CONTEXT_LIST ';' '}'     {;}
-  | '{' KEYVALUE ';' '}'	{
+CONTEXT: CONTEXT_LIST '}'  {;}
+  | '{' KEYVALUE ';' '}'	 {;}
+  | '{' KEYVALUE '}'	{
     $$ = sm_set_var(sm_new_context(1),$2->name,$2->value);
   }
   | '{' '}'							{ $$ = sm_new_context(0);}
@@ -285,7 +218,7 @@ int main(){
 
   //Introduction and prompt
   printf("Symbolic Math System\n");
-  printf("Version 0.12\n");
+  printf("Version 0.125\n");
   sm_terminal_prompt();
 
   //Start the parser. 

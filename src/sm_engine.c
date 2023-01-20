@@ -105,10 +105,21 @@ sm_object *sm_engine_eval(sm_object *input) {
           }
         }
       }
-      if (sme->size > 2)
-        return sm_engine_eval(sm_get_expr_arg(sme, 2));
-      else
-        return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+      // what to return??
+      return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+    }
+    if (op == sm_if_else) {
+      sm_object *condition_result = sm_engine_eval(sm_get_expr_arg(sme, 0));
+      if (condition_result->my_type == sm_meta_type) {
+        sm_meta *meta = (sm_meta *)condition_result;
+        if (meta->address->my_type == sm_symbol_type) {
+          sm_symbol *sym = (sm_symbol *)meta->address;
+          if (strncmp(&(sym->name->content), "true", 4) == 0) {
+            return sm_engine_eval(sm_get_expr_arg(sme, 1));
+          }
+        }
+      }
+      return sm_engine_eval(sm_get_expr_arg(sme, 2));
     }
     if (op == sm_array) {
       for (unsigned int i = 0; i < sme->size; i++) {
@@ -116,9 +127,75 @@ sm_object *sm_engine_eval(sm_object *input) {
         sm_set_expr_arg(sme, i, new_val);
       }
       return (sm_object *)sme;
-    } else
-      return input;
-  }
+    }
+    if (op == sm_funcall_l_l) {
+      sm_meta    *meta  = (sm_meta *)sm_get_expr_arg(sme, 0);
+      sm_context *cx    = (sm_context *)sm_get_expr_arg(sme, 1);
+      cx->parent        = sm_global_context(cx);
+      sm_object *result = sm_engine_eval(meta->address);
+      sm_global_context(cx->parent);
+      return result;
+    }
+    if (op == sm_funcall_v_l) {
+      sm_symbol                 *sym      = (sm_symbol *)sm_get_expr_arg(sme, 0);
+      sm_context                *cx       = (sm_context *)sm_get_expr_arg(sme, 1);
+      sm_string                 *var_name = sym->name;
+      sm_search_result_cascading sr = sm_find_var_cascading(sm_global_context(NULL), var_name);
+      if (sr.found == true) {
+        sm_meta *meta     = (sm_meta *)sm_context_entries(sr.context)[sr.index].value;
+        cx->parent        = sm_global_context(cx);
+        sm_object *result = sm_engine_eval(meta->address);
+        sm_global_context(cx->parent);
+        return result;
+      } else {
+        // should return error object;
+        printf("Could not find function: %s\n", &(var_name->content));
+        return (sm_object *)sm_new_double(0);
+      }
+    }
+    if (op == sm_funcall_l_v) {
+      sm_meta                   *meta     = (sm_meta *)sm_get_expr_arg(sme, 0);
+      sm_symbol                 *sym      = (sm_symbol *)sm_get_expr_arg(sme, 1);
+      sm_string                 *var_name = sym->name;
+      sm_search_result_cascading sr = sm_find_var_cascading(sm_global_context(NULL), var_name);
+      if (sr.found == true) {
+        sm_context *cx    = (sm_context *)sm_context_entries(sr.context)[sr.index].value;
+        cx->parent        = sm_global_context(cx);
+        sm_object *result = sm_engine_eval(meta->address);
+        sm_global_context(cx->parent);
+        return result;
+      } else {
+        // should return error object;
+        printf("Could not find context: %s\n", &(var_name->content));
+        return (sm_object *)sm_new_double(0);
+      }
+    }
+    if (op == sm_funcall_v_v) {
+      sm_object                 *obj1      = sm_get_expr_arg(sme, 0);
+      sm_object                 *obj2      = sm_get_expr_arg(sme, 1);
+      sm_string                 *var1_name = ((sm_symbol *)obj1)->name;
+      sm_string                 *var2_name = ((sm_symbol *)obj2)->name;
+      sm_search_result_cascading sr1 = sm_find_var_cascading(sm_global_context(NULL), var1_name);
+      sm_search_result_cascading sr2 = sm_find_var_cascading(sm_global_context(NULL), var2_name);
+      if (sr1.found == true && sr2.found == true) {
+        sm_meta    *meta  = (sm_meta *)sm_context_entries(sr1.context)[sr1.index].value;
+        sm_context *cx    = (sm_context *)sm_context_entries(sr1.context)[sr2.index].value;
+        cx->parent        = sm_global_context(cx);
+        sm_object *result = sm_engine_eval(meta->address);
+        sm_global_context(cx->parent);
+        return result;
+      } else {
+        // should return error object;
+        if (sr1.found != true)
+          printf("Could not find function: %s\n", &(var1_name->content));
+        if (sr2.found != true)
+          printf("Could not find context: %s\n", &(var2_name->content));
+        return (sm_object *)sm_new_double(0);
+      }
+    }
+
+    return input;
+  } // end of expr case
 
   if (input_type == sm_primitive_type) {
     // sm_expr *smp= (sm_primitive*)input;
