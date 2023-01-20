@@ -22,7 +22,18 @@ enum sm_expr_type {
   sm_exp,
   sm_diff,
   sm_array,
-  sm_if
+  sm_if,
+  sm_if_else,
+  sm_funcall_v_l,
+  sm_funcall_v_v,
+  sm_funcall_l_v,
+  sm_funcall_l_l,
+  sm_test_eq,
+  sm_test_lt,
+  sm_test_mt,
+  sm_let,
+  sm_assign,
+  sm_cprim
 };
 
 // Head of an expression

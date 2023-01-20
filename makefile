@@ -14,7 +14,7 @@ CC_DEBUG=clang
 CFLAGS=-fshort-enums -O3
 
 # Compiling for debugging info
-CFLAGS_DEBUG=-lm -fshort-enums -g
+CFLAGS_DEBUG=-fshort-enums -g
 
 # ncurses experiments:
 #CFLAGS= -lm -lncurses -Ofast -fshort-enums
@@ -25,14 +25,19 @@ HEADERS=src/sms.h src/y.tab.h    src/sm_object.h src/sm_symbol.h src/sm_heap.h s
 
 OBJ_FILES=src/lex.yy.o src/y.tab.o src/sm_object.o src/sm_symbol.o src/sm_heap.o src/sm_string.o src/sm_expr.o src/sm_double.o src/sm_context.o src/sm_commands.o src/sm_global.o src/sm_gc.o src/sm_terminal.o src/sm_key_value.o src/sm_pointer.o src/sm_engine.o src/sm_meta.o src/sm_signal.o src/sm_space.o
 
+DEBUG_OBJ_FILES=src/lex.yy.o src/y.tab.o src/sm_object.dbg.o src/sm_symbol.dbg.o src/sm_heap.dbg.o src/sm_string.dbg.o src/sm_expr.dbg.o src/sm_double.dbg.o src/sm_context.dbg.o src/sm_commands.dbg.o src/sm_global.dbg.o src/sm_gc.dbg.o src/sm_terminal.dbg.o src/sm_key_value.dbg.o src/sm_pointer.dbg.o src/sm_engine.dbg.o src/sm_meta.dbg.o src/sm_signal.dbg.o src/sm_space.dbg.o
+
 sms: $(OBJ_FILES)
 	$(CC) -lm -o sms $(OBJ_FILES)
 
 %.o : %.c %.h
 	$(CC) $(CFLAGS) -c $< -o $@
+
+%.dbg.o : %.c %.h
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -c $< -o $@
 	
-sms_debug: src/y.tab.c src/lex.yy.c $(SOURCES) $(HEADERS)
-	$(CC_DEBUG) -o sms_debug $(SOURCES) $(CFLAGS_DEBUG)
+sms_debug: $(DEBUG_OBJ_FILES)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o sms_debug $(DEBUG_OBJ_FILES)
 
 src/y.tab.c src/y.tab.h: src/sms.y
 	bison -dy -o src/y.tab.c src/sms.y

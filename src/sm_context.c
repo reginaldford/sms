@@ -134,6 +134,9 @@ unsigned int sm_context_sprint(sm_context *self, char *buffer) {
   unsigned int      cursor = 1;
   for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
     cursor += sm_context_entry_sprint(&(ce[object_index]), &(buffer[cursor]));
+    if (object_index + 1 != self->size) {
+      buffer[cursor++] = ';';
+    }
   }
   buffer[cursor++] = '}';
   return cursor;
@@ -145,9 +148,12 @@ unsigned int sm_context_to_string_len(sm_context *self) {
     return 2;
   }
   sm_context_entry *ce  = sm_context_entries(self);
-  unsigned int      sum = 2;
+  unsigned int      sum = 1;
   for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
     sum += sm_context_entry_to_string_len(&(ce[object_index]));
+    if (object_index + 1 != self->size) {
+      sum += 1; // add a semicolon between commands
+    }
   }
   return sum;
 }
@@ -155,8 +161,7 @@ unsigned int sm_context_to_string_len(sm_context *self) {
 // Return a new string describing this context entry
 sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
   sm_string *output_str = sm_string_add_recycle_2nd(ce->name, sm_new_string(1, "="));
-  output_str            = sm_string_add(output_str, sm_object_to_string(ce->value));
-  return sm_string_add(output_str, sm_new_string(1, ";"));
+  return sm_string_add(output_str, sm_object_to_string(ce->value));
 }
 
 // Print to string buffer a description of this context entry
@@ -165,13 +170,10 @@ unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer) {
   int cursor       = ce->name->size;
   buffer[cursor++] = '=';
   cursor += sm_object_sprint((sm_object *)ce->value, &(buffer[cursor]));
-  buffer[cursor++] = ';';
   return cursor;
 }
 
 // Return the length of string that sm_context_entry would produce
 unsigned int sm_context_entry_to_string_len(sm_context_entry *ce) {
-  unsigned int sum = ce->name->size;
-  sum += sm_object_to_string_len(ce->value);
-  return sum + 2;
+  return 1 + ce->name->size + sm_object_to_string_len(ce->value);
 }

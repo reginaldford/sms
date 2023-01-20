@@ -26,11 +26,14 @@ void sm_inflate_heap() {
     sm_object *current_obj = (sm_object *)scan_cursor;
     switch (current_obj->my_type) {
     case sm_context_type: {
-      sm_context_entry *table = sm_context_entries((sm_context *)current_obj);
+      sm_context       *cx    = (sm_context *)current_obj;
+      sm_context_entry *table = sm_context_entries(cx);
       for (unsigned int i = 0; i < ((sm_context *)current_obj)->size; i++) {
         table[i].name  = (sm_string *)sm_meet_object((sm_object *)table[i].name);
         table[i].value = sm_meet_object(table[i].value);
       }
+      if (cx->parent != NULL)
+        cx->parent = (sm_context *)sm_meet_object((sm_object *)cx->parent);
       break;
     }
     case sm_expr_type: {
