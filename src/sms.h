@@ -15,7 +15,6 @@ enum sm_object_type {
   sm_symbol_type,
   sm_context_type,
   sm_pointer_type,
-  sm_key_value_type,
   sm_meta_type,
   sm_space_type
 };
@@ -46,7 +45,6 @@ enum sm_object_type {
 #include "sm_gc.h"
 #include "sm_global.h"
 #include "sm_terminal.h"
-#include "sm_key_value.h"
 #include "sm_engine.h"
 #include "sm_meta.h"
 #include "sm_signal.h"

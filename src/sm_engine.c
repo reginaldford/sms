@@ -7,6 +7,14 @@ sm_object *sm_engine_eval(sm_object *input) {
   if (input_type == sm_expr_type) {
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
+
+    if (op == sm_assign) {
+      sm_symbol  *sym   = (sm_symbol *)sm_get_expr_arg(sme, 0);
+      sm_object  *value = (sm_object *)sm_get_expr_arg(sme, 1);
+      sm_context *cx    = sm_set_var(sm_global_context(NULL), sym->name, sm_engine_eval(value));
+      sm_global_context(cx);
+      return value;
+    }
     if (op == sm_plus) {
       double sum = ((sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0)))->value;
       for (unsigned int i = 1; i < sme->size; i++)
@@ -84,18 +92,8 @@ sm_object *sm_engine_eval(sm_object *input) {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
       return (sm_object *)sm_new_double(sqrt(left_side->value));
     }
-    if (op == sm_equals) {
-      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 0));
-      sm_double *right_side = (sm_double *)sm_engine_eval(sm_get_expr_arg(sme, 1));
-      if (left_side->value == right_side->value) {
-        return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(4, "true")));
-      } else {
-        return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
-      }
-    }
     if (op == sm_if) {
       sm_object *condition_result = sm_engine_eval(sm_get_expr_arg(sme, 0));
-      // TODO: implement singletons.
       if (condition_result->my_type == sm_meta_type) {
         sm_meta *meta = (sm_meta *)condition_result;
         if (meta->address->my_type == sm_symbol_type) {
@@ -129,11 +127,11 @@ sm_object *sm_engine_eval(sm_object *input) {
       return (sm_object *)sme;
     }
     if (op == sm_funcall_l_l) {
-      sm_meta    *meta  = (sm_meta *)sm_get_expr_arg(sme, 0);
-      sm_context *cx    = (sm_context *)sm_get_expr_arg(sme, 1);
-      cx->parent        = sm_global_context(cx);
-      sm_object *result = sm_engine_eval(meta->address);
-      sm_global_context(cx->parent);
+      sm_meta    *meta        = (sm_meta *)sm_get_expr_arg(sme, 0);
+      sm_context *cx          = (sm_context *)sm_get_expr_arg(sme, 1);
+      sm_context *previous_cx = sm_global_context(cx);
+      sm_object  *result      = sm_engine_eval(meta->address);
+      sm_global_context(previous_cx);
       return result;
     }
     if (op == sm_funcall_v_l) {
@@ -142,10 +140,10 @@ sm_object *sm_engine_eval(sm_object *input) {
       sm_string                 *var_name = sym->name;
       sm_search_result_cascading sr = sm_find_var_cascading(sm_global_context(NULL), var_name);
       if (sr.found == true) {
-        sm_meta *meta     = (sm_meta *)sm_context_entries(sr.context)[sr.index].value;
-        cx->parent        = sm_global_context(cx);
-        sm_object *result = sm_engine_eval(meta->address);
-        sm_global_context(cx->parent);
+        sm_meta    *meta        = (sm_meta *)sm_context_entries(sr.context)[sr.index].value;
+        sm_context *previous_cx = sm_global_context(cx);
+        sm_object  *result      = sm_engine_eval(meta->address);
+        sm_global_context(previous_cx);
         return result;
       } else {
         // should return error object;
@@ -159,10 +157,10 @@ sm_object *sm_engine_eval(sm_object *input) {
       sm_string                 *var_name = sym->name;
       sm_search_result_cascading sr = sm_find_var_cascading(sm_global_context(NULL), var_name);
       if (sr.found == true) {
-        sm_context *cx    = (sm_context *)sm_context_entries(sr.context)[sr.index].value;
-        cx->parent        = sm_global_context(cx);
-        sm_object *result = sm_engine_eval(meta->address);
-        sm_global_context(cx->parent);
+        sm_context *cx       = (sm_context *)sm_context_entries(sr.context)[sr.index].value;
+        sm_context *previous = sm_global_context(cx);
+        sm_object  *result   = sm_engine_eval(meta->address);
+        sm_global_context(previous);
         return result;
       } else {
         // should return error object;
@@ -178,11 +176,11 @@ sm_object *sm_engine_eval(sm_object *input) {
       sm_search_result_cascading sr1 = sm_find_var_cascading(sm_global_context(NULL), var1_name);
       sm_search_result_cascading sr2 = sm_find_var_cascading(sm_global_context(NULL), var2_name);
       if (sr1.found == true && sr2.found == true) {
-        sm_meta    *meta  = (sm_meta *)sm_context_entries(sr1.context)[sr1.index].value;
-        sm_context *cx    = (sm_context *)sm_context_entries(sr1.context)[sr2.index].value;
-        cx->parent        = sm_global_context(cx);
-        sm_object *result = sm_engine_eval(meta->address);
-        sm_global_context(cx->parent);
+        sm_meta    *meta     = (sm_meta *)sm_context_entries(sr1.context)[sr1.index].value;
+        sm_context *cx       = (sm_context *)sm_context_entries(sr1.context)[sr2.index].value;
+        sm_context *previous = sm_global_context(cx);
+        sm_object  *result   = sm_engine_eval(meta->address);
+        sm_global_context(previous);
         return result;
       } else {
         // should return error object;
@@ -193,10 +191,56 @@ sm_object *sm_engine_eval(sm_object *input) {
         return (sm_object *)sm_new_double(0);
       }
     }
-
+    if (op == sm_test_lt) {
+      sm_object *obj1 = sm_get_expr_arg(sme, 0);
+      sm_object *obj2 = sm_get_expr_arg(sme, 1);
+      if (obj1->my_type == sm_double_type) {
+        if (obj2->my_type == sm_double_type) {
+          double v1 = ((sm_double *)obj1)->value;
+          double v2 = ((sm_double *)obj2)->value;
+          if (v1 < v2)
+            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(4, "true")));
+          else
+            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+        }
+        return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+      }
+    }
+    if (op == sm_test_gt) {
+      sm_object *obj1 = sm_get_expr_arg(sme, 0);
+      sm_object *obj2 = sm_get_expr_arg(sme, 1);
+      if (obj1->my_type == sm_double_type) {
+        if (obj2->my_type == sm_double_type) {
+          double v1 = ((sm_double *)obj1)->value;
+          double v2 = ((sm_double *)obj2)->value;
+          if (v1 > v2)
+            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(4, "true")));
+          else
+            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+        }
+      }
+      return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+    }
+    if (op == sm_test_eq) {
+      sm_object *obj1 = sm_get_expr_arg(sme, 0);
+      sm_object *obj2 = sm_get_expr_arg(sme, 1);
+      if (obj1->my_type == sm_double_type) {
+        if (obj2->my_type == sm_double_type) {
+          double v1 = ((sm_double *)obj1)->value;
+          double v2 = ((sm_double *)obj2)->value;
+          if (v1 == v2)
+            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(4, "true")));
+          else
+            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+        }
+      }
+      return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+    }
+    // default action for expr
     return input;
   } // end of expr case
 
+  // other objects
   if (input_type == sm_primitive_type) {
     // sm_expr *smp= (sm_primitive*)input;
     printf("Primitives are not developed yet\n");
@@ -223,6 +267,6 @@ sm_object *sm_engine_eval(sm_object *input) {
         ce[i].value = sm_engine_eval(ce[i].value);
     }
     return input;
-  } else // literals are simply returned
-    return input;
+  }
+  return input;
 }

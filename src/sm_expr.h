@@ -6,7 +6,6 @@ enum sm_expr_type {
   sm_minus,
   sm_times,
   sm_divide,
-  sm_equals,
   sm_sqrt,
   sm_sin,
   sm_cos,
@@ -21,18 +20,18 @@ enum sm_expr_type {
   sm_ln,
   sm_exp,
   sm_diff,
+  sm_assign,
   sm_array,
-  sm_if,
-  sm_if_else,
   sm_funcall_v_l,
   sm_funcall_v_v,
   sm_funcall_l_v,
   sm_funcall_l_l,
+  sm_if,
+  sm_if_else,
+  sm_let,
   sm_test_eq,
   sm_test_lt,
-  sm_test_mt,
-  sm_let,
-  sm_assign,
+  sm_test_gt,
   sm_cprim
 };
 
@@ -45,14 +44,12 @@ typedef struct sm_expr {
   unsigned int      size;
 } sm_expr;
 
-sm_expr   *sm_new_expr_n(enum sm_expr_type op1, unsigned int size, unsigned int capacity);
-sm_expr   *sm_new_expr(enum sm_expr_type op1, sm_object *arg);
-sm_expr   *sm_append_to_expr(sm_expr *expr, sm_object *arg);
-sm_expr   *sm_new_expr_2(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2);
-sm_expr   *sm_new_expr_3(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
-sm_string *sm_prefix_to_string(sm_expr *expr, sm_string *op);
+sm_expr *sm_new_expr_n(enum sm_expr_type op1, unsigned int size, unsigned int capacity);
+sm_expr *sm_new_expr(enum sm_expr_type op1, sm_object *arg);
+sm_expr *sm_append_to_expr(sm_expr *expr, sm_object *arg);
+sm_expr *sm_new_expr_2(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2);
+sm_expr *sm_new_expr_3(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
 unsigned int sm_prefix_sprint(sm_expr *self, char *buffer);
-sm_string   *sm_infix_to_string(sm_expr *expr, sm_string *op);
 unsigned int sm_infix_sprint(sm_expr *expr, char *buffer);
 sm_string   *sm_expr_to_string(sm_expr *expr);
 unsigned int sm_expr_sprint(sm_expr *self, char *buffer);
