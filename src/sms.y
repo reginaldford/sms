@@ -174,8 +174,8 @@ META_EXPR : ':' EXPR {
         $$ = sm_new_meta((sm_object*) $2 ) ;
   }
 
-ARRAY: ARRAY_LIST ']'
-  | ARRAY_LIST ',' ']'
+ARRAY: ARRAY_LIST ']' {};
+  | ARRAY_LIST ',' ']' {};
   | '[' EXPR ']' { $$ = (sm_expr*)sm_new_expr(sm_array,(sm_object*)$2);}
   | '[' ']'	{ $$ = sm_new_expr_n(sm_array,0,0);}
 
@@ -183,7 +183,12 @@ ARRAY_LIST: '[' EXPR ',' EXPR {$$=sm_new_expr_2(sm_array,(sm_object*)$2,(sm_obje
   | ARRAY_LIST ',' EXPR {$$ = sm_append_to_expr($1,(sm_object*)$3);}
 
 CONTEXT: CONTEXT_LIST '}' {}
-  | '{' ASSIGNMENT ';' '}' {}
+  | CONTEXT_LIST ';' '}' {}
+  | '{' ASSIGNMENT ';' '}' {
+    sm_string *name  = ((sm_symbol*)sm_get_expr_arg($2,0))->name;
+    sm_object *value = (sm_object*)sm_get_expr_arg($2,1);
+    $$ = sm_set_var(sm_new_context(1),name,value);
+  }
   | '{' ASSIGNMENT '}' {
     sm_string *name  = ((sm_symbol*)sm_get_expr_arg($2,0))->name;
     sm_object *value = (sm_object*)sm_get_expr_arg($2,1);
