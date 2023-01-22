@@ -38,7 +38,7 @@ ln          {return LN;}
 sqrt        {return SQRT;}
 diff        {return DIFF;}
 delete      {return DELETE;}
-
+==          {return EQEQ;}
 <<EOF>> {
     /* Immediately exit the program here */
     sm_signal_handler(SIGQUIT);

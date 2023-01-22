@@ -65,6 +65,7 @@ sm_object *sm_get_expr_arg(sm_expr *expr, unsigned int index) {
 // Can this op take 2 arguments AND have infix representation?
 bool sm_is_infix(enum sm_expr_type op) {
   switch (op) {
+  case sm_assign:
   case sm_plus:
   case sm_minus:
   case sm_times:
@@ -74,21 +75,6 @@ bool sm_is_infix(enum sm_expr_type op) {
   default:
     return false;
   }
-}
-
-// New string containing the contents of an expression without the bounding symbols
-sm_string *sm_expr_contents_to_string(sm_expr *sme) {
-  sm_string *result_str;
-  if (sme->size > 0)
-    result_str = sm_object_to_string(sm_get_expr_arg(sme, 0));
-  else
-    return sm_new_string(0, "");
-  for (unsigned int arg_index = 1; arg_index < sme->size; arg_index++) {
-    result_str         = sm_string_add_recycle(result_str, sm_new_string(1, ","));
-    sm_string *obj_str = sm_object_to_string(sm_get_expr_arg(sme, arg_index));
-    result_str         = sm_string_add_recycle(result_str, obj_str);
-  }
-  return result_str;
 }
 
 unsigned int sm_expr_contents_to_string_len(sm_expr *sme) {
@@ -116,16 +102,6 @@ unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer) {
   return buffer_pos;
 }
 
-// New string containing array description
-sm_string *sm_expr_array_to_string(sm_expr *expr) {
-  if (expr->size == 0)
-    return sm_new_string(2, "[]");
-  sm_string *str_beginning = sm_new_string(1, "[");
-  sm_string *str_contents  = sm_expr_contents_to_string(expr);
-  sm_string *result_str    = sm_string_add_recycle_1st(str_beginning, str_contents);
-  return sm_string_add_recycle(result_str, sm_new_string(1, "]"));
-}
-
 // Print to a cstring buffer the description of array
 // Return the resulting length
 unsigned int sm_expr_array_sprint(sm_expr *expr, char *buffer) {
@@ -137,16 +113,6 @@ unsigned int sm_expr_array_sprint(sm_expr *expr, char *buffer) {
   int len         = sm_expr_contents_sprint(expr, &(buffer[1]));
   buffer[1 + len] = ']';
   return 2 + len;
-}
-
-// New string containing prefix description
-sm_string *sm_prefix_to_string(sm_expr *expr, sm_string *op) {
-  if (expr->size == 0)
-    return sm_string_add_recycle(op, sm_new_string(2, "()"));
-  sm_string *str_beginning = sm_string_add_recycle(op, sm_new_string(1, "("));
-  sm_string *str_contents  = sm_expr_contents_to_string(expr);
-  sm_string *result_str    = sm_string_add(str_beginning, str_contents);
-  return sm_string_add_recycle_2nd(result_str, sm_new_string(1, ")"));
 }
 
 // Print description of prefix expression to buffer
@@ -186,46 +152,6 @@ unsigned short int op_level(enum sm_expr_type op_type) {
     return 3;
   default:
     return 4;
-  }
-}
-
-// New String containing infix description
-// If there are more than 2 arguments, defaults to prefix
-// Adding an arg to 1 + 1 leads to +( 1, 1, x )
-sm_string *sm_infix_to_string(sm_expr *expr, sm_string *op) {
-  if (expr->size > 2)
-    return sm_prefix_to_string(expr, op);
-
-  sm_object *o1 = sm_get_expr_arg(expr, 0);
-  sm_object *o2 = sm_get_expr_arg(expr, 1);
-
-  sm_string *left_string  = sm_object_to_string(o1);
-  sm_string *right_string = sm_object_to_string(o2);
-
-  int mid_op_level   = op_level(expr->op);
-  int left_op_level  = o1->my_type == sm_expr_type ? op_level(((sm_expr *)o1)->op) : 5;
-  int right_op_level = o2->my_type == sm_expr_type ? op_level(((sm_expr *)o1)->op) : 5;
-
-  if (left_op_level <= 2 && right_op_level <= 2 && left_op_level != mid_op_level) {
-    sm_string *str = sm_string_add_recycle(sm_new_string(1, "("), left_string);
-    str            = sm_string_add_recycle(str, sm_new_string(1, ")"));
-    str            = sm_string_add_recycle(str, op);
-    str            = sm_string_add_recycle(str, sm_new_string(1, "("));
-    str            = sm_string_add_recycle(str, right_string);
-    return sm_string_add_recycle(str, sm_new_string(1, ")"));
-  } else if (left_op_level <= 2 && left_op_level != mid_op_level) {
-    sm_string *str = sm_string_add_recycle(sm_new_string(1, "("), left_string);
-    str            = sm_string_add_recycle(str, sm_new_string(1, ")"));
-    str            = sm_string_add_recycle(str, op);
-    return sm_string_add_recycle(str, right_string);
-  } else if (right_op_level <= 2 && right_op_level != mid_op_level) {
-    sm_string *str = sm_string_add_recycle(left_string, op);
-    str            = sm_string_add_recycle(str, sm_new_string(1, "("));
-    str            = sm_string_add_recycle(str, right_string);
-    return sm_string_add_recycle(str, sm_new_string(1, ")"));
-  } else {
-    sm_string *left_and_op = sm_string_add_recycle(left_string, op);
-    return sm_string_add_recycle(left_and_op, right_string);
   }
 }
 
