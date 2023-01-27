@@ -26,6 +26,6 @@ sm_space_array  *sm_space_add_by_pos(sm_space *space, sm_space_array *table);
 sm_space_array  *sm_space_add(sm_space *space, sm_space_array *table);
 sm_search_result sm_space_array_find_by_pos(sm_space_array *table, sm_space *space);
 sm_search_result sm_space_array_find(sm_space_array *table, unsigned int size);
-bool             sm_delete_space_by_pos(sm_space *space);
-void             sm_delete_space_by_index(sm_space_array *spt, unsigned int index_to_delete);
+bool             sm_space_rm_by_pos(sm_space *space);
+void             sm_space_rm_by_index(sm_space_array *spt, unsigned int index_to_remove);
 sm_space        *sm_new_space_after(void *object, unsigned int size);

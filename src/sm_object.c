@@ -80,8 +80,9 @@ int sm_sizeof(sm_object *obj1) {
     return sm_round_size(sizeof(sm_string) + ((sm_string *)obj1)->size + 1);
   if (obj_type == sm_symbol_type)
     return sizeof(sm_symbol);
-  if (obj_type == sm_context_type)
+  if (obj_type == sm_context_type) {
     return sizeof(sm_context) + sizeof(sm_context_entry) * ((sm_context *)obj1)->capacity;
+  }
   if (obj_type == sm_pointer_type)
     return sizeof(sm_pointer);
   if (obj_type == sm_meta_type)

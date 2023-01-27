@@ -106,11 +106,11 @@ sm_space_array *sm_space_add(sm_space *space, sm_space_array *table) {
 }
 
 // use sm_space_array_find to get a space index
-void sm_delete_space_by_index(sm_space_array *spt, unsigned int index_to_delete) {
-  if (index_to_delete < spt->size) {
+void sm_space_rm_by_index(sm_space_array *spt, unsigned int index_to_remove) {
+  if (index_to_remove < spt->size) {
     sm_space **ptr_array = sm_get_space_array(spt);
     spt->size--;
-    for (unsigned int i = index_to_delete; i + 2 <= spt->size; i++) {
+    for (unsigned int i = index_to_remove; i + 2 <= spt->size; i++) {
       ptr_array[i] = ptr_array[i + 1];
     }
     return;

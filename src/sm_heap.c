@@ -15,7 +15,7 @@ sm_heap *sm_new_heap(unsigned int capacity) {
 }
 
 // Check for adequate space size
-// If it is acceptable,  delete it from the space array and return the space, else return NULL
+// If it is acceptable,  remove it from the space array and return the space, else return NULL
 sm_space *check_space(unsigned int size, unsigned int index) {
   if (index + 1 <= sm_global_space_array(NULL)->size) {
     unsigned int space_size =
@@ -79,7 +79,7 @@ void *sm_malloc(unsigned int size) {
     if (sr.found == true) {
       sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];
       // Deleting space by its index
-      sm_delete_space_by_index(sm_global_space_array(NULL), sr.index);
+      sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
       return good_space;
     }
     sm_space *result_space = check_space(size, sr.index);
@@ -91,7 +91,7 @@ void *sm_malloc(unsigned int size) {
         sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
         sort_1_off(sm_global_space_array(NULL), sr.index);
       } else {
-        sm_delete_space_by_index(sm_global_space_array(NULL), sr.index);
+        sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
       }
       return result_space;
     }

@@ -36,8 +36,9 @@ cot         {return COT;}
 exp         {return EXP;}
 ln          {return LN;}
 sqrt        {return SQRT;}
+abs         {return ABS;}
 diff        {return DIFF;}
-delete      {return DELETE;}
+rm          {return RM;}
 ==          {return EQEQ;}
 <<EOF>> {
     /* Immediately exit the program here */
@@ -48,8 +49,8 @@ delete      {return DELETE;}
       yylval.num = sm_new_double(atof(yytext));
       return NUM;
     }
-
-[-+*/=\^\;\[\]\(\)\{\},\:]                   {return yytext[0];}
+[\<\>\!]\= { return yytext[0]; }
+[-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
 _?+{alpha}+({digit}?+{alpha}?+_?+)?+\'?+    {
       yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
       return SYM;

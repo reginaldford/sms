@@ -32,16 +32,17 @@ enum sm_object_type {
 #define SIGHUP 1
 #define SIGQUIT 3
 
+#include "sm_stack.h"
 #include "sm_string.h"
 #include "sm_heap.h"
 #include "sm_object.h"
 #include "sm_symbol.h"
+#include "sm_expr.h"
 #include "sm_context.h"
 #include "sm_pointer.h"
 #include "sm_commands.h"
 #include "sm_space.h"
 #include "sm_double.h"
-#include "sm_expr.h"
 #include "sm_gc.h"
 #include "sm_global.h"
 #include "sm_terminal.h"
