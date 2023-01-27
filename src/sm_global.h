@@ -10,3 +10,4 @@ sm_expr        *sm_global_obj_stack(sm_expr *replacement);
 char           *sm_global_fn_name(unsigned short int which);
 unsigned int    sm_global_fn_name_len(unsigned short int which);
 unsigned int    sm_global_num_fns();
+sm_stack       *sm_global_lex_stack(sm_stack *replacement);

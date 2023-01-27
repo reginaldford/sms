@@ -25,7 +25,7 @@ sm_expr *sm_append_to_expr(sm_expr *expr, sm_object *arg) {
     unsigned int new_capacity = ((int)(expr->capacity * sm_global_growth_factor(0))) + 1;
     sm_expr     *new_expr     = sm_new_expr_n(expr->op, expr->size + 1, new_capacity);
     for (unsigned int i = 0; i < expr->size; i++) {
-      sm_set_expr_arg(new_expr, i, sm_get_expr_arg(expr, i));
+      sm_set_expr_arg(new_expr, i, sm_expr_get_arg(expr, i));
     }
     return sm_set_expr_arg(new_expr, new_expr->size - 1, arg);
   } else {
@@ -57,7 +57,7 @@ sm_expr *sm_set_expr_arg(sm_expr *expr, unsigned int index, sm_object *value) {
 }
 
 // Get an argument of an expression
-sm_object *sm_get_expr_arg(sm_expr *expr, unsigned int index) {
+sm_object *sm_expr_get_arg(sm_expr *expr, unsigned int index) {
   sm_object **ptr_array = (sm_object **)&(expr[1]);
   return ptr_array[index];
 }
@@ -71,6 +71,9 @@ bool sm_is_infix(enum sm_expr_type op) {
   case sm_times:
   case sm_divide:
   case sm_pow:
+  case sm_test_eq:
+  case sm_test_lt:
+  case sm_test_gt:
     return true;
   default:
     return false;
@@ -80,12 +83,12 @@ bool sm_is_infix(enum sm_expr_type op) {
 unsigned int sm_expr_contents_to_string_len(sm_expr *sme) {
   unsigned int sum;
   if (sme->size > 0)
-    sum = sm_object_to_string_len(sm_get_expr_arg(sme, 0));
+    sum = sm_object_to_string_len(sm_expr_get_arg(sme, 0));
   else
     return 0;
   for (unsigned int arg_index = 1; arg_index < sme->size; arg_index++) {
     sum += 1; // comma
-    sum += sm_object_to_string_len(sm_get_expr_arg(sme, arg_index));
+    sum += sm_object_to_string_len(sm_expr_get_arg(sme, arg_index));
   }
   return sum;
 }
@@ -95,10 +98,10 @@ unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer) {
     return 0;
   unsigned int buffer_pos = 0;
   for (unsigned int i = 0; i + 1 < expr->size; i++) {
-    buffer_pos += sm_object_sprint(sm_get_expr_arg(expr, i), &(buffer[buffer_pos]));
+    buffer_pos += sm_object_sprint(sm_expr_get_arg(expr, i), &(buffer[buffer_pos]));
     buffer[buffer_pos++] = ',';
   }
-  buffer_pos += sm_object_sprint(sm_get_expr_arg(expr, expr->size - 1), &(buffer[buffer_pos]));
+  buffer_pos += sm_object_sprint(sm_expr_get_arg(expr, expr->size - 1), &(buffer[buffer_pos]));
   return buffer_pos;
 }
 
@@ -162,8 +165,8 @@ unsigned int sm_infix_sprint(sm_expr *expr, char *buffer) {
     return sm_prefix_sprint(expr, buffer);
   }
 
-  sm_object *o1 = sm_get_expr_arg(expr, 0);
-  sm_object *o2 = sm_get_expr_arg(expr, 1);
+  sm_object *o1 = sm_expr_get_arg(expr, 0);
+  sm_object *o2 = sm_expr_get_arg(expr, 1);
 
   int mid_op_level   = op_level(expr->op);
   int left_op_level  = o1->my_type == sm_expr_type ? op_level(((sm_expr *)o1)->op) : 5;
@@ -212,11 +215,11 @@ unsigned int sm_infix_to_string_len(sm_expr *expr, unsigned int op_len) {
   if (expr->size > 2)
     return sm_prefix_to_string_len(expr, op_len);
 
-  sm_object *o1 = sm_get_expr_arg(expr, 0);
-  sm_object *o2 = sm_get_expr_arg(expr, 1);
+  sm_object *o1 = sm_expr_get_arg(expr, 0);
+  sm_object *o2 = sm_expr_get_arg(expr, 1);
 
-  unsigned int left_arg_len  = sm_object_to_string_len(sm_get_expr_arg(expr, 0));
-  unsigned int right_arg_len = sm_object_to_string_len(sm_get_expr_arg(expr, 1));
+  unsigned int left_arg_len  = sm_object_to_string_len(sm_expr_get_arg(expr, 0));
+  unsigned int right_arg_len = sm_object_to_string_len(sm_expr_get_arg(expr, 1));
 
   int mid_op_level   = op_level(expr->op);
   int left_op_level  = o1->my_type == sm_expr_type ? op_level(((sm_expr *)o1)->op) : 5;
@@ -260,6 +263,13 @@ unsigned int sm_expr_to_string_len(sm_expr *expr) {
   }
 }
 
+unsigned int sm_funcall_sprint(sm_expr *funcall, char *buffer) {
+  unsigned int cursor = 0;
+  cursor += sm_object_sprint(sm_expr_get_arg(funcall, 0), buffer);
+  cursor += sm_object_sprint(sm_expr_get_arg(funcall, 1), &(buffer[cursor]));
+  return cursor;
+}
+
 // Adds a c string describing the expr to the buffer
 // Returns the length
 unsigned int sm_expr_sprint(sm_expr *expr, char *buffer) {
@@ -271,6 +281,10 @@ unsigned int sm_expr_sprint(sm_expr *expr, char *buffer) {
         return sm_infix_sprint(expr, buffer);
       else
         return sm_prefix_sprint(expr, buffer);
+    } else if (expr->op == sm_funcall_l_l || expr->op == sm_funcall_v_l ||
+               expr->op == sm_funcall_v_v || expr->op == sm_funcall_l_v) {
+      return sm_funcall_sprint(expr, buffer);
+
     } else {
       sm_strncpy(buffer, "unrecognized expr", 17);
       return 17;
@@ -282,7 +296,7 @@ unsigned int sm_expr_sprint(sm_expr *expr, char *buffer) {
 sm_object *sm_expr_pop(sm_expr *sme) {
   if (sme->size > 0) {
     sme->size--;
-    return sm_get_expr_arg(sme, sme->size);
+    return sm_expr_get_arg(sme, sme->size);
   } else {
     printf("Stack underflow.");
     return NULL;
@@ -295,7 +309,7 @@ sm_object *sm_expr_pop_recycle(sm_expr *sme) {
   if (sme->size > 0) {
     sme->size--;
     sme->capacity     = sme->size;
-    sm_object *answer = sm_get_expr_arg(sme, sme->size);
+    sm_object *answer = sm_expr_get_arg(sme, sme->size);
     sm_new_space_after(sme, sizeof(sm_object *));
     return answer;
   } else {

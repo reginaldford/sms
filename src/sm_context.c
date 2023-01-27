@@ -3,13 +3,14 @@
 #include "sms.h"
 
 // Create a new context, an array of key_values sorted by key
-struct sm_context *sm_new_context(unsigned int capacity) {
+sm_context *sm_new_context(unsigned int size, unsigned int capacity, sm_context *parent) {
   sm_context *new_context =
     (sm_context *)sm_malloc(sizeof(sm_context) + sizeof(sm_context_entry) * capacity);
   new_context->my_type  = sm_context_type;
-  new_context->size     = 0;
+  new_context->parent   = parent;
+  new_context->size     = size;
   new_context->capacity = capacity;
-  new_context->parent   = NULL; // for user-made objects
+  new_context->children = NULL;
   return new_context;
 }
 
@@ -18,10 +19,21 @@ sm_context_entry *sm_context_entries(sm_context *context) {
   return (sm_context_entry *)&(context[1]);
 }
 
+// Mutates the children to add one element
+sm_context *sm_context_add_child(sm_context *cx, sm_object *child) {
+  sm_expr *array = cx->children;
+  if (array == NULL) {
+    cx->children = sm_new_expr(sm_siblings, child);
+    return cx;
+  }
+  cx->children = sm_append_to_expr(cx->children, child);
+  return cx;
+}
+
 // Binary search to find the index with this key
 // Else, return the position where it should be added
 // For variable reference on lhs
-sm_search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
+sm_search_result sm_context_find_index(sm_context *context, sm_string *var_string) {
   sm_context_entry *context_entries = sm_context_entries(context);
 
   if (context->size == 0)
@@ -54,48 +66,88 @@ sm_search_result sm_find_var_index(sm_context *context, sm_string *var_string) {
 
 // Search for a variable, and traverse the 'parent' pointers to search
 // Used for variable reference on rhs
-sm_search_result_cascading sm_find_var_cascading(sm_context *context, sm_string *var_string) {
-  sm_search_result sr = sm_find_var_index(context, var_string);
+sm_search_result_cascading sm_context_find_far(sm_context *context, sm_string *var_string) {
+  sm_search_result sr = sm_context_find_index(context, var_string);
   if (sr.found == true) {
     return (sm_search_result_cascading){.found = true, .index = sr.index, .context = context};
   } else if (context->parent != NULL) {
-    return sm_find_var_cascading(context->parent, var_string);
+    return sm_context_find_far(context->parent, var_string);
   } else {
     return (sm_search_result_cascading){.found = false, .index = 0, .context = context};
   }
 }
 
+bool sm_context_update_relatives(sm_context *self, sm_context *old_self) {
+  if (self != old_self) {
+    if (self->parent != NULL) {
+      // updating self among parent's children
+      sm_expr *siblings = self->parent->children;
+      for (unsigned int i = 0; i < siblings->size; i++) {
+        sm_object *obj = sm_expr_get_arg(siblings, i);
+        if (obj == (sm_object *)old_self) {
+          sm_set_expr_arg(siblings, i, (sm_object *)self);
+          break;
+        }
+      }
+      // updating self as childrens' parent
+      siblings = self->children;
+      if (siblings != NULL) {
+        for (unsigned int i = 0; i < siblings->size; i++) {
+          sm_object *obj = sm_expr_get_arg(siblings, i);
+          if (obj->my_type == sm_context_type) {
+            ((sm_context *)obj)->parent = self;
+          } else if (obj->my_type == sm_meta_type) {
+            DEBUG_HERE("This is the meta case");
+            //!!handle this case
+          }
+        }
+      }
+    }
+    sm_stack_pop(sm_global_lex_stack(NULL));
+    sm_stack_push(sm_global_lex_stack(NULL), self);
+    return true;
+  }
+  return false;
+}
+
 
 // If the key exists, mutate the key_value to have the new value
 // Else, add a key_value with this key and value
-sm_context *sm_set_var(sm_context *context, sm_string *name, void *val) {
-  sm_context       *current_context = context;
-  sm_context_entry *context_entries = sm_context_entries(current_context);
-  sm_search_result  sr              = sm_find_var_index(current_context, name);
+sm_context *sm_context_set(sm_context *context, sm_string *name, void *val) {
+  sm_context                *current_context = context;
+  sm_search_result_cascading sr              = sm_context_find_far(current_context, name);
   if (sr.found == true) {
-    context_entries[sr.index].value = val;
-    return current_context;
+    sm_context_entry *context_entries = sm_context_entries(sr.context);
+    context_entries[sr.index].value   = val;
+    return context;
   }
+  sm_search_result sr2 = sm_context_find_index(current_context, name);
   if (current_context->size == current_context->capacity) {
-    int new_capacity = ((int)(current_context->capacity * sm_global_growth_factor(0))) + 1;
-    current_context  = (sm_context *)sm_realloc(
-       (sm_object *)current_context, sizeof(sm_context) + sizeof(sm_context_entry) * new_capacity);
-    current_context->capacity = new_capacity;
+    unsigned int new_capacity =
+      ((unsigned int)(current_context->capacity * sm_global_growth_factor(0))) + 1;
+
+    sm_context *new_cx = (sm_context *)sm_realloc(
+      (sm_object *)current_context, sizeof(sm_context) + sizeof(sm_context_entry) * new_capacity);
+    new_cx->capacity = new_capacity;
+
+    sm_context_update_relatives(new_cx, current_context);
+
+    current_context = new_cx;
   }
   current_context->size += 1;
-  context_entries = sm_context_entries(current_context);
-  for (unsigned int i = current_context->size; i > sr.index + 1; i--)
+  sm_context_entry *context_entries = sm_context_entries(current_context);
+  for (unsigned int i = current_context->size; i > sr2.index + 1; i--)
     context_entries[i - 1] = context_entries[i - 2];
-  context_entries[sr.index].name  = name;
-  context_entries[sr.index].value = val;
+  context_entries[sr2.index].name  = name;
+  context_entries[sr2.index].value = val;
   return current_context;
 }
 
 // Remove a key_value identified by the key
-bool sm_delete(sm_symbol *sym) {
-  sm_search_result sr = sm_find_var_index(sm_global_context(NULL), sym->name);
+bool sm_context_rm(sm_symbol *sym) {
+  sm_search_result sr = sm_context_find_index(*(sm_global_lex_stack(NULL)->top), sym->name);
   if (sr.found == true) {
-    sm_context       *context         = sm_global_context(NULL);
+    sm_context       *context         = *(sm_global_lex_stack(NULL)->top);
     sm_context_entry *context_entries = sm_context_entries(context);
     for (unsigned int i = sr.index; i + 1 < context->size; i++) {
       context_entries[i] = context_entries[i + 1];
@@ -106,7 +158,7 @@ bool sm_delete(sm_symbol *sym) {
     sm_new_space_after(context, sizeof(sm_context_entry));
     return true;
   } else {
-    printf("Could not find variable to delete: %s\n", &(sym->name->content));
+    printf("Could not find variable to remove: %s\n", &(sym->name->content));
     return false;
   }
 }

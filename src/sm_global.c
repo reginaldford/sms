@@ -75,33 +75,53 @@ sm_space_array *sm_global_space_array(sm_space_array *replacement) {
   return spaces;
 }
 
-// the global object stack
-sm_expr *sm_global_obj_stack(sm_expr *replacement) {
-  static sm_expr *expr = NULL;
+// the global lexical stack
+sm_stack *sm_global_lex_stack(sm_stack *replacement) {
+  static sm_stack *lex_stack = NULL;
   if (replacement != NULL) {
-    sm_expr *temp = expr;
-    expr          = replacement;
+    sm_stack *temp = lex_stack;
+    lex_stack      = replacement;
     return temp;
   }
-  return expr;
+  return lex_stack;
 }
 
 // primitive_names. read only
 char *sm_global_fn_name(unsigned short int which) {
-  static char *response[] = {"+",   "-",    "*",    "/",    "sqrt", "sin", "cos",
-                             "tan", "sinh", "cosh", "tanh", "^",    "csc", "sec",
-                             "cot", "ln",   "exp",  "diff", "="};
+  static char *response[] = {"+",    "-",    "*",  "/",   "sqrt", "sin", "cos", "tan", "sinh",
+                             "cosh", "tanh", "^",  "csc", "sec",  "cot", "ln",  "exp", "abs",
+                             "diff", "=",    "==", "<",   ">",    "if",  "if",  "let"};
   return response[which];
 }
 
 // corresponding string length of the string that would come from the sm_global_fn_name(which)
 unsigned int sm_global_fn_name_len(unsigned short int which) {
-  static long unsigned int response_len[] = {1, 1, 1, 1, 4, 3, 3, 3, 4, 4,
-                                             4, 1, 3, 3, 3, 2, 3, 4, 1};
+  static long unsigned int response_len[] = {1, 1, 1, 1, 4, 3, 3, 3, 4, 4, 4, 1, 3,
+                                             3, 3, 2, 3, 3, 4, 1, 2, 1, 1, 2, 2, 3};
   return response_len[which];
 }
 
 unsigned int sm_global_num_fns() {
-  static int num_fns = 19;
+  static int num_fns = 25;
   return num_fns;
+}
+
+
+// list of sibling objects
+sm_expr *sm_global_siblings(sm_expr *replacement) {
+  static sm_expr *siblings = NULL;
+  if (replacement != NULL) {
+    sm_expr *previous = siblings;
+    siblings          = replacement;
+    return previous;
+  }
+  if (siblings == NULL) {
+    sm_expr *siblings  = (sm_expr *)malloc(sizeof(sm_expr) + sizeof(void *) * 500);
+    siblings->my_type  = sm_expr_type;
+    siblings->op       = sm_siblings;
+    siblings->size     = 0;
+    siblings->capacity = 500;
+    return siblings;
+  }
+  return siblings;
 }

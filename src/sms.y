@@ -54,7 +54,7 @@ void yyerror(char *msg);
 %token <expr>     EXP
 %token <expr>     SQRT
 %token <expr>     DIFF
-%token <expr>     DELETE
+%token <expr>     RM
 %token <expr>     LET
 %token <expr>     NOT
 %token <expr>     ABS
@@ -71,12 +71,15 @@ void yyerror(char *msg);
 
 
 COMMAND : EXPR {
-    printf("%s\n",&(sm_object_to_string(sm_engine_eval((sm_object*)$1))->content));
+    sm_object * result = sm_engine_eval((sm_object*)$1,*(sm_global_lex_stack(NULL)->top));
+    sm_string * output_str = sm_object_to_string(result);
+    char * output_cstr = &(output_str->content);
+    printf("%s\n",output_cstr);
     sm_garbage_collect();
     sm_terminal_prompt();
   }
-  | DELETE SYM {
-    sm_delete((sm_symbol*)$2);
+  | RM SYM {
+    sm_context_rm((sm_symbol*)$2);
     sm_garbage_collect();
     sm_terminal_prompt();
   }
@@ -87,7 +90,7 @@ COMMAND : EXPR {
 
 
 
-EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
+EXPR : SELF { $$ = (sm_expr*)*(sm_global_lex_stack(NULL)->top); }
   | EXPR '+' EXPR { $$ = sm_new_expr_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
   | EXPR '-' EXPR { $$ = sm_new_expr_2(sm_minus, (sm_object*) $1, (sm_object*) $3 ) ; }
   | EXPR '*' EXPR { $$ = sm_new_expr_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
@@ -118,6 +121,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_global_context(NULL); }
   | LN   '(' EXPR ')' { $$ = sm_new_expr(sm_ln,  (sm_object*) $3 );}
   | EXP  '(' EXPR ')' { $$ = sm_new_expr(sm_exp, (sm_object*) $3 );}
   | SQRT '(' EXPR ')' { $$ = sm_new_expr(sm_sqrt,(sm_object*) $3 );}
+  | ABS  '(' EXPR ')' { $$ = sm_new_expr(sm_abs, (sm_object*) $3 );}
   | DIFF '(' EXPR ')' { $$ = sm_new_expr(sm_diff,(sm_object*) $3 );}
   | DIFF '(' EXPR ',' SYM ')' {$$ = sm_new_expr_2(sm_diff,(sm_object*)$3,(sm_object*)$5 );}
   | EXPR_LIST ')' {}
@@ -171,7 +175,7 @@ FUNCALL: META_EXPR CONTEXT {
   }
 
 META_EXPR : ':' EXPR {
-        $$ = sm_new_meta((sm_object*) $2 ) ;
+        $$ = sm_new_meta((sm_object*) $2, *(sm_global_lex_stack(NULL))->top ) ;
   }
 
 ARRAY: ARRAY_LIST ']' {};
@@ -182,37 +186,65 @@ ARRAY: ARRAY_LIST ']' {};
 ARRAY_LIST: '[' EXPR ',' EXPR {$$=sm_new_expr_2(sm_array,(sm_object*)$2,(sm_object*)$4);}
   | ARRAY_LIST ',' EXPR {$$ = sm_append_to_expr($1,(sm_object*)$3);}
 
-CONTEXT: CONTEXT_LIST '}' {}
-  | CONTEXT_LIST ';' '}' {}
+CONTEXT: CONTEXT_LIST '}' {
+    sm_context * top = *(sm_global_lex_stack(NULL)->top);
+    sm_stack_pop(sm_global_lex_stack(NULL));
+    $$=top;
+  }
+  | CONTEXT_LIST ';' '}' {
+    sm_stack_pop(sm_global_lex_stack(NULL));
+	}
   | '{' ASSIGNMENT ';' '}' {
-    sm_string *name  = ((sm_symbol*)sm_get_expr_arg($2,0))->name;
-    sm_object *value = (sm_object*)sm_get_expr_arg($2,1);
-    $$ = sm_set_var(sm_new_context(1),name,value);
+    sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
+    sm_context * new_cx =  sm_new_context(1,1,parent_cx);
+    sm_string *name  = ((sm_symbol*)sm_expr_get_arg($2,0))->name;
+    sm_object *value = (sm_object*)sm_expr_get_arg($2,1);
+    *(sm_context_entries(new_cx))=(sm_context_entry){.name=name,.value=value};  
+    //sm_context_add_child(parent_cx,(sm_object*)new_cx);
+    $$= new_cx;
   }
   | '{' ASSIGNMENT '}' {
-    sm_string *name  = ((sm_symbol*)sm_get_expr_arg($2,0))->name;
-    sm_object *value = (sm_object*)sm_get_expr_arg($2,1);
-    $$ = sm_set_var(sm_new_context(1),name,value);
+    sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
+    sm_context * new_cx =  sm_new_context(1,1,parent_cx);
+    sm_string *name  = ((sm_symbol*)sm_expr_get_arg($2,0))->name;
+    sm_object *value = ((sm_object*)sm_expr_get_arg($2,1));
+    *(sm_context_entries(new_cx))=(sm_context_entry){.name=name,.value=value};
+    //sm_context_add_child(parent_cx,(sm_object*)new_cx);
+    $$= new_cx;
   }
-  | '{' '}' { $$ = sm_new_context(0);}
-
+  | '{' '}' {
+    sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
+    sm_context *new_cx =sm_new_context(0,0,parent_cx);
+    //sm_context_add_child(parent_cx,(sm_object*)new_cx);
+    $$= new_cx;
+  }
+  
 CONTEXT_LIST: '{' ASSIGNMENT ';' ASSIGNMENT {
-    sm_string *name  = ((sm_symbol*)sm_get_expr_arg($2,0))->name;
-    sm_object *value = (sm_object*)sm_get_expr_arg($2,1);
-	  $$ = sm_new_context(2);
-	  $$ = sm_set_var(($$),name,value);
-	  $$ = sm_set_var(($$),name,value);
+    sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
+	  sm_context *new_cx = sm_new_context(2,2,parent_cx);
+	  sm_context_entry * arr = sm_context_entries(new_cx);
+    sm_string *name  = ((sm_symbol*)sm_expr_get_arg($2,0))->name;
+    sm_object *value = (sm_object*)sm_expr_get_arg($2,1);
+	  arr[0] = (sm_context_entry){.name=name,.value=value};
+    name  = ((sm_symbol*)sm_expr_get_arg($4,0))->name;
+    value = (sm_object*)sm_expr_get_arg($4,1);
+    arr[1] = (sm_context_entry){.name=name,.value=value};
+    //sm_context_add_child(parent_cx,(sm_object*)new_cx);
+	  sm_stack_push(sm_global_lex_stack(NULL),new_cx);
+	  $$ = new_cx;
   }
   | CONTEXT_LIST ';' ASSIGNMENT {
-    sm_string *name  = ((sm_symbol*)sm_get_expr_arg($3,0))->name;
-    sm_object *value = (sm_object*)sm_get_expr_arg($3,1);
-    $$ = sm_set_var($1,name,value);
+    sm_string *name  = ((sm_symbol*)sm_expr_get_arg($3,0))->name;
+    sm_object *value = (sm_object*)sm_expr_get_arg($3,1);
+    sm_context * new_cx = sm_context_set($1,name,value);
+    sm_stack_pop(sm_global_lex_stack(NULL));
+	  sm_stack_push(sm_global_lex_stack(NULL),new_cx);
+    $$=new_cx;
   }
 
 
 
 %%
-
 
 
 
@@ -231,9 +263,12 @@ int main(){
   //Initialize the global space arrays
   sm_global_space_array(sm_new_space_array(0,100));
 
-  //Initialize the global context
-  sm_global_context(sm_new_context(0));
+  //Initialize the lexical stack
+  sm_global_lex_stack(sm_new_stack(100));
 
+  //Initialize the global context
+  sm_stack_push(sm_global_lex_stack(NULL),sm_new_context(0,0,NULL));
+  
   //Introduction and prompt
   printf("Symbolic Math System\n");
   printf("Version 0.125\n");

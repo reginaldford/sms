@@ -26,21 +26,40 @@ void sm_inflate_heap() {
     sm_object *current_obj = (sm_object *)scan_cursor;
     switch (current_obj->my_type) {
     case sm_context_type: {
-      sm_context       *cx    = (sm_context *)current_obj;
+      sm_context *cx = (sm_context *)current_obj;
+      // Updating the entries
       sm_context_entry *table = sm_context_entries(cx);
       for (unsigned int i = 0; i < ((sm_context *)current_obj)->size; i++) {
         table[i].name  = (sm_string *)sm_meet_object((sm_object *)table[i].name);
         table[i].value = sm_meet_object(table[i].value);
       }
+      // Updating the parent
       if (cx->parent != NULL)
         cx->parent = (sm_context *)sm_meet_object((sm_object *)cx->parent);
+      // Updating the children
+      if (cx->children != NULL) {
+        cx->children = (sm_expr *)sm_meet_object((sm_object *)cx->children);
+      }
       break;
     }
     case sm_expr_type: {
       sm_expr *expr = (sm_expr *)current_obj;
-      for (unsigned int i = 0; i < expr->size; i++) {
-        sm_expr *new_expr = (sm_expr *)sm_meet_object(sm_get_expr_arg(expr, i));
-        sm_set_expr_arg(expr, i, (sm_object *)new_expr);
+      if (expr->op == sm_siblings) {
+        //!! YOU ARE HERE
+        // I need to add this siblings expr to a list
+        // after gc is done, place the siblings expressions on the heap
+        // inflate_sibilngs will then discard siblings if
+        // they dont have a pointer in place, meaning they are garbage.
+        for (unsigned int i = 0; i < expr->size; i++) {
+          sm_object *new_obj = sm_meet_object(sm_expr_get_arg(expr, i));
+          sm_set_expr_arg(expr, i, (sm_object *)new_obj);
+        }
+        break;
+      } else {
+        for (unsigned int i = 0; i < expr->size; i++) {
+          sm_object *new_obj = sm_meet_object(sm_expr_get_arg(expr, i));
+          sm_set_expr_arg(expr, i, (sm_object *)new_obj);
+        }
       }
       break;
     }
@@ -83,13 +102,15 @@ void sm_garbage_collect() {
     sm_global_space_array(NULL)->size = 0;
 
     // copy roots
-    sm_move_to_new_heap((sm_object *)sm_global_context(NULL));
+    sm_context *root_cx =
+      (sm_context *)sm_move_to_new_heap((sm_object *)*(sm_global_lex_stack(NULL)->top));
 
     // inflate
     sm_inflate_heap();
 
     // update global variables
-    sm_global_context((sm_context *)((sm_pointer *)sm_global_context(NULL))->address);
+    // sm_global_context((sm_context *)((sm_pointer *)sm_global_context(NULL))->address);
+    *(sm_global_lex_stack(NULL)->top) = root_cx;
 
     // for tracking purposes
     sm_gc_count(1);

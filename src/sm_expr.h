@@ -19,19 +19,21 @@ enum sm_expr_type {
   sm_cot,
   sm_ln,
   sm_exp,
+  sm_abs,
   sm_diff,
   sm_assign,
-  sm_array,
+  sm_test_eq,
+  sm_test_lt,
+  sm_test_gt,
+  sm_if,
+  sm_if_else,
+  sm_let,
   sm_funcall_v_l,
   sm_funcall_v_v,
   sm_funcall_l_v,
   sm_funcall_l_l,
-  sm_if,
-  sm_if_else,
-  sm_let,
-  sm_test_eq,
-  sm_test_lt,
-  sm_test_gt,
+  sm_array,
+  sm_siblings,
   sm_cprim
 };
 
@@ -55,7 +57,7 @@ sm_string   *sm_expr_to_string(sm_expr *expr);
 unsigned int sm_expr_sprint(sm_expr *self, char *buffer);
 unsigned int sm_expr_to_string_len(sm_expr *expr);
 sm_expr     *sm_set_expr_arg(sm_expr *expr, unsigned int index, sm_object *value);
-sm_object   *sm_get_expr_arg(sm_expr *expr, unsigned int index);
+sm_object   *sm_expr_get_arg(sm_expr *expr, unsigned int index);
 bool         sm_is_infix(enum sm_expr_type op);
 sm_object   *sm_expr_pop(sm_expr *sme);
 sm_object   *sm_expr_pop_recycle(sm_expr *sme);

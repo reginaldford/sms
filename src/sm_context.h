@@ -6,6 +6,7 @@ typedef struct sm_context {
   struct sm_context *parent;
   unsigned int       size;
   unsigned int       capacity;
+  sm_expr           *children;
 } sm_context;
 
 // key and value pair
@@ -29,17 +30,17 @@ typedef struct sm_search_result_cascading {
   sm_context  *context;
 } sm_search_result_cascading;
 
-sm_context              *sm_global_context(sm_context *replacement);
-sm_context              *sm_new_context(unsigned int capacity);
-struct sm_context_entry *sm_context_entries(struct sm_context *context);
-void                     sm_print_table(struct sm_context *context);
-sm_search_result sm_find_var_index(struct sm_context *context, struct sm_string *var_string);
-sm_search_result_cascading sm_find_var_cascading(sm_context *context, sm_string *var_string);
-sm_context  *sm_set_var(struct sm_context *context, struct sm_string *name, void *val);
-bool         sm_delete(sm_symbol *sym);
+sm_context       *sm_new_context(unsigned int size, unsigned int capacity, sm_context *parent);
+sm_context_entry *sm_context_entries(struct sm_context *context);
+sm_search_result  sm_context_find_index(struct sm_context *context, struct sm_string *var_string);
+sm_search_result_cascading sm_context_find_far(sm_context *context, sm_string *var_string);
+sm_context  *sm_context_set(struct sm_context *context, struct sm_string *name, void *val);
+bool         sm_context_rm(sm_symbol *sym);
 sm_string   *sm_context_to_string(sm_context *self);
 unsigned int sm_context_sprint(sm_context *self, char *buffer);
 unsigned int sm_context_to_string_len(sm_context *self);
 sm_string   *sm_context_entry_to_string(sm_context_entry *ce);
 unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer);
 unsigned int sm_context_entry_to_string_len(sm_context_entry *ce);
+sm_context  *sm_context_add_child(sm_context *cx, sm_object *child);
+bool         sm_context_update_relatives(sm_context *self, sm_context *old_self);
