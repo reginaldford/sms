@@ -1,40 +1,47 @@
 # STATUS QUO:
 
-SMS is a terminal program that interprets commands like `a = 4 * cos(0.5);` and `delete a;` to set and destroy variables, respectively.
+SMS Stands for Symbolic Math System. The application is a minimal algebraic system and a functional programming language.
+The SMS language is lexically scoped, weakly typed, and functional. SMS currently has no compiler.
 
-The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts. Contexts are user defined objects with key-value pairs. Functions can also be called with dynamic scoping for the variables.
+
+The C prorgam compiles to a terminal application which interprets commands like `a = 4 * cos(0.5);` and `rm a;` to calculate, set, and destroy variables.
+
+The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts. Contexts are user defined objects with key-value pairs. Functions can also be called with lexical scoping for variables and functions.
 
 To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. The variable names must start with underscores or a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
 
 After a command, the garbage collector is executed. The garbage collector uses the stop and copy algorithm. 
-
 The whitespace characters in the provided examples are optional, and are for readability. All commands end with a semicolon (;) .
 You can try the following examples:
 
-Direct computations. The resulting value will not be stored for later use:
+Direct calculations can be performed with any mathematical expression followed by a semicolon.
+The resulting value will be calculated and printed to the screen, but not stored for later use:
 
 `2 + sqrt(7);`
 
 Calculation and storage of double precision numbers:
 
-`a = 4E-2;`
+`a = 2 + sqrt(7)`
 
-`b = sqrt(a);`
+`b = sqrt(a) + 1.27E-3;`
 
-`c = a + b;`
+`c = (a + b)/2;`
 
 To see which variables are currently set, enter:
 
 `self ;`
 
-Hyperbolic trigonometric expressions:
-
-`a = sinh(a/b) + c ;`
-
-
 The meta operator (:) stores expressions :
 
 `expression = : +(a,b,c);`
+
+Call the function later with this syntax:
+
+`expression {}`
+
+Override specific variables:
+
+`expression {b=6}`
 
 Store structured data with no evaluation:
 
@@ -42,23 +49,17 @@ Store structured data with no evaluation:
 
 Removing the meta operator (:) above will lead to a different result.
 
-Storage of mathematical expressions in an array:
+Storage of mathematical expressions in an array (a meta array):
 
 `formula = : [ a ^ 2 + b ^ 2 , ln(a/b) ];`
 
-Prefix sums:
+Prefix notation may also be used for +,-,*,/.
 
 `c = + ( 1, sin( b ) ) ;`
-
-Set many variables to the same object:
-
-`a=b=c=d={same="object";};`
 
 Arrays can hold various objects:
 
 `d = :[ a, sinh(a/b), "this", 5 , { x = "x"; }];`
-
-Without the meta operator above, each element of the array will be evaluated.
 
 User objects (contexts):
 
@@ -70,28 +71,7 @@ Contexts can be nested:
 
 Variables can be removed from the current context:
 
-`delete c;`
-
-Define a function:
-
-`parabolic=:*(a,x^2);`
-
-`a=4;`
-
-`x=2;`
-
-After setting `a` and `x`, the following will call the `parabolic` function. 
-
-`parabolic{};`
-
-Since there are no variables provided in the context following 'parabolic', the dynamic scoping algorithm will go up to the global context for the values associated with the keys `a` and `x`.
-
-The values can be overridden individually:
-
-`parabolic { a = 2 ; };`
-
-`parabolic { a = 2 ; x = 1 ; };`
-
+`rm c;`
 
 Exit the program with:
 
@@ -113,7 +93,7 @@ Exit the program with:
 - [x] Clean the string manipulations to avoid sprintf and strlen.
 - [ ] General Guide.
 - [ ] Guide for adding your own command by adding C code.
-- [ ] Turing completeness.
+- [x] Turing completeness.
 - [ ] Arbitrary precision library written in sms.
 - [ ] Unicode support.
 - [ ] Graphics support.
