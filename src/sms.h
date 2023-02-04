@@ -1,4 +1,4 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include <signal.h>
 #include <stdbool.h>
@@ -42,9 +42,9 @@ enum sm_object_type {
 #include "sm_pointer.h"
 #include "sm_commands.h"
 #include "sm_space.h"
+#include "sm_global.h"
 #include "sm_double.h"
 #include "sm_gc.h"
-#include "sm_global.h"
 #include "sm_terminal.h"
 #include "sm_engine.h"
 #include "sm_meta.h"

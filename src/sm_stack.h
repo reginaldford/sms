@@ -1,4 +1,4 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 // size = stack->top - &(stack[1])
 typedef struct sm_stack {

@@ -1,4 +1,4 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 // sm_context_entry structs follow the sm_context struct in memory
 typedef struct sm_context {
@@ -36,10 +36,8 @@ sm_search_result  sm_context_find_index(struct sm_context *context, struct sm_st
 sm_search_result_cascading sm_context_find_far(sm_context *context, sm_string *var_string);
 sm_context  *sm_context_set(struct sm_context *context, struct sm_string *name, void *val);
 bool         sm_context_rm(sm_symbol *sym);
-sm_string   *sm_context_to_string(sm_context *self);
 unsigned int sm_context_sprint(sm_context *self, char *buffer);
 unsigned int sm_context_to_string_len(sm_context *self);
-sm_string   *sm_context_entry_to_string(sm_context_entry *ce);
 unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer);
 unsigned int sm_context_entry_to_string_len(sm_context_entry *ce);
 sm_context  *sm_context_add_child(sm_context *cx, sm_object *child);

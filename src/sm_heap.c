@@ -1,4 +1,4 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
 
@@ -73,29 +73,30 @@ void sort_1_off(sm_space_array *ssa, unsigned int off_index) {
 
 // Internal 'malloc'. checks space array first, else move the 'used' integer up
 void *sm_malloc(unsigned int size) {
-  if (sm_global_space_array(NULL)->size > 0) {
-    sm_search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
-    // sr.found is true for exact matches
-    if (sr.found == true) {
-      sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];
-      // Deleting space by its index
-      sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
-      return good_space;
-    }
-    sm_space *result_space = check_space(size, sr.index);
-    if (result_space != NULL) {
-      unsigned int remaining_size = (result_space->my_type - sm_space_type) - size;
-      if (remaining_size >= sizeof(sm_space)) {
-        sm_space *new_space = (sm_space *)((char *)result_space) + size;
-        new_space->my_type  = sm_space_type + remaining_size;
-        sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
-        sort_1_off(sm_global_space_array(NULL), sr.index);
-      } else {
-        sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
-      }
-      return result_space;
-    }
-  }
+  // if (sm_global_space_array(NULL)->size > 0) {
+  // sm_search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
+  // // sr.found is true for exact matches
+  // if (sr.found == true) {
+  // sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];
+  // // Deleting space by its index
+  // sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
+  // return good_space;
+  // }
+  // sm_space *result_space = check_space(size, sr.index);
+  // if (result_space != NULL) {
+  // unsigned int remaining_size = (result_space->my_type - sm_space_type) - size;
+  // if (remaining_size >= sizeof(sm_space)) {
+  // sm_space *new_space = (sm_space *)((char *)result_space) + size;
+  // new_space->my_type  = sm_space_type + remaining_size;
+  // sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
+  // sort_1_off(sm_global_space_array(NULL), sr.index);
+  // } else {
+  // sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
+  // }
+  // return result_space;
+  // }
+  // }
+
   // If no spaces were found, default to classic copy gc allocation
   unsigned int bytes_used = sm_global_current_heap(NULL)->used;
   sm_global_current_heap(NULL)->used += size;

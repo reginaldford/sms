@@ -1,6 +1,17 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
+
+bool sm_object_is_literal(unsigned short int t) {
+  switch (t) {
+  case sm_double_type:
+  case sm_meta_type:
+  case sm_string_type:
+    return true;
+  default:
+    return false;
+  }
+}
 
 // Return the object type as a string.
 sm_string *sm_object_type_str(unsigned short int t) {

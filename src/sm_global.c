@@ -1,4 +1,4 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
 
@@ -106,22 +106,23 @@ unsigned int sm_global_num_fns() {
   return num_fns;
 }
 
-
-// list of sibling objects
-sm_expr *sm_global_siblings(sm_expr *replacement) {
-  static sm_expr *siblings = NULL;
+// list of parent objects
+// stored outside of heap and used for gc
+sm_expr *sm_global_parents(sm_expr *replacement) {
+  const int       initial_capacity = 100;
+  static sm_expr *parents          = NULL;
   if (replacement != NULL) {
-    sm_expr *previous = siblings;
-    siblings          = replacement;
+    sm_expr *previous = parents;
+    parents           = replacement;
     return previous;
   }
-  if (siblings == NULL) {
-    sm_expr *siblings  = (sm_expr *)malloc(sizeof(sm_expr) + sizeof(void *) * 500);
-    siblings->my_type  = sm_expr_type;
-    siblings->op       = sm_siblings;
-    siblings->size     = 0;
-    siblings->capacity = 500;
-    return siblings;
+  if (parents == NULL) {
+    sm_expr *parents  = (sm_expr *)malloc(sizeof(sm_expr) + sizeof(void *) * initial_capacity);
+    parents->my_type  = sm_expr_type;
+    parents->op       = sm_siblings;
+    parents->size     = 0;
+    parents->capacity = initial_capacity;
+    return parents;
   }
-  return siblings;
+  return parents;
 }
