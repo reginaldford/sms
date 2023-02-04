@@ -71,7 +71,8 @@ void yyerror(char *msg);
 
 
 COMMAND : EXPR {
-    sm_object * result = sm_engine_eval((sm_object*)$1,*(sm_global_lex_stack(NULL)->top));
+    sm_context * previous_cx =*(sm_global_lex_stack(NULL)->top);
+    sm_object * result = sm_engine_eval((sm_object*)$1,previous_cx);
     sm_string * output_str = sm_object_to_string(result);
     char * output_cstr = &(output_str->content);
     printf("%s\n",output_cstr);
@@ -140,10 +141,10 @@ EXPR_LIST: '+' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_plus,(sm_object*)$3,(s
   | '*' '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_times,(sm_object*)$3,(sm_object*)$5 );}
   | '/' '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_divide,(sm_object*)$3,(sm_object*)$5 );}
   | EXPR_LIST ',' EXPR {$$ = sm_append_to_expr((sm_expr*)$1,(sm_object*)$3);}
-  
+
 LT : '<' '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(sm_test_lt,(sm_object*)($3),(sm_object*)($5));}
   | EXPR '<' EXPR { $$ = sm_new_expr_2(sm_test_lt,(sm_object*)($1),(sm_object*)($3));}
-  
+
 GT : '>' '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(sm_test_gt,(sm_object*)($3),(sm_object*)($5));}
   | EXPR '>' EXPR { $$ = sm_new_expr_2(sm_test_gt,(sm_object*)($1),(sm_object*)($3));}
 
@@ -168,6 +169,7 @@ FUNCALL: META_EXPR CONTEXT {
     $$=sm_new_expr_2(sm_funcall_l_v, (sm_object *)($1), (sm_object *)($2));
   }
   | SYM CONTEXT  {
+    ($2)->parent = *(sm_global_lex_stack(NULL)->top);
     $$=sm_new_expr_2(sm_funcall_v_l, (sm_object *)($1), (sm_object *)($2));
   }
   | SYM SYM  {
@@ -175,7 +177,7 @@ FUNCALL: META_EXPR CONTEXT {
   }
 
 META_EXPR : ':' EXPR {
-        $$ = sm_new_meta((sm_object*) $2, *(sm_global_lex_stack(NULL))->top ) ;
+    $$ = sm_new_meta((sm_object*) $2, *(sm_global_lex_stack(NULL))->top ) ;
   }
 
 ARRAY: ARRAY_LIST ']' {};
@@ -199,8 +201,8 @@ CONTEXT: CONTEXT_LIST '}' {
     sm_context * new_cx =  sm_new_context(1,1,parent_cx);
     sm_string *name  = ((sm_symbol*)sm_expr_get_arg($2,0))->name;
     sm_object *value = (sm_object*)sm_expr_get_arg($2,1);
-    *(sm_context_entries(new_cx))=(sm_context_entry){.name=name,.value=value};  
-    //sm_context_add_child(parent_cx,(sm_object*)new_cx);
+    *(sm_context_entries(new_cx))=(sm_context_entry){.name=name,.value=value};
+    sm_context_add_child(parent_cx,(sm_object*)new_cx);
     $$= new_cx;
   }
   | '{' ASSIGNMENT '}' {
@@ -209,16 +211,16 @@ CONTEXT: CONTEXT_LIST '}' {
     sm_string *name  = ((sm_symbol*)sm_expr_get_arg($2,0))->name;
     sm_object *value = ((sm_object*)sm_expr_get_arg($2,1));
     *(sm_context_entries(new_cx))=(sm_context_entry){.name=name,.value=value};
-    //sm_context_add_child(parent_cx,(sm_object*)new_cx);
+    sm_context_add_child(parent_cx,(sm_object*)new_cx);
     $$= new_cx;
   }
   | '{' '}' {
     sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
     sm_context *new_cx =sm_new_context(0,0,parent_cx);
-    //sm_context_add_child(parent_cx,(sm_object*)new_cx);
+    sm_context_add_child(parent_cx,(sm_object*)new_cx);
     $$= new_cx;
   }
-  
+
 CONTEXT_LIST: '{' ASSIGNMENT ';' ASSIGNMENT {
     sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
 	  sm_context *new_cx = sm_new_context(2,2,parent_cx);
@@ -229,7 +231,7 @@ CONTEXT_LIST: '{' ASSIGNMENT ';' ASSIGNMENT {
     name  = ((sm_symbol*)sm_expr_get_arg($4,0))->name;
     value = (sm_object*)sm_expr_get_arg($4,1);
     arr[1] = (sm_context_entry){.name=name,.value=value};
-    //sm_context_add_child(parent_cx,(sm_object*)new_cx);
+    sm_context_add_child(parent_cx,(sm_object*)new_cx);
 	  sm_stack_push(sm_global_lex_stack(NULL),new_cx);
 	  $$ = new_cx;
   }
@@ -237,8 +239,7 @@ CONTEXT_LIST: '{' ASSIGNMENT ';' ASSIGNMENT {
     sm_string *name  = ((sm_symbol*)sm_expr_get_arg($3,0))->name;
     sm_object *value = (sm_object*)sm_expr_get_arg($3,1);
     sm_context * new_cx = sm_context_set($1,name,value);
-    sm_stack_pop(sm_global_lex_stack(NULL));
-	  sm_stack_push(sm_global_lex_stack(NULL),new_cx);
+    sm_context_update_relatives(new_cx,$1);
     $$=new_cx;
   }
 
@@ -256,9 +257,9 @@ void yyerror(char *msg) {
 int main(){
   //Register the signal handler
   sm_register_signals();
-  
+
   //Initialize the current mem heap
-  sm_global_current_heap(sm_new_heap(7500));
+  sm_global_current_heap(sm_new_heap(1024*1024*5));
 
   //Initialize the global space arrays
   sm_global_space_array(sm_new_space_array(0,100));
@@ -268,13 +269,13 @@ int main(){
 
   //Initialize the global context
   sm_stack_push(sm_global_lex_stack(NULL),sm_new_context(0,0,NULL));
-  
+
   //Introduction and prompt
   printf("Symbolic Math System\n");
   printf("Version 0.125\n");
   sm_terminal_prompt();
 
-  //Start the parser. 
+  //Start the parser.
   yyparse();
 
   //Exit gracefully.

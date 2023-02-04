@@ -1,4 +1,4 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 sm_context     *sm_global_context(sm_context *replacement);
 sm_heap        *sm_global_current_heap(sm_heap *replacement);
@@ -11,3 +11,4 @@ char           *sm_global_fn_name(unsigned short int which);
 unsigned int    sm_global_fn_name_len(unsigned short int which);
 unsigned int    sm_global_num_fns();
 sm_stack       *sm_global_lex_stack(sm_stack *replacement);
+sm_expr        *sm_global_parents(sm_expr *replacement);

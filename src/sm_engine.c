@@ -1,4 +1,4 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
 
@@ -9,6 +9,9 @@
 // Recursive engine, uses the C stack for the SMS stack
 sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
   short int input_type = input->my_type;
+  if (sm_object_is_literal(input->my_type) == true) {
+    return input;
+  }
   if (input_type == sm_expr_type) {
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
@@ -16,7 +19,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
     if (op == sm_assign) {
       sm_symbol  *sym    = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object  *value  = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx);
-      sm_context *new_cx = sm_context_set(current_cx, sym->name, sm_engine_eval(value, current_cx));
+      sm_context *new_cx = sm_context_set(current_cx, sym->name, value);
       sm_context_update_relatives(new_cx, current_cx);
       return value;
     }
@@ -27,7 +30,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
       return (sm_object *)sm_new_double(sum);
     }
     if (op == sm_minus) {
-      double sum = ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx))->value;
+      sm_object *a = sm_expr_get_arg(sme, 0);
+      a            = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx);
+      double sum   = ((sm_double *)a)->value;
       for (unsigned int i = 1; i < sme->size; i++)
         sum -= ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, i), current_cx))->value;
       return (sm_object *)sm_new_double(sum);
@@ -144,11 +149,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
       return result;
     }
     if (op == sm_funcall_v_l) {
-      sm_symbol  *sym                     = (sm_symbol *)sm_expr_get_arg(sme, 0);
-      sm_context *cx                      = (sm_context *)sm_expr_get_arg(sme, 1);
-      cx                                  = (sm_context *)sm_engine_eval((sm_object *)cx, cx);
+      sm_symbol  *sym    = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_context *cx     = (sm_context *)sm_expr_get_arg(sme, 1);
+      sm_context *new_cx = (sm_context *)sm_engine_eval((sm_object *)cx, current_cx);
+      sm_context_update_relatives(new_cx, cx);
+      cx = new_cx;
+
       sm_string                 *var_name = sym->name;
-      sm_search_result_cascading sr       = sm_context_find_far(cx, var_name);
+      sm_search_result_cascading sr       = sm_context_find_far(current_cx, var_name);
 
       if (sr.found == true) {
         sm_meta   *meta   = (sm_meta *)sm_context_entries(sr.context)[sr.index].value;
@@ -278,15 +286,19 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
     sm_context       *cx     = (sm_context *)input;
     sm_context_entry *ce     = sm_context_entries(cx);
     sm_context       *new_cx = sm_new_context(cx->size, cx->size, cx->parent);
+    new_cx->children         = cx->children;
     sm_context_entry *new_ce = sm_context_entries(new_cx);
     for (unsigned int i = 0; i < cx->size; i++) {
       new_ce[i].name = ce[i].name;
-      if (((sm_context *)ce[i].value) != cx) {
+      if (false == sm_object_is_literal(ce[i].value->my_type) &&
+          ((sm_context *)ce[i].value) != cx) {
         new_ce[i].value = sm_engine_eval(ce[i].value, current_cx);
+        // new_ce[i].value = sm_engine_eval(ce[i].value, cx);
       } else {
         new_ce[i].value = ce[i].value;
       }
     }
+    sm_context_update_relatives(new_cx, cx);
     return (sm_object *)new_cx;
   }
   return input;

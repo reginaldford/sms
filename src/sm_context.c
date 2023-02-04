@@ -1,4 +1,4 @@
-// The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
 
@@ -54,7 +54,6 @@ sm_search_result sm_context_find_index(sm_context *context, sm_string *var_strin
     guess_point = (upper_limit + lower_limit) / 2.0;
   }
   comparison = strcmp(&(context_entries[guess_point].name->content), var_name);
-
   if (comparison == 0)
     return (sm_search_result){.found = true, .index = guess_point};
   if (comparison < 0) {
@@ -82,34 +81,36 @@ bool sm_context_update_relatives(sm_context *self, sm_context *old_self) {
     if (self->parent != NULL) {
       // updating self among parent's children
       sm_expr *siblings = self->parent->children;
-      for (unsigned int i = 0; i < siblings->size; i++) {
-        sm_object *obj = sm_expr_get_arg(siblings, i);
-        if (obj == (sm_object *)old_self) {
-          sm_set_expr_arg(siblings, i, (sm_object *)self);
-          break;
-        }
-      }
-      // updating self as childrens' parent
-      siblings = self->children;
       if (siblings != NULL) {
         for (unsigned int i = 0; i < siblings->size; i++) {
           sm_object *obj = sm_expr_get_arg(siblings, i);
-          if (obj->my_type == sm_context_type) {
-            ((sm_context *)obj)->parent = self;
-          } else if (obj->my_type == sm_meta_type) {
-            DEBUG_HERE("This is the meta case");
-            //!!handle this case
+          if (obj == (sm_object *)old_self) {
+            sm_set_expr_arg(siblings, i, (sm_object *)self);
+            break;
           }
         }
       }
     }
-    sm_stack_pop(sm_global_lex_stack(NULL));
-    sm_stack_push(sm_global_lex_stack(NULL), self);
+    // updating self as childrens' parent
+    sm_expr *siblings = self->children;
+    if (siblings != NULL) {
+      for (unsigned int i = 0; i < siblings->size; i++) {
+        sm_object *obj = sm_expr_get_arg(siblings, i);
+        if (obj->my_type == sm_context_type) {
+          ((sm_context *)obj)->parent = self;
+        } else if (obj->my_type == sm_meta_type) {
+          DEBUG_HERE("This is the meta case");
+        }
+      }
+    }
+    if ((sm_context *)*(sm_global_lex_stack(NULL)->top) == old_self) {
+      sm_stack_pop(sm_global_lex_stack(NULL));
+      sm_stack_push(sm_global_lex_stack(NULL), self);
+    }
     return true;
   }
   return false;
 }
-
 
 // If the key exists, mutate the key_value to have the new value
 // Else, add a key_value with this key and value
@@ -129,7 +130,6 @@ sm_context *sm_context_set(sm_context *context, sm_string *name, void *val) {
     sm_context *new_cx = (sm_context *)sm_realloc(
       (sm_object *)current_context, sizeof(sm_context) + sizeof(sm_context_entry) * new_capacity);
     new_cx->capacity = new_capacity;
-
     sm_context_update_relatives(new_cx, current_context);
 
     current_context = new_cx;
@@ -161,17 +161,6 @@ bool sm_context_rm(sm_symbol *sym) {
     printf("Could not find variable to remove: %s\n", &(sym->name->content));
     return false;
   }
-}
-
-// Return a new string describing this context
-sm_string *sm_context_to_string(sm_context *self) {
-  if (self->size == 0) {
-    return sm_new_string(2, "{}");
-  }
-  sm_string *new_str = sm_new_string(sm_context_to_string_len((sm_context *)self), "");
-  sm_context_sprint(self, (char *)&(new_str[1]));
-  (&new_str->content)[new_str->size] = '\0';
-  return new_str;
 }
 
 // Print to string buffer a description of this context
@@ -208,12 +197,6 @@ unsigned int sm_context_to_string_len(sm_context *self) {
     }
   }
   return sum;
-}
-
-// Return a new string describing this context entry
-sm_string *sm_context_entry_to_string(sm_context_entry *ce) {
-  sm_string *output_str = sm_string_add_recycle_2nd(ce->name, sm_new_string(1, "="));
-  return sm_string_add(output_str, sm_object_to_string(ce->value));
 }
 
 // Print to string buffer a description of this context entry
