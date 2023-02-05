@@ -13,3 +13,4 @@ bool            sm_is_within_heap(void *obj, sm_heap *heap);
 int             sm_round_size(int size);
 int             sm_mem_dump(sm_heap *heap, char *fname);
 void            sm_mem_cleanup();
+void            sm_sprint_dump();

@@ -71,36 +71,45 @@ void sort_1_off(sm_space_array *ssa, unsigned int off_index) {
   space_array[lower_index] = off_space;
 }
 
+// Find a space from the global space array or NULL
+void *sm_malloc_from_spaces(unsigned int size) {
+  if (sm_global_space_array(NULL)->size > 0) {
+    sm_search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
+    // sr.found is true for exact matches
+    if (sr.found == true) {
+      sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];
+      // Deleting space by its index
+      sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
+      return good_space;
+    }
+    sm_space *result_space = check_space(size, sr.index);
+    if (result_space != NULL) {
+      unsigned int remaining_size = (result_space->my_type - sm_space_type) - size;
+      if (remaining_size >= sizeof(sm_space)) {
+        sm_space *new_space = (sm_space *)((char *)result_space) + size;
+        new_space->my_type  = sm_space_type + remaining_size;
+        sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
+        sort_1_off(sm_global_space_array(NULL), sr.index);
+      } else {
+        sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
+      }
+      return result_space;
+    }
+  }
+  return NULL;
+}
+
 // Internal 'malloc'. checks space array first, else move the 'used' integer up
 void *sm_malloc(unsigned int size) {
-  // if (sm_global_space_array(NULL)->size > 0) {
-  // sm_search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
-  // // sr.found is true for exact matches
-  // if (sr.found == true) {
-  // sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];
-  // // Deleting space by its index
-  // sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
-  // return good_space;
-  // }
-  // sm_space *result_space = check_space(size, sr.index);
-  // if (result_space != NULL) {
-  // unsigned int remaining_size = (result_space->my_type - sm_space_type) - size;
-  // if (remaining_size >= sizeof(sm_space)) {
-  // sm_space *new_space = (sm_space *)((char *)result_space) + size;
-  // new_space->my_type  = sm_space_type + remaining_size;
-  // sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
-  // sort_1_off(sm_global_space_array(NULL), sr.index);
-  // } else {
-  // sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
-  // }
-  // return result_space;
-  // }
-  // }
-
   // If no spaces were found, default to classic copy gc allocation
+  // void *space_search = sm_malloc_from_spaces(size);
+  // if (space_search != NULL) {
+  // return space_search;
+  // } else {
   unsigned int bytes_used = sm_global_current_heap(NULL)->used;
   sm_global_current_heap(NULL)->used += size;
   return (void *)(((char *)sm_global_current_heap(NULL)->storage) + bytes_used);
+  // }
 }
 
 // Reallocate memory space for resizing or recreating objects
@@ -144,4 +153,24 @@ void sm_mem_cleanup() {
     free(sm_global_current_heap(NULL));
   if (sm_global_other_heap(NULL) != NULL)
     free(sm_global_other_heap(NULL));
+}
+
+// Print every object in current heap
+void sm_sprint_dump() {
+  char *scan_cursor = (char *)sm_global_current_heap(NULL)->storage;
+  while (scan_cursor <
+         ((char *)sm_global_current_heap(NULL)->storage) + sm_global_current_heap(NULL)->used) {
+    sm_object   *current_obj = (sm_object *)scan_cursor;
+    unsigned int len         = sm_object_to_string_len(current_obj);
+    char         buf[len];
+    unsigned int real_len = sm_object_sprint(current_obj, buf);
+    buf[real_len]         = '\0';
+    printf("%s\n", buf);
+    if (current_obj->my_type <= sm_space_type)
+      scan_cursor += sm_sizeof(current_obj);
+    else {
+      DEBUG_HERE("Error: Stopping on unrecognized object type.");
+      return;
+    }
+  }
 }
