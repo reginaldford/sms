@@ -1,7 +1,7 @@
 # Requires gcc/clang, make, flex and bison
 # On OpenBSD, use gmake command instead of make
 
-# Where would you put your binary executable?
+# Your preferred directory for the binary installation
 INSTALL_DIR=/usr/bin
 
 # Works with clang, gcc, egcc (OpenBSD), x86_64-w64-mingw32-gcc
@@ -14,7 +14,7 @@ CC_DEBUG=clang
 CFLAGS=-fshort-enums -O3
 
 # Compiling for debugging info
-CFLAGS_DEBUG=-fshort-enums -g
+# CFLAGS_DEBUG=-fshort-enums -g
 
 # ncurses experiments:
 #CFLAGS= -lm -lncurses -Ofast -fshort-enums
@@ -27,8 +27,8 @@ OBJ_FILES=src/lex.yy.o src/y.tab.o src/sm_object.o src/sm_symbol.o src/sm_heap.o
 
 DEBUG_OBJ_FILES=src/lex.yy.o src/y.tab.o src/sm_object.dbg.o src/sm_symbol.dbg.o src/sm_heap.dbg.o src/sm_string.dbg.o src/sm_expr.dbg.o src/sm_double.dbg.o src/sm_context.dbg.o src/sm_commands.dbg.o src/sm_global.dbg.o src/sm_gc.dbg.o src/sm_terminal.dbg.o src/sm_pointer.dbg.o src/sm_engine.dbg.o src/sm_meta.dbg.o src/sm_signal.dbg.o src/sm_space.dbg.o src/sm_stack.dbg.o
 
-sms: $(OBJ_FILES)
-	$(CC) -lm -o sms $(OBJ_FILES)
+bin/sms: $(OBJ_FILES)
+	$(CC) -lm -o bin/sms $(OBJ_FILES)
 
 %.o : %.c %.h
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -36,8 +36,8 @@ sms: $(OBJ_FILES)
 %.dbg.o : %.c %.h
 	$(CC_DEBUG) $(CFLAGS_DEBUG) -c $< -o $@
 	
-sms_debug: $(DEBUG_OBJ_FILES)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o sms_debug $(DEBUG_OBJ_FILES)
+bin/sms_debug: $(DEBUG_OBJ_FILES)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_debug $(DEBUG_OBJ_FILES)
 
 src/y.tab.c src/y.tab.h: src/sms.y
 	bison -dy -o src/y.tab.c src/sms.y
@@ -48,11 +48,20 @@ src/y.tab.c src/y.tab.h: src/sms.y
 src/lex.yy.c: src/y.tab.h src/y.tab.c src/sms.l
 	flex --yylineno -o src/lex.yy.c src/sms.l
 
-all: sms
+TEST_SOURCES=src/test/sm_test.c src/test/sm_test_context.c src/test/sm_test_expr.c src/test/sm_test_gc.c src/test/sm_test_mathops.c src/test/sm_test_numbers.c src/test/sm_test_parser.c src/test/sm_test_string.c
+
+TEST_HEADERS=src/test/sm_test.h src/test/sm_test_context.h src/test/sm_test_expr.h src/test/sm_test_gc.h src/test/sm_test_mathops.h src/test/sm_test_numbers.h src/test/sm_test_parser.c src/test/sm_test_string.h
+
+TEST_OBJ_FILES=src/test/sm_test.o src/test/sm_test_context.o src/test/sm_test_expr.o src/test/sm_test_gc.o src/test/sm_test_mathops.o src/test/sm_test_numbers.o src/test/sm_test_parser.c src/test/sm_test_string.o
+
+bin/sms_tests: $(TEST_OBJ_FILES) $(OBJ_FILES)
+	$(CC) -lm -o bin/sms_tests $(TEST_OBJ_FILES)
+
+all: bin/sms bin/sms_debug bin/sms_tests
 
 install: all
-	cp -fv sms /usr/bin/sms
-	chmod +x /usr/bin/sms
+	cp -fv bin/sms $(INSTALL_DIR)/sms
+	chmod +x $(INSTALL_DIR)/sms
 
 clean:
-	rm -v -f  src/lex.yy.c src/y.tab.c src/y.tab.h src/*.o sms sms_debug
+	rm -v -f  src/lex.yy.c src/y.tab.c src/y.tab.h src/*.o src/test/*.o bin/*
