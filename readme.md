@@ -54,11 +54,12 @@ Define a function that calculates the nth fibonacci number:
 
 `fib{n=20}`
 
-On AMD64 architecture, this implementation of fib will crash for n > 21 because SMS uses a 5 MB heap size.
+This fib function uses lots of memory for high values of n.
+For example, on AMD64 architecture, this implementation of fib will crash for n > 21 because SMS uses a 5 MB heap size.
 
 Storage of mathematical expressions in an array (a meta array):
 
-`quad = : [ (-b+sqrt(b^2-4*a*c)/(2*a) , (-b+sqrt(b^2-4*a*c)/(2*a) ];`
+`quad = : [ (-b+sqrt(b^2-4*a*c)/(2*a) , (-b-sqrt(b^2-4*a*c)/(2*a) ];`
 
 Call the quadratic formula function and recieve two values.
 
