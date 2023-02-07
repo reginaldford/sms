@@ -135,11 +135,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx);
     }
     if (op == sm_array) {
+      sm_expr * new_arr = sm_new_expr_n(sm_array,sme->size,sme->capacity);
       for (unsigned int i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx);
-        sm_set_expr_arg(sme, i, new_val);
+        sm_set_expr_arg(new_arr, i, new_val);
       }
-      return (sm_object *)sme;
+      return (sm_object *)new_arr;
     }
     if (op == sm_funcall_l_l) {
       sm_meta    *meta  = (sm_meta *)sm_expr_get_arg(sme, 0);
