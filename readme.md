@@ -1,21 +1,22 @@
-# STATUS QUO:
+# Intro:
 
 SMS Stands for Symbolic Math System. The application is a minimal algebraic system and a functional programming language.
 The SMS language is lexically scoped, weakly typed, and functional. SMS currently has no compiler.
 
-
-The C prorgam compiles to a terminal application which interprets commands like `a = 4 * cos(0.5);` and `rm a;` to calculate, set, and destroy variables.
+The C program compiles to a terminal application which interprets commands like `a = 4 * cos(0.5);` and `rm a;` to calculate, set, and destroy variables.
 
 The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts. Contexts are user defined objects with key-value pairs. Functions can also be called with lexical scoping for variables and functions.
 
 To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. The variable names must start with underscores or a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
 
-After a command, the garbage collector is executed. The garbage collector uses the stop and copy algorithm. 
-The whitespace characters in the provided examples are optional, and are for readability. All commands end with a semicolon (;) .
+Supported functions so far (in double precision):
+
+`+, -, *, /, ^, ln, exp, abs, sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sqrt, if, ==, >, <` 
+
+In SMS, whitespace characters (outside of a string) are ignored. All commands end with a semicolon (;) .
 You can try the following examples:
 
-Direct calculations can be performed with any mathematical expression followed by a semicolon.
-The resulting value will be calculated and printed to the screen, but not stored for later use:
+Direct calculations can be performed with any mathematical expression:
 
 `2 + sqrt(7);`
 
@@ -31,33 +32,39 @@ To see which variables are currently set, enter:
 
 `self ;`
 
+Prefix notation may also be used for +,-,*,/.
+
+`c = + ( 1, sin( b ) ) ;`
+
 The meta operator (:) stores expressions :
 
-`expression = : +(a,b,c);`
+`expr = : +(a,b,c);`
 
 Call the function later with this syntax:
 
-`expression {}`
+`expr {}`
 
 Override specific variables:
 
 `expression {b=6}`
 
-Store structured data with no evaluation:
+Define a function that calculates the nth fibonacci number:
 
-`x= : {name="power graph"; value=cos(b);};`
+`fib=:if( n < 2 , 1 , fib{ n=n-1 } + fib { n=n-2 } );`
 
-Removing the meta operator (:) above will lead to a different result.
+`fib{n=20}`
+
+On AMD64 architecture, this implementation of fib will crash for n > 21 because SMS uses a 5 MB heap size.
 
 Storage of mathematical expressions in an array (a meta array):
 
-`formula = : [ a ^ 2 + b ^ 2 , ln(a/b) ];`
+`quad = : [ (-b+sqrt(b^2-4*a*c)/(2*a) , (-b+sqrt(b^2-4*a*c)/(2*a) ];`
 
-Prefix notation may also be used for +,-,*,/.
+Call the quadratic formula function and recieve two values.
 
-`c = + ( 1, sin( b ) ) ;`
+`quad {a=-1,b=2,c=3};`
 
-Arrays can hold various objects:
+Arrays can hold objects of different types:
 
 `d = :[ a, sinh(a/b), "this", 5 , { x = "x"; }];`
 
@@ -76,7 +83,6 @@ Variables can be removed from the current context:
 Exit the program with:
 
 `exit; `
-
 
 # PLANS:
 
@@ -111,17 +117,17 @@ Required Packages:
 
 - GCC or CLANG compiler
 
-- GNU Make compatible build program
+- GNU Make ( or compatible build program )
 
 The makefile uses clang by default.
 Edit the first lines of the makefile to use your preferred compiler and make program if necessary.
 
-Once you have the necessary packages installed,
+Once you have the necessary packages installed (GCC/Clang, Flex, and Bison),
 Change directory to the top level of the project (where LICENSE.txt is located) and run:
 
 `make`
 
-Upon success, you will have a portable executable called 'sms'.
+Upon success, you will have a portable executable called 'sms' in the bin directory.
 
 On Linux/Unix systems, You may be able to build and install in one step:
 
