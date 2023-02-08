@@ -56,6 +56,9 @@ _?+{alpha}+({digit}?+{alpha}?+_?+)?+\'?+    {
       return SYM;
     }
 
+"//".* { ;};
+
+
 \"([^"\\]|\\.)*\" {
   // Text after the first quotation will be at &(yytext[1])
   // We also have string length yyleng-2, for trimming quotes.
