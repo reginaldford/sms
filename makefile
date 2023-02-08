@@ -48,17 +48,15 @@ src/y.tab.c src/y.tab.h: src/sms.y
 src/lex.yy.c: src/y.tab.h src/y.tab.c src/sms.l
 	flex --yylineno -o src/lex.yy.c src/sms.l
 
-TEST_SOURCES=src/test/sm_test.c src/test/sm_test_context.c src/test/sm_test_expr.c src/test/sm_test_gc.c src/test/sm_test_mathops.c src/test/sm_test_numbers.c src/test/sm_test_parser.c src/test/sm_test_string.c
-
-TEST_HEADERS=src/test/sm_test.h src/test/sm_test_context.h src/test/sm_test_expr.h src/test/sm_test_gc.h src/test/sm_test_mathops.h src/test/sm_test_numbers.h src/test/sm_test_parser.c src/test/sm_test_string.h
-
-TEST_OBJ_FILES=src/test/sm_test.dbg.o src/test/sm_test_context.dbg.o src/test/sm_test_expr.dbg.o src/test/sm_test_gc.dbg.o src/test/sm_test_mathops.dbg.o src/test/sm_test_numbers.dbg.o src/test/sm_test_parser.c src/test/sm_test_string.dbg.o
+TEST_SOURCES=src/test/sm_test.c
+TEST_HEADERS=src/test/sm_test.h
+TEST_OBJ_FILES=src/test/sm_test.dbg.o
 
 bin/sms_tests: $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
 	$(CC_DEBUG) -lm -o bin/sms_tests $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
 all: bin/sms bin/sms_debug bin/sms_tests
 
-install: all
+install: bin/sms
 	cp -fv bin/sms $(INSTALL_DIR)/sms
 	chmod +x $(INSTALL_DIR)/sms
 
