@@ -19,6 +19,7 @@ enum sm_object_type {
   sm_space_type
 };
 
+
 // Useful macros
 #define MIN(x, y) (x < y ? x : y)
 #define MAX(x, y) (x > y ? x : y)
@@ -49,3 +50,6 @@ enum sm_object_type {
 #include "sm_engine.h"
 #include "sm_meta.h"
 #include "sm_signal.h"
+#include "sm_parse_result.h"
+#include "sm_init.h"
+#include "y.tab.h"

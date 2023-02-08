@@ -1,1 +1,1 @@
-int sm_test_mathops();
+int sm_test_mathops(int subchapter);
