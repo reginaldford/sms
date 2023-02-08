@@ -21,6 +21,9 @@ int main() {
       // Print
       sm_string *result_str = sm_object_to_string(result);
       printf("%s\n", &(result_str->content));
+      // Cleanup
+      sm_garbage_collect();
+
     } else {
       printf("Error: parser returned %i\n", pr.return_val);
     }
