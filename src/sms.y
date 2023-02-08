@@ -22,8 +22,6 @@ void yyerror(char *msg);
   sm_meta * meta;
 };
 
-%token CLEAR FORMAT LS NEWLINE EXIT SELF IF
-
 %type  <expr>     FUNCALL
 %type  <expr>     IF_STATEMENT
 %type  <meta>     META_EXPR
@@ -37,6 +35,10 @@ void yyerror(char *msg);
 %type  <expr>     EQ
 %type  <expr>     GT
 %type  <expr>     LT
+%type  <expr>     COMMAND
+
+%token CLEAR FORMAT LS NEWLINE EXIT SELF IF
+
 %token <num>      NUM
 %token <expr>     EQEQ
 %token <sym>      SYM
@@ -65,30 +67,23 @@ void yyerror(char *msg);
 %left  ':'
 
 
-
 %%
 
 
-
-COMMAND : EXPR {
-    sm_context * previous_cx =*(sm_global_lex_stack(NULL)->top);
-    sm_object * result = sm_engine_eval((sm_object*)$1,previous_cx);
-    sm_string * output_str = sm_object_to_string(result);
-    char * output_cstr = &(output_str->content);
-    printf("%s\n",output_cstr);
-    sm_garbage_collect();
-    sm_terminal_prompt();
+COMMAND : EXPR ';' { sm_global_parser_output((sm_object*)($1)); YYACCEPT ; }
+  | RM SYM ';' {
+    bool success = (sm_expr*) sm_context_rm(*(sm_global_lex_stack(NULL)->top),(sm_symbol*)$2);
+    if(success == true){
+      sm_global_parser_output((sm_object*)sm_new_symbol(sm_new_string(4,"true")));
+      YYACCEPT;
+    } else {
+      sm_global_parser_output((sm_object*)sm_new_symbol(sm_new_string(5,"false")));
+      YYERROR;
+    }
   }
-  | RM SYM {
-    sm_context_rm((sm_symbol*)$2);
-    sm_garbage_collect();
-    sm_terminal_prompt();
-  }
-  | LET SYM '=' EXPR { printf("Activated let command ! (incomplete) \n"); }
-  | error { yyerror("Bad syntax.");}
-  | COMMAND ';' COMMAND ';'
+  | LET SYM '=' EXPR ';' { printf("Activated let command ! (incomplete) \n"); }
+  | error { yyerror("Bad syntax."); YYABORT; }
   | EXIT    ';' { sm_signal_handler(SIGQUIT); }
-
 
 
 EXPR : SELF { $$ = (sm_expr*)*(sm_global_lex_stack(NULL)->top); }
@@ -254,30 +249,3 @@ void yyerror(char *msg) {
   fprintf(stderr,"Error Specifics: %s\n",msg);
 }
 
-int main(){
-  //Register the signal handler
-  sm_register_signals();
-
-  //Initialize the current mem heap
-  sm_global_current_heap(sm_new_heap(1024*1024*5));
-
-  //Initialize the global space arrays
-  sm_global_space_array(sm_new_space_array(0,100));
-
-  //Initialize the lexical stack
-  sm_global_lex_stack(sm_new_stack(100));
-
-  //Initialize the global context
-  sm_stack_push(sm_global_lex_stack(NULL),sm_new_context(0,0,NULL));
-
-  //Introduction and prompt
-  printf("Symbolic Math System\n");
-  printf("Version 0.125\n");
-  sm_terminal_prompt();
-
-  //Start the parser.
-  yyparse();
-
-  //Exit gracefully.
-  sm_signal_handler(SIGQUIT);
-}

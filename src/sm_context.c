@@ -144,18 +144,17 @@ sm_context *sm_context_set(sm_context *context, sm_string *name, void *val) {
 }
 
 // Remove a key_value identified by the key
-bool sm_context_rm(sm_symbol *sym) {
-  sm_search_result sr = sm_context_find_index(*(sm_global_lex_stack(NULL)->top), sym->name);
+bool sm_context_rm(sm_context *self, sm_symbol *sym) {
+  sm_search_result sr = sm_context_find_index(self, sym->name);
   if (sr.found == true) {
-    sm_context       *context         = *(sm_global_lex_stack(NULL)->top);
-    sm_context_entry *context_entries = sm_context_entries(context);
-    for (unsigned int i = sr.index; i + 1 < context->size; i++) {
+    sm_context_entry *context_entries = sm_context_entries(self);
+    for (unsigned int i = sr.index; i + 1 < self->size; i++) {
       context_entries[i] = context_entries[i + 1];
     }
-    context->size -= 1;
-    context->capacity = context->size;
+    self->size -= 1;
+    self->capacity = self->size;
     // Putting a space for remaining space
-    //sm_new_space_after(context, sizeof(sm_context_entry));
+    // sm_new_space_after(context, sizeof(sm_context_entry));
     return true;
   } else {
     printf("Could not find variable to remove: %s\n", &(sym->name->content));

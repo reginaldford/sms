@@ -133,3 +133,15 @@ sm_expr *sm_global_parents(sm_expr *replacement) {
   }
   return parents;
 }
+
+// This makes the bison parser globally accessible
+sm_object *sm_global_parser_output(sm_object *replacement) {
+  static sm_object *parser_output;
+  if (replacement != NULL) {
+    sm_object *temp = parser_output;
+    parser_output   = replacement;
+    return temp;
+  } else {
+    return parser_output;
+  }
+}

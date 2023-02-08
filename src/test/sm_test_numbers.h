@@ -1,1 +1,1 @@
-int sm_test_numbers();
+int sm_test_numbers(int subchapter);
