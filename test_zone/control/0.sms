@@ -1,0 +1,12 @@
+{
+  true=:true;
+  false=:false;
+  pi=3.14159265358979323;
+  tests=[
+    [if(2<5,"hello","goodbye"),"hello","2<5?"],
+    [if(2>5,"hello","goodbye"),"goodbye","2>5?"],
+    [if(2==5,"hello","goodbye"),"goodbye","2==5?"],
+    [if(5==5,"hello","goodbye"),"hello","5==5?"],
+    [if(2+3==5,"hello","goodbye"),"hello","2+3==5?"],
+  ];
+};
