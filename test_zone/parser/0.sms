@@ -1,15 +1,26 @@
-[
-  [ { }    , {}       ,  "parsing an empty context"],
-  [ :1     , :(1)     ,  "effectless parens"],
-  [ :2     , :((2))   ,  "effectless parens"],
-  [ :3     , :(((3))) ,  "effectless parens"],
-  [ :(2+2) , :+(2,2)  ,  "equivelant meta expressions"],
-  [ ::(2+2), ::+(2,2) ,  "equivelant meta expressions"],
-  [ "hello123!@#\n", "hello123!@#\n"  ,  "just a string"],
-  [ 3.1415926535897932, 3.1415926535897932  ,  "just pi"],
-  [ :4  , :(4),  "metaphor"],
-  [ 3.14E2  , 314,      "E notation"],
-  [ 6.14E2  , 614,      "E notation"],
-  [ 6.14e2  , 614,      "e notation"],
-  [ 6.14e-2 , 0.0614,   "e notation, negative"],
-];
+{
+  pi=3.14159265358979323;
+  tests=[
+    [ { }    , {}       ,  "parsing an empty context"],
+    [ :1     , :(1)     ,  "effectless parens"],
+    [ :2     , :((2))   ,  "effectless parens"],
+    [ :3     , :(((3))) ,  "effectless parens"],
+    [ :(2+2) , :+(2,2)  ,  "equivelant meta expressions"],
+    [ ::(2+2), ::+(2,2) ,  "equivelant meta expressions"],
+    [ "hello123!@#\n", "hello123!@#\n"  ,  "just a string"],
+    [ "", ""  ,  "empty string"],
+    [ pi, 3.14159265358979323  ,  "just pi"],
+    [ :4  , :(4),  "metaphor"],
+    [ 3.14E2  , 314,      "E notation"],
+    [ 6.14E2  , 614,      "E notation"],
+    [ 6.14e2  , 614,      "e notation"],
+    [ 6.14e-2 , 0.0614,   "e notation, negative"],
+    [ .123 , 0.123,   "leading decimal"],
+    [ -0 , -(0),   "negative 0"],
+    [ :if(n<2,1,fib+fib) , :if(<(n,2),1,+(fib,fib)) ,   "fake fib meta condition"],
+    [ :if(:true,1) , :if(:true,1) ,   "meta condition"],
+    [ { a=1; } , {a=1} ,   "single entry context"],
+    [ { x="hi"; a=1 } , {a=1; x="hi";} ,   "double entry context"],
+    [ { x="hi"; a=1; k={} } , {a=1; k={}; x="hi"; } ,   "triple entry context"],
+  ];
+};

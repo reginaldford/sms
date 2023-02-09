@@ -42,3 +42,4 @@ unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer);
 unsigned int sm_context_entry_to_string_len(sm_context_entry *ce);
 sm_context  *sm_context_add_child(sm_context *cx, sm_object *child);
 bool         sm_context_update_relatives(sm_context *self, sm_context *old_self);
+sm_object   *sm_context_get(sm_context *self, unsigned int index);

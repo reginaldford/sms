@@ -211,3 +211,10 @@ unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer) {
 unsigned int sm_context_entry_to_string_len(sm_context_entry *ce) {
   return 1 + ce->name->size + sm_object_to_string_len(ce->value);
 }
+
+// Return the object at a specific index.
+// Does not check for validity of index.
+sm_object *sm_context_get(sm_context *self, unsigned int index) {
+  sm_context_entry *entries = sm_context_entries(self);
+  return entries[index].value;
+}

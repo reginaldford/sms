@@ -6,7 +6,7 @@
 int num_chapters() { return 7; }
 
 char *chapter_name(int chapter) {
-  char *names[] = {"parser", "numbers", "context", "string", "expr", "mathops", "gc"};
+  char *names[] = {"parser", "math", "context", "string", "expr", "mathops", "gc"};
   if (chapter < 0 || chapter >= num_chapters()) {
     printf("Invalid chapter: %i\n", chapter);
     exit(-1);
@@ -15,7 +15,7 @@ char *chapter_name(int chapter) {
 }
 
 int num_subchapters(int chapter) {
-  int values[] = {2, 0, 0, 0, 0, 0, 0};
+  int values[] = {2, 2, 0, 0, 0, 0, 0};
   if (chapter >= 0 && chapter < num_chapters() - 1) {
     return values[chapter];
   } else {
@@ -29,6 +29,7 @@ void test_intro(int chapter, int subchapter, int test, char *desc) {
 
 int display_width() { return 50; }
 
+// for text alignment
 char *spaces(int len) {
   int         my_len = -1;
   static char str[50];
@@ -45,6 +46,19 @@ char *spaces(int len) {
   return str;
 }
 
+// countes 2-digit values to help text alignment
+int get_alignment(int chapter, int subchapter, int test) {
+  int alignment = 0;
+  if (chapter >= 10)
+    alignment++;
+  if (subchapter >= 10)
+    alignment++;
+  if (test >= 10)
+    alignment++;
+  return alignment;
+}
+
+// run an sms file with tests
 int perform_test_subchapter(int chapter, int subchapter) {
   if (chapter < -1 || chapter >= num_chapters()) {
     printf("Test chapter: %i out of range.\n", chapter);
@@ -61,12 +75,25 @@ int perform_test_subchapter(int chapter, int subchapter) {
     sm_parse_result pr = sm_parse();
     if (pr.return_val == 0) {
       printf("Successful.\n");
-      // we expect an array of arrays, each with 3 objects.
-      if (pr.parsed_object->my_type != sm_expr_type) {
-        printf("Top level object is not an array. Aborting.\n");
+      // we expect a context with 'test' set to an array of arrays, each with 3 objects.
+      if (pr.parsed_object->my_type != sm_context_type) {
+        printf("Top level object is not a context. Aborting.\n");
         exit(-1);
       }
-      sm_expr *test_list = (sm_expr *)pr.parsed_object;
+
+      sm_context                *test_env = (sm_context *)pr.parsed_object;
+      sm_search_result_cascading src = sm_context_find_far(test_env, sm_new_string(5, "tests"));
+      if (src.found == false) {
+        printf("Top level context must contain a key 'tests' associated to a nested array.");
+        printf("Aborting.\n");
+        exit(-1);
+      }
+      if (sm_context_get(src.context, src.index)->my_type != sm_expr_type) {
+        printf("Value under 'test' should be an array.\n");
+        exit(-1);
+      }
+      sm_expr *test_list = (sm_expr *)sm_context_get(src.context, src.index);
+
       for (unsigned int i = 0; i < test_list->size; i++) {
         sm_object *obj = sm_expr_get_arg(test_list, i);
         if (obj->my_type != sm_expr_type) {
@@ -84,26 +111,21 @@ int perform_test_subchapter(int chapter, int subchapter) {
           test_description = &(((sm_string *)sm_expr_get_arg(test_triplet, 2))->content);
         }
         test_intro(chapter, subchapter, i, test_description);
-        sm_object *outcome =
-          sm_engine_eval(sm_expr_get_arg(test_triplet, 0), *(sm_global_lex_stack(NULL)->top));
+        sm_object *outcome      = sm_engine_eval(sm_expr_get_arg(test_triplet, 0), test_env);
         sm_string *outcome_str  = sm_object_to_string(outcome);
         sm_object *expected     = sm_expr_get_arg(test_triplet, 1);
         sm_string *expected_str = sm_object_to_string(expected);
         int        diff         = strcmp(&(expected_str->content), &(outcome_str->content));
-        // for displaying aligned "PASSED" values:
-        int alignment = 0;
-        if (chapter >= 10)
-          alignment++;
-        if (subchapter >= 10)
-          alignment++;
-        if (i >= 10)
-          alignment++;
+        int        alignment    = get_alignment(chapter, subchapter, i);
         if (diff != 0) {
-          printf("%sFailed: Test %i . %i . %i: failed.\n",
-                 spaces(display_width() - (strlen(test_description)+alignment)), chapter, subchapter, i);
+          printf("%sFailed.\nRegarding %i . %i . %i:\n",
+                 spaces(display_width() - (strlen(test_description) + alignment)), chapter,
+                 subchapter, i);
+          printf("Left  side: %s\n", &(outcome_str->content));
+          printf("Right side: %s\n", &(expected_str->content));
           return 1;
         } else {
-          printf("%sPassed.\n", spaces(display_width() - (strlen(test_description)+alignment)));
+          printf("%sPassed.\n", spaces(display_width() - (strlen(test_description) + alignment)));
         }
       }
     } else {
@@ -113,6 +135,7 @@ int perform_test_subchapter(int chapter, int subchapter) {
   return -1;
 }
 
+// run 1 test from sms file
 int perform_test(int chapter, int subchapter, int test) {
   if (chapter < -1 || chapter >= num_chapters()) {
     printf("Test chapter: %i out of range.\n", chapter);
@@ -129,12 +152,24 @@ int perform_test(int chapter, int subchapter, int test) {
     sm_parse_result pr = sm_parse();
     if (pr.return_val == 0) {
       // we expect an array of arrays, each with 3 objects.
-      if (pr.parsed_object->my_type != sm_expr_type) {
-        printf("Top level object is not an array. Aborting.\n");
+      if (pr.parsed_object->my_type != sm_context_type) {
+        printf("Top level object is not a context. Aborting.\n");
         exit(-1);
       }
-      sm_expr   *test_list = (sm_expr *)pr.parsed_object;
-      sm_object *obj;
+
+      sm_context                *test_env = (sm_context *)pr.parsed_object;
+      sm_search_result_cascading src = sm_context_find_far(test_env, sm_new_string(5, "tests"));
+      if (src.found == false) {
+        printf("Top level context must contain a key 'tests' associated to a nested array.");
+        printf("Aborting.\n");
+        exit(-1);
+      }
+      if (sm_context_get(src.context, src.index)->my_type != sm_expr_type) {
+        printf("Value under 'test' should be an array.\n");
+        exit(-1);
+      }
+      sm_expr   *test_list = (sm_expr *)sm_context_get(src.context, src.index);
+      sm_object *obj; // 1 element of the user-provided array under 'test'
       if (test >= 0 && test < (int)test_list->size) {
         obj = sm_expr_get_arg(test_list, test);
       } else {
@@ -157,29 +192,22 @@ int perform_test(int chapter, int subchapter, int test) {
         test_description = &(((sm_string *)sm_expr_get_arg(test_triplet, 2))->content);
       }
       test_intro(chapter, subchapter, test, test_description);
-      sm_object *outcome =
-        sm_engine_eval(sm_expr_get_arg(test_triplet, 0), *(sm_global_lex_stack(NULL)->top));
+      sm_object *outcome      = sm_engine_eval(sm_expr_get_arg(test_triplet, 0), test_env);
       sm_string *outcome_str  = sm_object_to_string(outcome);
       sm_object *expected     = sm_expr_get_arg(test_triplet, 1);
       sm_string *expected_str = sm_object_to_string(expected);
       int        diff         = strcmp(&(expected_str->content), &(outcome_str->content));
-
-      // for displaying aligned "PASSED" values:
-      int alignment = 0;
-      if (chapter >= 10)
-        alignment++;
-      if (subchapter >= 10)
-        alignment++;
-      if (test >= 10)
-        alignment++;
+      int        alignment    = get_alignment(chapter, subchapter, test);
 
       if (diff != 0) {
         printf("%sFailed: Test %i . %i . %i: failed.\n",
-               spaces(display_width() - (strlen(test_description + alignment))), chapter,
+               spaces(display_width() - (strlen(test_description) + alignment)), chapter,
                subchapter, test);
+        printf("Left  side: %s\n", &(outcome_str->content));
+        printf("Right side: %s\n", &(expected_str->content));
         return 1;
       } else {
-        printf("%sPassed.\n", spaces(display_width() - (strlen(test_description + alignment))));
+        printf("%sPassed.\n", spaces(display_width() - (strlen(test_description) + alignment)));
       }
     } else {
       printf("Failed.\n");

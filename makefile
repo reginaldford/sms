@@ -61,4 +61,4 @@ install: bin/sms
 	chmod +x $(INSTALL_DIR)/sms
 
 clean:
-	rm -v -f  src/lex.yy.c src/y.tab.c src/y.tab.h src/*.o src/test/*.o bin/*
+	rm -v -f  src/lex.yy.c src/y.tab.c src/y.tab.h src/*.o src/test/*.o bin/sms bin/sms_debug bin/sms_tests
