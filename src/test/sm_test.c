@@ -2,11 +2,24 @@
 
 #include "../sms.h"
 #include "sm_test.h"
+#include "sm_test_outline.h"
 
-int num_chapters() { return 3; }
+#define DISPLAY_WIDTH 50
+
+test_outline *global_test_outline(test_outline *replacement) {
+  static test_outline *to;
+  if (replacement != NULL) {
+    test_outline *temp = to;
+    to                 = replacement;
+    return temp;
+  }
+  return to;
+}
+
+int num_chapters() { return global_test_outline(NULL)->num_chapters; }
 
 char *chapter_name(int chapter) {
-  char *names[] = {"parser", "math", "control", "context", "string", "expr", "mathops", "gc"};
+  char **names = global_test_outline(NULL)->chapter_names;
   if (chapter < 0 || chapter >= num_chapters()) {
     printf("Invalid chapter: %i\n", chapter);
     exit(-1);
@@ -15,7 +28,7 @@ char *chapter_name(int chapter) {
 }
 
 int num_subchapters(int chapter) {
-  int values[] = {2, 2, 1, 0, 0, 0, 0, 0};
+  int *values = global_test_outline(NULL)->num_subchapters;
   if (chapter >= 0 && chapter <= num_chapters() - 1) {
     return values[chapter];
   } else {
@@ -27,14 +40,12 @@ void test_intro(int chapter, int subchapter, int test, char *desc) {
   printf("Test: %i.%i.%i : %s ...", chapter, subchapter, test, desc);
 }
 
-int display_width() { return 50; }
-
 // for text alignment
 char *spaces(int len) {
   int         my_len = -1;
-  static char str[50];
+  static char str[DISPLAY_WIDTH];
   if (my_len == -1) {
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < DISPLAY_WIDTH; i++) {
       str[i] = ' ';
     }
     str[len] = '\0';
@@ -121,13 +132,13 @@ int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter,
   int        alignment    = get_alignment(chapter, subchapter, test);
   if (diff != 0) {
     printf("%sFailed.\nRegarding %i.%i.%i:\n",
-           spaces(display_width() - (strlen(test_description) + alignment)), chapter, subchapter,
+           spaces(DISPLAY_WIDTH - (strlen(test_description) + alignment)), chapter, subchapter,
            test);
     printf("Left  side: %s\n", &(outcome_str->content));
     printf("Right side: %s\n", &(expected_str->content));
     return 1;
   } else {
-    printf("%sPassed.\n", spaces(display_width() - (strlen(test_description) + alignment)));
+    printf("%sPassed.\n", spaces(DISPLAY_WIDTH - (strlen(test_description) + alignment)));
     return 0;
   }
 }
@@ -179,6 +190,9 @@ int main(int num_args, char **argv) {
   int subchapter = -1;
   int test       = -1;
   int num_fails  = 0;
+  // reading the outline file
+  char *filepath = "../test_zone/outline.sms";
+  global_test_outline(parse_test_outline(filepath));
   if (num_args == 2) {
     chapter = atoi(argv[1]);
   } else if (num_args == 3) {
@@ -206,7 +220,6 @@ int main(int num_args, char **argv) {
     printf("Specified test number: %i is out of range. Must be at least 0.\n", test);
     return -1;
   }
-
   // passing -1 means to test all.
   if (chapter == -1) {
     printf("Testing all %i Chapters\n", num_chapters());
@@ -256,7 +269,7 @@ int main(int num_args, char **argv) {
     }
     num_fails += test_result;
   }
-  
+
   if (num_fails == 1) {
     printf("\n!! There was a failed test. Reported above.\n");
   } else if (num_fails > 1) {

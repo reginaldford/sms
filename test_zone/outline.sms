@@ -1,0 +1,17 @@
+{ // This file is parsed by sms_tests for a test plan
+  // Compare this to the output of ls -R at this directory
+  chapters = [
+    {
+      name= "parser";
+      num_subchapters = 2;
+    },
+    {
+      name= "control";
+      num_subchapters = 1;
+    },
+    {
+      name= "math";
+      num_subchapters = 2;
+    }
+  ];
+};

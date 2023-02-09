@@ -48,9 +48,9 @@ src/y.tab.c src/y.tab.h: src/sms.y
 src/lex.yy.c: src/y.tab.h src/y.tab.c src/sms.l
 	flex --yylineno -o src/lex.yy.c src/sms.l
 
-TEST_SOURCES=src/test/sm_test.c
-TEST_HEADERS=src/test/sm_test.h
-TEST_OBJ_FILES=src/test/sm_test.dbg.o
+TEST_SOURCES=src/test/sm_test.c src/test/sm_test_outline.c
+TEST_HEADERS=src/test/sm_test.h src/test/sm_test_outline.h
+TEST_OBJ_FILES=src/test/sm_test.dbg.o src/test/sm_test_outline.o
 
 bin/sms_tests: $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
 	$(CC_DEBUG) -lm -o bin/sms_tests $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)

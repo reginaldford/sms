@@ -218,3 +218,25 @@ sm_object *sm_context_get(sm_context *self, unsigned int index) {
   sm_context_entry *entries = sm_context_entries(self);
   return entries[index].value;
 }
+
+// Return the object by name
+// Does not search the ancestry for the value
+sm_object *sm_context_get_by_name(sm_context *self, sm_string *name) {
+  sm_context_entry *entries = sm_context_entries(self);
+  sm_search_result  sr      = sm_context_find_index(self, name);
+  if (sr.found == true) {
+    return entries[sr.index].value;
+  }
+  return NULL;
+}
+
+// Return the object by name
+// Searches the ancestry for the value
+sm_object *sm_context_get_by_name_far(sm_context *self, sm_string *name) {
+  sm_search_result_cascading src = sm_context_find_far(self, name);
+  if (src.found == true) {
+    sm_context_entry *entries = sm_context_entries(src.context);
+    return entries[src.index].value;
+  }
+  return NULL;
+}
