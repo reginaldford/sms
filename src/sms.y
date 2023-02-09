@@ -219,14 +219,15 @@ CONTEXT: CONTEXT_LIST '}' {
 CONTEXT_LIST: '{' ASSIGNMENT ';' ASSIGNMENT {
     sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
 	  sm_context *new_cx = sm_new_context(2,2,parent_cx);
+    sm_context_add_child(parent_cx,(sm_object*)new_cx);
 	  sm_context_entry * arr = sm_context_entries(new_cx);
     sm_string *name  = ((sm_symbol*)sm_expr_get_arg($2,0))->name;
+    sm_string *name2  = ((sm_symbol*)sm_expr_get_arg($4,0))->name;
     sm_object *value = (sm_object*)sm_expr_get_arg($2,1);
-	  arr[0] = (sm_context_entry){.name=name,.value=value};
-    name  = ((sm_symbol*)sm_expr_get_arg($4,0))->name;
-    value = (sm_object*)sm_expr_get_arg($4,1);
-    arr[1] = (sm_context_entry){.name=name,.value=value};
-    sm_context_add_child(parent_cx,(sm_object*)new_cx);
+    sm_object *value2 = (sm_object*)sm_expr_get_arg($4,1);
+    short int toggle = strcmp(&(name->content),&(name2->content)) < 0 ? 0 : 1;
+	  arr[toggle%2] = (sm_context_entry){.name=name,.value=value};
+    arr[(toggle+1)%2] = (sm_context_entry){.name=name2,.value=value2};
 	  sm_stack_push(sm_global_lex_stack(NULL),new_cx);
 	  $$ = new_cx;
   }
@@ -235,6 +236,8 @@ CONTEXT_LIST: '{' ASSIGNMENT ';' ASSIGNMENT {
     sm_object *value = (sm_object*)sm_expr_get_arg($3,1);
     sm_context * new_cx = sm_context_set($1,name,value);
     sm_context_update_relatives(new_cx,$1);
+    sm_stack_pop(sm_global_lex_stack(NULL));
+    sm_stack_push(sm_global_lex_stack(NULL),new_cx);
     $$=new_cx;
   }
 
