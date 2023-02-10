@@ -62,6 +62,7 @@ void yyerror(char *msg);
 %token <expr>     ABS
 
 %right EQEQ
+%right '<' '>'
 %left  '+' '-'
 %left  '*' '/'
 %right '^'

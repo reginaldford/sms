@@ -10,5 +10,10 @@
     [if(2+3==5,"hello","goodbye"),"hello","2+3==5?"],
     [if(5==1+4,"hello","goodbye"),"hello","5==1+4?"],
     [if(5==1+5,"hello","goodbye"),"goodbye","5==1+5?"],
+    [if(5==1+5,if(2+3>7,"1","2"),"goodbye"),"goodbye","5==1+5?"],
+    [if(5==1+4,if(2+3>7,"1","2"),"goodbye"),"2","nested conditions"],
+    [if(5==1+4,if(2+3<7,"1","2"),"goodbye"),"1","nested conditions"],
+    [if(5==1+4,if(2*3<7,"1","2"),"goodbye"),"1","nested conditions"],
+    [if(5==1+4,if(2^3<7,"1","2"),"goodbye"),"2","nested conditions"],
   ];
 };

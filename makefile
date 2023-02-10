@@ -14,7 +14,7 @@ CC_DEBUG=clang
 CFLAGS=-fshort-enums -O3
 
 # Compiling for debugging info
-# CFLAGS_DEBUG=-fshort-enums -g
+CFLAGS_DEBUG=-fshort-enums -g
 
 # ncurses experiments:
 #CFLAGS= -lm -lncurses -Ofast -fshort-enums
@@ -53,7 +53,7 @@ TEST_HEADERS=src/test/sm_test.h src/test/sm_test_outline.h
 TEST_OBJ_FILES=src/test/sm_test.dbg.o src/test/sm_test_outline.o
 
 bin/sms_tests: $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
-	$(CC_DEBUG) -lm -o bin/sms_tests $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_tests $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
 all: bin/sms bin/sms_debug bin/sms_tests
 
 install: bin/sms
