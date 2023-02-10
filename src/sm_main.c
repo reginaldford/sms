@@ -5,11 +5,9 @@
 int main() {
   // Initialize global variables etc.
   sm_init();
-
   // Introduction and prompt
   printf("Symbolic Math System\n");
-  printf("Version 0.125\n");
-
+  printf("Version 0.13\n");
   while (true) {
     // Prompt
     sm_terminal_prompt();
@@ -23,12 +21,10 @@ int main() {
       printf("%s\n", &(result_str->content));
       // Cleanup
       sm_garbage_collect();
-
     } else {
       printf("Error: parser returned %i\n", pr.return_val);
     }
   }
-
   // Exit gracefully.
   sm_signal_handler(SIGQUIT);
 }

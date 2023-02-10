@@ -3,23 +3,22 @@
 #include "../sms.h"
 #include "sm_test_outline.h"
 
+// All allocated memory is in the test outline
 void graceful_exit(test_outline *to_free, int val) {
   free(to_free);
   exit(val);
 }
 
+// Read the file at filepath, parse and validate the structure.
+// If validated, return the completed test_outline, else exit with -1
 test_outline *parse_test_outline(char *filepath) {
   test_outline *result_outline = malloc(sizeof(test_outline));
   result_outline->num_chapters = 0;
-
   const char *last_slash = strrchr(filepath, '/');
-
   if (!last_slash) {
     last_slash = filepath;
   }
-
   sm_strncpy(result_outline->test_zone_path, filepath, strlen(filepath));
-
   sm_init();
   freopen(filepath, "r", stdin);
   printf("Parsing test outline file: %s ...\n", filepath);
@@ -69,10 +68,8 @@ test_outline *parse_test_outline(char *filepath) {
     result_outline->num_subchapters[i] = num_subchapters;
     result_outline->chapter_names[i]   = &(ch_name_str->content);
   }
-
   // store the path of the outline file as the test zone path
   int path_length = (char *)last_slash - (char *)filepath;
   sm_strncpy(result_outline->test_zone_path, filepath, path_length);
-
   return result_outline;
 }
