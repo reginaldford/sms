@@ -18,6 +18,13 @@ test_outline *global_test_outline(test_outline *replacement) {
   return to;
 }
 
+// to track how many tests are performed
+int global_num_tests(int inc) {
+  static int num = 0;
+  num += inc;
+  return num;
+}
+
 // return the total number of chapters in this outline
 int num_chapters() { return global_test_outline(NULL)->num_chapters; }
 
@@ -63,7 +70,7 @@ char *spaces(int len) {
   return str;
 }
 
-// Counts 2-digit values among provided integers to help text alignment
+// counts 2-digit values among provided integers to help text alignment
 int get_alignment(int chapter, int subchapter, int test) {
   int alignment = 0;
   if (chapter >= 10)
@@ -177,10 +184,12 @@ int perform_test_subchapter(int chapter, int subchapter, int test, char *test_zo
     sm_search_result_cascading src       = sm_context_find_far(test_env, sm_new_string(5, "tests"));
     sm_expr                   *test_list = (sm_expr *)sm_context_get(src.context, src.index);
     if (test == -1) {
+      global_num_tests(test_list->size);
       for (unsigned int i = 0; i < test_list->size; i++) {
         num_fails += perform_specific_test(test_env, test_list, chapter, subchapter, i);
       }
     } else {
+      global_num_tests(1);
       num_fails += perform_specific_test(test_env, test_list, chapter, subchapter, test);
     }
   }
@@ -289,11 +298,12 @@ int main(int num_args, char **argv) {
   }
 
   if (num_fails == 1) {
-    printf("\n!! There was a failed test. Reported above.\n");
+    printf("\n!! There was 1 failed test reported above. %i tests total.\n", global_num_tests(0));
   } else if (num_fails > 1) {
-    printf("\n!! There were %i failed tests. Reported above.\n", num_fails);
+    printf("\n!! There were %i failed tests reported above. %i tests total.\n", num_fails,
+           global_num_tests(0));
   } else {
-    printf("\nAll tests passed!\n");
+    printf("\nAll %i tests passed!\n", global_num_tests(0));
   }
   return num_fails;
 }
