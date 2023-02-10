@@ -3,9 +3,11 @@
 #include "../sms.h"
 #include "sm_test.h"
 #include "sm_test_outline.h"
+#include <ctype.h>
 
 #define DISPLAY_WIDTH 50
 
+// global for the test outline structure
 test_outline *global_test_outline(test_outline *replacement) {
   static test_outline *to;
   if (replacement != NULL) {
@@ -16,8 +18,10 @@ test_outline *global_test_outline(test_outline *replacement) {
   return to;
 }
 
+// return the total number of chapters in this outline
 int num_chapters() { return global_test_outline(NULL)->num_chapters; }
 
+// return the name of this chapter
 char *chapter_name(int chapter) {
   char **names = global_test_outline(NULL)->chapter_names;
   if (chapter < 0 || chapter >= num_chapters()) {
@@ -27,6 +31,7 @@ char *chapter_name(int chapter) {
   return names[chapter];
 }
 
+// return the number of subchapters of this chapter
 int num_subchapters(int chapter) {
   int *values = global_test_outline(NULL)->num_subchapters;
   if (chapter >= 0 && chapter <= num_chapters() - 1) {
@@ -36,6 +41,7 @@ int num_subchapters(int chapter) {
   }
 }
 
+// announce which test is being performed
 void test_intro(int chapter, int subchapter, int test, char *desc) {
   printf("Test: %i.%i.%i : %s ...", chapter, subchapter, test, desc);
 }
@@ -117,7 +123,7 @@ int check_specific_test(sm_expr *test_list, int test) {
 int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter, int subchapter,
                           int test) {
   if (check_specific_test(test_list, test) != 0) {
-    printf("Something as wrong with the format of the test.\n");
+    printf("Something was wrong with the format of the test.\n");
     return -1;
   }
 
@@ -146,7 +152,7 @@ int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter,
 // run an sms file with tests
 // if int test is -1, will do all tests
 // else, will run the specified test
-int perform_test_subchapter(int chapter, int subchapter, int test) {
+int perform_test_subchapter(int chapter, int subchapter, int test, char *test_zone_path) {
   int num_fails = 0;
   if (chapter < -1 || chapter >= num_chapters()) {
     printf("Test chapter: %i out of range.\n", chapter);
@@ -157,7 +163,7 @@ int perform_test_subchapter(int chapter, int subchapter, int test) {
   } else {
     sm_init();
     char buf[64];
-    sprintf(buf, "../test_zone/%s/%i.sms", chapter_name(chapter), subchapter);
+    sprintf(buf, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
     printf("Parsing: %s... \n", buf);
     freopen(buf, "r", stdin);
     sm_parse_result pr = sm_parse();
@@ -190,19 +196,27 @@ int main(int num_args, char **argv) {
   int subchapter = -1;
   int test       = -1;
   int num_fails  = 0;
-  // reading the outline file
+  int arg_shift  = 0; // depends on whether the first arg is a filepath
+
+  // If the first arg starts with a letter or period,
+  // we assume this is a file path for the outline file
   char *filepath = "../test_zone/outline.sms";
+  if (num_args > 1 && (isalpha(*(argv[1])) != 0 || *(argv[1]) == '.')) {
+    filepath = argv[1];
+    arg_shift++;
+  }
   global_test_outline(parse_test_outline(filepath));
-  if (num_args == 2) {
-    chapter = atoi(argv[1]);
-  } else if (num_args == 3) {
-    chapter    = atoi(argv[1]);
-    subchapter = atoi(argv[2]);
-  } else if (num_args == 4) {
-    chapter    = atoi(argv[1]);
-    subchapter = atoi(argv[2]);
-    test       = atoi(argv[3]);
-  } else if (num_args > 4) {
+
+  if (num_args == 2 + arg_shift) {
+    chapter = atoi(argv[1 + arg_shift]);
+  } else if (num_args == 3 + arg_shift) {
+    chapter    = atoi(argv[1 + arg_shift]);
+    subchapter = atoi(argv[2 + arg_shift]);
+  } else if (num_args == 4 + arg_shift) {
+    chapter    = atoi(argv[1 + arg_shift]);
+    subchapter = atoi(argv[2 + arg_shift]);
+    test       = atoi(argv[3 + arg_shift]);
+  } else if (num_args > 4 + arg_shift) {
     printf("Too many arguments.\n Only pass integer(s) for the chapter and, optionally, a ( "
            "subchapter and, optionally, a test number ) .\n");
   }
@@ -229,7 +243,8 @@ int main(int num_args, char **argv) {
                num_subchapters(ch), ch, ch, num_subchapters(ch) - 1);
         for (int sub_ch = 0; sub_ch < num_subchapters(ch); sub_ch++) {
           printf("Testing Subchapter %i.%i\n", ch, sub_ch);
-          int test_result = perform_test_subchapter(ch, sub_ch, -1);
+          int test_result =
+            perform_test_subchapter(ch, sub_ch, -1, global_test_outline(NULL)->test_zone_path);
           if (test_result == -1) {
             printf("Testing Error.\n");
             exit(test_result);
@@ -244,7 +259,8 @@ int main(int num_args, char **argv) {
              num_subchapters(chapter), chapter, chapter, num_subchapters(chapter) - 1);
       for (int sub_ch = 0; sub_ch < num_subchapters(chapter); sub_ch++) {
         printf("Testing Subchapter %i.%i\n", chapter, sub_ch);
-        int test_result = perform_test_subchapter(chapter, sub_ch, -1);
+        int test_result =
+          perform_test_subchapter(chapter, sub_ch, -1, global_test_outline(NULL)->test_zone_path);
         if (test_result == -1) {
           printf("Testing Error.\n");
           exit(test_result);
@@ -254,7 +270,8 @@ int main(int num_args, char **argv) {
     }
   } else if (test == -1) {
     printf("Testing Subchapter %i.%i\n", chapter, subchapter);
-    int test_result = perform_test_subchapter(chapter, subchapter, -1);
+    int test_result =
+      perform_test_subchapter(chapter, subchapter, -1, global_test_outline(NULL)->test_zone_path);
     if (test_result == -1) {
       printf("Testing Error.\n");
       exit(test_result);
@@ -262,7 +279,8 @@ int main(int num_args, char **argv) {
     num_fails += test_result;
   } else {
     printf("Running Test %i.%i.%i\n", chapter, subchapter, test);
-    int test_result = perform_test_subchapter(chapter, subchapter, test);
+    int test_result =
+      perform_test_subchapter(chapter, subchapter, test, global_test_outline(NULL)->test_zone_path);
     if (test_result == -1) {
       printf("Testing Error.\n");
       exit(test_result);
