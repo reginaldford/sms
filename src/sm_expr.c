@@ -93,17 +93,21 @@ unsigned int sm_expr_contents_to_string_len(sm_expr *sme) {
   return sum;
 }
 
-unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer) {
+unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum sm_expr_type op) {
   if (expr->size == 0)
     return 0;
   unsigned int buffer_pos = 0;
   for (unsigned int i = 0; i + 1 < expr->size; i++) {
     buffer_pos += sm_object_sprint(sm_expr_get_arg(expr, i), &(buffer[buffer_pos]));
-    buffer[buffer_pos++] = ',';
+    if (op != sm_then)
+      buffer[buffer_pos++] = ',';
+    else
+      buffer[buffer_pos++] = ';';
   }
   buffer_pos += sm_object_sprint(sm_expr_get_arg(expr, expr->size - 1), &(buffer[buffer_pos]));
   return buffer_pos;
 }
+
 
 // Print to a cstring buffer the description of array
 // Return the resulting length
@@ -113,7 +117,7 @@ unsigned int sm_expr_array_sprint(sm_expr *expr, char *buffer) {
     buffer[1] = ']';
     return 2;
   }
-  int len         = sm_expr_contents_sprint(expr, &(buffer[1]));
+  int len         = sm_expr_contents_sprint(expr, &(buffer[1]), expr->op);
   buffer[1 + len] = ']';
   return 2 + len;
 }
@@ -128,7 +132,7 @@ unsigned int sm_prefix_sprint(sm_expr *expr, char *buffer) {
   sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
   unsigned int cursor = sm_global_fn_name_len(expr->op);
   buffer[cursor++]    = '(';
-  cursor += sm_expr_contents_sprint(expr, &(buffer[cursor]));
+  cursor += sm_expr_contents_sprint(expr, &(buffer[cursor]), expr->op);
   buffer[cursor++] = ')';
   return cursor;
 }

@@ -35,6 +35,8 @@ void yyerror(char *msg);
 %type  <expr>     EQ
 %type  <expr>     GT
 %type  <expr>     LT
+%type  <expr>     SEQUENCE
+%type  <expr>     SEQUENCE_LIST
 %type  <expr>     COMMAND
 
 %token CLEAR FORMAT LS NEWLINE EXIT SELF IF
@@ -61,11 +63,13 @@ void yyerror(char *msg);
 %token <expr>     NOT
 %token <expr>     ABS
 
-%right EQEQ
-%right '<' '>'
+
+%left ';'
+%left '='
+%nonassoc '<' '>' EQEQ
 %left  '+' '-'
 %left  '*' '/'
-%right '^'
+%left '^'
 %left  ':'
 
 
@@ -132,11 +136,21 @@ EXPR : SELF { $$ = (sm_expr*)*(sm_global_lex_stack(NULL)->top); }
   | EQ {}
   | LT {}
   | GT {}
+  | SEQUENCE {}
+
+ASSIGNMENT : SYM '=' EXPR {
+    $$ = sm_new_expr_2(sm_assign,(sm_object*)($1),(sm_object*)($3));
+  }
+
+SEQUENCE: SEQUENCE_LIST ')' {}
+
+SEQUENCE_LIST: '('  EXPR ';' EXPR {$$ = sm_new_expr_2(sm_then  ,(sm_object*)$2,(sm_object*)$4 );}
+  | SEQUENCE_LIST ';' EXPR {$$ = sm_append_to_expr((sm_expr*)$1,(sm_object*)$3);}
 
 EXPR_LIST: '+' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
-  | '-' '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_minus,(sm_object*)$3,(sm_object*)$5 );}
-  | '*' '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_times,(sm_object*)$3,(sm_object*)$5 );}
-  | '/' '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_divide,(sm_object*)$3,(sm_object*)$5 );}
+  | '-'  '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_minus ,(sm_object*)$3,(sm_object*)$5 );}
+  | '*'  '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_times ,(sm_object*)$3,(sm_object*)$5 );}
+  | '/'  '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_divide,(sm_object*)$3,(sm_object*)$5 );}
   | EXPR_LIST ',' EXPR {$$ = sm_append_to_expr((sm_expr*)$1,(sm_object*)$3);}
 
 LT : '<' '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(sm_test_lt,(sm_object*)($3),(sm_object*)($5));}
@@ -153,10 +167,6 @@ IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
   }
   | IF '(' EXPR ',' EXPR ',' EXPR ')' {
     $$ = sm_new_expr_3(sm_if_else,(sm_object*)($3),(sm_object*)($5),(sm_object*)($7));
-  }
-
-ASSIGNMENT : SYM '=' EXPR {
-    $$ = sm_new_expr_2(sm_assign,(sm_object*)($1),(sm_object*)($3));
   }
 
 FUNCALL: META_EXPR CONTEXT {
@@ -253,4 +263,3 @@ void yyerror(char *msg) {
 	//Use this function to investigate the error.
   fprintf(stderr,"Error Specifics: %s\n",msg);
 }
-

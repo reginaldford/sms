@@ -28,6 +28,7 @@ enum sm_expr_type {
   sm_if,
   sm_if_else,
   sm_let,
+  sm_then,
   sm_funcall_v_l,
   sm_funcall_v_v,
   sm_funcall_l_v,

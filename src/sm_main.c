@@ -7,7 +7,7 @@ int main() {
   sm_init();
   // Introduction and prompt
   printf("Symbolic Math System\n");
-  printf("Version 0.13\n");
+  printf("Version 0.135\n");
   while (true) {
     // Prompt
     sm_terminal_prompt();

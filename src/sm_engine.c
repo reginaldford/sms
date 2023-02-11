@@ -17,6 +17,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
     short    op  = sme->op;
 
     switch (op) {
+    case (sm_then): {
+      sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx);
+      for (unsigned int i = 1; i < sme->size - 1; i++)
+        sm_engine_eval(sm_expr_get_arg(sme, i), current_cx);
+      return sm_engine_eval(sm_expr_get_arg(sme, sme->size - 1), current_cx);
+    }
     case (sm_assign): {
       sm_symbol  *sym    = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object  *value  = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx);
