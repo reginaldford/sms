@@ -14,7 +14,7 @@ void graceful_exit(test_outline *to_free, int val) {
 test_outline *parse_test_outline(char *filepath) {
   test_outline *result_outline = malloc(sizeof(test_outline));
   result_outline->num_chapters = 0;
-  const char *last_slash = strrchr(filepath, '/');
+  const char *last_slash       = strrchr(filepath, '/');
   if (!last_slash) {
     last_slash = filepath;
   }

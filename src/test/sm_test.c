@@ -5,7 +5,7 @@
 #include "sm_test_outline.h"
 #include <ctype.h>
 
-#define DISPLAY_WIDTH 50
+#define DISPLAY_WIDTH 65
 
 // global for the test outline structure
 test_outline *global_test_outline(test_outline *replacement) {
@@ -55,18 +55,11 @@ void test_intro(int chapter, int subchapter, int test, char *desc) {
 
 // for text alignment
 char *spaces(int len) {
-  int         my_len = -1;
   static char str[DISPLAY_WIDTH];
-  if (my_len == -1) {
-    for (int i = 0; i < DISPLAY_WIDTH; i++) {
-      str[i] = ' ';
-    }
-    str[len] = '\0';
-    return str;
+  for (int i = 0; i < len; i++) {
+    str[i] = ' ';
   }
-  str[my_len] = ' ';
-  str[len]    = '\0';
-  my_len      = len;
+  str[len] = '\0';
   return str;
 }
 
@@ -144,14 +137,14 @@ int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter,
   int        diff         = strcmp(&(expected_str->content), &(outcome_str->content));
   int        alignment    = get_alignment(chapter, subchapter, test);
   if (diff != 0) {
-    printf("%sFailed.\nRegarding %i.%i.%i:\n",
-           spaces(DISPLAY_WIDTH - (strlen(test_description) + alignment)), chapter, subchapter,
-           test);
-    printf("Left  side: %s\n", &(outcome_str->content));
-    printf("Right side: %s\n", &(expected_str->content));
+    // -8 for exact display width
+    printf("%sFailed.\n", spaces(DISPLAY_WIDTH - 8));
+    printf("  Left  side (evaluated): %s\n", &(outcome_str->content));
+    printf("  Right side (literal)  : %s\n\n", &(expected_str->content));
     return 1;
   } else {
-    printf("%sPassed.\n", spaces(DISPLAY_WIDTH - (strlen(test_description) + alignment)));
+    // 26 for exact display width
+    printf("%sPassed.\n", spaces(DISPLAY_WIDTH - (strlen(test_description) + alignment + 26)));
     return 0;
   }
 }
@@ -174,7 +167,10 @@ int perform_test_subchapter(int chapter, int subchapter, int test, char *test_zo
     printf("Parsing: %s... \n", buf);
     freopen(buf, "r", stdin);
     sm_parse_result pr = sm_parse();
-
+    if (pr.return_val != 0) {
+      printf("Error parsing the subchapter. Parser returned %i\n", pr.return_val);
+      return -1;
+    }
     // exits the program if there is a problem
     sm_context *test_env = check_parsed_object(pr);
     if (test_env == NULL) {
