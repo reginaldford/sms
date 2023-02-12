@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 
+// keep syncronized with function sm_object_type_str
 enum sm_object_type {
   sm_double_type,
   sm_expr_type,
@@ -16,7 +17,9 @@ enum sm_object_type {
   sm_context_type,
   sm_pointer_type,
   sm_meta_type,
-  sm_space_type
+  sm_space_type,
+  sm_fun_type,
+  sm_unknown_type
 };
 
 
@@ -52,4 +55,5 @@ enum sm_object_type {
 #include "sm_signal.h"
 #include "sm_parse_result.h"
 #include "sm_init.h"
+#include "sm_fun.h"
 #include "y.tab.h"

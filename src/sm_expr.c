@@ -267,10 +267,10 @@ unsigned int sm_expr_to_string_len(sm_expr *expr) {
   }
 }
 
-unsigned int sm_funcall_sprint(sm_expr *funcall, char *buffer) {
+unsigned int sm_fun_call_sprint(sm_expr *fun_call, char *buffer) {
   unsigned int cursor = 0;
-  cursor += sm_object_sprint(sm_expr_get_arg(funcall, 0), buffer);
-  cursor += sm_object_sprint(sm_expr_get_arg(funcall, 1), &(buffer[cursor]));
+  cursor += sm_object_sprint(sm_expr_get_arg(fun_call, 0), buffer);
+  cursor += sm_object_sprint(sm_expr_get_arg(fun_call, 1), &(buffer[cursor]));
   return cursor;
 }
 
@@ -285,9 +285,9 @@ unsigned int sm_expr_sprint(sm_expr *expr, char *buffer) {
         return sm_infix_sprint(expr, buffer);
       else
         return sm_prefix_sprint(expr, buffer);
-    } else if (expr->op == sm_funcall_l_l || expr->op == sm_funcall_v_l ||
-               expr->op == sm_funcall_v_v || expr->op == sm_funcall_l_v) {
-      return sm_funcall_sprint(expr, buffer);
+    } else if (expr->op == sm_fun_call_l_l || expr->op == sm_fun_call_v_l ||
+               expr->op == sm_fun_call_v_v || expr->op == sm_fun_call_l_v) {
+      return sm_fun_call_sprint(expr, buffer);
 
     } else {
       sm_strncpy(buffer, "unrecognized expr", 17);

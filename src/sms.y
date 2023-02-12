@@ -20,9 +20,16 @@ void yyerror(char *msg);
   sm_string *str;
   sm_context * context;
   sm_meta * meta;
+  sm_fun * fun;
+  sm_expr* param_list;
+  sm_fun_param_obj* param;
 };
 
-%type  <expr>     FUNCALL
+%type  <expr>     FUN_CALL
+%type  <fun>      FUN_INTRO
+%type  <param_list>     PARAM_LIST
+%type  <expr>     PARAM_LIST_OPEN
+%type  <param>    PARAM
 %type  <expr>     IF_STATEMENT
 %type  <meta>     META_EXPR
 %type  <expr>     ASSIGNMENT
@@ -41,7 +48,10 @@ void yyerror(char *msg);
 
 %token CLEAR FORMAT LS NEWLINE EXIT SELF IF
 
+%token <fun>      ARROW
+%token <fun>      FUN
 %token <num>      NUM
+%token <expr>     PIPE
 %token <expr>     EQEQ
 %token <sym>      SYM
 %token <str>      STRING
@@ -63,9 +73,10 @@ void yyerror(char *msg);
 %token <expr>     NOT
 %token <expr>     ABS
 
-
 %left ';'
+%nonassoc FUN
 %left '='
+%left  IF
 %nonassoc '<' '>' EQEQ
 %left  '+' '-'
 %left  '*' '/'
@@ -91,8 +102,43 @@ COMMAND : EXPR ';' { sm_global_parser_output((sm_object*)($1)); YYACCEPT ; }
   | error { yyerror("Bad syntax."); YYABORT; }
   | EXIT    ';' { sm_signal_handler(SIGQUIT); }
 
+PARAM_LIST : '(' PARAM ')' {
+    $$=sm_new_expr(sm_param_list,(sm_object*)$2);
+  }
+  | PARAM_LIST_OPEN ')' {
+  }
+  | PARAM_LIST_OPEN PARAM ')' {
+    $$=sm_append_to_expr($1,(sm_object*)$2);
+  }
+
+FUN_INTRO :  PARAM_LIST ARROW {
+    sm_fun * new_fun = sm_new_fun(*(sm_global_lex_stack(NULL)->top), ($1)->size, (sm_object*)NULL);
+    for(unsigned int i=0;i<($1)->size;i++){
+      sm_fun_set_param(new_fun,i,&(((sm_fun_param_obj*)sm_expr_get_arg($1,i))->content));
+    }
+    $$=new_fun; 
+  }
+
+PARAM_LIST_OPEN : '(' PARAM ',' {
+    sm_expr* new_expr = sm_new_expr_n(sm_param_list,1,3);
+    $$=sm_set_expr_arg(new_expr,0,(sm_object*)$2);
+  }
+  | PARAM_LIST_OPEN PARAM ',' {
+    $$=sm_append_to_expr($1,(sm_object*)$2);
+  }
+
+PARAM : SYM {
+      $$=sm_new_fun_param_obj($1->name,(sm_object*)NULL,sm_unknown_type);
+  }
+  | SYM '=' EXPR {
+      $$=sm_new_fun_param_obj($1->name,(sm_object*)$3,sm_unknown_type);
+  }
 
 EXPR : SELF { $$ = (sm_expr*)*(sm_global_lex_stack(NULL)->top); }
+  | FUN_INTRO EXPR {
+    $1->content = (sm_object*)$2;
+    $$=(sm_expr*)$1;
+  }
   | EXPR '+' EXPR { $$ = sm_new_expr_2(sm_plus,  (sm_object*) $1, (sm_object*) $3 ) ; }
   | EXPR '-' EXPR { $$ = sm_new_expr_2(sm_minus, (sm_object*) $1, (sm_object*) $3 ) ; }
   | EXPR '*' EXPR { $$ = sm_new_expr_2(sm_times, (sm_object*) $1, (sm_object*) $3 ) ; }
@@ -131,7 +177,7 @@ EXPR : SELF { $$ = (sm_expr*)*(sm_global_lex_stack(NULL)->top); }
   | ARRAY {}
   | META_EXPR {}
   | ASSIGNMENT {}
-  | FUNCALL {}
+  | FUN_CALL {}
   | IF_STATEMENT {}
   | EQ {}
   | LT {}
@@ -145,7 +191,7 @@ ASSIGNMENT : SYM '=' EXPR {
 SEQUENCE: SEQUENCE_LIST ')' {}
 
 SEQUENCE_LIST: '('  EXPR ';' EXPR {$$ = sm_new_expr_2(sm_then  ,(sm_object*)$2,(sm_object*)$4 );}
-  | SEQUENCE_LIST ';' EXPR {$$ = sm_append_to_expr((sm_expr*)$1,(sm_object*)$3);}
+  | SEQUENCE_LIST ';' EXPR {$$ = sm_append_to_expr((sm_expr*)$1,(sm_object*)$3);} 
 
 EXPR_LIST: '+' '('  EXPR ',' EXPR  {$$ = sm_new_expr_2(sm_plus,(sm_object*)$3,(sm_object*)$5 );}
   | '-'  '('  EXPR ',' EXPR {$$ = sm_new_expr_2(sm_minus ,(sm_object*)$3,(sm_object*)$5 );}
@@ -169,18 +215,19 @@ IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
     $$ = sm_new_expr_3(sm_if_else,(sm_object*)($3),(sm_object*)($5),(sm_object*)($7));
   }
 
-FUNCALL: META_EXPR CONTEXT {
-    $$=sm_new_expr_2(sm_funcall_l_l, (sm_object *)($1), (sm_object *)($2));
+FUN_CALL: META_EXPR CONTEXT {
+    $$=sm_new_expr_2(sm_fun_call_l_l, (sm_object *)($1), (sm_object *)($2));
   }
   | META_EXPR SYM {
-    $$=sm_new_expr_2(sm_funcall_l_v, (sm_object *)($1), (sm_object *)($2));
+    $$=sm_new_expr_2(sm_fun_call_l_v, (sm_object *)($1), (sm_object *)($2));
   }
   | SYM CONTEXT  {
     ($2)->parent = *(sm_global_lex_stack(NULL)->top);
-    $$=sm_new_expr_2(sm_funcall_v_l, (sm_object *)($1), (sm_object *)($2));
+    sm_context_add_child(($2)->parent,(sm_object*)($2));
+    $$=sm_new_expr_2(sm_fun_call_v_l, (sm_object *)($1), (sm_object *)($2));
   }
   | SYM SYM  {
-    $$=sm_new_expr_2(sm_funcall_v_v, (sm_object *)($1), (sm_object *)($2));
+    $$=sm_new_expr_2(sm_fun_call_v_v, (sm_object *)($1), (sm_object *)($2));
   }
 
 META_EXPR : ':' EXPR {
@@ -196,11 +243,11 @@ ARRAY_LIST: '[' EXPR ',' EXPR {$$=sm_new_expr_2(sm_array,(sm_object*)$2,(sm_obje
   | ARRAY_LIST ',' EXPR {$$ = sm_append_to_expr($1,(sm_object*)$3);}
 
 CONTEXT: CONTEXT_LIST '}' {
-    sm_context * top = *(sm_global_lex_stack(NULL)->top);
+    $1->parent = *(sm_global_lex_stack(NULL)->top);
     sm_stack_pop(sm_global_lex_stack(NULL));
-    $$=top;
   }
   | CONTEXT_LIST ';' '}' {
+    $1->parent = *(sm_global_lex_stack(NULL)->top);
     sm_stack_pop(sm_global_lex_stack(NULL));
 	}
   | '{' ASSIGNMENT ';' '}' {
@@ -240,16 +287,13 @@ CONTEXT_LIST: '{' ASSIGNMENT ';' ASSIGNMENT {
     short int toggle = strcmp(&(name->content),&(name2->content)) < 0 ? 0 : 1;
 	  arr[toggle%2] = (sm_context_entry){.name=name,.value=value};
     arr[(toggle+1)%2] = (sm_context_entry){.name=name2,.value=value2};
-	  sm_stack_push(sm_global_lex_stack(NULL),new_cx);
+	  sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL),new_cx));
 	  $$ = new_cx;
   }
   | CONTEXT_LIST ';' ASSIGNMENT {
     sm_string *name  = ((sm_symbol*)sm_expr_get_arg($3,0))->name;
     sm_object *value = (sm_object*)sm_expr_get_arg($3,1);
     sm_context * new_cx = sm_context_set($1,name,value);
-    sm_context_update_relatives(new_cx,$1);
-    sm_stack_pop(sm_global_lex_stack(NULL));
-    sm_stack_push(sm_global_lex_stack(NULL),new_cx);
     $$=new_cx;
   }
 
@@ -263,3 +307,4 @@ void yyerror(char *msg) {
 	//Use this function to investigate the error.
   fprintf(stderr,"Error Specifics: %s\n",msg);
 }
+

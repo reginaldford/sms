@@ -27,7 +27,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
       sm_symbol  *sym    = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object  *value  = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx);
       sm_context *new_cx = sm_context_set(current_cx, sym->name, value);
-      sm_context_update_relatives(new_cx, current_cx);
       return value;
     }
     case (sm_plus): {
@@ -149,20 +148,19 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
       }
       return (sm_object *)new_arr;
     }
-    case (sm_funcall_l_l): {
+    case (sm_fun_call_l_l): {
       sm_meta    *meta  = (sm_meta *)sm_expr_get_arg(sme, 0);
       sm_context *cx    = (sm_context *)sm_expr_get_arg(sme, 1);
       cx                = (sm_context *)sm_engine_eval((sm_object *)cx, cx);
       sm_object *result = sm_engine_eval(meta->address, cx);
       return result;
     }
-    case (sm_funcall_v_l): {
+    case (sm_fun_call_v_l): {
       sm_symbol  *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_context *cx  = (sm_context *)sm_expr_get_arg(sme, 1);
 
       sm_context *new_cx = (sm_context *)sm_engine_eval((sm_object *)cx, current_cx);
-      sm_context_update_relatives(new_cx, cx);
-      cx = new_cx;
+      cx                 = new_cx;
 
       sm_string                 *var_name = sym->name;
       sm_search_result_cascading sr       = sm_context_find_far(cx, var_name);
@@ -177,7 +175,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
         return (sm_object *)sm_new_double(0);
       }
     }
-    case (sm_funcall_l_v): {
+    case (sm_fun_call_l_v): {
       sm_meta                   *meta     = (sm_meta *)sm_expr_get_arg(sme, 0);
       sm_symbol                 *sym      = (sm_symbol *)sm_expr_get_arg(sme, 1);
       sm_string                 *var_name = sym->name;
@@ -193,7 +191,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
         return (sm_object *)sm_new_double(0);
       }
     }
-    case (sm_funcall_v_v): {
+    case (sm_fun_call_v_v): {
       sm_object                 *obj1      = sm_expr_get_arg(sme, 0);
       sm_object                 *obj2      = sm_expr_get_arg(sme, 1);
       sm_string                 *var1_name = ((sm_symbol *)obj1)->name;
@@ -308,7 +306,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx) {
         new_ce[i].value = ce[i].value;
       }
     }
-    sm_context_update_relatives(new_cx, cx);
+    return (sm_object *)new_cx;
     return (sm_object *)new_cx;
   }
   default:

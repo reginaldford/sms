@@ -29,13 +29,14 @@ enum sm_expr_type {
   sm_if_else,
   sm_let,
   sm_then,
-  sm_funcall_v_l,
-  sm_funcall_v_v,
-  sm_funcall_l_v,
-  sm_funcall_l_l,
+  sm_fun_call_v_l,
+  sm_fun_call_v_v,
+  sm_fun_call_l_v,
+  sm_fun_call_l_l,
   sm_array,
   sm_siblings,
-  sm_cprim
+  sm_prim,
+  sm_param_list
 };
 
 // Head of an expression

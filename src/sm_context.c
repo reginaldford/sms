@@ -69,7 +69,7 @@ sm_search_result_cascading sm_context_find_far(sm_context *context, sm_string *v
   sm_search_result sr = sm_context_find_index(context, var_string);
   if (sr.found == true) {
     return (sm_search_result_cascading){.found = true, .index = sr.index, .context = context};
-  } else if (context->parent != NULL) {
+  } else if (context->parent != NULL && context->parent != context) {
     return sm_context_find_far(context->parent, var_string);
   } else {
     return (sm_search_result_cascading){.found = false, .index = 0, .context = context};
@@ -131,7 +131,6 @@ sm_context *sm_context_set(sm_context *context, sm_string *name, void *val) {
       (sm_object *)current_context, sizeof(sm_context) + sizeof(sm_context_entry) * new_capacity);
     new_cx->capacity = new_capacity;
     sm_context_update_relatives(new_cx, current_context);
-
     current_context = new_cx;
   }
   current_context->size += 1;
