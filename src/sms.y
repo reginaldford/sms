@@ -113,7 +113,8 @@ PARAM_LIST : '(' PARAM ')' {
 FUN_INTRO :  PARAM_LIST ARROW {
     sm_fun * new_fun = sm_new_fun(*(sm_global_lex_stack(NULL)->top), ($1)->size, (sm_object*)NULL);
     for(unsigned int i=0;i<($1)->size;i++){
-      sm_fun_set_param(new_fun,i,&(((sm_fun_param_obj*)sm_expr_get_arg($1,i))->content));
+      sm_fun_param_obj * po = (sm_fun_param_obj*)sm_expr_get_arg($1,i);
+      sm_fun_set_param(new_fun,i,po->name,po->default_val,po->known_type);
     }
     $$=new_fun; 
   }

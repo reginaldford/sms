@@ -27,6 +27,8 @@ OBJ_FILES=src/lex.yy.o src/y.tab.o src/sm_main.o src/sm_object.o src/sm_symbol.o
 
 DEBUG_OBJ_FILES=src/lex.yy.o src/y.tab.o src/sm_object.dbg.o src/sm_symbol.dbg.o src/sm_heap.dbg.o src/sm_string.dbg.o src/sm_expr.dbg.o src/sm_double.dbg.o src/sm_context.dbg.o src/sm_commands.dbg.o src/sm_global.dbg.o src/sm_gc.dbg.o src/sm_terminal.dbg.o src/sm_pointer.dbg.o src/sm_engine.dbg.o src/sm_meta.dbg.o src/sm_signal.dbg.o src/sm_space.dbg.o src/sm_stack.dbg.o src/sm_parse_result.dbg.o src/sm_init.dbg.o src/sm_fun.dbg.o
 
+# Optimized executable
+
 bin/sms: $(OBJ_FILES)
 	$(CC) -lm -o bin/sms $(OBJ_FILES)
 
@@ -36,9 +38,6 @@ bin/sms: $(OBJ_FILES)
 %.dbg.o : %.c %.h
 	$(CC_DEBUG) $(CFLAGS_DEBUG) -c $< -o $@
 	
-bin/sms_debug: $(DEBUG_OBJ_FILES) src/sm_main.dbg.o
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_debug $(DEBUG_OBJ_FILES) src/sm_main.dbg.o
-
 src/y.tab.c src/y.tab.h: src/sms.y
 	bison -dy -o src/y.tab.c src/sms.y
 
@@ -48,13 +47,34 @@ src/y.tab.c src/y.tab.h: src/sms.y
 src/lex.yy.c: src/y.tab.h src/y.tab.c src/sms.l
 	flex --yylineno -o src/lex.yy.c src/sms.l
 
+
+# Annotated executable
+
+bin/sms_debug: $(DEBUG_OBJ_FILES) src/sm_main.dbg.o
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_debug $(DEBUG_OBJ_FILES) src/sm_main.dbg.o
+
+# sms_tests runs unit tests
+
 TEST_SOURCES=src/test/sm_test.c src/test/sm_test_outline.c
 TEST_HEADERS=src/test/sm_test.h src/test/sm_test_outline.h
 TEST_OBJ_FILES=src/test/sm_test.dbg.o src/test/sm_test_outline.o
 
-bin/sms_tests: $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
+bin/sms_tests: $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES) $(TEST_HEADERS)
 	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_tests $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
-all: bin/sms bin/sms_debug bin/sms_tests
+
+# Kernel test program runs tests on internal functions
+
+KERNEL_TEST_SOURCES=src/test/sm_kernel_test.c
+KERNEL_TEST_HEADERS=src/test/sm_kernel_test.h
+KERNEL_TEST_OBJ_FILES=src/test/sm_kernel_test.dbg.o
+
+src/test/sm_kernel_test.dbg.o: src/test/sm_kernel_test.c
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -c $< -o src/test/sm_kernel_test.dbg.o
+
+bin/sms_kernel_test: $(KERNEL_TEST_OBJ_FILES) $(DEBUG_OBJ_FILES) $(TEST_HEADERS)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_kernel_test $(KERNEL_TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
+
+all: bin/sms bin/sms_debug bin/sms_tests bin/sms_kernel_test
 
 install: bin/sms
 	cp -fv bin/sms $(INSTALL_DIR)/sms

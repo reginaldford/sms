@@ -90,6 +90,19 @@ void sm_inflate_heap() {
       meta->address = (sm_object *)sm_meet_object(meta->address);
       break;
     }
+    case sm_fun_type: {
+      sm_fun *fun = (sm_fun *)current_obj;
+      if (fun->parent != NULL)
+        fun->parent = (sm_context *)sm_meet_object((sm_object *)fun->parent);
+      for (unsigned short int i = 0; i < fun->num_params; i++) {
+        sm_fun_param *param = sm_fun_get_param(fun, i);
+        param->name         = (sm_string *)sm_meet_object((sm_object *)param->name);
+        if (param->default_val != NULL) {
+          param->default_val = sm_meet_object(param->default_val);
+        }
+      }
+      break;
+    }
     default:
       break;
     }
