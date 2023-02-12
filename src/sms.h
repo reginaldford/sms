@@ -56,4 +56,3 @@ enum sm_object_type {
 #include "sm_parse_result.h"
 #include "sm_init.h"
 #include "sm_fun.h"
-#include "y.tab.h"
