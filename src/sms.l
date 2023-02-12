@@ -39,7 +39,6 @@ sqrt        {return SQRT;}
 abs         {return ABS;}
 diff        {return DIFF;}
 rm          {return RM;}
-fun         {return FUN;}
 ==          {return EQEQ;}
 =>          {return ARROW;}
 <<EOF>> {

@@ -74,7 +74,6 @@ void yyerror(char *msg);
 %token <expr>     ABS
 
 %left ';'
-%nonassoc FUN
 %left '='
 %left  IF
 %nonassoc '<' '>' EQEQ
@@ -99,7 +98,7 @@ COMMAND : EXPR ';' { sm_global_parser_output((sm_object*)($1)); YYACCEPT ; }
     }
   }
   | LET SYM '=' EXPR ';' { printf("Activated let command ! (incomplete) \n"); }
-  | error { yyerror("Bad syntax."); YYABORT; }
+  | error ';' { YYABORT; }
   | EXIT    ';' { sm_signal_handler(SIGQUIT); }
 
 PARAM_LIST : '(' PARAM ')' {
@@ -126,6 +125,7 @@ PARAM_LIST_OPEN : '(' PARAM ',' {
   | PARAM_LIST_OPEN PARAM ',' {
     $$=sm_append_to_expr($1,(sm_object*)$2);
   }
+  | error
 
 PARAM : SYM {
       $$=sm_new_fun_param_obj($1->name,(sm_object*)NULL,sm_unknown_type);
@@ -238,9 +238,11 @@ ARRAY: ARRAY_LIST ']' {};
   | ARRAY_LIST ',' ']' {};
   | '[' EXPR ']' { $$ = (sm_expr*)sm_new_expr(sm_array,(sm_object*)$2);}
   | '[' ']'	{ $$ = sm_new_expr_n(sm_array,0,0);}
+  | error
 
 ARRAY_LIST: '[' EXPR ',' EXPR {$$=sm_new_expr_2(sm_array,(sm_object*)$2,(sm_object*)$4);}
   | ARRAY_LIST ',' EXPR {$$ = sm_append_to_expr($1,(sm_object*)$3);}
+  | error
 
 CONTEXT: CONTEXT_LIST '}' {
     $1->parent = *(sm_global_lex_stack(NULL)->top);

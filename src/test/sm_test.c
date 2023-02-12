@@ -126,10 +126,10 @@ int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter,
     printf("Something was wrong with the format of the test.\n");
     return -1;
   }
-
   sm_expr *test_triplet     = (sm_expr *)sm_expr_get_arg(test_list, test);
   char    *test_description = &(((sm_string *)sm_expr_get_arg(test_triplet, 2))->content);
   test_intro(chapter, subchapter, test, test_description);
+
   sm_object *outcome      = sm_engine_eval(sm_expr_get_arg(test_triplet, 0), test_env);
   sm_string *outcome_str  = sm_object_to_string(outcome);
   sm_object *expected     = sm_expr_get_arg(test_triplet, 1);
@@ -138,7 +138,7 @@ int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter,
   int        alignment    = get_alignment(chapter, subchapter, test);
   if (diff != 0) {
     // -8 for exact display width
-    printf("%sFailed.\n", spaces(DISPLAY_WIDTH - 8));
+    printf("\n%sFailed.\n", spaces(DISPLAY_WIDTH - 8));
     printf("  Left  side (evaluated): %s\n", &(outcome_str->content));
     printf("  Right side (literal)  : %s\n\n", &(expected_str->content));
     return 1;
@@ -204,7 +204,7 @@ int main(int num_args, char **argv) {
   int arg_shift  = 0; // depends on whether the first arg is a filepath
 
   // If the first arg starts with a letter or period,
-  // we assume this is a file path for the outline file
+  // we assume first arg is a file path for the outline file
   char *filepath = "../test_zone/outline.sms";
   if (num_args > 1 && (isalpha(*(argv[1])) != 0 || *(argv[1]) == '.')) {
     filepath = argv[1];
