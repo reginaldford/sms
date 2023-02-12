@@ -94,7 +94,7 @@ void sm_inflate_heap() {
       break;
     }
 
-    if (current_obj->my_type <= sm_space_type)
+    if (current_obj->my_type <= sm_fun_type)
       scan_cursor += sm_sizeof(current_obj);
     else {
       printf("Error: Ending inflation on unrecognized object type: %i\n", current_obj->my_type);

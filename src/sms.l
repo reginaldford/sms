@@ -39,7 +39,9 @@ sqrt        {return SQRT;}
 abs         {return ABS;}
 diff        {return DIFF;}
 rm          {return RM;}
+fun         {return FUN;}
 ==          {return EQEQ;}
+=>          {return ARROW;}
 <<EOF>> {
     /* Immediately exit the program here */
     sm_signal_handler(SIGQUIT);
