@@ -7,7 +7,7 @@
 
 #define DISPLAY_WIDTH 65
 
-// global for the test outline structure
+// Global for the test outline structure
 test_outline *global_test_outline(test_outline *replacement) {
   static test_outline *to;
   if (replacement != NULL) {
@@ -18,17 +18,17 @@ test_outline *global_test_outline(test_outline *replacement) {
   return to;
 }
 
-// to track how many tests are performed
+// To track how many tests are performed
 int global_num_tests(int inc) {
   static int num = 0;
   num += inc;
   return num;
 }
 
-// return the total number of chapters in this outline
+// Return the total number of chapters in this outline
 int num_chapters() { return global_test_outline(NULL)->num_chapters; }
 
-// return the name of this chapter
+// Return the name of this chapter
 char *chapter_name(int chapter) {
   char **names = global_test_outline(NULL)->chapter_names;
   if (chapter < 0 || chapter >= num_chapters()) {
@@ -38,7 +38,7 @@ char *chapter_name(int chapter) {
   return names[chapter];
 }
 
-// return the number of subchapters of this chapter
+// Return the number of subchapters of this chapter
 int num_subchapters(int chapter) {
   int *values = global_test_outline(NULL)->num_subchapters;
   if (chapter >= 0 && chapter <= num_chapters() - 1) {
@@ -48,12 +48,12 @@ int num_subchapters(int chapter) {
   }
 }
 
-// announce which test is being performed
+// Announce which test is being performed
 void test_intro(int chapter, int subchapter, int test, char *desc) {
   printf("Test: %i.%i.%i : %s ...", chapter, subchapter, test, desc);
 }
 
-// for text alignment
+// For text alignment
 char *spaces(int len) {
   static char str[DISPLAY_WIDTH];
   for (int i = 0; i < len; i++) {
@@ -63,7 +63,7 @@ char *spaces(int len) {
   return str;
 }
 
-// counts 2-digit values among provided integers to help text alignment
+// Counts 2-digit values among provided integers to help text alignment
 int get_alignment(int chapter, int subchapter, int test) {
   int alignment = 0;
   if (chapter >= 10)
@@ -78,7 +78,7 @@ int get_alignment(int chapter, int subchapter, int test) {
 // Returns 0 if pr contains a successfully pared context
 // with an array assigned to 'test'
 sm_context *check_parsed_object(sm_parse_result pr) {
-  // we expect an array of arrays, each with 3 objects.
+  // We expect an array of arrays, each with 3 objects.
   if (pr.parsed_object->my_type != sm_context_type) {
     printf("Top level object is not a context. Aborting.\n");
     return NULL;
@@ -98,7 +98,7 @@ sm_context *check_parsed_object(sm_parse_result pr) {
   return (sm_context *)test_env;
 }
 
-// returns 0 if there are no problems
+// Return 0 if there are no problems
 int check_specific_test(sm_expr *test_list, int test) {
   sm_object *obj;
   if (test >= 0 && test < (int)test_list->size) {
@@ -149,9 +149,9 @@ int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter,
   }
 }
 
-// run an sms file with tests
-// if int test is -1, will do all tests
-// else, will run the specified test
+// Run an sms file with tests
+// If test == -1, do all tests
+// Else, run the specified test
 int perform_test_subchapter(int chapter, int subchapter, int test, char *test_zone_path) {
   int num_fails = 0;
   if (chapter < -1 || chapter >= num_chapters()) {
@@ -164,6 +164,12 @@ int perform_test_subchapter(int chapter, int subchapter, int test, char *test_zo
     sm_init();
     char buf[64];
     sprintf(buf, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
+    // If test_zone_path is empty string, then we need to remove the leading "/" from buf
+    if (test_zone_path[0] == '\0') {
+      for (int i = 0; buf[i] != '\0' && i < 64; i++) {
+        buf[i] = buf[i + 1];
+      }
+    }
     printf("Parsing: %s... \n", buf);
     freopen(buf, "r", stdin);
     sm_parse_result pr = sm_parse();
@@ -206,8 +212,9 @@ int main(int num_args, char **argv) {
   // If the first arg starts with a letter or period,
   // we assume first arg is a file path for the outline file
   char *filepath = "../test_zone/outline.sms";
-  // if the first argument does not start with an integer
-  if (num_args > 1 && isalpha(*(argv[1]) != 0)) {
+  // isdigit returns nonzero if the character is a digit
+  // Assuming the relative path to outline.sms does not start with an integer
+  if (num_args > 1 && isdigit(*argv[1]) == 0) {
     filepath = argv[1];
     arg_shift++;
   }
