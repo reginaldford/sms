@@ -21,10 +21,11 @@ int main(int num_args, char **argv) {
   int chosen_test    = -1;
   int current_chapter             = 0;
   int num_fails = 0;
-  int total_tests=0;
   
   if (num_args > 1) {
-    if (isalpha(*(argv[1]))) {
+  // isalpha returns nonzero if the character is alpha
+  // Assuming the relative path to outline.sms does not start with an integer
+    if (isalpha(*(argv[1])) == 0 ) {
       if (strcmp(argv[1], "--help") == 0) {
         printf("Supplying no arguments will run all tests.\n");
         printf("Example: ./%s\n", argv[0]);
@@ -53,9 +54,9 @@ int main(int num_args, char **argv) {
   CHAPTER(chapter_1(chosen_test));
 
   if(num_fails==0){
-    printf("All tests passed!");
+    printf("\nAll tests passed!\n");
   }else{  
-    printf("%i tests failed.\n",num_fails);
+    printf("\n%i tests failed.\n",num_fails);
   }
   return num_fails;
 }
