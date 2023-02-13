@@ -206,7 +206,8 @@ int main(int num_args, char **argv) {
   // If the first arg starts with a letter or period,
   // we assume first arg is a file path for the outline file
   char *filepath = "../test_zone/outline.sms";
-  if (num_args > 1 && (isalpha(*(argv[1])) != 0 || *(argv[1]) == '.')) {
+  // if the first argument does not start with an integer
+  if (num_args > 1 && isalpha(*(argv[1]) != 0)) {
     filepath = argv[1];
     arg_shift++;
   }

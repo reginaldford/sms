@@ -37,6 +37,7 @@ bin/sms: $(OBJ_FILES)
 
 %.dbg.o : %.c %.h
 	$(CC_DEBUG) $(CFLAGS_DEBUG) -c $< -o $@
+
 	
 src/y.tab.c src/y.tab.h: src/sms.y
 	bison -dy -o src/y.tab.c src/sms.y
@@ -53,32 +54,35 @@ src/lex.yy.c: src/y.tab.h src/y.tab.c src/sms.l
 bin/sms_debug: $(DEBUG_OBJ_FILES) src/sm_main.dbg.o
 	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_debug $(DEBUG_OBJ_FILES) src/sm_main.dbg.o
 
-# sms_tests runs unit tests
+# sms_test runs unit tests
 
 TEST_SOURCES=src/test/sm_test.c src/test/sm_test_outline.c
 TEST_HEADERS=src/test/sm_test.h src/test/sm_test_outline.h
 TEST_OBJ_FILES=src/test/sm_test.dbg.o src/test/sm_test_outline.o
 
-bin/sms_tests: $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES) $(TEST_HEADERS)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_tests $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
+bin/sms_test: $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES) $(TEST_HEADERS)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_test $(TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
 
 # Kernel test program runs tests on internal functions
 
-KERNEL_TEST_SOURCES=src/test/sm_kernel_test.c
-KERNEL_TEST_HEADERS=src/test/sm_kernel_test.h
-KERNEL_TEST_OBJ_FILES=src/test/sm_kernel_test.dbg.o
+kernel_test_SOURCES=src/kernel_test/chapter_0.c src/kernel_test/chapter_1.c src/kernel_test/kernel_test.c
+kernel_test_HEADERS=src/kernel_test/chapter_0.h src/kernel_test/chapter_1.h
+kernel_test_OBJ_FILES=src/kernel_test/kernel_test.dbg.o src/kernel_test/chapter_0.dbg.o src/kernel_test/chapter_1.dbg.o
 
-src/test/sm_kernel_test.dbg.o: src/test/sm_kernel_test.c
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -c $< -o src/test/sm_kernel_test.dbg.o
+src/kernel_test/kernel_test.dbg.o: $(kernel_test_SOURCES) $(kernel_test_HEADERS)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -c src/kernel_test/kernel_test.c -o src/kernel_test/kernel_test.dbg.o
 
-bin/sms_kernel_test: $(KERNEL_TEST_OBJ_FILES) $(DEBUG_OBJ_FILES) $(TEST_HEADERS)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_kernel_test $(KERNEL_TEST_OBJ_FILES) $(DEBUG_OBJ_FILES)
+src/kernel_test/%.dbg.o: %.c %.h
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -c $< -o $@
 
-all: bin/sms bin/sms_debug bin/sms_tests bin/sms_kernel_test
+bin/sms_kernel_test: $(kernel_test_OBJ_FILES) $(DEBUG_OBJ_FILES)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -o bin/sms_kernel_test $(kernel_test_OBJ_FILES) $(DEBUG_OBJ_FILES)
+
+all: bin/sms bin/sms_debug bin/sms_test bin/sms_kernel_test
 
 install: bin/sms
 	cp -fv bin/sms $(INSTALL_DIR)/sms
 	chmod +x $(INSTALL_DIR)/sms
 
 clean:
-	rm -v -f  src/lex.yy.c src/y.tab.c src/y.tab.h src/*.o src/test/*.o bin/sms bin/sms_debug bin/sms_tests
+	rm -v -f  src/lex.yy.c src/y.tab.c src/y.tab.h src/*.o src/test/*.o src/*.o src/kernel_test/*.o bin/sms bin/sms_debug bin/sms_test
