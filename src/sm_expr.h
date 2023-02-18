@@ -29,13 +29,10 @@ enum sm_expr_type {
   sm_if_else,
   sm_let,
   sm_then,
-  sm_fun_call_v_l,
-  sm_fun_call_v_v,
-  sm_fun_call_l_v,
-  sm_fun_call_l_l,
   sm_array,
   sm_siblings,
   sm_prim,
+  sm_fun_call,
   sm_param_list
 };
 
@@ -53,11 +50,10 @@ sm_expr *sm_new_expr(enum sm_expr_type op1, sm_object *arg);
 sm_expr *sm_append_to_expr(sm_expr *expr, sm_object *arg);
 sm_expr *sm_new_expr_2(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2);
 sm_expr *sm_new_expr_3(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
-unsigned int sm_prefix_sprint(sm_expr *self, char *buffer);
-unsigned int sm_infix_sprint(sm_expr *expr, char *buffer);
+unsigned int sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);
+unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake);
 sm_string   *sm_expr_to_string(sm_expr *expr);
-unsigned int sm_expr_sprint(sm_expr *self, char *buffer);
-unsigned int sm_expr_to_string_len(sm_expr *expr);
+unsigned int sm_expr_sprint(sm_expr *self, char *buffer, bool fake);
 sm_expr     *sm_set_expr_arg(sm_expr *expr, unsigned int index, sm_object *value);
 sm_object   *sm_expr_get_arg(sm_expr *expr, unsigned int index);
 bool         sm_is_infix(enum sm_expr_type op);

@@ -7,21 +7,23 @@
 #include <string.h>
 #include <math.h>
 
-// keep syncronized with function sm_object_type_str
+// These are the major object types of SMS
+// Keep syncronized with function sm_object_type_str
 enum sm_object_type {
-  sm_double_type,
-  sm_expr_type,
-  sm_primitive_type,
-  sm_string_type,
-  sm_symbol_type,
-  sm_context_type,
-  sm_pointer_type,
-  sm_meta_type,
-  sm_space_type,
-  sm_fun_type,
-  sm_unknown_type
+  sm_double_type,    // 0
+  sm_expr_type,      // 1
+  sm_primitive_type, // 2
+  sm_string_type,    // 3
+  sm_symbol_type,    // 4
+  sm_context_type,   // 5
+  sm_pointer_type,   // 6
+  sm_meta_type,      // 7
+  sm_space_type,     // 8
+  sm_fun_type,       // 9
+  sm_fun_param_type, // 10
+  sm_local_type,     // 11
+  sm_unknown_type    // 12
 };
-
 
 // Useful macros
 #define MIN(x, y) (x < y ? x : y)
@@ -31,8 +33,7 @@ enum sm_object_type {
   printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
   fflush(stdout);
 
-// Windows lacks these signals
-// in <signal.h> because it isn't even POSIX
+// Windows <signal.h> lacks these signals because it isn't even POSIX
 #define SIGHUP 1
 #define SIGQUIT 3
 
@@ -50,9 +51,10 @@ enum sm_object_type {
 #include "sm_double.h"
 #include "sm_gc.h"
 #include "sm_terminal.h"
+#include "sm_fun.h"
 #include "sm_engine.h"
 #include "sm_meta.h"
 #include "sm_signal.h"
 #include "sm_parse_result.h"
 #include "sm_init.h"
-#include "sm_fun.h"
+#include "sm_local.h"

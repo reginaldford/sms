@@ -161,9 +161,9 @@ void sm_sprint_dump() {
   while (scan_cursor <
          ((char *)sm_global_current_heap(NULL)->storage) + sm_global_current_heap(NULL)->used) {
     sm_object   *current_obj = (sm_object *)scan_cursor;
-    unsigned int len         = sm_object_to_string_len(current_obj);
+    unsigned int len         = sm_object_sprint(current_obj, NULL, true);
     char         buf[len];
-    unsigned int real_len = sm_object_sprint(current_obj, buf);
+    unsigned int real_len = sm_object_sprint(current_obj, buf, false);
     buf[real_len]         = '\0';
     printf("%s\n", buf);
     if (current_obj->my_type <= sm_space_type)

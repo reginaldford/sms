@@ -2,6 +2,8 @@
 
 #include "sms.h"
 
+// Copy the object to the new heap
+// Leave an sm_pointer in the old space
 sm_object *sm_move_to_new_heap(sm_object *obj) {
   sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
   // Overwrite the old object. sm_pointer is NOT larger
@@ -9,6 +11,8 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
   return new_obj;
 }
 
+// If obj is an sm_pointer, the object was alreay moved to the new heap
+// Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
   unsigned short int the_type = obj->my_type;
   if (the_type == sm_pointer_type)
@@ -17,6 +21,8 @@ sm_object *sm_meet_object(sm_object *obj) {
     return sm_move_to_new_heap(obj);
 }
 
+// If a sibling ptr aims at an sm_pointer, then it was already copied to new space by GC
+// Therefore, it's not garbage, and we will keep it
 sm_expr *inflate_siblings(sm_expr *siblings) {
   unsigned int num_keepers = 0;
   sm_object   *keepers[siblings->size];
@@ -36,6 +42,7 @@ sm_expr *inflate_siblings(sm_expr *siblings) {
   return NULL;
 }
 
+// GC for the internal parent/child references in contexts
 void inflate_all_siblings() {
   sm_expr *arr = sm_global_parents(NULL);
   for (unsigned int i = 0; i < arr->size; i++) {
@@ -45,13 +52,17 @@ void inflate_all_siblings() {
   arr->size = 0;
 }
 
+// Copy the objects referenced by the current_obj into the new heap
+// and copy all referenced objects until all possible references are copied
 void sm_inflate_heap() {
-  // inflate new space. 'meet' every ptr,
-  // meeting will copy to new heap if necessary
+  // Inflate new space. 'meet' every ptr
+  // Meeting will copy to new heap if necessary
   char *scan_cursor = (char *)sm_global_current_heap(NULL)->storage;
   while (scan_cursor <
          ((char *)sm_global_current_heap(NULL)->storage) + sm_global_current_heap(NULL)->used) {
     sm_object *current_obj = (sm_object *)scan_cursor;
+    // scan_cursor is not referred to for the rest of the loop
+    scan_cursor += sm_sizeof(current_obj);
     switch (current_obj->my_type) {
     case sm_context_type: {
       sm_context *cx = (sm_context *)current_obj;
@@ -66,7 +77,6 @@ void sm_inflate_heap() {
         cx->parent = (sm_context *)sm_meet_object((sm_object *)cx->parent);
       // Save the siblings list for later processing
       if (cx->children != NULL) {
-        // TODO: use custom allocators , this collection is not in the heap
         sm_expr *e = sm_append_to_expr(sm_global_parents(NULL), (sm_object *)cx);
         sm_global_parents(e);
       }
@@ -91,7 +101,8 @@ void sm_inflate_heap() {
       break;
     }
     case sm_fun_type: {
-      sm_fun *fun = (sm_fun *)current_obj;
+      sm_fun *fun  = (sm_fun *)current_obj;
+      fun->content = sm_meet_object((sm_object *)fun->content);
       if (fun->parent != NULL)
         fun->parent = (sm_context *)sm_meet_object((sm_object *)fun->parent);
       for (unsigned short int i = 0; i < fun->num_params; i++) {
@@ -103,46 +114,53 @@ void sm_inflate_heap() {
       }
       break;
     }
-    default:
+    case sm_fun_param_type: {
+      sm_fun_param_obj *param = (sm_fun_param_obj *)current_obj;
+      param->name             = (sm_string *)sm_meet_object((sm_object *)param->name);
+      if (param->default_val != NULL) {
+        param->default_val = sm_meet_object((sm_object *)param->default_val);
+      }
       break;
     }
-
-    if (current_obj->my_type <= sm_fun_type)
-      scan_cursor += sm_sizeof(current_obj);
-    else {
-      printf("Error: Ending inflation on unrecognized object type: %i\n", current_obj->my_type);
-      return;
+    case sm_local_type: {
+      sm_local *local = (sm_local *)current_obj;
+      local->name     = (sm_string *)sm_meet_object((sm_object *)local->name);
+      break;
+    }
+    default:
+      break;
     }
   }
 }
 
+// Copying GC
 void sm_garbage_collect() {
   if (sm_global_current_heap(NULL)->used != 0) {
-    // build "to" heap if necessary, same size as current
+    // Build "to" heap if necessary, same size as current
     if (sm_global_other_heap(NULL) == NULL)
       sm_global_other_heap(sm_new_heap(sm_global_current_heap(NULL)->capacity));
 
-    // swap heaps now
+    // Swap heaps now
     sm_heap *other_heap = sm_global_current_heap(sm_global_other_heap(NULL));
     sm_global_other_heap(other_heap);
 
-    // consider this heap empty now
+    // Consider this heap empty now
     sm_global_current_heap(NULL)->used = 0;
 
-    // reset the space array
+    // Reset the space array
     sm_global_space_array(NULL)->size = 0;
 
-    // copy root (the global context)
+    // Copy root (the global context)
     *(sm_global_lex_stack(NULL)->top) =
       (sm_context *)sm_move_to_new_heap((sm_object *)*(sm_global_lex_stack(NULL)->top));
 
-    // inflate
+    // Inflate
     sm_inflate_heap();
 
-    // inflate context siblings arrays last
+    // Inflate context siblings arrays last
     inflate_all_siblings();
 
-    // for tracking purposes
+    // For tracking purposes
     sm_gc_count(1);
   }
   printf("%i bytes used after gc.\n", sm_global_current_heap(NULL)->used);
