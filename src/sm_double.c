@@ -11,23 +11,22 @@ sm_double *sm_new_double(double value) {
 
 // Return an sm_string describing this double
 sm_string *sm_double_to_string(sm_double *self) {
-  sm_string *new_str = sm_new_string(sm_double_to_string_len(self), "");
-  sm_double_sprint(self, &(new_str->content));
+  sm_string *new_str = sm_new_string(sm_double_sprint(self, NULL, true), "");
+  sm_double_sprint(self, &(new_str->content), false);
   (&new_str->content)[new_str->size] = '\0';
   return new_str;
 }
 
-// Return an sm_string describing this double
-// Unfortunately requires expressing the double ahead of time
-unsigned int sm_double_to_string_len(sm_double *self) {
-  char buffer[22];
-  return sm_double_sprint(self, buffer);
-}
-
 // Adds a c string describing the double to the buffer
 // Returns the length
-unsigned int sm_double_sprint(sm_double *self, char *buffer) {
-  sprintf(buffer, "%.*g", 16, self->value);
+unsigned int sm_double_sprint(sm_double *self, char *buffer, bool fake) {
+  char internal_buf[17];
+  if (!fake)
+    sprintf(buffer, "%.*g", 16, self->value);
+  else {
+    sprintf(internal_buf, "%.*g", 16, self->value);
+    buffer = internal_buf;
+  }
   unsigned short int count = 0;
   for (; count < 22 && buffer[count] != '\0'; count++)
     ;

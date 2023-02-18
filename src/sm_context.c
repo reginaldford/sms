@@ -96,10 +96,13 @@ bool sm_context_update_relatives(sm_context *self, sm_context *old_self) {
     if (siblings != NULL) {
       for (unsigned int i = 0; i < siblings->size; i++) {
         sm_object *obj = sm_expr_get_arg(siblings, i);
-        if (obj->my_type == sm_context_type) {
+        switch (obj->my_type) {
+        case sm_context_type: {
           ((sm_context *)obj)->parent = self;
-        } else if (obj->my_type == sm_meta_type) {
-          DEBUG_HERE("This is the meta case");
+          break;
+        }
+        case sm_meta_type: {
+        }
         }
       }
     }
@@ -163,52 +166,40 @@ bool sm_context_rm(sm_context *self, sm_symbol *sym) {
 
 // Print to string buffer a description of this context
 // Return the string length
-unsigned int sm_context_sprint(sm_context *self, char *buffer) {
-  buffer[0] = '{';
+unsigned int sm_context_sprint(sm_context *self, char *buffer, bool fake) {
+  if (!fake)
+    buffer[0] = '{';
   if (self->size == 0) {
-    buffer[1] = '}';
+    if (!fake)
+      buffer[1] = '}';
     return 2;
   }
   sm_context_entry *ce     = sm_context_entries(self);
   unsigned int      cursor = 1;
   for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
-    cursor += sm_context_entry_sprint(&(ce[object_index]), &(buffer[cursor]));
+    cursor += sm_context_entry_sprint(&(ce[object_index]), &(buffer[cursor]), fake);
     if (object_index + 1 != self->size) {
-      buffer[cursor++] = ';';
+      if (!fake)
+        buffer[cursor] = ';';
+      cursor++;
     }
   }
-  buffer[cursor++] = '}';
+  if (!fake)
+    buffer[cursor] = '}';
+  cursor++;
   return cursor;
-}
-
-// Return hypothetical string length resulting from sm_context_to_string(this)
-unsigned int sm_context_to_string_len(sm_context *self) {
-  if (self->size == 0) {
-    return 2;
-  }
-  sm_context_entry *ce  = sm_context_entries(self);
-  unsigned int      sum = 1;
-  for (unsigned int object_index = 0; object_index + 1 <= self->size; object_index++) {
-    sum += sm_context_entry_to_string_len(&(ce[object_index]));
-    if (object_index + 1 != self->size) {
-      sum += 1; // add a semicolon between commands
-    }
-  }
-  return sum;
 }
 
 // Print to string buffer a description of this context entry
-unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer) {
-  sm_strncpy(buffer, &(ce->name->content), ce->name->size);
-  int cursor       = ce->name->size;
-  buffer[cursor++] = '=';
-  cursor += sm_object_sprint((sm_object *)ce->value, &(buffer[cursor]));
+unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer, bool fake) {
+  if (!fake)
+    sm_strncpy(buffer, &(ce->name->content), ce->name->size);
+  int cursor = ce->name->size;
+  if (!fake)
+    buffer[cursor] = '=';
+  cursor++;
+  cursor += sm_object_sprint((sm_object *)ce->value, &(buffer[cursor]), fake);
   return cursor;
-}
-
-// Return the length of string that sm_context_entry would produce
-unsigned int sm_context_entry_to_string_len(sm_context_entry *ce) {
-  return 1 + ce->name->size + sm_object_to_string_len(ce->value);
 }
 
 // Return the object at a specific index.

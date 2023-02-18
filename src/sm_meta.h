@@ -10,5 +10,4 @@ typedef struct sm_meta {
 
 sm_meta     *sm_new_meta(sm_object *address, sm_context *context);
 sm_string   *sm_meta_to_string(sm_meta *meta);
-unsigned int sm_meta_to_string_len(sm_meta *meta);
-unsigned int sm_meta_sprint(sm_meta *self, char *buffer);
+unsigned int sm_meta_sprint(sm_meta *self, char *buffer, bool fake);

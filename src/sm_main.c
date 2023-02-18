@@ -15,7 +15,7 @@ int main() {
     sm_parse_result pr = sm_parse();
     if (pr.return_val == 0) {
       // Evaluate
-      sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top));
+      sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       // Print
       sm_string *result_str = sm_object_to_string(result);
       printf("%s\n", &(result_str->content));

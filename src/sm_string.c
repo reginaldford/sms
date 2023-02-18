@@ -57,7 +57,7 @@ sm_string *sm_string_add_recycle_2nd(sm_string *str1, sm_string *str2) {
 sm_string *sm_string_to_string(sm_string *str) {
   const unsigned int final_len = str->size + 2;
   sm_string         *new_str   = sm_new_string(final_len, "");
-  sm_string_sprint(str, &(new_str->content));
+  sm_string_sprint(str, &(new_str->content), false);
   (&new_str->content)[final_len] = '\0';
   return new_str;
 }
@@ -65,38 +65,49 @@ sm_string *sm_string_to_string(sm_string *str) {
 // Adds a c string describing the string
 // Unescapes back to the c-style escape codes
 // Returns the length
-unsigned int sm_string_sprint(sm_string *self, char *to_str) {
+unsigned int sm_string_sprint(sm_string *self, char *to_str, bool fake) {
   char *from_str = &(self->content);
-  to_str[0]      = '\"';
+  if (!fake)
+    to_str[0] = '\"';
   // i for from_str , j for to_str
   unsigned int i, j;
   for (i = 0, j = 1; i < self->size; i++, j++) {
     if (from_str[i] == '\n' || from_str[i] == '\r' || from_str[i] == '\t' || from_str[i] == '\\' ||
         from_str[i] == '\"') {
-      to_str[j++] = '\\';
+      if (!fake)
+        to_str[j] = '\\';
+      j++;
       switch (from_str[i]) {
       case '\n':
-        to_str[j] = 'n';
+        if (!fake)
+          to_str[j] = 'n';
         break;
       case '\r':
-        to_str[j] = 'r';
+        if (!fake)
+          to_str[j] = 'r';
         break;
       case '\t':
-        to_str[j] = 't';
+        if (!fake)
+          to_str[j] = 't';
         break;
       case '\\':
-        to_str[j] = '\\';
+        if (!fake)
+          to_str[j] = '\\';
         break;
       case '\"':
-        to_str[j] = '\"';
+        if (!fake)
+          to_str[j] = '\"';
         break;
       default:
-        to_str[j] = from_str[i];
+        if (!fake)
+          to_str[j] = from_str[i];
       }
     } else {
-      to_str[j] = from_str[i];
+      if (!fake)
+        to_str[j] = from_str[i];
     }
   }
-  to_str[j] = '\"';
+  if (!fake)
+    to_str[j] = '\"';
   return j + 1;
 }

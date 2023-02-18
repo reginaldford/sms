@@ -47,17 +47,17 @@ rm          {return RM;}
   };
 
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
-      yylval.num = sm_new_double(atof(yytext));
-      return NUM;
-    }
+   yylval.num = sm_new_double(atof(yytext));
+   return NUM;
+  }
 [\<\>\!]\= { return yytext[0]; }
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
-_?+{alpha}+({digit}?+{alpha}?+_?+)?+\'?+    {
-      yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
-      return SYM;
-    }
+({digit}?+{alpha}?+_?+)?+\'?+ {
+    yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
+    return SYM;
+  }
 
-"//".* { ;};
+"//".* {/*comment*/};
 
 
 \"([^"\\]|\\.)*\" {
