@@ -1,7 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
-#include "y.tab.h"
+#include "../bison_flex/y.tab.h"
 
 struct sm_parse_result sm_parse() {
   int result = yyparse();

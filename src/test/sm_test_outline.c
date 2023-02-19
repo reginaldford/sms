@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "../sms.h"
+#include "../main/sms.h"
 #include "sm_test_outline.h"
 
 // All allocated memory is in the test outline

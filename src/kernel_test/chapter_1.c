@@ -1,4 +1,4 @@
-#include "../sms.h"
+#include "../main/sms.h"
 #include "macros.h"
 
 // Generating many objects and then collecting the garbage.

@@ -45,7 +45,6 @@ enum sm_object_type {
 #include "sm_expr.h"
 #include "sm_context.h"
 #include "sm_pointer.h"
-#include "sm_commands.h"
 #include "sm_space.h"
 #include "sm_global.h"
 #include "sm_double.h"

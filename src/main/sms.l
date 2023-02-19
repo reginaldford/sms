@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "sms.h"
+#include "../main/sms.h"
 #include "y.tab.h"
 
 %}
