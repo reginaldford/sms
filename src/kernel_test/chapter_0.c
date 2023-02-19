@@ -1,4 +1,4 @@
-#include "../sms.h"
+#include "../main/sms.h"
 #include "macros.h"
 
 // Just report the size of structures

@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "../sms.h"
+#include "../main/sms.h"
 #include "sm_test.h"
 #include "sm_test_outline.h"
 #include <ctype.h>

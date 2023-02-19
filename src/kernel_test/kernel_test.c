@@ -4,7 +4,7 @@
 // User can specify the chapter and test number (2 integers)
 // Program returns number of failed tests.
 
-#include "../sms.h"
+#include "../main/sms.h"
 #include <ctype.h>
 #include "chapter_0.h"
 #include "chapter_1.h"

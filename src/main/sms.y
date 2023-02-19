@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
-#include "sms.h"
+#include "../main/sms.h"
 
   extern int yylex();
   void       yyerror(char *msg);
