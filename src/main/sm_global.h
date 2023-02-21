@@ -13,3 +13,4 @@ unsigned int    sm_global_num_fns();
 sm_stack       *sm_global_lex_stack(sm_stack *replacement);
 sm_expr        *sm_global_parents(sm_expr *replacement);
 sm_object      *sm_global_parser_output(sm_object *replacement);
+sm_options     *sm_global_options(sm_options *replacement);

@@ -3,6 +3,8 @@
 #include "sms.h"
 
 void sm_terminal_prompt() {
-  printf("\n> ");
-  fflush(stdout);
+  if (!sm_global_options(NULL)->script_flag) {
+    printf("\n> ");
+    fflush(stdout);
+  }
 }

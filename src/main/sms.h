@@ -37,6 +37,7 @@ enum sm_object_type {
 #define SIGHUP 1
 #define SIGQUIT 3
 
+#include "sm_options.h"
 #include "sm_stack.h"
 #include "sm_string.h"
 #include "sm_heap.h"
