@@ -9,23 +9,23 @@
 #include "chapter_0.h"
 #include "chapter_1.h"
 
-#define CHAPTER(f)\
-  if(chosen_chapter==-1||chosen_chapter==current_chapter){\
-    printf("Chapter %i : \n",current_chapter);\
-    num_fails+=f;\
-  }\
+#define CHAPTER(f)                                                                                 \
+  if (chosen_chapter == -1 || chosen_chapter == current_chapter) {                                 \
+    printf("Chapter %i : \n", current_chapter);                                                    \
+    num_fails += f;                                                                                \
+  }                                                                                                \
   current_chapter++;
 
 int main(int num_args, char **argv) {
-  int chosen_chapter = -1;
-  int chosen_test    = -1;
-  int current_chapter             = 0;
-  int num_fails = 0;
-  
+  int chosen_chapter  = -1;
+  int chosen_test     = -1;
+  int current_chapter = 0;
+  int num_fails       = 0;
+
   if (num_args > 1) {
-  // isalpha returns nonzero if the character is alpha
-  // Assuming the relative path to outline.sms does not start with an integer
-    if (isalpha(*(argv[1])) == 0 ) {
+    // isalpha returns nonzero if the character is alpha
+    // Assuming the relative path to outline.sms does not start with an integer
+    if (isalpha(*(argv[1])) == 0) {
       if (strcmp(argv[1], "--help") == 0) {
         printf("Supplying no arguments will run all tests.\n");
         printf("Example: ./%s\n", argv[0]);
@@ -40,7 +40,7 @@ int main(int num_args, char **argv) {
     }
     chosen_chapter = atoi(argv[1]);
     if (num_args > 2) {
-      if (isalpha(*(argv[1])!=0)) {
+      if (isalpha(*(argv[1]) != 0)) {
         printf("Second argument must be for test number.\n");
         return -1;
       }
@@ -49,14 +49,14 @@ int main(int num_args, char **argv) {
   }
 
   printf("SMS Kernel Tests\n\n");
-  
+
   CHAPTER(chapter_0(chosen_test));
   CHAPTER(chapter_1(chosen_test));
 
-  if(num_fails==0){
+  if (num_fails == 0) {
     printf("\nAll tests passed!\n");
-  }else{  
-    printf("\n%i tests failed.\n",num_fails);
+  } else {
+    printf("\n%i tests failed.\n", num_fails);
   }
   return num_fails;
 }

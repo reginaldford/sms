@@ -1,6 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
+#include "sm_main.h"
 
 /* GLOBALS
 Globals in this project use functions f(x):
@@ -143,5 +144,17 @@ sm_object *sm_global_parser_output(sm_object *replacement) {
     return temp;
   } else {
     return parser_output;
+  }
+}
+
+// Options from the command line arguments
+sm_options *sm_global_options(sm_options *replacement) {
+  static sm_options *options;
+  if (replacement != NULL) {
+    sm_options *temp = options;
+    options          = replacement;
+    return temp;
+  } else {
+    return options;
   }
 }
