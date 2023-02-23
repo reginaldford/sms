@@ -8,8 +8,13 @@
 #include <string.h>
 #include "../main/sms.h"
 
-  extern int yylex();
-  void       yyerror(char *msg);
+extern int yylex();
+void       yyerror(char *msg);
+
+void _lex_file(char *fpath);
+void _done_lexing_file();
+void _lex_cstr(char * cstr,int len);
+
 
 %}
 
@@ -72,6 +77,7 @@
 %token <expr> LET
 %token <expr> NOT
 %token <expr> ABS
+%token DONE
 
 %left ';'
 %left '='
@@ -97,12 +103,15 @@ COMMAND : EXPR ';' {
     YYACCEPT;
   } else {
     sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
-    YYERROR;
+    YYACCEPT;
   }
 }
 | LET SYM '=' EXPR ';' { printf("Activated let command ! (incomplete) \n"); }
 | error ';' { YYABORT; }
-| EXIT ';' { sm_signal_handler(SIGQUIT); }
+| DONE      { YYACCEPT;}
+| EXIT ';'  { sm_signal_handler(SIGQUIT); }
+
+
 
 EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | SYM{}
@@ -343,8 +352,19 @@ CONTEXT_LIST : '{' ASSIGNMENT ';' ASSIGNMENT {
 
 %%
 
+void lex_file(char *fpath){
+  _lex_file(fpath);
+}
 
-  void yyerror(char *msg) {
+void done_lexing_file(){
+  _done_lexing_file();
+}
+
+void lex_cstr(char * cstr,int len){
+  _lex_cstr(cstr,len);
+}
+
+void yyerror(char *msg) {
   // Use this function to investigate the error.
   fprintf(stderr, "Error Specifics: %s\n", msg);
 }

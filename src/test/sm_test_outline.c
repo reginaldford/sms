@@ -22,7 +22,7 @@ test_outline *parse_test_outline(char *filepath) {
   sm_init();
   freopen(filepath, "r", stdin);
   printf("Parsing test outline file: %s ...\n", filepath);
-  sm_parse_result pr = sm_parse();
+  sm_parse_result pr = sm_parse_more();
   if (pr.return_val != 0) {
     printf("There was an issue parsing %s \n", filepath);
     graceful_exit(result_outline, -1);

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "../main/sms.h"
 #include "y.tab.h"
 
@@ -41,10 +42,8 @@ diff        {return DIFF;}
 rm          {return RM;}
 ==          {return EQEQ;}
 =>          {return ARROW;}
-<<EOF>> {
-    /* Immediately exit the program here */
-    sm_signal_handler(SIGQUIT);
-  };
+<<EOF>>     {return DONE;};
+'\0'        {return DONE;};
 
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
    yylval.num = sm_new_double(atof(yytext));
@@ -103,4 +102,25 @@ rm          {return RM;}
     yylval.str = sm_new_string(final_i,text);
     return STRING;
   }
+
+
 %%
+
+
+void _lex_file(char * fpath){
+  FILE *f = fopen(fpath,"rb");
+  if(access(fpath,F_OK)!=0){
+    printf("File not found: %s\n",fpath);
+    exit(-1);
+  }
+  YY_BUFFER_STATE bs = yy_create_buffer(f,YY_BUF_SIZE);
+  yypush_buffer_state(bs);
+}
+
+void _done_lexing_file(){
+  yypop_buffer_state();
+}
+
+void _lex_cstr(char * cstr,int len){
+  yy_scan_bytes(cstr,len);
+}

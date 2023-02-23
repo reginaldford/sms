@@ -21,12 +21,17 @@ OBJS4           := $(SRCS1:%=$(BUILD_DIR)/%.dbg.o)	# dbg version of base files
 INCLUDE         := include
 INSTALL_DIR     := /usr/bin
 TARGET_SMS      := sms
+TARGET_SMS_DBG  := sms_dbg
 TARGET_TEST     := sms_test
 TARGET_KT       := sms_kernel_test
 
 # sms executable
 bin/$(TARGET_SMS): $(OBJS0) $(OBJS1) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.o 
 	$(CC) -lm $(OBJS1) $(OBJS0) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.o -o $@
+
+# sms_dbg executable
+bin/$(TARGET_SMS_DBG): $(OBJS0) $(OBJS4) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.dbg.o
+	$(CC) -lm $(OBJS4) $(OBJS0) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.dbg.o -o $@
 
 # sms_test executable
 bin/$(TARGET_TEST): $(OBJS0) $(OBJS4) $(OBJS2)
@@ -67,4 +72,5 @@ install: bin/$(TARGET_SMS)
 	cp -fv bin/$(TARGET_SMS) $(INSTALL_DIR)/$(TARGET_SMS)
 	chmod +x $(INSTALL_DIR)/$(TARGET_SMS)
 
-all: bin/sms bin/sms_test bin/sms_kernel_test
+# For developers
+all: bin/sms bin/sms_dbg bin/sms_test bin/sms_kernel_test
