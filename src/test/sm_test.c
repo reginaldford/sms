@@ -172,7 +172,7 @@ int perform_test_subchapter(int chapter, int subchapter, int test, char *test_zo
     }
     printf("Parsing: %s... \n", buf);
     freopen(buf, "r", stdin);
-    sm_parse_result pr = sm_parse();
+    sm_parse_result pr = sm_parse_more();
     if (pr.return_val != 0) {
       printf("Error parsing the subchapter. Parser returned %i\n", pr.return_val);
       return -1;
