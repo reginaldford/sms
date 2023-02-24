@@ -91,7 +91,8 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(sm_fun_param_obj);
   case sm_local_type:
     return sizeof(sm_local);
-
+  case sm_space_type:
+    return ((sm_space *)obj1)->size;
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
     exit(0);

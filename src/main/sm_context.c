@@ -156,7 +156,7 @@ bool sm_context_rm(sm_context *self, sm_symbol *sym) {
     self->size -= 1;
     self->capacity = self->size;
     // Putting a space for remaining space
-    // sm_new_space_after(context, sizeof(sm_context_entry));
+    sm_new_space_after(self, sizeof(sm_context_entry));
     return true;
   } else {
     printf("Could not find variable to remove: %s\n", &(sym->name->content));

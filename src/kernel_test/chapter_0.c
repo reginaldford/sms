@@ -22,5 +22,6 @@ int chapter_0(int test) {
   TEST(printf("sizeof %s is %d\n", "sm_fun", (int)sizeof(sm_fun)));
   TEST(printf("sizeof %s is %d\n", "sm_fun_param", (int)sizeof(sm_fun_param)));
   TEST(printf("sizeof %s is %d\n", "sm_fun_param_obj", (int)sizeof(sm_fun_param_obj)));
+  TEST(printf("sizeof %s is %d\n", "sm_space", (int)sizeof(sm_space)));
   return 0;
 }

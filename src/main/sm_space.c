@@ -20,7 +20,7 @@ sm_space *sm_new_space(void *trash, unsigned int size) {
 sm_space *sm_new_space_after(void *object, unsigned int size) {
   // Size sets the whole obj size manually
   // Size must be more than sizeof(sm_space)
-  return sm_new_space((sm_space *)((char *)object) + sm_sizeof(object), size);
+  return sm_new_space(((char *)object) + sm_sizeof(object), size);
 }
 
 // create a new array designed to hold spaces, sorted by size

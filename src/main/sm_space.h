@@ -4,9 +4,7 @@
 // sm_space_type is to be subtracted from my_type to calculate the size
 typedef struct sm_space {
   enum sm_object_type my_type;
-  enum sm_object_type my_type2;
-  enum sm_object_type my_type3;
-  enum sm_object_type my_type4;
+  unsigned short int  size;
 } sm_space;
 
 
