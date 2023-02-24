@@ -161,7 +161,7 @@ int perform_test_subchapter(int chapter, int subchapter, int test, char *test_zo
     printf("Subchapter: %i out of range (max acceptable value is: %i).\n", subchapter,
            num_subchapters(chapter) - 1);
   } else {
-    sm_init();
+    sm_init(NULL);
     char buf[64];
     sprintf(buf, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
     // If test_zone_path is empty string, then we need to remove the leading "/" from buf

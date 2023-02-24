@@ -5,22 +5,21 @@
 // Stores a static structure with processed command line information
 // or prints helping information for command line arguments and exits.
 sm_options *sm_process_args(int num_args, char **argv) {
-  static char             *valid_flags = "-e -h -i -s";
+  static char             *valid_flags = "-e -h -i -m -s";
   static struct sm_options options;
   options.script_flag   = false;
   options.script_fp[0]  = '\0';
   options.script_fp_len = 0;
-  options.env_flag      = false;
-  options.env_fp[0]     = '\0';
-  options.env_fp_len    = 0;
-  options.always_gc     = false;
-  options.print_stats   = true;
-  options.eval_flag     = false;
-  options.eval_cmd[0]   = '\0';
-  options.eval_cmd_len  = 0;
   options.init_flag     = false;
   options.init_fp[0]    = '\0';
   options.init_fp_len   = 0;
+  options.eval_flag     = false;
+  options.eval_cmd[0]   = '\0';
+  options.eval_cmd_len  = 0;
+  options.gc            = true;
+  options.print_stats   = true;
+  options.mem_mbytes    = 50;
+  options.print_stats   = true;
 
   for (int current_arg = 1; current_arg < num_args; current_arg += 2) {
     if (argv[current_arg][0] != '-') {
@@ -53,10 +52,12 @@ sm_options *sm_process_args(int num_args, char **argv) {
     }
     case 'h': {
       printf("SMS Help\n");
-      printf("-e to Execute a calculation:                 sms -e 2+2\n");
-      printf("-h for Help:                                 sms -h\n");
-      printf("-i to run Initial file then start the REPL:  sms -i script.sms\n");
-      printf("-s to run Script file  then exit:            sms -s script.sms\n");
+      printf("Flag:                                      Example:\n");
+      printf("-e Execute a calculation.                  sms -e 2+2\n");
+      printf("-h Help.                                   sms -h\n");
+      printf("-i Run Initial file then start the REPL.   sms -i script.sms\n");
+      printf("-s Run Script file  then exit.             sms -s script.sms\n");
+      printf("-m Set the heap size in MB. Default: 50.   sms -m 150\n");
       exit(0);
     }
     case 's': {
@@ -66,6 +67,27 @@ sm_options *sm_process_args(int num_args, char **argv) {
         options.script_fp[i] = argv[current_arg + 1][i];
       }
       options.script_fp_len = i;
+      break;
+    }
+    case 'm': {
+      options.mem_flag               = true;
+      long unsigned int i            = 0;
+      const char       *valid_values = "1 to 1000000 which is 1 MB to 1 TB.";
+      if (options.mem_str[0] == '-') {
+        printf("Invalid memory size format: %s\n", options.mem_str);
+        printf("Value must be an integer from %s", valid_values);
+        exit(-1);
+      }
+      for (; i < strlen(argv[current_arg + 1]); i++) {
+        options.mem_str[i] = argv[current_arg + 1][i];
+      }
+      options.mem_mbytes = atoi(options.mem_str);
+      // 1MB to 1TB
+      if (options.mem_mbytes < 1 || options.mem_mbytes > 1000 * 1000) {
+        printf("Invalid memory heap size: %s\n", options.mem_str);
+        printf("Value must be an integer from %s", valid_values);
+        exit(-1);
+      }
       break;
     }
     default: {
