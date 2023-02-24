@@ -22,6 +22,22 @@ void sm_init(sm_options *options) {
   // Initialize the lexical stack
   sm_global_lex_stack(sm_new_stack(100));
 
+  // Build the global context's parent
+  sm_context       *parent_cx = sm_new_context(3, 3, NULL);
+  sm_context_entry *parents   = sm_context_entries(parent_cx);
+  // The keys MUST be in strcmp order
+  parents[0] = (sm_context_entry){.name  = sm_new_string(2, "PI"),
+                                  .value = (sm_object *)sm_new_double(3.14159265358979323846)};
+  parents[1] =
+    (sm_context_entry){.name  = sm_new_string(5, "false"),
+                       .value = (sm_object *)sm_new_meta(
+                         (sm_object *)sm_new_symbol(sm_new_string(5, "false")), parent_cx)};
+
+  parents[2] =
+    (sm_context_entry){.name  = sm_new_string(4, "true"),
+                       .value = (sm_object *)sm_new_meta(
+                         (sm_object *)sm_new_symbol(sm_new_string(4, "true")), parent_cx)};
+
   // Initialize the global context
-  sm_stack_push(sm_global_lex_stack(NULL), sm_new_context(0, 0, NULL));
+  sm_stack_push(sm_global_lex_stack(NULL), sm_new_context(0, 0, parent_cx));
 }
