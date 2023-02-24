@@ -176,7 +176,7 @@ unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
     //(left)op(right)
     if (!fake)
       buffer[0] = '(';
-    int cursor = sm_object_sprint(o1, &(buffer[1]), fake);
+    int cursor = 1 + sm_object_sprint(o1, &(buffer[1]), fake);
     if (!fake)
       buffer[cursor] = ')';
     cursor++;
@@ -195,7 +195,7 @@ unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
     //(left)op right
     if (!fake)
       buffer[0] = '(';
-    int cursor = sm_object_sprint(o1, &(buffer[1]), fake);
+    int cursor = 1 + sm_object_sprint(o1, &(buffer[1]), fake);
     if (!fake)
       buffer[cursor] = ')';
     cursor++;

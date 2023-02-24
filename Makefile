@@ -14,6 +14,7 @@ SRCS1           := $(filter-out $(SRC_DIR1)/sm_main.c, $(shell find $(SRC_DIR1) 
 SRCS2           := $(shell find $(SRC_DIR3) -name '*.c')
 SRCS3           := $(shell find $(SRC_DIR2) -name '*.c')
 OBJS0           := $(BUILD_DIR)/$(SRC_DIR0)/y.tab.c.o $(BUILD_DIR)/$(SRC_DIR0)/lex.yy.c.o
+OBJS5           := $(BUILD_DIR)/$(SRC_DIR0)/y.tab.c.dbg.o $(BUILD_DIR)/$(SRC_DIR0)/lex.yy.c.dbg.o
 OBJS1           := $(SRCS1:%=$(BUILD_DIR)/%.o)		  # base files
 OBJS2           := $(SRCS2:%=$(BUILD_DIR)/%.dbg.o)  # kernel tests
 OBJS3           := $(SRCS3:%=$(BUILD_DIR)/%.dbg.o)	# tests
@@ -30,16 +31,16 @@ bin/$(TARGET_SMS): $(OBJS0) $(OBJS1) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.o
 	$(CC) -lm $(OBJS1) $(OBJS0) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.o -o $@
 
 # sms_dbg executable
-bin/$(TARGET_SMS_DBG): $(OBJS0) $(OBJS4) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.dbg.o
-	$(CC) -lm $(OBJS4) $(OBJS0) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.dbg.o -o $@
+bin/$(TARGET_SMS_DBG): $(OBJS5) $(OBJS4) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.dbg.o
+	$(CC) -lm $(OBJS4) $(OBJS5) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.dbg.o -o $@
 
 # sms_test executable
-bin/$(TARGET_TEST): $(OBJS0) $(OBJS4) $(OBJS2)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS4) $(OBJS0) $(OBJS2) -o $@ 
+bin/$(TARGET_TEST): $(OBJS5) $(OBJS4) $(OBJS2)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS4) $(OBJS5) $(OBJS2) -o $@
 
 # sms_kernel_test executable
 bin/$(TARGET_KT): $(OBJS0) $(OBJS4) $(OBJS3)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS4) $(OBJS0) $(OBJS3) -o $@ 
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS4) $(OBJS0) $(OBJS3) -o $@
 
 # Bison generates the parser
 $(SRC_DIR0)/y.tab.c $(SRC_DIR0)/y.tab.h: $(SRC_DIR1)/sms.y

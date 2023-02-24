@@ -161,7 +161,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local
-  $1->content = (sm_object *)sm_localize_expr($2, $1);
+  $1->content = (sm_object *)sm_localize((sm_object*)$2, $1);
   $$ = $1;
 }
 
@@ -244,12 +244,16 @@ FUN_CALL_OPEN : SYM '(' EXPR {
   if(found==NULL){
     char buf[64];
     sprintf(buf,"Error: Function not found: %s\n",&(var_name->content));
+    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "false")));
     yyerror(buf);
+    YYERROR;
   }
   if(found->my_type != sm_fun_type){
     char buf[64];
     sprintf(buf,"Error: Not a function: %s\n",&(var_name->content));
+    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "false")));
     yyerror(buf);
+    YYERROR;
   }
   sm_expr * args= sm_new_expr_n(sm_array,1,2);
   args=sm_set_expr_arg(args,0,(sm_object*)$3);
@@ -272,12 +276,16 @@ FUN_CALL : FUN_CALL_OPEN ')' {}
   if(found==NULL){
     char buf[64];
     sprintf(buf,"Error: Function not found: %s\n",&(var_name->content));
+    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "false")));
     yyerror(buf);
+    YYERROR;
   }
   if(found->my_type != sm_fun_type){
     char buf[64];
     sprintf(buf,"Error: Not a function: %s\n",&(var_name->content));
+    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "false")));
     yyerror(buf);
+    YYERROR;
   }
   sm_expr * args= sm_new_expr_n(sm_array,0,0);
   $$ = sm_new_expr_2(sm_fun_call, (sm_object *)found, (sm_object *)args);
@@ -366,5 +374,5 @@ void lex_cstr(char * cstr,int len){
 
 void yyerror(char *msg) {
   // Use this function to investigate the error.
-  fprintf(stderr, "Error Specifics: %s\n", msg);
+  fprintf(stderr, "Error: %s\n", msg);
 }

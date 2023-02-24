@@ -18,3 +18,4 @@ sm_string   *sm_string_add_recycle_1st(sm_string *str1, sm_string *str2);
 sm_string   *sm_string_add_recycle_2nd(sm_string *str1, sm_string *str2);
 sm_string   *sm_string_to_string(sm_string *str);
 unsigned int sm_string_sprint(sm_string *self, char *buffer, bool fake);
+sm_string   *sm_new_string_manual(unsigned int size);
