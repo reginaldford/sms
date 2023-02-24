@@ -12,7 +12,7 @@ void start_repl() {
     sm_terminal_prompt();
     // Read
     sm_parse_result pr = sm_parse_stdin();
-    if (pr.return_val == 0) {
+    if (pr.return_val == 0 && pr.parsed_object != NULL) {
       // Evaluate
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       // Print
@@ -42,12 +42,15 @@ void run_file(sm_options *options, bool init) {
       printf("Error parsing the file. Parser returned %i\n", pr.return_val);
       sm_signal_handler(SIGQUIT);
     }
-    sm_object *evaluated = pr.parsed_object;
-    evaluated           = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-    sm_string *response = sm_object_to_string(evaluated);
-    printf("%s\n", &(response->content));
-    last_parsed_obj = pr.parsed_object;
-    pr              = sm_parse_more();
+
+    if (pr.parsed_object != NULL) {
+      sm_object *evaluated =
+        sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      sm_string *response = sm_object_to_string(evaluated);
+      printf("%s\n", &(response->content));
+      last_parsed_obj = pr.parsed_object;
+    }
+    pr = sm_parse_more();
   } while (pr.parsed_object != last_parsed_obj);
   sm_parse_done();
   if (!init)

@@ -15,10 +15,17 @@ char *sm_strncpy(char *dest, const char *src, unsigned int n) {
 // Expecting a null terminated string
 sm_string *sm_new_string(unsigned int size, char *str) {
   // We add a null character that is not included in the size
+  struct sm_string *newstr = sm_new_string_manual(size);
+  sm_strncpy(&(newstr->content), str, size);
+  return newstr;
+}
+
+// For you to fill in yourself
+sm_string *sm_new_string_manual(unsigned int size) {
+  // We add a null character that is not included in the size
   struct sm_string *newstr = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
   newstr->my_type          = sm_string_type;
   newstr->size             = size;
-  sm_strncpy(&(newstr->content), str, size);
   return newstr;
 }
 

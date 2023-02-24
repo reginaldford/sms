@@ -53,7 +53,7 @@ int sm_fun_param_sprint(sm_fun_param *self, char *buffer, bool fake) {
 }
 
 // Example: add(a,b)=>a+b;
-// If affect is true, the buffer will be affected.
+// If fake is false, the buffer will be affected.
 // Otherwise, only length calculation is performed.
 unsigned int sm_fun_sprint(sm_fun *self, char *buffer, bool fake) {
   if (!fake)
