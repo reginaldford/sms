@@ -61,18 +61,18 @@ int main(int num_args, char **argv) {
   printf("Version 0.135\n");
   // Process command line args
   sm_global_options(sm_process_args(num_args, argv));
-  sm_init();
-  sm_options options = *sm_global_options(NULL);
-  if (options.init_flag) {
-    printf("Initializing with: %s... \n", options.init_fp);
-    run_file(&options, true);
+  sm_options *options = sm_global_options(NULL);
+  sm_init(options);
+  if (options->init_flag) {
+    printf("Initializing with: %s... \n", options->init_fp);
+    run_file(options, true);
   }
-  if (options.script_flag) {
-    printf("Running: %s... \n", options.script_fp);
-    run_file(&options, false);
+  if (options->script_flag) {
+    printf("Running: %s... \n", options->script_fp);
+    run_file(options, false);
   }
-  if (options.eval_flag) {
-    sm_parse_result pr = sm_parse_cstr(options.eval_cmd, options.eval_cmd_len);
+  if (options->eval_flag) {
+    sm_parse_result pr = sm_parse_cstr(options->eval_cmd, options->eval_cmd_len);
     if (pr.return_val != 0) {
       printf("Parsing failed.\n");
       sm_signal_handler(SIGQUIT);
