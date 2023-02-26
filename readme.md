@@ -50,14 +50,18 @@ Exit the program with:
 
 # FEATURES:
 - [x] Mathematical evaluation. Commands like a=4*sin(3.14/8) will evaluate to a double precision decimal number.
-- [x] Support for scripting and pipes by using flags for input and output preferences. Try -h for help.
+- [x] Copying garbage collector.
+- [x] Lexical scope.
+- [x] Command line flags to run scripts or initialize into a loaded REPL.
+- [x] Useful example.sms file with common conversion functions and constants.
+- [x] Custom memory heap size can be set from 100 kilobytes to 1 terrabyte.
 - [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
 - [x] Fast string manipulation techniques, that avoid unsafe character iteration algorithms.
+- [x] Only 2 uses of malloc in the interpreter: for the 2 heaps of the copying GC algorithm.
 - [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing.
-- [x] Recursive function calls. 
+- [x] Recursive function calls.
 - [x] Local variables store an array index to their location in the stack frame. This is much faster than binary search.
-- [x] The maximum capacity for parsing and storing strings, arrays, and contexts is remarkably high. Generally, if an array, string, or context is too large to parse, it's because 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characaters or 3) You are reaching the max heap size of 1 terrabyte of memory for SMS.
-- [x] Custom memory heap size can be set from 100 kilabytes to 1 terrabyte.
+- [x] The maximum capacity for strings, arrays, and contexts is remarkably high. Generally, if a collection item is too large to parse, it's because 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characaters or 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
 
 # PLANS:
 - [ ] Standard libraries: file, string, array, math, matrix, net, etc.
