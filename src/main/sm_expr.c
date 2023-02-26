@@ -194,6 +194,7 @@ unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
     cursor++;
     if (!fake)
       sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+    cursor += sm_global_fn_name_len(expr->op);
     cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
     return cursor;
   } else if (right_op_level <= 2 && right_op_level != mid_op_level) {
