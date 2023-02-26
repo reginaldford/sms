@@ -32,11 +32,11 @@ Call the function with familiar syntax:
 
 User objects (contexts):
 
-`car = { weigth = 2.2; speed = 5; license_plate = "smthg_fnny"; } ; `
+`car = { weight = 2.2; speed = 5; license_plate = "smthg_fnny"; } ; `
 
 Contexts can be nested:
 
-`nested = { example = { x = [ 1, 2 ]; }; k = 5; } ;`
+`nested = { example = { x = [ 1, "two" ]; }; k = 5.123; } ;`
 
 Variables can be removed from the current context:
 
@@ -51,25 +51,34 @@ SMS Versions will have 2 significant figures for somewhat stable alpha releases.
 SMS Versions will have 1 significant figure for somewhat more stable alpha releases. (ex: v 0.1)
 
 
-# PLANS:
+# FEATURES:
+- [x] Mathematical evaluation. Commands like a=4*sin(3.14/8) will evaluate to a double precision decimal number.
+- [x] Support for scripting and pipes by using flags for input and output preferences. Try -h for help.
+- [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
+- [x] Fast string manipulation techniques, that avoid unsafe character iteration algorithms.
+- [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing.
+- [x] Recursive function calls. 
+- [x] Local variables store an array index to their location in the stack frame. This is much faster than binary search.
+- [x] The maximum capacity for parsing and storing strings, arrays, and contexts is remarkably high. Generally, if an array, string, or context is too large to parse, it's because 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characaters or 3) You are reaching the max heap size of 1 terrabyte of memory for SMS.
+- [x] Custom memory heap size can be set from 100 kilabytes to 1 terrabyte.
 
-- [x] Mathematical evaluation is implemented. Commands like a=4*sin(3.14/8) will evaluate to a decimal number.
-- [ ] Currently, the garbage collector only executes after a command. The plan is to have the garbage collector initiate when a new memory allocation would pass a threshold. Live objects must be tracked on a stack, which becomes a new member of the roots for inflating to the new heap at garbage collection. With this upgrade, the garbage collector would then run less often.
-- [ ] Currently, syntax errors are entirely vague and repeat for every token after an error up until the next semicolon. Errors will be handled more gracefully, with useful responses for particular cases.
-- [x] Better support for scripting and pipes by using flags for input and output preferences.
+#PLANS:
+- [ ] Standard libraries: file, string, array, math, matrix, net, etc.
+- [ ] Support for booting from a serialized memory heap.
+- [ ] 'Last moment' garbage collection.
+- [ ] Tail call optimization.
+- [ ] Package system.
+- [ ] Precise syntax error reporting.
+- [ ] Try/Catch error syntax.
+- [ ] Variable heap size, with min, max, and max_emptiness specs.
 - [ ] A diff command for taking derivatives.
 - [ ] A integral command for taking integrals.
-- [ ] Support for floats and integers as opposed to just doubles.
-- [ ] Quad precision support.
-- [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
-- [ ] Memory serialization support (starting with a populated heap from the file system for faster booting).
-- [x] Clean the string manipulations to avoid sprintf and strlen.
-- [ ] General Guide.
-- [ ] Guide for adding your own command by adding C code.
-- [x] Turing completeness.
-- [ ] Arbitrary precision library written in sms.
-- [ ] Unicode support.
-- [ ] Graphics support.
+- [ ] Arbitrary precision support.
+- [ ] General documentation.
+- [ ] A community!
+- [ ] Thread forking support.
+- [ ] Simple Webserver and networking tools.
+- [ ] Some Unicode support.
 
 # HOW TO COMPILE
 
