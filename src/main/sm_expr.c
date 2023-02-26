@@ -80,6 +80,7 @@ bool sm_is_infix(enum sm_expr_type op) {
   }
 }
 
+//
 unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum sm_expr_type op, bool fake) {
   if (expr->size == 0)
     return 0;
@@ -101,7 +102,6 @@ unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum sm_expr_t
   return buffer_pos;
 }
 
-
 // Print to a cstring buffer the description of array
 // Return the resulting length
 unsigned int sm_expr_array_sprint(sm_expr *expr, char *buffer, bool fake) {
@@ -120,13 +120,6 @@ unsigned int sm_expr_array_sprint(sm_expr *expr, char *buffer, bool fake) {
 
 // Print description of prefix expression to buffer
 unsigned int sm_prefix_sprint(sm_expr *expr, char *buffer, bool fake) {
-  if (expr->size == 0) {
-    if (!fake)
-      buffer[0] = '[';
-    if (!fake)
-      buffer[1] = ']';
-    return 2;
-  }
   if (!fake)
     sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
   unsigned int cursor = sm_global_fn_name_len(expr->op);
@@ -230,7 +223,7 @@ unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
 
 // New string describing this expression
 sm_string *sm_expr_to_string(sm_expr *expr) {
-  sm_string *new_str = sm_new_string(sm_expr_sprint(expr, NULL, true), "");
+  sm_string *new_str = sm_new_string_manual(sm_expr_sprint(expr, NULL, true));
   sm_expr_sprint(expr, &(new_str->content), false);
   (&new_str->content)[new_str->size] = '\0';
   return new_str;
@@ -256,9 +249,12 @@ unsigned int sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
         return sm_prefix_sprint(expr, buffer, fake);
     } else if (expr->op == sm_fun_call) {
       return sm_fun_call_sprint(expr, buffer, fake);
+    } else if (expr->op == sm_param_list) {
+      return sm_prefix_sprint(expr, buffer, fake);
     } else {
-      if (!fake)
+      if (!fake) {
         sm_strncpy(buffer, "unrecognized expr", 17);
+      }
       return 17;
     }
   }

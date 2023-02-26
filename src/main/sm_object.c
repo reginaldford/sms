@@ -30,9 +30,8 @@ sm_string *sm_object_type_str(unsigned short int t) {
 
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
-  sm_string   *new_str = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));
-  unsigned int len     = sm_object_sprint(obj1, &(new_str->content), false);
-
+  sm_string   *new_str     = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));
+  unsigned int len         = sm_object_sprint(obj1, &(new_str->content), false);
   (&new_str->content)[len] = '\0';
   return new_str;
 }
@@ -57,11 +56,12 @@ unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
     return sm_fun_sprint((sm_fun *)obj1, buffer, fake);
   case sm_local_type:
     return sm_local_sprint((sm_local *)obj1, buffer, fake);
+  case sm_error_type:
+    return sm_error_sprint((sm_error *)obj1, buffer, fake);
   default: {
     if (!fake)
       sprintf(buffer, "?(%i)", obj1->my_type);
-    // 1 + floor ( ln( x ) / ln( 10 )) is the number of digits in x
-    return 3 + 1 + (int)(log(obj1->my_type) / log(10));
+    return sm_double_len(obj1->my_type);
   }
   }
 }
@@ -93,6 +93,8 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(sm_local);
   case sm_space_type:
     return ((sm_space *)obj1)->size;
+  case sm_error_type:
+    return sizeof(sm_error);
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
     exit(0);

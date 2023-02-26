@@ -32,8 +32,8 @@ enum sm_expr_type {
   sm_array,
   sm_siblings,
   sm_prim,
-  sm_fun_call,
-  sm_param_list
+  sm_param_list,
+  sm_fun_call
 };
 
 // Head of an expression

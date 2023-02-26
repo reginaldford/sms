@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 // These are the major object types of SMS
 // Keep syncronized with function sm_object_type_str
@@ -22,7 +23,8 @@ enum sm_object_type {
   sm_fun_type,       // 9
   sm_fun_param_type, // 10
   sm_local_type,     // 11
-  sm_unknown_type    // 12
+  sm_error_type,     // 12
+  sm_unknown_type    // 13
 };
 
 // Useful macros
@@ -58,3 +60,4 @@ enum sm_object_type {
 #include "sm_parse_result.h"
 #include "sm_init.h"
 #include "sm_local.h"
+#include "sm_error.h"
