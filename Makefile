@@ -26,6 +26,17 @@ TARGET_SMS_DBG  := sms_dbg
 TARGET_TEST     := sms_test
 TARGET_KT       := sms_kernel_test
 
+# There 2 are not files
+.PHONY: $(TARGET_SMS) all
+
+# Parallel processing for default case
+$(TARGET_SMS):
+	$(MAKE) -j4 bin/$(TARGET_SMS)
+
+# Parallel processing for dev case
+all:
+	$(MAKE) -j4 dev
+
 # sms executable
 bin/$(TARGET_SMS): $(OBJS0) $(OBJS1) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.o 
 	$(CC) -lm $(OBJS1) $(OBJS0) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.o -o $@
@@ -58,6 +69,9 @@ $(BUILD_DIR)/%.c.o: %.c
 $(BUILD_DIR)/%.c.dbg.o: %.c
 	$(CC_DEBUG) $(CFLAGS_DEBUG) -c $< -o $@
 
+# Artificial targets (not file destinations)
+.PHONY: all clean install
+
 # Reset file state
 clean:
 	rm -vrf  $(SRC_DIR0)/lex.yy.c\
@@ -74,4 +88,4 @@ install: bin/$(TARGET_SMS)
 	chmod +x $(INSTALL_DIR)/$(TARGET_SMS)
 
 # For developers
-all: bin/sms bin/sms_dbg bin/sms_test bin/sms_kernel_test
+dev: bin/$(TARGET_SMS) bin/$(TARGET_SMS_DBG) bin/$(TARGET_TEST) bin/$(TARGET_KT)

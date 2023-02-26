@@ -199,7 +199,6 @@ PARAM_LIST_OPEN : '(' SYM ',' {
   $$ = sm_append_to_expr($1, (sm_object *)new_param);
 }
 
-
 ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(sm_assign, (sm_object *)($1), (sm_object *)($3)); }
 
 SEQUENCE : SEQUENCE_LIST ')' {}
@@ -235,62 +234,42 @@ IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_3(sm_if_else, (sm_object *)($3), (sm_object *)($5), (sm_object *)($7));
 }
 
-FUN_CALL_OPEN : SYM '(' EXPR {
+FUN_CALL : FUN_CALL_OPEN ')' {}
+| SYM '(' ')'{
   // store the function in the fun_call here
   // index: 0   1   
-  // value: fun args
+  // value: fun args 
+  // if the function doesnt exist yet:
+  // value: symbol args 
   sm_string * var_name = $1->name;
   sm_object * found = sm_context_get_by_name_far(*(sm_global_lex_stack(NULL)->top),var_name);
   if(found==NULL){
-    char buf[64];
-    sprintf(buf,"Error: Function not found: %s\n",&(var_name->content));
-    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "false")));
-    yyerror(buf);
-    YYERROR;
+    found=(sm_object*)$1;
   }
-  if(found->my_type != sm_fun_type){
-    char buf[64];
-    sprintf(buf,"Error: Not a function: %s\n",&(var_name->content));
-    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "false")));
-    yyerror(buf);
-    YYERROR;
+  sm_expr * args= sm_new_expr_n(sm_array,0,0);
+  $$ = sm_new_expr_2(sm_fun_call, (sm_object *)found, (sm_object *)args);
+}
+
+FUN_CALL_OPEN : SYM '(' EXPR {
+  // store the function in the fun_call here
+  // index: 0   1   
+  // value: fun args 
+  // if the function doesnt exist yet:
+  // value: symbol args
+  sm_string * var_name = $1->name;
+  sm_object * found = sm_context_get_by_name_far(*(sm_global_lex_stack(NULL)->top),var_name);
+  if(found==NULL){
+    found=(sm_object*)$1;
   }
-  sm_expr * args= sm_new_expr_n(sm_array,1,2);
+  sm_expr * args= sm_new_expr_n(sm_param_list,1,2);
   args=sm_set_expr_arg(args,0,(sm_object*)$3);
   $$ = sm_new_expr_2(sm_fun_call, (sm_object *)found, (sm_object *)args);
-  
 }
 | FUN_CALL_OPEN ',' EXPR {
   sm_expr * args = (sm_expr*)sm_expr_get_arg($1,1);
   args = sm_append_to_expr(args, (sm_object *)$3);
   $$=sm_set_expr_arg($1,1,(sm_object*)args);
 }
-
-FUN_CALL : FUN_CALL_OPEN ')' {}
-| SYM '(' ')'{
-  // store the function in the fun_call here
-  // index: 0   1   
-  // value: fun args 
-  sm_string * var_name = $1->name;
-  sm_object * found = sm_context_get_by_name_far(*(sm_global_lex_stack(NULL)->top),var_name);
-  if(found==NULL){
-    char buf[64];
-    sprintf(buf,"Error: Function not found: %s\n",&(var_name->content));
-    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "false")));
-    yyerror(buf);
-    YYERROR;
-  }
-  if(found->my_type != sm_fun_type){
-    char buf[64];
-    sprintf(buf,"Error: Not a function: %s\n",&(var_name->content));
-    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "false")));
-    yyerror(buf);
-    YYERROR;
-  }
-  sm_expr * args= sm_new_expr_n(sm_array,0,0);
-  $$ = sm_new_expr_2(sm_fun_call, (sm_object *)found, (sm_object *)args);
-}
-
 
 META_EXPR : ':' EXPR { $$ = sm_new_meta((sm_object *)$2, *(sm_global_lex_stack(NULL))->top); }
 

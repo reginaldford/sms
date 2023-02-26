@@ -102,6 +102,12 @@ bool sm_context_update_relatives(sm_context *self, sm_context *old_self) {
           break;
         }
         case sm_meta_type: {
+          ((sm_meta *)obj)->scope = self;
+          break;
+        }
+        case sm_fun_type: {
+          ((sm_fun *)obj)->parent = self;
+          break;
         }
         }
       }

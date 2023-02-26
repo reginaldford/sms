@@ -7,10 +7,10 @@ void sm_init(sm_options *options) {
   sm_register_signals();
 
   // Initialize the current mem heap
-  unsigned int mem_mbytes = 50;
+  double mem_mbytes = 50;
   if (options != NULL && options->mem_flag) {
     mem_mbytes = options->mem_mbytes;
-    printf("Custom Heap Size: %i MB\n", mem_mbytes);
+    printf("Custom Heap Size: %f MB\n", mem_mbytes);
   }
   // Start with half of the heap size allocated.
   // During first gc, a second heap of the same size will be allocated.

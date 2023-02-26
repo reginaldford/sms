@@ -19,7 +19,7 @@ test_outline *parse_test_outline(char *filepath) {
     last_slash = filepath;
   }
   sm_strncpy(result_outline->test_zone_path, filepath, strlen(filepath));
-  sm_init();
+  sm_init(NULL);
   freopen(filepath, "r", stdin);
   printf("Parsing test outline file: %s ...\n", filepath);
   sm_parse_result pr = sm_parse_more();

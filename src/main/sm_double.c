@@ -32,3 +32,7 @@ unsigned int sm_double_sprint(sm_double *self, char *buffer, bool fake) {
     ;
   return count;
 }
+
+// Return the number of digits in this double
+// You can cast an int to a double and use this for ints
+int sm_double_len(double a) { return 1 + (int)(log(a) / log(10)); }
