@@ -47,17 +47,17 @@ ft_to_m =  (ft)    => ft / 3.281;
 m_to_ft =  (m)     => ft * 3.281;
 cm_to_in = (cm)    => cm / 2.54;
 
-in_to_m = (in)     => in * .0254;
+in_to_m =  (in)    => in * .0254;
 cm_to_ft = (cm)    => cm / 30.48;
 
 ft_to_cm = (ft)    => ft * 30.48;
-m_to_in = (m)      => m / .0254;
+m_to_in =  (m)     => m / .0254;
 
 m_to_mi = (m)      => m / 1609;
 mi_to_m = (mi)     => mi * 1609;
 
-ft_to_mi = (f)     => f/5280;
-mi_to_ft = (mi)     => mi*5280;
+ft_to_mi = (f)     => f / 5280;
+mi_to_ft = (mi)    => mi * 5280;
 
 // Calculate the nth value of the Fibonacci sequence
 fib = (n) => if( n < 2 , 1 ,fib(n - 1) + fib(n - 2));
