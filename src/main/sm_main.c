@@ -61,7 +61,7 @@ void run_file(sm_options *options, bool init) {
 // Can run files, start REPL, or both
 int main(int num_args, char **argv) {
   printf("Symbolic Math System\n");
-  printf("Version 0.135\n");
+  printf("Version 0.14\n");
   // Process command line args
   sm_global_options(sm_process_args(num_args, argv));
   sm_options *options = sm_global_options(NULL);

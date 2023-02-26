@@ -1,81 +1,42 @@
 # Intro:
 
-SMS Stands for Symbolic Math System. The application is a minimal algebraic system and a functional programming language.
-The SMS language is lexically scoped, weakly typed, and functional. SMS currently has no compiler.
+SMS Stands for Symbolic Math System.
 
-The C program compiles to a terminal application which interprets commands like `a = 4 * cos(0.5);` and `rm a;` to calculate, set, and destroy variables.
+Currently, SMS can serve as calculator for basic conversion and trigonometric needs. The long term goal of SMS is to provide a simple general purpose programming language that focuses on mathematics and speed.
 
-The program currently parses, evaluates, and stores mathematical expressions, strings, and data structures like arrays and contexts. Contexts are user defined objects with key-value pairs. Functions can also be called with lexical scoping for variables and functions.
+In addition to providing a command line, SMS can interpret files.
+Run `sms -h` for command line options.
 
-To exit the program, use `ctrl + c` or enter `exit;` The syntax is expected to rapidly change for a while. The variable names must start with underscores or a letter and variables can store mathematical expressions, strings, numbers, contexts and arrays of the forementioned things.
-
-Supported functions so far (in double precision):
+The program currently parses, evaluates, and stores mathematical expressions, strings, arrays and contexts. Contexts are user defined objects with key-value pairs. Functions can also be called with lexical scoping for variables and functions.
+SMS has the following built-in functions so far (in double precision):
 
 `+, -, *, /, ^, ln, exp, abs, sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sqrt, if, ==, >, <` 
 
-In SMS, whitespace characters (outside of a string) are ignored. All commands end with a semicolon (;) .
-You can try the following examples:
+# HOW TO DOWNLOAD & RUN / Install
+- At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, FreeBSD, and Windows. You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
 
-Direct calculations can be performed with any mathematical expression:
+In SMS, whitespace characters (outside of strings) are ignored. All commands end with a semicolon (`;`) .
 
-`2 + sqrt(7);`
+Check out `sms_src/example.sms` for example functions and ideas.
+You can also run `sms -i examples.sms` to have a calculator loaded with some useful functions and constants.
 
-Calculation and storage of double precision numbers:
+In addition to the mathematical ideas covered in the example file, SMS has ambitions to be a general purpose programming language. Hence, SMS has premature general purpose programming features that will be embellished further in the near future:
 
-`a = 2 + sqrt(7)`
+Anonymous functions with javascript-like syntax:
 
-`b = sqrt(a) + 1.27E-3;`
+`wave = (x) => sin(x) + 0.5 * cos(x * 2);`
 
-`c = (a + b)/2;`
+Call the function with familiar syntax:
 
-To see which variables are currently set, enter:
-
-`self ;`
-
-Prefix notation may also be used for +,-,*,/.
-
-`c = + ( 1, sin( b ) ) ;`
-
-The meta operator (:) stores expressions :
-
-`expr = : +(a,b,c);`
-
-Call the function later with this syntax:
-
-`expr {}`
-
-Override specific variables:
-
-`expression {b=6}`
-
-Define a function that calculates the nth fibonacci number:
-
-`fib=:if( n < 2 , 1 , fib{ n=n-1 } + fib { n=n-2 } );`
-
-`fib{n=20}`
-
-This fib function uses lots of memory for high values of n.
-For example, on AMD64 architecture, this implementation of fib will crash for n > 21 because SMS uses a 5 MB heap size.
-
-Storage of mathematical expressions in an array (a meta array):
-
-`quad = : [ (-b+sqrt(b^2-4*a*c)/(2*a) , (-b-sqrt(b^2-4*a*c)/(2*a) ];`
-
-Call the quadratic formula function and recieve two values.
-
-`quad {a=-1,b=2,c=3};`
-
-Arrays can hold objects of different types:
-
-`d = :[ a, sinh(a/b), "this", 5 , { x = "x"; }];`
+`wave(4);`
 
 User objects (contexts):
 
-`car = { color = red; speed = 5; license_plate = "smthg_fnny"; } ; `
+`car = { weigth = 2.2; speed = 5; license_plate = "smthg_fnny"; } ; `
 
 Contexts can be nested:
 
-`nested = { example={ x = [ 1, 2 ]; }; k = 5; } ;`
+`nested = { example = { x = [ 1, 2 ]; }; k = 5; } ;`
 
 Variables can be removed from the current context:
 
@@ -85,12 +46,17 @@ Exit the program with:
 
 `exit; `
 
+SMS Versions will have 3 significant figures for development periods.                (ex: v 0.135) 
+SMS Versions will have 2 significant figures for somewhat stable alpha releases.     (ex: v 0.13)
+SMS Versions will have 1 significant figure for somewhat more stable alpha releases. (ex: v 0.1)
+
+
 # PLANS:
 
 - [x] Mathematical evaluation is implemented. Commands like a=4*sin(3.14/8) will evaluate to a decimal number.
 - [ ] Currently, the garbage collector only executes after a command. The plan is to have the garbage collector initiate when a new memory allocation would pass a threshold. Live objects must be tracked on a stack, which becomes a new member of the roots for inflating to the new heap at garbage collection. With this upgrade, the garbage collector would then run less often.
 - [ ] Currently, syntax errors are entirely vague and repeat for every token after an error up until the next semicolon. Errors will be handled more gracefully, with useful responses for particular cases.
-- [ ] Better support for scripting and pipes by using flags for input and output preferences.
+- [x] Better support for scripting and pipes by using flags for input and output preferences.
 - [ ] A diff command for taking derivatives.
 - [ ] A integral command for taking integrals.
 - [ ] Support for floats and integers as opposed to just doubles.
@@ -104,9 +70,6 @@ Exit the program with:
 - [ ] Arbitrary precision library written in sms.
 - [ ] Unicode support.
 - [ ] Graphics support.
-
-# HOW TO DOWNLOAD & RUN / Install
-- At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, FreeBSD, and Windows. You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
 
 # HOW TO COMPILE
 
