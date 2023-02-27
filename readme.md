@@ -61,7 +61,7 @@ Exit the program with:
 - [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing.
 - [x] Recursive function calls.
 - [x] Local variables store an array index to their location in the stack frame. This is much faster than binary search.
-- [x] The maximum capacity for strings, arrays, and contexts is remarkably high. Generally, if a collection item is too large to parse, it's because 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characaters or 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
+- [x] The maximum capacity for strings, arrays, and contexts is remarkably high. Generally, if a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters or: 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
 
 # PLANS:
 - [ ] Standard libraries: file, string, array, math, matrix, net, etc.
@@ -79,8 +79,9 @@ Exit the program with:
 - [ ] General documentation.
 - [ ] A community!
 - [ ] Thread forking support.
-- [ ] Simple Webserver and networking tools.
 - [ ] Some Unicode support.
+- [ ] Simple Webserver and networking tools.
+
 
 # HOW TO COMPILE
 
