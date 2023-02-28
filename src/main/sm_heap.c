@@ -19,7 +19,7 @@ sm_heap *sm_new_heap(unsigned int capacity) {
 sm_space *check_space(unsigned int size, unsigned int index) {
   if (index + 1 <= sm_global_space_array(NULL)->size) {
     unsigned int space_size =
-      sm_get_space_array(sm_global_space_array(NULL))[index]->my_type - sm_space_type;
+      sm_get_space_array(sm_global_space_array(NULL))[index]->my_type - sm_space_expr;
     if (space_size >= size) {
       sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[index];
       return good_space;
@@ -36,7 +36,7 @@ sm_search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size
   int          comparison  = 1;
   unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
   while (lower_limit < upper_limit && comparison != 0) {
-    comparison = space_array[guess_point]->my_type - sm_space_type - size;
+    comparison = space_array[guess_point]->my_type - sm_space_expr - size;
     if (comparison == 0)
       return (sm_search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
@@ -45,7 +45,7 @@ sm_search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size
       lower_limit = guess_point + 1;
     guess_point = (upper_limit + lower_limit) / 2.0;
   }
-  comparison = space_array[guess_point]->my_type - sm_space_type - size;
+  comparison = space_array[guess_point]->my_type - sm_space_expr - size;
   if (comparison == 0)
     return (sm_search_result){.found = true, .index = guess_point};
   if (comparison < 0) {
@@ -57,7 +57,7 @@ sm_search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size
 
 // Sort the space array that is unsorted by the 1 space at off_index
 void sort_1_off(sm_space_array *ssa, unsigned int off_index) {
-  unsigned int space_size = sm_get_space_array(ssa)[off_index]->my_type - sm_space_type;
+  unsigned int space_size = sm_get_space_array(ssa)[off_index]->my_type - sm_space_expr;
   // Now, to binary search the remaining portion of the array
   sm_search_result sr = find_space_within_bounds(ssa, space_size, 0, off_index - 1);
   // Use search result to sort this 1-off array
@@ -84,10 +84,10 @@ void *sm_malloc_from_spaces(unsigned int size) {
     }
     sm_space *result_space = check_space(size, sr.index);
     if (result_space != NULL) {
-      unsigned int remaining_size = (result_space->my_type - sm_space_type) - size;
+      unsigned int remaining_size = (result_space->my_type - sm_space_expr) - size;
       if (remaining_size >= sizeof(sm_space)) {
         sm_space *new_space = (sm_space *)((char *)result_space) + size;
-        new_space->my_type  = sm_space_type + remaining_size;
+        new_space->my_type  = sm_space_expr + remaining_size;
         sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
         sort_1_off(sm_global_space_array(NULL), sr.index);
       } else {
@@ -166,7 +166,7 @@ void sm_sprint_dump() {
     unsigned int real_len = sm_object_sprint(current_obj, buf, false);
     buf[real_len]         = '\0';
     printf("%s\n", buf);
-    if (current_obj->my_type <= sm_space_type)
+    if (current_obj->my_type <= sm_space_expr)
       scan_cursor += sm_sizeof(current_obj);
     else {
       DEBUG_HERE("Error: Stopping on unrecognized object type.");

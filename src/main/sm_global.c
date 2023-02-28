@@ -130,7 +130,7 @@ sm_expr *sm_global_parents(sm_expr *replacement) {
   if (parents == NULL) {
     sm_expr *parents  = (sm_expr *)malloc(sizeof(sm_expr) + sizeof(void *) * initial_capacity);
     parents->my_type  = sm_expr_type;
-    parents->op       = sm_siblings;
+    parents->op       = sm_siblings_expr;
     parents->size     = 0;
     parents->capacity = initial_capacity;
     return parents;

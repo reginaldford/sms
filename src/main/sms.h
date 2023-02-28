@@ -9,22 +9,22 @@
 #include <ctype.h>
 
 // These are the major object types of SMS
-// Keep syncronized with function sm_object_type_str
-enum sm_object_type {
+// Keep syncronized with function sm_object_expr_str
+enum sm_object_expr {
   sm_double_type,    // 0
   sm_expr_type,      // 1
   sm_primitive_type, // 2
-  sm_string_type,    // 3
+  sm_string_expr,    // 3
   sm_symbol_type,    // 4
   sm_context_type,   // 5
-  sm_pointer_type,   // 6
-  sm_meta_type,      // 7
-  sm_space_type,     // 8
-  sm_fun_type,       // 9
-  sm_fun_param_type, // 10
+  sm_pointer_expr,   // 6
+  sm_meta_expr,      // 7
+  sm_space_expr,     // 8
+  sm_fun_expr,       // 9
+  sm_fun_param_expr, // 10
   sm_local_type,     // 11
-  sm_error_type,     // 12
-  sm_unknown_type    // 13
+  sm_error_expr,     // 12
+  sm_unknown_expr    // 13
 };
 
 // Useful macros
@@ -61,3 +61,4 @@ enum sm_object_type {
 #include "sm_init.h"
 #include "sm_local.h"
 #include "sm_error.h"
+#include "sm_diff.h"

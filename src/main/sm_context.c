@@ -23,7 +23,7 @@ sm_context_entry *sm_context_entries(sm_context *context) {
 sm_context *sm_context_add_child(sm_context *cx, sm_object *child) {
   sm_expr *array = cx->children;
   if (array == NULL) {
-    cx->children = sm_new_expr(sm_siblings, child);
+    cx->children = sm_new_expr(sm_siblings_expr, child);
     return cx;
   }
   cx->children = sm_append_to_expr(cx->children, child);
@@ -85,7 +85,7 @@ bool sm_context_update_relatives(sm_context *self, sm_context *old_self) {
         for (unsigned int i = 0; i < siblings->size; i++) {
           sm_object *obj = sm_expr_get_arg(siblings, i);
           if (obj == (sm_object *)old_self) {
-            sm_set_expr_arg(siblings, i, (sm_object *)self);
+            sm_expr_set_arg(siblings, i, (sm_object *)self);
             break;
           }
         }
@@ -101,11 +101,11 @@ bool sm_context_update_relatives(sm_context *self, sm_context *old_self) {
           ((sm_context *)obj)->parent = self;
           break;
         }
-        case sm_meta_type: {
+        case sm_meta_expr: {
           ((sm_meta *)obj)->scope = self;
           break;
         }
-        case sm_fun_type: {
+        case sm_fun_expr: {
           ((sm_fun *)obj)->parent = self;
           break;
         }

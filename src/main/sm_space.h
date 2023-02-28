@@ -1,9 +1,9 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 // Anything with a type too high is a space
-// sm_space_type is to be subtracted from my_type to calculate the size
+// sm_space_expr is to be subtracted from my_type to calculate the size
 typedef struct sm_space {
-  enum sm_object_type my_type;
+  enum sm_object_expr my_type;
   unsigned short int  size;
 } sm_space;
 

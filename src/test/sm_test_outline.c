@@ -48,7 +48,7 @@ test_outline *parse_test_outline(char *filepath) {
     }
     sm_context *current_ch_cx = (sm_context *)current_obj;
     sm_object  *ch_name_obj   = sm_context_get_by_name(current_ch_cx, sm_new_string(4, "name"));
-    if (ch_name_obj->my_type != sm_string_type) {
+    if (ch_name_obj->my_type != sm_string_expr) {
       printf("Each context in the chapters array must associate 'name' with a string for the name "
              "of the chapter.\n");
       graceful_exit(result_outline, -1);

@@ -19,7 +19,7 @@ sm_object *sm_localize(sm_object *obj, sm_fun *fun) {
     for (unsigned int i = 0; i < sme->size; i++) {
       sm_object *current_obj   = sm_expr_get_arg(sme, i);
       sm_object *processed_obj = sm_localize(current_obj, fun);
-      sm_set_expr_arg(sme, i, processed_obj);
+      sm_expr_set_arg(sme, i, processed_obj);
     }
   } else if (obj->my_type == sm_symbol_type) {
     sm_symbol *sym = (sm_symbol *)obj;

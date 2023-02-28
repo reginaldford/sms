@@ -2,38 +2,38 @@
 
 // Denotes the type of expression
 enum sm_expr_type {
-  sm_plus,
-  sm_minus,
-  sm_times,
-  sm_divide,
-  sm_sqrt,
-  sm_sin,
-  sm_cos,
-  sm_tan,
-  sm_sinh,
-  sm_cosh,
-  sm_tanh,
-  sm_pow,
-  sm_csc,
-  sm_sec,
-  sm_cot,
-  sm_ln,
-  sm_exp,
-  sm_abs,
-  sm_diff,
-  sm_assign,
-  sm_test_eq,
-  sm_test_lt,
-  sm_test_gt,
-  sm_if,
-  sm_if_else,
-  sm_let,
-  sm_then,
-  sm_array,
-  sm_siblings,
-  sm_prim,
-  sm_param_list,
-  sm_fun_call
+  sm_plus_expr,
+  sm_minus_expr,
+  sm_times_expr,
+  sm_divide_expr,
+  sm_sqrt_expr,
+  sm_sin_expr,
+  sm_cos_expr,
+  sm_tan_expr,
+  sm_sinh_expr,
+  sm_cosh_expr,
+  sm_tanh_expr,
+  sm_pow_expr,
+  sm_csc_expr,
+  sm_sec_expr,
+  sm_cot_expr,
+  sm_ln_expr,
+  sm_exp_expr,
+  sm_abs_expr,
+  sm_diff_expr,
+  sm_assign_expr,
+  sm_test_eq_expr,
+  sm_test_lt_expr,
+  sm_test_gt_expr,
+  sm_if_expr,
+  sm_if_else_expr,
+  sm_let_expr,
+  sm_then_expr,
+  sm_array_expr,
+  sm_siblings_expr,
+  sm_prim_expr,
+  sm_param_list_expr,
+  sm_fun_call_expr
 };
 
 // Head of an expression
@@ -54,7 +54,7 @@ unsigned int sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);
 unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake);
 sm_string   *sm_expr_to_string(sm_expr *expr);
 unsigned int sm_expr_sprint(sm_expr *self, char *buffer, bool fake);
-sm_expr     *sm_set_expr_arg(sm_expr *expr, unsigned int index, sm_object *value);
+sm_expr     *sm_expr_set_arg(sm_expr *expr, unsigned int index, sm_object *value);
 sm_object   *sm_expr_get_arg(sm_expr *expr, unsigned int index);
 bool         sm_is_infix(enum sm_expr_type op);
 sm_object   *sm_expr_pop(sm_expr *sme);
