@@ -24,7 +24,7 @@ sm_string *sm_new_string(unsigned int size, char *str) {
 sm_string *sm_new_string_manual(unsigned int size) {
   // We add a null character that is not included in the size
   struct sm_string *newstr = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size + 1));
-  newstr->my_type          = sm_string_type;
+  newstr->my_type          = sm_string_expr;
   newstr->size             = size;
   return newstr;
 }

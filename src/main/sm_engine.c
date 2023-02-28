@@ -9,7 +9,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
-    case sm_fun_call: {
+    case sm_diff_expr: {
+      return sm_diff(sm_expr_get_arg(sme, 0));
+    }
+    case sm_fun_call_expr: {
       sm_fun         *fun      = (sm_fun *)sm_expr_get_arg(sme, 0);
       struct sm_expr *args     = (struct sm_expr *)sm_expr_get_arg(sme, 1);
       sm_expr        *new_args = (sm_expr *)sm_engine_eval((sm_object *)args, current_cx, sf);
@@ -24,7 +27,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
           sm_strncpy((&err_msg->content) + 27, &fun_sym->name->content, fun_sym->name->size);
           return (sm_object *)sm_new_error(err_msg, sm_new_string(1, "."), 0);
         }
-        if (found->my_type != sm_fun_type) {
+        if (found->my_type != sm_fun_expr) {
           printf("Error: %s exists, but is not a function.\n", &(fun_sym->name->content));
           sm_string *err_msg = sm_new_string(47 + fun_sym->name->size,
                                              "Error: Variable exists, but is not a function: ");
@@ -33,31 +36,31 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         }
         sm_fun *found_fun = (sm_fun *)found;
         return sm_engine_eval(found_fun->content, found_fun->parent, new_args);
-      } else if (fun->my_type == sm_fun_type) {
+      } else if (fun->my_type == sm_fun_expr) {
         return sm_engine_eval(fun->content, fun->parent, new_args);
       } else {
         return sm_engine_eval((sm_object *)fun, current_cx, new_args);
       }
     }
-    case sm_then: {
+    case sm_then_expr: {
       sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       for (unsigned int i = 1; i < sme->size - 1; i++)
         sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
       return sm_engine_eval(sm_expr_get_arg(sme, sme->size - 1), current_cx, sf);
     }
-    case sm_assign: {
+    case sm_assign_expr: {
       sm_symbol *sym   = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_context_set(current_cx, sym->name, value);
-      return (sm_object *)sm_new_expr_2(sm_assign,(sm_object*)sym,value);
+      return (sm_object *)sm_new_expr_2(sm_assign_expr, (sm_object *)sym, value);
     }
-    case sm_plus: {
+    case sm_plus_expr: {
       double sum = ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf))->value;
       for (unsigned int i = 1; i < sme->size; i++)
         sum += ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf))->value;
       return (sm_object *)sm_new_double(sum);
     }
-    case sm_minus: {
+    case sm_minus_expr: {
       sm_object *a = sm_expr_get_arg(sme, 0);
       a            = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       double sum   = ((sm_double *)a)->value;
@@ -65,81 +68,81 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         sum -= ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf))->value;
       return (sm_object *)sm_new_double(sum);
     }
-    case sm_times: {
+    case sm_times_expr: {
       double product =
         ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf))->value;
       for (unsigned int i = 1; i < sme->size; i++)
         product *= ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf))->value;
       return (sm_object *)sm_new_double(product);
     }
-    case sm_divide: {
+    case sm_divide_expr: {
       double quotient =
         ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf))->value;
       for (unsigned int i = 1; i < sme->size; i++)
         quotient /= ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf))->value;
       return (sm_object *)sm_new_double(quotient);
     }
-    case sm_pow: {
+    case sm_pow_expr: {
       sm_double *left_side  = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *right_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       return (sm_object *)sm_new_double(pow(left_side->value, right_side->value));
     }
-    case sm_sin: {
+    case sm_sin_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(sin(left_side->value));
     }
-    case sm_cos: {
+    case sm_cos_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(cos(left_side->value));
     }
-    case sm_tan: {
+    case sm_tan_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(tan(left_side->value));
     }
-    case sm_sec: {
+    case sm_sec_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(1.0 / cos(left_side->value));
     }
-    case sm_csc: {
+    case sm_csc_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(1.0 / sin(left_side->value));
     }
-    case sm_cot: {
+    case sm_cot_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(1.0 / tan(left_side->value));
     }
-    case sm_sinh: {
+    case sm_sinh_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(sinh(left_side->value));
     }
-    case sm_cosh: {
+    case sm_cosh_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(cosh(left_side->value));
     }
-    case sm_tanh: {
+    case sm_tanh_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(tanh(left_side->value));
     }
-    case sm_ln: {
+    case sm_ln_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(log(left_side->value));
     }
-    case sm_exp: {
+    case sm_exp_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(exp(left_side->value));
     }
-    case sm_sqrt: {
+    case sm_sqrt_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(sqrt(left_side->value));
     }
-    case sm_abs: {
+    case sm_abs_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       double     x         = left_side->value;
       return (sm_object *)sm_new_double(x < 0 ? -1 * x : x);
     }
-    case sm_if: {
+    case sm_if_expr: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (condition_result->my_type == sm_meta_type) {
+      if (condition_result->my_type == sm_meta_expr) {
         sm_meta *meta = (sm_meta *)condition_result;
         if (meta->address->my_type == sm_symbol_type) {
           sm_symbol *sym = (sm_symbol *)meta->address;
@@ -151,9 +154,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
                                       current_cx);
     }
-    case sm_if_else: {
+    case sm_if_else_expr: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (condition_result->my_type == sm_meta_type) {
+      if (condition_result->my_type == sm_meta_expr) {
         sm_meta *meta = (sm_meta *)condition_result;
         if (meta->address->my_type == sm_symbol_type) {
           sm_symbol *sym = (sm_symbol *)meta->address;
@@ -164,23 +167,23 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       }
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
     }
-    case sm_array: {
-      sm_expr *new_arr = sm_new_expr_n(sm_array, sme->size, sme->size);
+    case sm_array_expr: {
+      sm_expr *new_arr = sm_new_expr_n(sm_array_expr, sme->size, sme->size);
       for (unsigned int i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        sm_set_expr_arg(new_arr, i, new_val);
+        sm_expr_set_arg(new_arr, i, new_val);
       }
       return (sm_object *)new_arr;
     }
-    case sm_param_list: {
-      sm_expr *new_arr = sm_new_expr_n(sm_param_list, sme->size, sme->size);
+    case sm_param_list_expr: {
+      sm_expr *new_arr = sm_new_expr_n(sm_param_list_expr, sme->size, sme->size);
       for (unsigned int i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        sm_set_expr_arg(new_arr, i, new_val);
+        sm_expr_set_arg(new_arr, i, new_val);
       }
       return (sm_object *)new_arr;
     }
-    case sm_test_lt: {
+    case sm_test_lt_expr: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj1->my_type == sm_double_type) {
@@ -198,7 +201,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
                                         current_cx);
       }
     }
-    case sm_test_gt: {
+    case sm_test_gt_expr: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj1->my_type == sm_double_type) {
@@ -216,7 +219,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
                                       current_cx);
     }
-    case sm_test_eq: {
+    case sm_test_eq_expr: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj1->my_type == sm_double_type) {
@@ -259,24 +262,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_local *local = (sm_local *)input;
     return sm_expr_get_arg(sf, local->index);
   }
-  case sm_context_type: {
-    sm_context       *cx     = (sm_context *)input;
-    sm_context_entry *ce     = sm_context_entries(cx);
-    sm_context       *new_cx = sm_new_context(cx->size, cx->size, cx->parent);
-    new_cx->children         = cx->children;
-    sm_context_entry *new_ce = sm_context_entries(new_cx);
-    for (unsigned int i = 0; i < cx->size; i++) {
-      new_ce[i].name = ce[i].name;
-      if (false == sm_object_is_literal(ce[i].value->my_type) &&
-          ((sm_context *)ce[i].value) != cx) {
-        new_ce[i].value = sm_engine_eval(ce[i].value, current_cx, sf);
-      } else {
-        new_ce[i].value = ce[i].value;
-      }
-    }
-    return (sm_object *)new_cx;
-  }
-  case sm_error_type: {
+  case sm_error_expr: {
     // TODO: Add callstack info here.
     return input;
   }

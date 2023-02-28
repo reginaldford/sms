@@ -14,8 +14,8 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 // If obj is an sm_pointer, the object was alreay moved to the new heap
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
-  unsigned short int the_type = obj->my_type;
-  if (the_type == sm_pointer_type)
+  unsigned short int the_expr = obj->my_type;
+  if (the_expr == sm_pointer_expr)
     return ((sm_pointer *)obj)->address;
   else
     return sm_move_to_new_heap(obj);
@@ -28,14 +28,14 @@ sm_expr *inflate_siblings(sm_expr *siblings) {
   sm_object   *keepers[siblings->size];
   for (unsigned int i = 0; i < siblings->size; i++) {
     sm_object *current_sibling = sm_expr_get_arg(siblings, i);
-    if (current_sibling->my_type == sm_pointer_type) {
+    if (current_sibling->my_type == sm_pointer_expr) {
       keepers[num_keepers++] = ((sm_pointer *)current_sibling)->address;
     }
   }
   if (num_keepers > 0) {
-    sm_expr *new_expr = sm_new_expr_n(sm_siblings, num_keepers, num_keepers);
+    sm_expr *new_expr = sm_new_expr_n(sm_siblings_expr, num_keepers, num_keepers);
     for (unsigned int i = 0; i < num_keepers; i++) {
-      sm_set_expr_arg(new_expr, i, keepers[i]);
+      sm_expr_set_arg(new_expr, i, keepers[i]);
     }
     return new_expr;
   }
@@ -86,7 +86,7 @@ void sm_inflate_heap() {
       sm_expr *expr = (sm_expr *)current_obj;
       for (unsigned int i = 0; i < expr->size; i++) {
         sm_object *new_obj = sm_meet_object(sm_expr_get_arg(expr, i));
-        sm_set_expr_arg(expr, i, (sm_object *)new_obj);
+        sm_expr_set_arg(expr, i, (sm_object *)new_obj);
       }
       break;
     }
@@ -95,12 +95,12 @@ void sm_inflate_heap() {
       sym->name      = (sm_string *)sm_meet_object((sm_object *)sym->name);
       break;
     }
-    case sm_meta_type: {
+    case sm_meta_expr: {
       sm_meta *meta = (sm_meta *)current_obj;
       meta->address = (sm_object *)sm_meet_object(meta->address);
       break;
     }
-    case sm_fun_type: {
+    case sm_fun_expr: {
       sm_fun *fun  = (sm_fun *)current_obj;
       fun->content = sm_meet_object((sm_object *)fun->content);
       if (fun->parent != NULL)
@@ -114,7 +114,7 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case sm_fun_param_type: {
+    case sm_fun_param_expr: {
       sm_fun_param_obj *param = (sm_fun_param_obj *)current_obj;
       param->name             = (sm_string *)sm_meet_object((sm_object *)param->name);
       if (param->default_val != NULL) {

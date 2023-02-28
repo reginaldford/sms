@@ -115,37 +115,37 @@ COMMAND : EXPR ';' {
 
 EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | SYM{}
-| EXPR '+' EXPR { $$ = sm_new_expr_2(sm_plus, (sm_object *)$1, (sm_object *)$3); }
-| EXPR '-' EXPR { $$ = sm_new_expr_2(sm_minus, (sm_object *)$1, (sm_object *)$3); }
-| EXPR '*' EXPR { $$ = sm_new_expr_2(sm_times, (sm_object *)$1, (sm_object *)$3); }
-| EXPR '/' EXPR { $$ = sm_new_expr_2(sm_divide, (sm_object *)$1, (sm_object *)$3); }
-| EXPR '^' EXPR { $$ = sm_new_expr_2(sm_pow, (sm_object *)$1, (sm_object *)$3); }
+| EXPR '+' EXPR { $$ = sm_new_expr_2(sm_plus_expr, (sm_object *)$1, (sm_object *)$3); }
+| EXPR '-' EXPR { $$ = sm_new_expr_2(sm_minus_expr, (sm_object *)$1, (sm_object *)$3); }
+| EXPR '*' EXPR { $$ = sm_new_expr_2(sm_times_expr, (sm_object *)$1, (sm_object *)$3); }
+| EXPR '/' EXPR { $$ = sm_new_expr_2(sm_divide_expr, (sm_object *)$1, (sm_object *)$3); }
+| EXPR '^' EXPR { $$ = sm_new_expr_2(sm_pow_expr, (sm_object *)$1, (sm_object *)$3); }
 | NUM{}
 | '-' EXPR {
   if (((sm_object *)$2)->my_type == sm_double_type) {
     ((sm_double *)$2)->value *= -1;
     $$ = (sm_expr *)$2;
   } else {
-    $$ = sm_new_expr_2(sm_times, (sm_object *)sm_new_double(-1), (sm_object *)$2);
+    $$ = sm_new_expr_2(sm_times_expr, (sm_object *)sm_new_double(-1), (sm_object *)$2);
   }
 }
 | '(' EXPR ')' { $$ = (sm_expr *)$2; }
 | STRING{}
-| SIN '(' EXPR ')' { $$ = sm_new_expr(sm_sin, (sm_object *)$3); }
-| COS '(' EXPR ')' { $$ = sm_new_expr(sm_cos, (sm_object *)$3); }
-| TAN '(' EXPR ')' { $$ = sm_new_expr(sm_tan, (sm_object *)$3); }
-| SINH '(' EXPR ')' { $$ = sm_new_expr(sm_sinh, (sm_object *)$3); }
-| COSH '(' EXPR ')' { $$ = sm_new_expr(sm_cosh, (sm_object *)$3); }
-| TANH '(' EXPR ')' { $$ = sm_new_expr(sm_tanh, (sm_object *)$3); }
-| SEC '(' EXPR ')' { $$ = sm_new_expr(sm_sec, (sm_object *)$3); }
-| CSC '(' EXPR ')' { $$ = sm_new_expr(sm_csc, (sm_object *)$3); }
-| COT '(' EXPR ')' { $$ = sm_new_expr(sm_cot, (sm_object *)$3); }
-| LN '(' EXPR ')' { $$ = sm_new_expr(sm_ln, (sm_object *)$3); }
-| EXP '(' EXPR ')' { $$ = sm_new_expr(sm_exp, (sm_object *)$3); }
-| SQRT '(' EXPR ')' { $$ = sm_new_expr(sm_sqrt, (sm_object *)$3); }
-| ABS '(' EXPR ')' { $$ = sm_new_expr(sm_abs, (sm_object *)$3); }
-| DIFF '(' EXPR ')' { $$ = sm_new_expr(sm_diff, (sm_object *)$3); }
-| DIFF '(' EXPR ',' SYM ')' { $$ = sm_new_expr_2(sm_diff, (sm_object *)$3, (sm_object *)$5); }
+| SIN '(' EXPR ')' { $$ = sm_new_expr(sm_sin_expr, (sm_object *)$3); }
+| COS '(' EXPR ')' { $$ = sm_new_expr(sm_cos_expr, (sm_object *)$3); }
+| TAN '(' EXPR ')' { $$ = sm_new_expr(sm_tan_expr, (sm_object *)$3); }
+| SINH '(' EXPR ')' { $$ = sm_new_expr(sm_sinh_expr, (sm_object *)$3); }
+| COSH '(' EXPR ')' { $$ = sm_new_expr(sm_cosh_expr, (sm_object *)$3); }
+| TANH '(' EXPR ')' { $$ = sm_new_expr(sm_tanh_expr, (sm_object *)$3); }
+| SEC '(' EXPR ')' { $$ = sm_new_expr(sm_sec_expr, (sm_object *)$3); }
+| CSC '(' EXPR ')' { $$ = sm_new_expr(sm_csc_expr, (sm_object *)$3); }
+| COT '(' EXPR ')' { $$ = sm_new_expr(sm_cot_expr, (sm_object *)$3); }
+| LN '(' EXPR ')' { $$ = sm_new_expr(sm_ln_expr, (sm_object *)$3); }
+| EXP '(' EXPR ')' { $$ = sm_new_expr(sm_exp_expr, (sm_object *)$3); }
+| SQRT '(' EXPR ')' { $$ = sm_new_expr(sm_sqrt_expr, (sm_object *)$3); }
+| ABS '(' EXPR ')' { $$ = sm_new_expr(sm_abs_expr, (sm_object *)$3); }
+| DIFF '(' EXPR ')' { $$ = sm_new_expr(sm_diff_expr, (sm_object *)$3); }
+| DIFF '(' EXPR ',' SYM ')' { $$ = sm_new_expr_2(sm_diff_expr, (sm_object *)$3, (sm_object *)$5); }
 | EXPR_LIST ')' {}
 | CONTEXT{}
 | ARRAY{}
@@ -171,17 +171,17 @@ FUN_INTRO : PARAM_LIST ARROW {
   sm_context_add_child(parent_cx, (sm_object*)new_fun);
   for (unsigned int i = 0; i < ($1)->size; i++) {
     sm_fun_param_obj *po = (sm_fun_param_obj *)sm_expr_get_arg($1, i);
-    sm_fun_set_param(new_fun, i, po->name, po->default_val, po->known_type);
+    sm_fun_set_param(new_fun, i, po->name, po->default_val, po->known_expr);
   }
   $$ = new_fun;
 }
 
 PARAM_LIST : '(' ')' {
-  $$ = sm_new_expr_n(sm_param_list, 0, 0);
+  $$ = sm_new_expr_n(sm_param_list_expr, 0, 0);
 }
 | '(' SYM ')' {
   sm_fun_param_obj * fpo = sm_new_fun_param_obj($2->name,NULL,0);
-  $$                = sm_new_expr(sm_param_list,(sm_object*)fpo);
+  $$                = sm_new_expr(sm_param_list_expr,(sm_object*)fpo);
 }
 | PARAM_LIST_OPEN ')' {}
 | PARAM_LIST_OPEN SYM ')' {
@@ -190,48 +190,48 @@ PARAM_LIST : '(' ')' {
 }
 
 PARAM_LIST_OPEN : '(' SYM ',' {
-  sm_expr *new_expr = sm_new_expr_n(sm_param_list, 1, 3);
+  sm_expr *new_expr = sm_new_expr_n(sm_param_list_expr, 1, 3);
   sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL,0);
-  $$                = sm_set_expr_arg(new_expr, 0, (sm_object*)new_param);
+  $$                = sm_expr_set_arg(new_expr, 0, (sm_object*)new_param);
 }
 | PARAM_LIST_OPEN SYM ',' {
   sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL,0);
   $$ = sm_append_to_expr($1, (sm_object *)new_param);
 }
 
-ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(sm_assign, (sm_object *)($1), (sm_object *)($3)); }
+ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(sm_assign_expr, (sm_object *)($1), (sm_object *)($3)); }
 
 SEQUENCE : SEQUENCE_LIST ')' {}
 
-SEQUENCE_LIST : '(' EXPR ';' EXPR { $$ = sm_new_expr_2(sm_then, (sm_object *)$2, (sm_object *)$4); }
+SEQUENCE_LIST : '(' EXPR ';' EXPR { $$ = sm_new_expr_2(sm_then_expr, (sm_object *)$2, (sm_object *)$4); }
 | SEQUENCE_LIST ';' EXPR { $$ = sm_append_to_expr((sm_expr *)$1, (sm_object *)$3); }
 
-EXPR_LIST : '+' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_plus, (sm_object *)$3, (sm_object *)$5); }
-| '-' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_minus, (sm_object *)$3, (sm_object *)$5); }
-| '*' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_times, (sm_object *)$3, (sm_object *)$5); }
-| '/' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_divide, (sm_object *)$3, (sm_object *)$5); }
+EXPR_LIST : '+' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_plus_expr, (sm_object *)$3, (sm_object *)$5); }
+| '-' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_minus_expr, (sm_object *)$3, (sm_object *)$5); }
+| '*' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_times_expr, (sm_object *)$3, (sm_object *)$5); }
+| '/' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_divide_expr, (sm_object *)$3, (sm_object *)$5); }
 | EXPR_LIST ',' EXPR { $$ = sm_append_to_expr((sm_expr *)$1, (sm_object *)$3); }
 
 LT : '<' '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(sm_test_lt, (sm_object *)($3), (sm_object *)($5));
+  $$ = sm_new_expr_2(sm_test_lt_expr, (sm_object *)($3), (sm_object *)($5));
 }
-| EXPR '<' EXPR { $$ = sm_new_expr_2(sm_test_lt, (sm_object *)($1), (sm_object *)($3)); }
+| EXPR '<' EXPR { $$ = sm_new_expr_2(sm_test_lt_expr, (sm_object *)($1), (sm_object *)($3)); }
 
 GT : '>' '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(sm_test_gt, (sm_object *)($3), (sm_object *)($5));
+  $$ = sm_new_expr_2(sm_test_gt_expr, (sm_object *)($3), (sm_object *)($5));
 }
-| EXPR '>' EXPR { $$ = sm_new_expr_2(sm_test_gt, (sm_object *)($1), (sm_object *)($3)); }
+| EXPR '>' EXPR { $$ = sm_new_expr_2(sm_test_gt_expr, (sm_object *)($1), (sm_object *)($3)); }
 
 EQ : EQEQ '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(sm_test_eq, (sm_object *)($3), (sm_object *)($5));
+  $$ = sm_new_expr_2(sm_test_eq_expr, (sm_object *)($3), (sm_object *)($5));
 }
-| EXPR EQEQ EXPR { $$ = sm_new_expr_2(sm_test_eq, (sm_object *)($1), (sm_object *)($3)); }
+| EXPR EQEQ EXPR { $$ = sm_new_expr_2(sm_test_eq_expr, (sm_object *)($1), (sm_object *)($3)); }
 
 IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(sm_if, (sm_object *)($3), (sm_object *)($5));
+  $$ = sm_new_expr_2(sm_if_expr, (sm_object *)($3), (sm_object *)($5));
 }
 | IF '(' EXPR ',' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_3(sm_if_else, (sm_object *)($3), (sm_object *)($5), (sm_object *)($7));
+  $$ = sm_new_expr_3(sm_if_else_expr, (sm_object *)($3), (sm_object *)($5), (sm_object *)($7));
 }
 
 FUN_CALL : FUN_CALL_OPEN ')' {}
@@ -246,8 +246,8 @@ FUN_CALL : FUN_CALL_OPEN ')' {}
   if(found==NULL){
     found=(sm_object*)$1;
   }
-  sm_expr * args= sm_new_expr_n(sm_array,0,0);
-  $$ = sm_new_expr_2(sm_fun_call, (sm_object *)found, (sm_object *)args);
+  sm_expr * args= sm_new_expr_n(sm_array_expr,0,0);
+  $$ = sm_new_expr_2(sm_fun_call_expr, (sm_object *)found, (sm_object *)args);
 }
 
 FUN_CALL_OPEN : SYM '(' EXPR {
@@ -261,24 +261,24 @@ FUN_CALL_OPEN : SYM '(' EXPR {
   if(found==NULL){
     found=(sm_object*)$1;
   }
-  sm_expr * args= sm_new_expr_n(sm_param_list,1,2);
-  args=sm_set_expr_arg(args,0,(sm_object*)$3);
-  $$ = sm_new_expr_2(sm_fun_call, (sm_object *)found, (sm_object *)args);
+  sm_expr * args= sm_new_expr_n(sm_param_list_expr,1,2);
+  args=sm_expr_set_arg(args,0,(sm_object*)$3);
+  $$ = sm_new_expr_2(sm_fun_call_expr, (sm_object *)found, (sm_object *)args);
 }
 | FUN_CALL_OPEN ',' EXPR {
   sm_expr * args = (sm_expr*)sm_expr_get_arg($1,1);
   args = sm_append_to_expr(args, (sm_object *)$3);
-  $$=sm_set_expr_arg($1,1,(sm_object*)args);
+  $$=sm_expr_set_arg($1,1,(sm_object*)args);
 }
 
 META_EXPR : ':' EXPR { $$ = sm_new_meta((sm_object *)$2, *(sm_global_lex_stack(NULL))->top); }
 
 ARRAY : ARRAY_LIST ']' {};
 | ARRAY_LIST ',' ']' {};
-| '[' EXPR ']' { $$ = (sm_expr *)sm_new_expr(sm_array, (sm_object *)$2); }
-| '[' ']' { $$ = sm_new_expr_n(sm_array, 0, 0); }
+| '[' EXPR ']' { $$ = (sm_expr *)sm_new_expr(sm_array_expr, (sm_object *)$2); }
+| '[' ']' { $$ = sm_new_expr_n(sm_array_expr, 0, 0); }
 
-ARRAY_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_array, (sm_object *)$2, (sm_object *)$4); }
+ARRAY_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_array_expr, (sm_object *)$2, (sm_object *)$4); }
 | ARRAY_LIST ',' EXPR { $$ = sm_append_to_expr($1, (sm_object *)$3); }
 
 CONTEXT : CONTEXT_LIST '}' {

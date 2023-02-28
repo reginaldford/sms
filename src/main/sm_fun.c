@@ -5,7 +5,7 @@
 // new sm_fun structure
 sm_fun *sm_new_fun(sm_context *parent, unsigned short int num_params, sm_object *content) {
   sm_fun *self     = sm_malloc(sizeof(sm_fun) + num_params * sizeof(sm_fun_param));
-  self->my_type    = sm_fun_type;
+  self->my_type    = sm_fun_expr;
   self->parent     = parent;
   self->num_params = num_params;
   self->content    = content;
@@ -14,12 +14,12 @@ sm_fun *sm_new_fun(sm_context *parent, unsigned short int num_params, sm_object 
 
 // new sm_fun_param structure
 sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val,
-                                       enum sm_object_type known_type) {
+                                       enum sm_object_expr known_expr) {
   sm_fun_param_obj *self = sm_malloc(sizeof(sm_fun_param_obj));
-  self->my_type          = sm_fun_param_type;
+  self->my_type          = sm_fun_param_expr;
   self->name             = name;
   self->default_val      = default_val;
-  self->known_type       = known_type;
+  self->known_expr       = known_expr;
   return self;
 }
 
@@ -31,11 +31,11 @@ sm_fun_param *sm_fun_get_param(sm_fun *self, unsigned short int i) {
 
 // Set the i'th element of the array of sm_fun_param objects following the sm_fun struct
 void sm_fun_set_param(sm_fun *self, unsigned short int i, sm_string *name, sm_object *default_val,
-                      short int known_type) {
+                      short int known_expr) {
   sm_fun_param *arr  = (sm_fun_param *)&(self[1]);
   arr[i].name        = name;
   arr[i].default_val = default_val;
-  arr[i].known_type  = known_type;
+  arr[i].known_expr  = known_expr;
 }
 
 // Print to c str buffer a description of this parameter

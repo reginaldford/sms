@@ -16,7 +16,7 @@ sm_expr *sm_new_expr_n(enum sm_expr_type op, unsigned int size, unsigned int cap
 // New expression object
 sm_expr *sm_new_expr(enum sm_expr_type op, sm_object *arg) {
   sm_expr *new_expr = sm_new_expr_n(op, 1, 1);
-  return sm_set_expr_arg(new_expr, 0, arg);
+  return sm_expr_set_arg(new_expr, 0, arg);
 }
 
 // Append another object to this expression.
@@ -25,32 +25,32 @@ sm_expr *sm_append_to_expr(sm_expr *expr, sm_object *arg) {
     unsigned int new_capacity = ((int)(expr->capacity * sm_global_growth_factor(0))) + 1;
     sm_expr     *new_expr     = sm_new_expr_n(expr->op, expr->size + 1, new_capacity);
     for (unsigned int i = 0; i < expr->size; i++) {
-      sm_set_expr_arg(new_expr, i, sm_expr_get_arg(expr, i));
+      sm_expr_set_arg(new_expr, i, sm_expr_get_arg(expr, i));
     }
-    return sm_set_expr_arg(new_expr, new_expr->size - 1, arg);
+    return sm_expr_set_arg(new_expr, new_expr->size - 1, arg);
   } else {
     expr->size += 1;
-    return sm_set_expr_arg(expr, expr->size - 1, arg);
+    return sm_expr_set_arg(expr, expr->size - 1, arg);
   }
 }
 
 // New expression with 2 arguments
 sm_expr *sm_new_expr_2(enum sm_expr_type op, sm_object *arg1, sm_object *arg2) {
   sm_expr *new_expr = sm_new_expr_n(op, 2, 2);
-  sm_set_expr_arg(new_expr, 0, arg1);
-  return sm_set_expr_arg(new_expr, 1, arg2);
+  sm_expr_set_arg(new_expr, 0, arg1);
+  return sm_expr_set_arg(new_expr, 1, arg2);
 }
 
 // New expression with 3 arguments
 sm_expr *sm_new_expr_3(enum sm_expr_type op, sm_object *arg1, sm_object *arg2, sm_object *arg3) {
   sm_expr *new_expr = sm_new_expr_n(op, 3, 3);
-  sm_set_expr_arg(new_expr, 0, arg1);
-  sm_set_expr_arg(new_expr, 1, arg2);
-  return sm_set_expr_arg(new_expr, 2, arg3);
+  sm_expr_set_arg(new_expr, 0, arg1);
+  sm_expr_set_arg(new_expr, 1, arg2);
+  return sm_expr_set_arg(new_expr, 2, arg3);
 }
 
 // Set an argument of an expression
-sm_expr *sm_set_expr_arg(sm_expr *expr, unsigned int index, sm_object *value) {
+sm_expr *sm_expr_set_arg(sm_expr *expr, unsigned int index, sm_object *value) {
   sm_object **ptr_array = (sm_object **)&(expr[1]);
   ptr_array[index]      = value;
   return expr;
@@ -65,15 +65,15 @@ sm_object *sm_expr_get_arg(sm_expr *expr, unsigned int index) {
 // Can this op take 2 arguments AND have infix representation?
 bool sm_is_infix(enum sm_expr_type op) {
   switch (op) {
-  case sm_assign:
-  case sm_plus:
-  case sm_minus:
-  case sm_times:
-  case sm_divide:
-  case sm_pow:
-  case sm_test_eq:
-  case sm_test_lt:
-  case sm_test_gt:
+  case sm_assign_expr:
+  case sm_plus_expr:
+  case sm_minus_expr:
+  case sm_times_expr:
+  case sm_divide_expr:
+  case sm_pow_expr:
+  case sm_test_eq_expr:
+  case sm_test_lt_expr:
+  case sm_test_gt_expr:
     return true;
   default:
     return false;
@@ -87,7 +87,7 @@ unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum sm_expr_t
   unsigned int buffer_pos = 0;
   for (unsigned int i = 0; i + 1 < expr->size; i++) {
     buffer_pos += sm_object_sprint(sm_expr_get_arg(expr, i), &(buffer[buffer_pos]), fake);
-    if (op != sm_then) {
+    if (op != sm_then_expr) {
       if (!fake)
         buffer[buffer_pos] = ',';
       buffer_pos++;
@@ -134,17 +134,17 @@ unsigned int sm_prefix_sprint(sm_expr *expr, char *buffer, bool fake) {
 }
 
 // Useful for making decisions about parenthesis
-unsigned short int op_level(enum sm_expr_type op_type) {
-  switch (op_type) {
-  case sm_plus:
-  case sm_minus:
+unsigned short int op_level(enum sm_expr_type op_expr) {
+  switch (op_expr) {
+  case sm_plus_expr:
+  case sm_minus_expr:
     return 1;
-  case sm_times:
-  case sm_divide:
+  case sm_times_expr:
+  case sm_divide_expr:
     return 2;
-  case sm_pow:
-  case sm_exp:
-  case sm_ln:
+  case sm_pow_expr:
+  case sm_exp_expr:
+  case sm_ln_expr:
     return 3;
   default:
     return 4;
@@ -240,7 +240,7 @@ unsigned int sm_fun_call_sprint(sm_expr *fun_call, char *buffer, bool fake) {
 // Adds a c string describing the expr to the buffer
 // Returns the length
 unsigned int sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
-  if (expr->op == sm_array) {
+  if (expr->op == sm_array_expr) {
     return sm_expr_array_sprint(expr, buffer, fake);
   } else {
     if (expr->op < sm_global_num_fns()) {
@@ -248,9 +248,9 @@ unsigned int sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
         return sm_infix_sprint(expr, buffer, fake);
       else
         return sm_prefix_sprint(expr, buffer, fake);
-    } else if (expr->op == sm_fun_call) {
+    } else if (expr->op == sm_fun_call_expr) {
       return sm_fun_call_sprint(expr, buffer, fake);
-    } else if (expr->op == sm_param_list) {
+    } else if (expr->op == sm_param_list_expr) {
       return sm_prefix_sprint(expr, buffer, fake);
     } else {
       if (!fake) {
