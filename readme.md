@@ -11,7 +11,11 @@ Contexts are user defined objects with key-value pairs. Creating and running fun
 
 SMS has the following built-in functions so far (in double precision):
 
-`+, -, *, /, ^, ln, exp, abs, sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sqrt, if, ==, >, <, diff` 
+Arithmetical operations: `+, -, *, /, ^, ln, exp, abs,  sqrt, , diff` 
+
+Flow control: `if, ==, >, <`
+
+Trigonometry `sin, cos, tan, sinh, cosh, tanh, sec, csc, cot,sech,csch,coth`
 
 # HOW TO DOWNLOAD & RUN / Install
 - At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
@@ -47,7 +51,7 @@ Exit the program with:
 
 `exit; `
 
-The above features are premature because, though we can create nested objects and nested arrays, there is no way to refer to things inside an object from the outside and there is no way to access the elements of an array. `standard` functions for things like accessing context entries from the outside and to access array elements. As these features are added, this README will be updated. On the other hand, the anonymous functions can be created and called to make complex procedures already. Just note that type checking is essentially not being done for function calls, so we have undefined behaviour for errors like `"notANumber" + 5`;
+The above features are premature because, though we can create nested objects and nested arrays, there is no way to refer to things inside an object from the outside and there is no way to access the elements of an array. As these features are added, this README will be updated. On the other hand, the anonymous functions can be created and called to make complex procedures already. Just note that type checking is essentially not being done for function calls, so we have undefined behaviour for errors like `"notANumber" + 5`;
 
 
 # FEATURES:
