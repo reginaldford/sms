@@ -2,7 +2,7 @@
 
 SMS Stands for Symbolic Math System.
 
-Currently, SMS can serve as calculator for double-precision arithmetic, trigonometry and differentiation. For a long time , SMS will be a practical calculator. The long term goal of SMS is to provide a simple general purpose programming language that focuses on mathematics and speed.
+Currently, SMS can serve as calculator for double-precision arithmetic, trigonometry and differentiation. For a while, SMS will be a practical calculator. The long term goal of SMS is to provide a simple general purpose programming language that focuses on mathematics and speed.
 
 In addition to providing a command line, SMS can interpret files.
 Run `sms -h` for command line options.
@@ -11,11 +11,13 @@ Contexts are user defined objects with key-value pairs. Creating and running fun
 
 SMS has the following built-in functions so far (in double precision):
 
-Arithmetical operations: `+, -, *, /, ^, ln, exp, abs,  sqrt, , diff` 
+Arithmetical operations: `+, -, *, /, ^, ln, exp, abs,  sqrt` 
 
 Flow control: `if, ==, >, <`
 
-Trigonometry `sin, cos, tan, sinh, cosh, tanh, sec, csc, cot,sech,csch,coth`
+Trigonometry: `sin, cos, tan, sinh, cosh, tanh, sec, csc, cot,sech,csch,coth`
+
+Calculus: `diff`
 
 # HOW TO DOWNLOAD & RUN / Install
 - At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
