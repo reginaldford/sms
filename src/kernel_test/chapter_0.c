@@ -4,7 +4,7 @@
 // Just report the size of structures
 int chapter_0(int test) {
   int current_test = 0;
-  TEST(printf("sizeof %s is %d\n", "enum", (int)sizeof(enum sm_object_expr)));
+  TEST(printf("sizeof %s is %d\n", "enum", (int)sizeof(enum sm_object_type)));
   TEST(printf("sizeof %s is %d\n", "long", (int)sizeof(long)));
   TEST(printf("sizeof %s is %d\n", "int", (int)sizeof(int)));
   TEST(printf("sizeof %s is %d\n", "short", (int)sizeof(int)));

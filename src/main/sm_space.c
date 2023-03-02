@@ -9,7 +9,7 @@ sm_space *sm_new_space(void *trash, unsigned int size) {
   if (size >= sizeof(sm_space)) {
     sm_space *new_space = (sm_space *)trash;
     // sm_space needs to be the highest type value
-    new_space->my_type = sm_space_expr + size;
+    new_space->my_type = sm_space_type + size;
     sm_global_space_array(sm_space_add(new_space, sm_global_space_array(NULL)));
     return new_space;
   } else
@@ -45,7 +45,7 @@ sm_space **sm_get_space_array(sm_space_array *table) { return (sm_space **)&(tab
 
 sm_string *sm_space_to_string(sm_space *self) {
   sm_string *answer = sm_new_string(7, "space(");
-  sm_string *size   = sm_double_to_string(sm_new_double((double)self->my_type - sm_space_expr));
+  sm_string *size   = sm_double_to_string(sm_new_double((double)self->my_type - sm_space_type));
   answer            = sm_string_add_recycle(answer, size);
   answer            = sm_string_add_recycle(answer, sm_new_string(1, ")"));
   return answer;
@@ -64,7 +64,7 @@ sm_search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
   unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
 
   while (lower_limit < upper_limit && comparison != 0) {
-    comparison = table_entries[guess_point]->my_type - sm_space_expr - size;
+    comparison = table_entries[guess_point]->my_type - sm_space_type - size;
     if (comparison == 0)
       return (sm_search_result){.found = true, .index = guess_point};
     else if (comparison > 0)
@@ -73,7 +73,7 @@ sm_search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
       lower_limit = guess_point + 1;
     guess_point = (upper_limit + lower_limit) / 2.0;
   }
-  comparison = table_entries[guess_point]->my_type - sm_space_expr - size;
+  comparison = table_entries[guess_point]->my_type - sm_space_type - size;
 
   if (comparison == 0)
     return (sm_search_result){.found = true, .index = guess_point};
@@ -86,7 +86,7 @@ sm_search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
 
 // add a space to the space array, keeping it sorted
 sm_space_array *sm_space_add(sm_space *space, sm_space_array *table) {
-  sm_search_result sr            = sm_space_array_find(table, space->my_type - sm_space_expr);
+  sm_search_result sr            = sm_space_array_find(table, space->my_type - sm_space_type);
   sm_space       **table_entries = sm_get_space_array(table);
 
   if (table->size == table->capacity) {

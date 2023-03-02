@@ -5,7 +5,6 @@ typedef struct sm_meta {
   sm_object  *address;
   sm_context *scope;
   sm_context *data;
-
 } sm_meta;
 
 sm_meta     *sm_new_meta(sm_object *address, sm_context *context);

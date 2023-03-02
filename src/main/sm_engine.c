@@ -10,7 +10,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     short    op  = sme->op;
     switch (op) {
     case sm_diff_expr: {
-      return sm_diff(sm_expr_get_arg(sme, 0));
+      sm_object *evaluated1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *evaluated2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (evaluated2->my_type != sm_symbol_type) {
+        printf("Error: Second arg to diff is not a symbol:%i.\n", evaluated2->my_type);
+        return (sm_object *)sm_new_double(0);
+      }
+      // return sm_expr_simplify(sm_diff(evaluated1, (sm_symbol *)evaluated2));
+      return sm_diff(evaluated1, (sm_symbol *)evaluated2);
     }
     case sm_fun_call_expr: {
       sm_fun         *fun      = (sm_fun *)sm_expr_get_arg(sme, 0);
@@ -27,7 +34,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
           sm_strncpy((&err_msg->content) + 27, &fun_sym->name->content, fun_sym->name->size);
           return (sm_object *)sm_new_error(err_msg, sm_new_string(1, "."), 0);
         }
-        if (found->my_type != sm_fun_expr) {
+        if (found->my_type != sm_fun_type) {
           printf("Error: %s exists, but is not a function.\n", &(fun_sym->name->content));
           sm_string *err_msg = sm_new_string(47 + fun_sym->name->size,
                                              "Error: Variable exists, but is not a function: ");
@@ -36,7 +43,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         }
         sm_fun *found_fun = (sm_fun *)found;
         return sm_engine_eval(found_fun->content, found_fun->parent, new_args);
-      } else if (fun->my_type == sm_fun_expr) {
+      } else if (fun->my_type == sm_fun_type) {
         return sm_engine_eval(fun->content, fun->parent, new_args);
       } else {
         return sm_engine_eval((sm_object *)fun, current_cx, new_args);
@@ -123,6 +130,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(tanh(left_side->value));
     }
+    case sm_sech_expr: {
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / cosh(left_side->value));
+    }
+    case sm_csch_expr: {
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / sinh(left_side->value));
+    }
+    case sm_coth_expr: {
+      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / tanh(left_side->value));
+    }
     case sm_ln_expr: {
       sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_double(log(left_side->value));
@@ -142,28 +161,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     }
     case sm_if_expr: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (condition_result->my_type == sm_meta_expr) {
-        sm_meta *meta = (sm_meta *)condition_result;
-        if (meta->address->my_type == sm_symbol_type) {
-          sm_symbol *sym = (sm_symbol *)meta->address;
-          if (strncmp(&(sym->name->content), "true", 4) == 0) {
-            return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-          }
-        }
+      sm_symbol *sym              = (sm_symbol *)condition_result;
+      if (strncmp(&(sym->name->content), "true", 4) == 0) {
+        return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
       return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
                                       current_cx);
     }
     case sm_if_else_expr: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (condition_result->my_type == sm_meta_expr) {
-        sm_meta *meta = (sm_meta *)condition_result;
-        if (meta->address->my_type == sm_symbol_type) {
-          sm_symbol *sym = (sm_symbol *)meta->address;
-          if (strncmp(&(sym->name->content), "true", 4) == 0) {
-            return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-          }
-        }
+      sm_symbol *sym              = (sm_symbol *)condition_result;
+      if (strncmp(&(sym->name->content), "true", 4) == 0) {
+        return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
     }
@@ -191,11 +200,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
           double v1 = ((sm_double *)obj1)->value;
           double v2 = ((sm_double *)obj2)->value;
           if (v1 < v2)
-            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(4, "true")),
-                                            current_cx);
+            return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
           else
-            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
-                                            current_cx);
+            return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
         }
         return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
                                         current_cx);
@@ -209,11 +216,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
           double v1 = ((sm_double *)obj1)->value;
           double v2 = ((sm_double *)obj2)->value;
           if (v1 > v2)
-            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(4, "true")),
-                                            current_cx);
+            return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
           else
-            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
-                                            current_cx);
+            return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
         }
       }
       return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
@@ -227,11 +232,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
           double v1 = ((sm_double *)obj1)->value;
           double v2 = ((sm_double *)obj2)->value;
           if (v1 == v2)
-            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(4, "true")),
-                                            current_cx);
+            return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
           else
-            return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
-                                            current_cx);
+            return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
         }
       }
       return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
@@ -241,6 +244,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return input;
     } // end of switch inside expr case
   }   // end of expr case
+  case sm_meta_type: {
+    return ((sm_meta *)input)->address;
+  }
   case sm_primitive_type: {
     printf("Primitives are not developed yet\n");
     fflush(stdout);
@@ -262,7 +268,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_local *local = (sm_local *)input;
     return sm_expr_get_arg(sf, local->index);
   }
-  case sm_error_expr: {
+  case sm_error_type: {
     // TODO: Add callstack info here.
     return input;
   }

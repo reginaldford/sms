@@ -5,7 +5,7 @@
 // new sm_fun structure
 sm_fun *sm_new_fun(sm_context *parent, unsigned short int num_params, sm_object *content) {
   sm_fun *self     = sm_malloc(sizeof(sm_fun) + num_params * sizeof(sm_fun_param));
-  self->my_type    = sm_fun_expr;
+  self->my_type    = sm_fun_type;
   self->parent     = parent;
   self->num_params = num_params;
   self->content    = content;
@@ -14,9 +14,9 @@ sm_fun *sm_new_fun(sm_context *parent, unsigned short int num_params, sm_object 
 
 // new sm_fun_param structure
 sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val,
-                                       enum sm_object_expr known_expr) {
+                                       enum sm_object_type known_expr) {
   sm_fun_param_obj *self = sm_malloc(sizeof(sm_fun_param_obj));
-  self->my_type          = sm_fun_param_expr;
+  self->my_type          = sm_fun_param_type;
   self->name             = name;
   self->default_val      = default_val;
   self->known_expr       = known_expr;

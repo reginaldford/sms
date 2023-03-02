@@ -4,7 +4,7 @@
 #include "sm_main.h"
 #include "../bison_flex/y.tab.h"
 
-// Run user comaand line
+// Run user command line
 void start_repl() {
   // Read, Evaluate, Print Loop
   while (true) {
@@ -26,7 +26,7 @@ void start_repl() {
   }
 }
 
-// If init is true , run file at options.init_fp
+// If init is true , run file at options.init_fp then exit
 // If init is false, run file at options.script_fp
 void run_file(sm_options *options, bool init) {
   sm_parse_result pr;
@@ -42,7 +42,6 @@ void run_file(sm_options *options, bool init) {
       printf("Error parsing the file. Parser returned %i\n", pr.return_val);
       sm_signal_handler(SIGQUIT);
     }
-
     if (pr.parsed_object != NULL) {
       sm_object *evaluated =
         sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
@@ -61,7 +60,7 @@ void run_file(sm_options *options, bool init) {
 // Can run files, start REPL, or both
 int main(int num_args, char **argv) {
   printf("Symbolic Math System\n");
-  printf("Version 0.14\n");
+  printf("Version 0.145\n");
   // Process command line args
   sm_global_options(sm_process_args(num_args, argv));
   sm_options *options = sm_global_options(NULL);

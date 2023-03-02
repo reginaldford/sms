@@ -17,6 +17,9 @@ enum sm_expr_type {
   sm_csc_expr,
   sm_sec_expr,
   sm_cot_expr,
+  sm_csch_expr,
+  sm_sech_expr,
+  sm_coth_expr,
   sm_ln_expr,
   sm_exp_expr,
   sm_abs_expr,
@@ -47,7 +50,7 @@ typedef struct sm_expr {
 
 sm_expr *sm_new_expr_n(enum sm_expr_type op1, unsigned int size, unsigned int capacity);
 sm_expr *sm_new_expr(enum sm_expr_type op1, sm_object *arg);
-sm_expr *sm_append_to_expr(sm_expr *expr, sm_object *arg);
+sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg);
 sm_expr *sm_new_expr_2(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2);
 sm_expr *sm_new_expr_3(enum sm_expr_type op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
 unsigned int sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);
@@ -59,3 +62,7 @@ sm_object   *sm_expr_get_arg(sm_expr *expr, unsigned int index);
 bool         sm_is_infix(enum sm_expr_type op);
 sm_object   *sm_expr_pop(sm_expr *sme);
 sm_object   *sm_expr_pop_recycle(sm_expr *sme);
+sm_object   *sm_expr_simplify(sm_object *seslf);
+bool         sm_expr_has_0(sm_expr *self);
+sm_expr     *sm_expr_rm_0s(sm_expr *self);
+sm_expr     *sm_expr_rm_1s(sm_expr *self);

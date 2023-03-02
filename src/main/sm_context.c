@@ -26,7 +26,7 @@ sm_context *sm_context_add_child(sm_context *cx, sm_object *child) {
     cx->children = sm_new_expr(sm_siblings_expr, child);
     return cx;
   }
-  cx->children = sm_append_to_expr(cx->children, child);
+  cx->children = sm_expr_append(cx->children, child);
   return cx;
 }
 
@@ -101,11 +101,11 @@ bool sm_context_update_relatives(sm_context *self, sm_context *old_self) {
           ((sm_context *)obj)->parent = self;
           break;
         }
-        case sm_meta_expr: {
+        case sm_meta_type: {
           ((sm_meta *)obj)->scope = self;
           break;
         }
-        case sm_fun_expr: {
+        case sm_fun_type: {
           ((sm_fun *)obj)->parent = self;
           break;
         }

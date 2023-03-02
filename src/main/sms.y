@@ -15,7 +15,6 @@ void _lex_file(char *fpath);
 void _done_lexing_file();
 void _lex_cstr(char * cstr,int len);
 
-
 %}
 
 %union {
@@ -66,6 +65,9 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> SINH
 %token <expr> COSH
 %token <expr> TANH
+%token <expr> SECH
+%token <expr> CSCH
+%token <expr> COTH
 %token <expr> SEC
 %token <expr> CSC
 %token <expr> COT
@@ -140,12 +142,14 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | SEC '(' EXPR ')' { $$ = sm_new_expr(sm_sec_expr, (sm_object *)$3); }
 | CSC '(' EXPR ')' { $$ = sm_new_expr(sm_csc_expr, (sm_object *)$3); }
 | COT '(' EXPR ')' { $$ = sm_new_expr(sm_cot_expr, (sm_object *)$3); }
+| SECH '(' EXPR ')' { $$ = sm_new_expr(sm_sinh_expr, (sm_object *)$3); }
+| CSCH '(' EXPR ')' { $$ = sm_new_expr(sm_sinh_expr, (sm_object *)$3); }
+| COTH '(' EXPR ')' { $$ = sm_new_expr(sm_sinh_expr, (sm_object *)$3); }
 | LN '(' EXPR ')' { $$ = sm_new_expr(sm_ln_expr, (sm_object *)$3); }
 | EXP '(' EXPR ')' { $$ = sm_new_expr(sm_exp_expr, (sm_object *)$3); }
 | SQRT '(' EXPR ')' { $$ = sm_new_expr(sm_sqrt_expr, (sm_object *)$3); }
 | ABS '(' EXPR ')' { $$ = sm_new_expr(sm_abs_expr, (sm_object *)$3); }
-| DIFF '(' EXPR ')' { $$ = sm_new_expr(sm_diff_expr, (sm_object *)$3); }
-| DIFF '(' EXPR ',' SYM ')' { $$ = sm_new_expr_2(sm_diff_expr, (sm_object *)$3, (sm_object *)$5); }
+| DIFF '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(sm_diff_expr, (sm_object *)$3, (sm_object *)$5); }
 | EXPR_LIST ')' {}
 | CONTEXT{}
 | ARRAY{}
@@ -186,7 +190,7 @@ PARAM_LIST : '(' ')' {
 | PARAM_LIST_OPEN ')' {}
 | PARAM_LIST_OPEN SYM ')' {
   sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL,0);
-  $$ = sm_append_to_expr($1, (sm_object *)new_param);
+  $$ = sm_expr_append($1, (sm_object *)new_param);
 }
 
 PARAM_LIST_OPEN : '(' SYM ',' {
@@ -196,7 +200,7 @@ PARAM_LIST_OPEN : '(' SYM ',' {
 }
 | PARAM_LIST_OPEN SYM ',' {
   sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL,0);
-  $$ = sm_append_to_expr($1, (sm_object *)new_param);
+  $$ = sm_expr_append($1, (sm_object *)new_param);
 }
 
 ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(sm_assign_expr, (sm_object *)($1), (sm_object *)($3)); }
@@ -204,13 +208,13 @@ ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(sm_assign_expr, (sm_object *)($1)
 SEQUENCE : SEQUENCE_LIST ')' {}
 
 SEQUENCE_LIST : '(' EXPR ';' EXPR { $$ = sm_new_expr_2(sm_then_expr, (sm_object *)$2, (sm_object *)$4); }
-| SEQUENCE_LIST ';' EXPR { $$ = sm_append_to_expr((sm_expr *)$1, (sm_object *)$3); }
+| SEQUENCE_LIST ';' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
 
 EXPR_LIST : '+' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_plus_expr, (sm_object *)$3, (sm_object *)$5); }
 | '-' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_minus_expr, (sm_object *)$3, (sm_object *)$5); }
 | '*' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_times_expr, (sm_object *)$3, (sm_object *)$5); }
 | '/' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_divide_expr, (sm_object *)$3, (sm_object *)$5); }
-| EXPR_LIST ',' EXPR { $$ = sm_append_to_expr((sm_expr *)$1, (sm_object *)$3); }
+| EXPR_LIST ',' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
 
 LT : '<' '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(sm_test_lt_expr, (sm_object *)($3), (sm_object *)($5));
@@ -267,7 +271,7 @@ FUN_CALL_OPEN : SYM '(' EXPR {
 }
 | FUN_CALL_OPEN ',' EXPR {
   sm_expr * args = (sm_expr*)sm_expr_get_arg($1,1);
-  args = sm_append_to_expr(args, (sm_object *)$3);
+  args = sm_expr_append(args, (sm_object *)$3);
   $$=sm_expr_set_arg($1,1,(sm_object*)args);
 }
 
@@ -279,7 +283,7 @@ ARRAY : ARRAY_LIST ']' {};
 | '[' ']' { $$ = sm_new_expr_n(sm_array_expr, 0, 0); }
 
 ARRAY_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(sm_array_expr, (sm_object *)$2, (sm_object *)$4); }
-| ARRAY_LIST ',' EXPR { $$ = sm_append_to_expr($1, (sm_object *)$3); }
+| ARRAY_LIST ',' EXPR { $$ = sm_expr_append($1, (sm_object *)$3); }
 
 CONTEXT : CONTEXT_LIST '}' {
   $1->parent = *(sm_global_lex_stack(NULL)->top);
@@ -338,6 +342,7 @@ CONTEXT_LIST : '{' ASSIGNMENT ';' ASSIGNMENT {
 
 
 %%
+
 
 void lex_file(char *fpath){
   _lex_file(fpath);
