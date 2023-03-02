@@ -2,7 +2,7 @@
 
 SMS Stands for Symbolic Math System.
 
-Currently, SMS can serve as calculator for double-precision arithmetic, trigonometry and differentiation. For a while, SMS will be a practical calculator. The long term goal of SMS is to provide a simple general purpose programming language that focuses on mathematics and speed.
+Currently, SMS can serve as calculator for double-precision arithmetic, trigonometry and differentiation. The long term goal of SMS is to provide a simple general purpose programming language that focuses on mathematics and speed.
 
 In addition to providing a command line, SMS can interpret files.
 Run `sms -h` for command line options.
@@ -15,7 +15,7 @@ Arithmetical operations: `+, -, *, /, ^, ln, exp, abs,  sqrt`
 
 Flow control: `if, ==, >, <`
 
-Trigonometry: `sin, cos, tan, sinh, cosh, tanh, sec, csc, cot,sech,csch,coth`
+Trigonometry: `sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sech, csch, coth`
 
 Calculus: `diff`
 
