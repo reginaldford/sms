@@ -34,6 +34,9 @@ tanh        {return TANH;}
 sec         {return SEC;}
 csc         {return CSC;}
 cot         {return COT;}
+sech        {return SECH;}
+csch        {return CSCH;}
+coth        {return COTH;}
 exp         {return EXP;}
 ln          {return LN;}
 sqrt        {return SQRT;}

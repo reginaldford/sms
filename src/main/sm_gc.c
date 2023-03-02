@@ -15,7 +15,7 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
   unsigned short int the_expr = obj->my_type;
-  if (the_expr == sm_pointer_expr)
+  if (the_expr == sm_pointer_type)
     return ((sm_pointer *)obj)->address;
   else
     return sm_move_to_new_heap(obj);
@@ -28,7 +28,7 @@ sm_expr *inflate_siblings(sm_expr *siblings) {
   sm_object   *keepers[siblings->size];
   for (unsigned int i = 0; i < siblings->size; i++) {
     sm_object *current_sibling = sm_expr_get_arg(siblings, i);
-    if (current_sibling->my_type == sm_pointer_expr) {
+    if (current_sibling->my_type == sm_pointer_type) {
       keepers[num_keepers++] = ((sm_pointer *)current_sibling)->address;
     }
   }
@@ -77,7 +77,7 @@ void sm_inflate_heap() {
         cx->parent = (sm_context *)sm_meet_object((sm_object *)cx->parent);
       // Save the siblings list for later processing
       if (cx->children != NULL) {
-        sm_expr *e = sm_append_to_expr(sm_global_parents(NULL), (sm_object *)cx);
+        sm_expr *e = sm_expr_append(sm_global_parents(NULL), (sm_object *)cx);
         sm_global_parents(e);
       }
       break;
@@ -95,12 +95,12 @@ void sm_inflate_heap() {
       sym->name      = (sm_string *)sm_meet_object((sm_object *)sym->name);
       break;
     }
-    case sm_meta_expr: {
+    case sm_meta_type: {
       sm_meta *meta = (sm_meta *)current_obj;
       meta->address = (sm_object *)sm_meet_object(meta->address);
       break;
     }
-    case sm_fun_expr: {
+    case sm_fun_type: {
       sm_fun *fun  = (sm_fun *)current_obj;
       fun->content = sm_meet_object((sm_object *)fun->content);
       if (fun->parent != NULL)
@@ -114,7 +114,7 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case sm_fun_param_expr: {
+    case sm_fun_param_type: {
       sm_fun_param_obj *param = (sm_fun_param_obj *)current_obj;
       param->name             = (sm_string *)sm_meet_object((sm_object *)param->name);
       if (param->default_val != NULL) {

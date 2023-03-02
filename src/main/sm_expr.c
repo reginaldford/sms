@@ -20,7 +20,7 @@ sm_expr *sm_new_expr(enum sm_expr_type op, sm_object *arg) {
 }
 
 // Append another object to this expression.
-sm_expr *sm_append_to_expr(sm_expr *expr, sm_object *arg) {
+sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg) {
   if (expr->size == expr->capacity) {
     unsigned int new_capacity = ((int)(expr->capacity * sm_global_growth_factor(0))) + 1;
     sm_expr     *new_expr     = sm_new_expr_n(expr->op, expr->size + 1, new_capacity);
@@ -32,6 +32,24 @@ sm_expr *sm_append_to_expr(sm_expr *expr, sm_object *arg) {
     expr->size += 1;
     return sm_expr_set_arg(expr, expr->size - 1, arg);
   }
+}
+
+
+sm_expr *sm_expr_copy(sm_expr *self) {
+  sm_expr *result = sm_new_expr_n(self->op, self->size, self->size);
+  for (unsigned int i = 0; i < self->size; i++) {
+    sm_expr_append(result, sm_expr_get_arg(self, i));
+  }
+  return result;
+}
+
+// Concatenative collectoins, assume the type of the left expression
+sm_expr *sm_expr_concat(sm_expr *expr1, sm_expr *expr2) {
+  sm_expr *result = sm_new_expr_n(expr1->op, 0, expr1->size + expr2->size);
+  for (unsigned int i = 0; i < expr2->size; i++) {
+    sm_expr_append(result, sm_expr_get_arg(expr2, i));
+  }
+  return result;
 }
 
 // New expression with 2 arguments
@@ -284,5 +302,86 @@ sm_object *sm_expr_pop_recycle(sm_expr *sme) {
   } else {
     printf("Stack underflow.");
     return NULL;
+  }
+}
+
+
+bool sm_expr_has_0(sm_expr *expr) {
+  for (unsigned int i = 0; i < expr->size; i++) {
+    sm_object *current_obj = sm_expr_get_arg(expr, i);
+    if (current_obj->my_type == sm_double_type) {
+      if (((sm_double *)current_obj)->value == 0)
+        return true;
+    }
+  }
+  return false;
+}
+
+sm_expr *sm_expr_merge_constants(sm_object *obj) {
+  switch (obj->my_type) {
+  case sm_expr_type: {
+    sm_expr *expr = (sm_expr *)obj;
+    switch (expr->op) {
+    case sm_plus_expr: {
+      sm_expr   *result    = sm_new_expr_n(sm_plus_expr, 0, expr->capacity);
+      sm_double *constants = sm_new_double(1);
+      for (unsigned int i = 0; i < expr->size; i++) {
+        sm_object *current = sm_expr_get_arg(expr, i);
+        if (current->my_type == sm_expr_type && ((sm_expr *)current)->op == sm_plus_expr) {
+        }
+      }
+      expr = sm_expr_rm_0s(expr);
+    }
+    }
+  }
+  }
+}
+
+sm_expr *sm_expr_rm_0s(sm_expr *expr) {
+  sm_expr *result = sm_new_expr_n(expr->op, 0, expr->capacity);
+  for (unsigned int i = 0; i < expr->size; i++) {
+    sm_object *current_obj = sm_expr_get_arg(expr, i);
+    if (((sm_double *)current_obj)->value != 0) {
+      sm_expr_append(result, current_obj);
+    }
+  }
+  return result;
+}
+
+sm_expr *sm_expr_rm_1s(sm_expr *expr) {
+  sm_expr *result = sm_new_expr_n(expr->op, 0, expr->capacity);
+  for (unsigned int i = 0; i < expr->size; i++) {
+    sm_object *current_obj = sm_expr_get_arg(expr, i);
+    if (((sm_double *)current_obj)->value != 1) {
+      sm_expr_append(result, current_obj);
+    }
+  }
+  return result;
+}
+
+sm_object *sm_expr_simplify(sm_object *self) {
+  switch (self->my_type) {
+  case sm_expr_type: {
+    sm_expr *expr = (sm_expr *)self;
+    switch (expr->op) {
+    case sm_plus_expr: {
+      expr = sm_expr_rm_0s(expr);
+      if (expr->size == 0)
+        return (sm_object *)sm_new_double(0);
+      else
+        return (sm_object *)expr;
+    }
+    case sm_times_expr: {
+      if (sm_expr_has_0(expr))
+        return (sm_object *)sm_new_double(0);
+      else
+        return (sm_object *)sm_expr_rm_1s(expr);
+    }
+    default:
+      return self;
+    }
+  default:
+    return self;
+  }
   }
 }

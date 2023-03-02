@@ -5,7 +5,7 @@
 // New meta, a pointer to an object
 sm_meta *sm_new_meta(sm_object *address, sm_context *context) {
   sm_meta *smm = sm_malloc(sizeof(sm_meta));
-  smm->my_type = sm_meta_expr;
+  smm->my_type = sm_meta_type;
   smm->address = address;
   smm->scope   = context;
   return smm;

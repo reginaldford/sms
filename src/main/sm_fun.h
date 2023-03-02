@@ -27,7 +27,7 @@ typedef struct sm_fun_param_obj {
 sm_fun           *sm_new_fun(sm_context *parent, unsigned short int num_params, sm_object *content);
 unsigned int      sm_fun_sprint(sm_fun *self, char *buffer, bool fake);
 sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val,
-                                       enum sm_object_expr known_expr);
+                                       enum sm_object_type known_expr);
 sm_fun_param     *sm_fun_get_param(sm_fun *self, unsigned short int i);
 void sm_fun_set_param(sm_fun *self, unsigned short int i, sm_string *name, sm_object *default_val,
                       short int known_expr);
