@@ -2,16 +2,16 @@
 
 SMS Stands for Symbolic Math System.
 
-Currently, SMS can serve as calculator for basic conversion and trigonometric needs. The long term goal of SMS is to provide a simple general purpose programming language that focuses on mathematics and speed.
+Currently, SMS can serve as calculator for double-precision arithmetic, trigonometry and differentiation. For a long time , SMS will be a practical calculator. The long term goal of SMS is to provide a simple general purpose programming language that focuses on mathematics and speed.
 
 In addition to providing a command line, SMS can interpret files.
 Run `sms -h` for command line options.
 
-The program currently parses, evaluates, and stores mathematical expressions, strings, arrays and contexts. Contexts are user defined objects with key-value pairs. Creating and running functions in SMS appears much like javascript's arrow-function syntax. Where javascript would have `Math.sqrt`, SMS has `sqrt`.
+Contexts are user defined objects with key-value pairs. Creating and running functions in SMS appears much like javascript's arrow-function syntax. Where javascript would have `Math.sqrt`, SMS has `sqrt`.
 
 SMS has the following built-in functions so far (in double precision):
 
-`+, -, *, /, ^, ln, exp, abs, sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sqrt, if, ==, >, <` 
+`+, -, *, /, ^, ln, exp, abs, sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sqrt, if, ==, >, <, diff` 
 
 # HOW TO DOWNLOAD & RUN / Install
 - At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
@@ -19,7 +19,7 @@ SMS has the following built-in functions so far (in double precision):
 In SMS, whitespace characters (outside of strings) are ignored. All commands end with a semicolon (`;`) .
 
 Check out `sms_src/example.sms` for example functions and ideas.
-You can also run `sms -i examples.sms` to have a calculator loaded with some useful functions and constants.
+You can also run `sms -i example.sms` to have a calculator loaded with some useful functions and constants.
 
 In addition to the mathematical ideas covered in the example file, SMS has ambitions to be a general purpose programming language. Hence, SMS has premature general purpose programming features that will be embellished further in the near future:
 
@@ -47,6 +47,8 @@ Exit the program with:
 
 `exit; `
 
+The above features are premature because, though we can create nested objects and nested arrays, there is no way to refer to things inside an object from the outside and there is no way to access the elements of an array. `standard` functions for things like accessing context entries from the outside and to access array elements. As these features are added, this README will be updated. On the other hand, the anonymous functions can be created and called to make complex procedures already. Just note that type checking is essentially not being done for function calls, so we have undefined behaviour for errors like `"notANumber" + 5`;
+
 
 # FEATURES:
 - [x] Mathematical evaluation. Commands like a=4*sin(3.14/8) will evaluate to a double precision decimal number.
@@ -62,8 +64,10 @@ Exit the program with:
 - [x] Recursive function calls.
 - [x] Local variables store an array index to their location in the stack frame. This is much faster than binary search.
 - [x] The maximum capacity for strings, arrays, and contexts is remarkably high. Generally, if a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters or: 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
+- [x] A `diff` command for taking derivatives. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
 
 # PLANS:
+- [ ] Configurable algebraic simplification.
 - [ ] Standard libraries: file, string, array, math, matrix, net, etc.
 - [ ] Support for booting from a serialized memory heap.
 - [ ] 'Last moment' garbage collection.
@@ -73,7 +77,6 @@ Exit the program with:
 - [ ] Modern terminal support
 - [ ] Try/Catch error syntax.
 - [ ] Variable heap size, with min, max, and max_emptiness specs.
-- [ ] A diff command for taking derivatives.
 - [ ] A integral command for taking integrals.
 - [ ] Arbitrary precision support.
 - [ ] General documentation.
