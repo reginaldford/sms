@@ -10,15 +10,19 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     short    op  = sme->op;
     switch (op) {
     case sm_diff_expr: {
-      sm_object *evaluated1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *evaluated2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (evaluated2->my_type != sm_symbol_type) {
-        printf("Error: Second arg to diff is not a symbol:%i.\n", evaluated2->my_type);
+      sm_object *evaluated0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *evaluated1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (evaluated1->my_type != sm_symbol_type) {
+        printf("Error: Second arg to diff is not a symbol:%i.\n", evaluated1->my_type);
         return (sm_object *)sm_new_double(0);
       }
-      sm_object *result = sm_diff(evaluated1, (sm_symbol *)evaluated2);
-      result            = sm_expr_simplify(result);
+      sm_object *result = sm_diff(evaluated0, (sm_symbol *)evaluated1);
+      result            = sm_simplify(result);
       return result;
+    }
+    case sm_simp_expr: {
+      sm_object *evaluated0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return sm_simplify(evaluated0);
     }
     case sm_fun_call_expr: {
       sm_fun         *fun      = (sm_fun *)sm_expr_get_arg(sme, 0);

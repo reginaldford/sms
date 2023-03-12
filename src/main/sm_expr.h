@@ -24,6 +24,7 @@ enum sm_expr_type {
   sm_exp_expr,
   sm_abs_expr,
   sm_diff_expr,
+  sm_simp_expr,
   sm_assign_expr,
   sm_test_eq_expr,
   sm_test_lt_expr,
