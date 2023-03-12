@@ -6,7 +6,6 @@ bool sm_symbol_equal(sm_symbol *s1, sm_symbol *s2) {
   return !strcmp(&s1->name->content, &s2->name->content);
 }
 
-
 // distribute
 // group like terms
 // apply constant arith
@@ -17,7 +16,6 @@ bool sm_symbol_equal(sm_symbol *s1, sm_symbol *s2) {
 // x^1=x
 // *x^-1=/x
 bool has_symbol(sm_expr *self, sm_symbol *sym) {
-  // ln(exp(x))=x <<cancelling compositions>>
   switch (self->my_type) {
   case sm_expr_type: {
     switch (((sm_expr *)self)->op) {
@@ -80,8 +78,23 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       sm_object *to_diff_twice = sm_expr_get_arg((sm_expr *)obj, 0);
       return sm_diff(sm_diff(to_diff_twice, wrt), wrt);
     }
-    case sm_minus_expr:
-    case sm_plus_expr: {
+    case sm_pow_expr: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *obj0 = sm_expr_get_arg(expr, 0);
+        sm_object *obj1 = sm_expr_get_arg(expr, 1);
+        //!! figure out it it's x^y or y^x, return accordingly
+        //!! or maybe it's both?
+        // if(has_symbol((sm_expr*)obj0,wrt)==true && has_symbol((sm_expr*)obj1,wrt)==false){
+        sm_object *deducted_expr =
+          (sm_object *)sm_new_expr_2(sm_minus_expr, obj1, (sm_object *)sm_new_double(1));
+        return (sm_object *)sm_new_expr_2(
+          sm_times_expr, obj1, (sm_object *)sm_new_expr_2(sm_pow_expr, obj0, deducted_expr));
+        // }
+      }
+      return (sm_object *)sm_new_double(0);
+    }
+    case sm_plus_expr:
+    case sm_minus_expr: {
       sm_expr *output = sm_new_expr_n(expr->op, expr->size, expr->size);
       for (unsigned int i = 0; i < expr->size; i++) {
         output = sm_expr_set_arg(output, i, sm_diff(sm_expr_get_arg(expr, i), wrt));
@@ -96,11 +109,11 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
           sm_object *current_obj = sm_expr_get_arg(expr, j);
           if (j == i) {
             sm_object *diff = sm_diff(current_obj, wrt);
-            sm_expr_set_arg(product, j, diff);
+            sm_expr_append(product, diff);
           } else
-            sm_expr_set_arg(product, j, current_obj);
+            sm_expr_append(product, current_obj);
         }
-        if (!sm_expr_has_0(expr))
+        if (!sm_expr_has_num(expr, 0))
           sum = sm_expr_append(sum, (sm_object *)product);
       }
       if (sum->size == 0)

@@ -21,7 +21,7 @@ sm_string *sm_object_type_str(unsigned short int t) {
   static char *response_string[]     = {"double",  "expression", "primitive", "string", "symbol",
                                         "context", "pointer",    "key_value", "meta",   "space",
                                         "fun",     "fun_param",  "local",     "?"};
-  static int   response_string_len[] = {6, 10, 9, 6, 6, 7, 7, 9, 4, 5, 3, 5, 1};
+  static int   response_string_len[] = {6, 10, 9, 6, 6, 7, 7, 9, 4, 5, 3, 9, 5, 1};
   if (t < ARRAY_SIZE(response_string_len))
     return sm_new_string(response_string_len[t], response_string[t]);
   else
@@ -99,4 +99,49 @@ int sm_sizeof(sm_object *obj1) {
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
     exit(0);
   }
+}
+
+bool sm_object_eq(sm_object *self, sm_object *other) {
+  if (self->my_type != other->my_type)
+    return false;
+  switch (self->my_type) {
+  case sm_double_type: {
+    double value1 = ((sm_double *)self)->value;
+    double value2 = ((sm_double *)other)->value;
+    if (value1 == value2)
+      return true;
+    else
+      return false;
+  }
+  case sm_string_type:
+    return strcmp(&((sm_string *)self)->content, &((sm_string *)other)->content) == 0;
+  case sm_symbol_type:
+    return strcmp(&(((sm_symbol *)self)->name->content), &(((sm_symbol *)other)->name->content)) ==
+           0;
+  case sm_expr_type: {
+    sm_expr *self_expr  = (sm_expr *)self;
+    sm_expr *other_expr = (sm_expr *)other;
+    if (self_expr->op != other_expr->op || self_expr->size != other_expr->size)
+      return false;
+    for (unsigned int i = 0; i < self_expr->size; i++) {
+      if (!sm_object_eq(sm_expr_get_arg(self_expr, i), sm_expr_get_arg(other_expr, i)))
+        return false;
+    }
+    return true;
+  }
+  case sm_primitive_type:
+    return (void *)self == (void *)other;
+  default:
+    return false;
+  }
+}
+
+// prints the object by using a buffer allocated from OS
+void sm_object_dbg_print(sm_object *obj) {
+  int   len = sm_object_sprint(obj, NULL, true);
+  char *buf = malloc(len + 1);
+  sm_object_sprint(obj, buf, false);
+  buf[len] = '\0';
+  printf("%s\n", buf);
+  free(buf);
 }
