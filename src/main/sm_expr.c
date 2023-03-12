@@ -285,18 +285,22 @@ unsigned int sm_fun_call_sprint(sm_expr *fun_call, char *buffer, bool fake) {
 // Adds a c string describing the expr to the buffer
 // Returns the length
 unsigned int sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
-  if (expr->op == sm_array_expr) {
+  switch (expr->op) {
+  case sm_array_expr: {
     return sm_expr_array_sprint(expr, buffer, fake);
-  } else {
+  }
+  case sm_fun_call_expr: {
+    return sm_fun_call_sprint(expr, buffer, fake);
+  }
+  case sm_param_list_expr: {
+    return sm_prefix_sprint(expr, buffer, fake);
+  }
+  default:
     if (expr->op < sm_global_num_fns()) {
       if (sm_is_infix(expr->op))
         return sm_infix_sprint(expr, buffer, fake);
       else
         return sm_prefix_sprint(expr, buffer, fake);
-    } else if (expr->op == sm_fun_call_expr) {
-      return sm_fun_call_sprint(expr, buffer, fake);
-    } else if (expr->op == sm_param_list_expr) {
-      return sm_prefix_sprint(expr, buffer, fake);
     } else {
       if (!fake) {
         sm_strncpy(buffer, "unrecognized expr", 17);
