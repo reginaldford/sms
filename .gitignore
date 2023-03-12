@@ -7,6 +7,8 @@ lex.yy.c
 y.tab.c
 y.tab.h
 
+*.fuse_hidden*
+
 # Prerequisites
 *.d
 
