@@ -113,7 +113,7 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
 }
 
 unsigned int sm_global_num_fns() {
-  static const unsigned short int num_fns = 32;
+  static const unsigned short int num_fns = 36;
   return num_fns;
 }
 

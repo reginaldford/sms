@@ -271,6 +271,109 @@ sm_expr *apply_constants9(sm_expr *self) {
   return result;
 }
 
+// const ^ const = const
+sm_expr *apply_constants10(sm_expr *e) {
+  if (e->my_type == sm_expr_type) {
+    if (e->op == sm_pow_expr) {
+      sm_object *obj0 = sm_expr_get_arg(e, 0);
+      sm_object *obj1 = sm_expr_get_arg(e, 1);
+      if (obj0->my_type == sm_double_type) {
+        sm_double *d0 = (sm_double *)obj0;
+        if (obj1->my_type == sm_double_type) {
+          sm_double *d1 = (sm_double *)obj1;
+          return (sm_expr *)sm_new_double(pow(d0->value, d1->value));
+        }
+      }
+    }
+    sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size);
+    for (unsigned int i = 0; i < e->size; i++) {
+      sm_expr *current_obj = (sm_expr *)sm_expr_get_arg(e, i);
+      sm_expr_append(new_expr, (sm_object *)apply_constants10(current_obj));
+    }
+    return new_expr;
+  } else
+    return e;
+}
+
+// a / b , check if a%b==0, if so, simplify
+sm_expr *apply_constants11(sm_expr *e) {
+  if (e->my_type == sm_expr_type) {
+    if (e->op == sm_divide_expr) {
+      sm_object *obj0 = sm_expr_get_arg(e, 0);
+      sm_object *obj1 = sm_expr_get_arg(e, 1);
+      if (obj0->my_type == sm_double_type) {
+        sm_double *d0 = (sm_double *)obj0;
+        if (obj1->my_type == sm_double_type) {
+          sm_double *d1 = (sm_double *)obj1;
+          int        i0 = (int)d0->value;
+          int        i1 = (int)d1->value;
+          if (i0 == d0->value && i1 == d1->value && i1 % i0 == 0) {
+            return (sm_expr *)sm_new_expr_2(sm_divide_expr, (sm_object *)sm_new_double(1),
+                                            (sm_object *)sm_new_double(i1 / i0));
+          } else
+            return (sm_expr *)sm_new_double(d0->value / d1->value);
+        }
+      }
+    }
+    sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size);
+    for (unsigned int i = 0; i < e->size; i++) {
+      sm_expr *current_obj = (sm_expr *)sm_expr_get_arg(e, i);
+      sm_expr_append(new_expr, (sm_object *)apply_constants11(current_obj));
+    }
+    return new_expr;
+  } else
+    return e;
+}
+
+// a ^ (b ^ c) = a ^ bc
+sm_expr *apply_constants12(sm_expr *e) {
+  if (e->my_type == sm_expr_type) {
+    if (e->op == sm_pow_expr) {
+      sm_object *obj0 = sm_expr_get_arg(e, 0);
+      sm_object *obj1 = sm_expr_get_arg(e, 1);
+      if (obj1->my_type == sm_expr_type && ((sm_expr *)obj1)->op == sm_pow_expr) {
+        sm_expr   *right_pow   = (sm_expr *)obj1;
+        sm_object *objb        = sm_expr_get_arg(right_pow, 0);
+        sm_object *objc        = sm_expr_get_arg(right_pow, 1);
+        sm_expr   *new_product = sm_new_expr_2(sm_times_expr, objb, objc);
+        sm_expr   *new_expr    = sm_new_expr_2(sm_pow_expr, obj0, (sm_object *)new_product);
+        return new_expr;
+      }
+    }
+    sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size);
+    for (unsigned int i = 0; i < e->size; i++) {
+      sm_expr *current_obj = (sm_expr *)sm_expr_get_arg(e, i);
+      sm_expr_append(new_expr, (sm_object *)apply_constants12(current_obj));
+    }
+    return new_expr;
+  } else
+    return e;
+}
+
+// (a ^ b) ^ c = a ^ bc
+sm_expr *apply_constants13(sm_expr *e) {
+  if (e->my_type == sm_expr_type) {
+    if (e->op == sm_pow_expr) {
+      sm_object *obj0 = sm_expr_get_arg(e, 0);
+      sm_object *objc = sm_expr_get_arg(e, 1);
+      if (obj0->my_type == sm_expr_type && ((sm_expr *)obj0)->op == sm_pow_expr) {
+        sm_object *objb        = sm_expr_get_arg((sm_expr *)obj0, 1);
+        sm_object *obja        = sm_expr_get_arg((sm_expr *)obj0, 0);
+        sm_expr   *new_product = sm_new_expr_2(sm_times_expr, objb, objc);
+        sm_expr   *new_expr    = sm_new_expr_2(sm_pow_expr, obja, (sm_object *)new_product);
+        return new_expr;
+      }
+    }
+    sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size);
+    for (unsigned int i = 0; i < e->size; i++) {
+      sm_expr *current_obj = (sm_expr *)sm_expr_get_arg(e, i);
+      sm_expr_append(new_expr, (sm_object *)apply_constants13(current_obj));
+    }
+    return new_expr;
+  } else
+    return e;
+}
+
 // Run each simplifier until the expression stops changing.
 sm_object *sm_simplify(sm_object *obj) {
   sm_expr *result      = (sm_expr *)obj;
@@ -287,6 +390,10 @@ sm_object *sm_simplify(sm_object *obj) {
     result      = apply_constants7(result);
     result      = apply_constants8(result);
     result      = apply_constants9(result);
+    result      = apply_constants10(result);
+    result      = apply_constants11(result);
+    result      = apply_constants12(result);
+    result      = apply_constants13(result);
   } while (sm_object_eq((sm_object *)last_result, (sm_object *)result) == false);
   return (sm_object *)result;
 }

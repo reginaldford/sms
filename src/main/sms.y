@@ -252,7 +252,7 @@ FUN_CALL : FUN_CALL_OPEN ')' {}
   if(found==NULL){
     found=(sm_object*)$1;
   }
-  sm_expr * args= sm_new_expr_n(sm_array_expr,0,0);
+  sm_expr * args= sm_new_expr_n(sm_param_list_expr,0,0);
   $$ = sm_new_expr_2(sm_fun_call_expr, (sm_object *)found, (sm_object *)args);
 }
 
