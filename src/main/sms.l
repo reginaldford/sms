@@ -42,6 +42,7 @@ ln          {return LN;}
 sqrt        {return SQRT;}
 abs         {return ABS;}
 diff        {return DIFF;}
+simp        {return SIMP;}
 rm          {return RM;}
 ==          {return EQEQ;}
 =>          {return ARROW;}
