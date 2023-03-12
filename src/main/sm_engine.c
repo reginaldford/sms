@@ -16,8 +16,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         printf("Error: Second arg to diff is not a symbol:%i.\n", evaluated2->my_type);
         return (sm_object *)sm_new_double(0);
       }
-      // return sm_expr_simplify(sm_diff(evaluated1, (sm_symbol *)evaluated2));
-      return sm_diff(evaluated1, (sm_symbol *)evaluated2);
+      sm_object *result = sm_diff(evaluated1, (sm_symbol *)evaluated2);
+      result            = sm_expr_simplify(result);
+      return result;
     }
     case sm_fun_call_expr: {
       sm_fun         *fun      = (sm_fun *)sm_expr_get_arg(sme, 0);

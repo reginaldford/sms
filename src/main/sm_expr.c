@@ -13,10 +13,25 @@ sm_expr *sm_new_expr_n(enum sm_expr_type op, unsigned int size, unsigned int cap
   return new_expr;
 }
 
-// New expression object
+// New expression object with 1 argument
 sm_expr *sm_new_expr(enum sm_expr_type op, sm_object *arg) {
   sm_expr *new_expr = sm_new_expr_n(op, 1, 1);
   return sm_expr_set_arg(new_expr, 0, arg);
+}
+
+// New expression with 2 arguments
+sm_expr *sm_new_expr_2(enum sm_expr_type op, sm_object *arg1, sm_object *arg2) {
+  sm_expr *new_expr = sm_new_expr_n(op, 2, 2);
+  sm_expr_set_arg(new_expr, 0, arg1);
+  return sm_expr_set_arg(new_expr, 1, arg2);
+}
+
+// New expression with 3 arguments
+sm_expr *sm_new_expr_3(enum sm_expr_type op, sm_object *arg1, sm_object *arg2, sm_object *arg3) {
+  sm_expr *new_expr = sm_new_expr_n(op, 3, 3);
+  sm_expr_set_arg(new_expr, 0, arg1);
+  sm_expr_set_arg(new_expr, 1, arg2);
+  return sm_expr_set_arg(new_expr, 2, arg3);
 }
 
 // Append another object to this expression.
@@ -34,37 +49,22 @@ sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg) {
   }
 }
 
-
+// Shallow copy
 sm_expr *sm_expr_copy(sm_expr *self) {
-  sm_expr *result = sm_new_expr_n(self->op, self->size, self->size);
+  sm_expr *result = sm_new_expr_n(self->op, 0, self->size);
   for (unsigned int i = 0; i < self->size; i++) {
     sm_expr_append(result, sm_expr_get_arg(self, i));
   }
   return result;
 }
 
-// Concatenative collectoins, assume the type of the left expression
+// Concatenate collections, assume the type of the left expression
 sm_expr *sm_expr_concat(sm_expr *expr1, sm_expr *expr2) {
   sm_expr *result = sm_new_expr_n(expr1->op, 0, expr1->size + expr2->size);
   for (unsigned int i = 0; i < expr2->size; i++) {
     sm_expr_append(result, sm_expr_get_arg(expr2, i));
   }
   return result;
-}
-
-// New expression with 2 arguments
-sm_expr *sm_new_expr_2(enum sm_expr_type op, sm_object *arg1, sm_object *arg2) {
-  sm_expr *new_expr = sm_new_expr_n(op, 2, 2);
-  sm_expr_set_arg(new_expr, 0, arg1);
-  return sm_expr_set_arg(new_expr, 1, arg2);
-}
-
-// New expression with 3 arguments
-sm_expr *sm_new_expr_3(enum sm_expr_type op, sm_object *arg1, sm_object *arg2, sm_object *arg3) {
-  sm_expr *new_expr = sm_new_expr_n(op, 3, 3);
-  sm_expr_set_arg(new_expr, 0, arg1);
-  sm_expr_set_arg(new_expr, 1, arg2);
-  return sm_expr_set_arg(new_expr, 2, arg3);
 }
 
 // Set an argument of an expression
@@ -98,7 +98,7 @@ bool sm_is_infix(enum sm_expr_type op) {
   }
 }
 
-//
+// Print to string buffer the comma/semicolon sepearted list
 unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum sm_expr_type op, bool fake) {
   if (expr->size == 0)
     return 0;
@@ -115,8 +115,9 @@ unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum sm_expr_t
       buffer_pos++;
     }
   }
-  buffer_pos +=
-    sm_object_sprint(sm_expr_get_arg(expr, expr->size - 1), &(buffer[buffer_pos]), fake);
+  if (expr->size > 0)
+    buffer_pos +=
+      sm_object_sprint(sm_expr_get_arg(expr, expr->size - 1), &(buffer[buffer_pos]), fake);
   return buffer_pos;
 }
 
@@ -172,6 +173,32 @@ unsigned short int op_level(enum sm_expr_type op_expr) {
 // Print infix to c string buffer
 // Return length
 unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
+  if (expr->size == 0) {
+    if (!fake) {
+      unsigned int len = sm_global_fn_name_len(expr->op);
+      buffer[0]        = '(';
+      sm_strncpy(buffer + 1, sm_global_fn_name(expr->op), len);
+      buffer[1 + len] = ')';
+    }
+    return sm_global_fn_name_len(expr->op) + 2;
+  }
+  if (expr->size == 1) {
+    unsigned int len  = 0;
+    unsigned int len2 = 0;
+    len               = sm_global_fn_name_len(expr->op);
+    if (!fake)
+      buffer[0] = '(';
+    if (!fake)
+      buffer[1] = '_';
+    if (!fake)
+      sm_strncpy(&(buffer[2]), sm_global_fn_name(expr->op), len);
+
+    len2 = sm_object_sprint(sm_expr_get_arg(expr, 0), buffer + 2 + len, fake);
+
+    if (!fake)
+      buffer[2 + len + len2] = ')';
+    return 3 + len + len2;
+  }
   if (expr->size > 2) {
     return sm_prefix_sprint(expr, buffer, fake);
   }
@@ -302,86 +329,5 @@ sm_object *sm_expr_pop_recycle(sm_expr *sme) {
   } else {
     printf("Stack underflow.");
     return NULL;
-  }
-}
-
-
-bool sm_expr_has_0(sm_expr *expr) {
-  for (unsigned int i = 0; i < expr->size; i++) {
-    sm_object *current_obj = sm_expr_get_arg(expr, i);
-    if (current_obj->my_type == sm_double_type) {
-      if (((sm_double *)current_obj)->value == 0)
-        return true;
-    }
-  }
-  return false;
-}
-
-sm_expr *sm_expr_merge_constants(sm_object *obj) {
-  switch (obj->my_type) {
-  case sm_expr_type: {
-    sm_expr *expr = (sm_expr *)obj;
-    switch (expr->op) {
-    case sm_plus_expr: {
-      sm_expr   *result    = sm_new_expr_n(sm_plus_expr, 0, expr->capacity);
-      sm_double *constants = sm_new_double(1);
-      for (unsigned int i = 0; i < expr->size; i++) {
-        sm_object *current = sm_expr_get_arg(expr, i);
-        if (current->my_type == sm_expr_type && ((sm_expr *)current)->op == sm_plus_expr) {
-        }
-      }
-      expr = sm_expr_rm_0s(expr);
-    }
-    }
-  }
-  }
-}
-
-sm_expr *sm_expr_rm_0s(sm_expr *expr) {
-  sm_expr *result = sm_new_expr_n(expr->op, 0, expr->capacity);
-  for (unsigned int i = 0; i < expr->size; i++) {
-    sm_object *current_obj = sm_expr_get_arg(expr, i);
-    if (((sm_double *)current_obj)->value != 0) {
-      sm_expr_append(result, current_obj);
-    }
-  }
-  return result;
-}
-
-sm_expr *sm_expr_rm_1s(sm_expr *expr) {
-  sm_expr *result = sm_new_expr_n(expr->op, 0, expr->capacity);
-  for (unsigned int i = 0; i < expr->size; i++) {
-    sm_object *current_obj = sm_expr_get_arg(expr, i);
-    if (((sm_double *)current_obj)->value != 1) {
-      sm_expr_append(result, current_obj);
-    }
-  }
-  return result;
-}
-
-sm_object *sm_expr_simplify(sm_object *self) {
-  switch (self->my_type) {
-  case sm_expr_type: {
-    sm_expr *expr = (sm_expr *)self;
-    switch (expr->op) {
-    case sm_plus_expr: {
-      expr = sm_expr_rm_0s(expr);
-      if (expr->size == 0)
-        return (sm_object *)sm_new_double(0);
-      else
-        return (sm_object *)expr;
-    }
-    case sm_times_expr: {
-      if (sm_expr_has_0(expr))
-        return (sm_object *)sm_new_double(0);
-      else
-        return (sm_object *)sm_expr_rm_1s(expr);
-    }
-    default:
-      return self;
-    }
-  default:
-    return self;
-  }
   }
 }

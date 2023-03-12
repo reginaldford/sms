@@ -72,9 +72,9 @@ Exit the program with:
 - [ ] Precise syntax error reporting.
 - [ ] Modern terminal support
 - [ ] Try/Catch error syntax.
-- [ ] Variable heap size, with min, max, and max_emptiness specs.
+- [ ] Dynamic heap size, with min, max, and max_emptiness specs.
 - [ ] A diff command for taking derivatives.
-- [ ] A integral command for taking integrals.
+- [ ] An integral command for taking integrals.
 - [ ] Arbitrary precision support.
 - [ ] General documentation.
 - [ ] A community!

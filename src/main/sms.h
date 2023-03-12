@@ -62,3 +62,4 @@ enum sm_object_type {
 #include "sm_local.h"
 #include "sm_error.h"
 #include "sm_diff.h"
+#include "sm_simplify.h"

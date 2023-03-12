@@ -43,7 +43,7 @@ sm_search_result sm_context_find_index(sm_context *context, sm_string *var_strin
   unsigned int upper_limit = context->size == 0 ? 0 : context->size - 1;
   int          comparison  = 1;
   unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
-  while (lower_limit < upper_limit && comparison != 0) {
+  while (lower_limit < upper_limit) {
     comparison = strcmp(&(context_entries[guess_point].name->content), var_name);
     if (comparison == 0)
       return (sm_search_result){.found = true, .index = guess_point};
