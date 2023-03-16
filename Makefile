@@ -83,7 +83,8 @@ clean:
 		bin/sms*
 		
 # Install the binary to a unix-like system
-install: bin/$(TARGET_SMS)
+install:
+	$(MAKE) -j4 bin/$(TARGET_SMS)
 	cp -fv bin/$(TARGET_SMS) $(INSTALL_DIR)/$(TARGET_SMS)
 	chmod +x $(INSTALL_DIR)/$(TARGET_SMS)
 
