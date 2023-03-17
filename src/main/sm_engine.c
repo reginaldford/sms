@@ -9,11 +9,32 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case sm_dot_expr: {
+      sm_object *base_obj   = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
+      sm_string *field_name = field_sym->name;
+      if (base_obj->my_type != sm_context_type) {
+        sm_string *base_str = sm_object_to_string(base_obj);
+        printf("Base of dot expression is not a context: %s\n", &(base_str->content));
+        return (sm_object *)sm_new_double(0);
+      }
+      sm_context                *base_cx = (sm_context *)base_obj;
+      sm_search_result_cascading sr      = sm_context_find_far(base_cx, field_name);
+      if (sr.found != true) {
+        sm_string *base_str = sm_object_to_string(base_obj);
+        printf("Could not find variable: %s within %s\n", &(field_name->content),
+               &(base_str->content));
+        return (sm_object *)sm_new_double(0);
+      }
+      return sm_context_entries(sr.context)[sr.index].value;
+    }
     case sm_diff_expr: {
       sm_object *evaluated0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *evaluated1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (evaluated1->my_type != sm_symbol_type) {
-        printf("Error: Second arg to diff is not a symbol:%i.\n", evaluated1->my_type);
+        printf("Error: Second arg to diff is not a symbol: ");
+        sm_string *not_sym_str = sm_object_to_string(evaluated1);
+        printf("%s.\n", &(not_sym_str->content));
         return (sm_object *)sm_new_double(0);
       }
       sm_object *result = sm_diff(evaluated0, (sm_symbol *)evaluated1);

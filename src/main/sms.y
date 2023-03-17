@@ -35,8 +35,8 @@ void _lex_cstr(char * cstr,int len);
 %type <expr> FUN_CALL_OPEN
 %type <param_list> PARAM_LIST
 %type <expr> PARAM_LIST_OPEN
-%type <expr> IF_STATEMENT 
-%type <meta> META_EXPR 
+%type <expr> IF_STATEMENT
+%type <meta> META_EXPR
 %type <expr> ASSIGNMENT
 %type <context> CONTEXT
 %type <context> CONTEXT_LIST
@@ -53,6 +53,7 @@ void _lex_cstr(char * cstr,int len);
 
 %token CLEAR FORMAT LS NEWLINE EXIT SELF IF
 
+%token DOT
 %token <fun> ARROW
 %token <num> NUM
 %token <expr> PIPE
@@ -90,6 +91,7 @@ void _lex_cstr(char * cstr,int len);
 %left '*' '/'
 %left '^'
 %left ':'
+%left DOT
 
 
 %%
@@ -164,6 +166,12 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | LT{}
 | GT{}
 | SEQUENCE {}
+| SYM DOT SYM {
+  $$ = sm_new_expr_2(sm_dot_expr,(sm_object*)$1,(sm_object*)$3);
+}
+| EXPR DOT SYM {
+  $$ = sm_new_expr_2(sm_dot_expr,(sm_object*)$1,(sm_object*)$3);
+}
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local
@@ -243,10 +251,10 @@ IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
 FUN_CALL : FUN_CALL_OPEN ')' {}
 | SYM '(' ')'{
   // store the function in the fun_call here
-  // index: 0   1   
-  // value: fun args 
+  // index: 0   1
+  // value: fun args
   // if the function doesnt exist yet:
-  // value: symbol args 
+  // value: symbol args
   sm_string * var_name = $1->name;
   sm_object * found = sm_context_get_by_name_far(*(sm_global_lex_stack(NULL)->top),var_name);
   if(found==NULL){
@@ -258,8 +266,8 @@ FUN_CALL : FUN_CALL_OPEN ')' {}
 
 FUN_CALL_OPEN : SYM '(' EXPR {
   // store the function in the fun_call here
-  // index: 0   1   
-  // value: fun args 
+  // index: 0   1
+  // value: fun args
   // if the function doesnt exist yet:
   // value: symbol args
   sm_string * var_name = $1->name;

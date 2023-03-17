@@ -20,6 +20,7 @@ digit [0-9]
 [ \t\f\v\n] { ; }
 exit        {return EXIT;}
 clear       {return CLEAR;}
+"."         {return DOT;}
 ls          {return LS;}
 format      {return FORMAT;}
 let         {return LET;}
