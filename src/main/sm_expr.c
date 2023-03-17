@@ -92,6 +92,7 @@ bool sm_is_infix(enum sm_expr_type op) {
   case sm_test_eq_expr:
   case sm_test_lt_expr:
   case sm_test_gt_expr:
+  case sm_dot_expr:
     return true;
   default:
     return false;
@@ -206,65 +207,13 @@ unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
   sm_object *o1 = sm_expr_get_arg(expr, 0);
   sm_object *o2 = sm_expr_get_arg(expr, 1);
 
-  int mid_op_level   = op_level(expr->op);
-  int left_op_level  = o1->my_type == sm_expr_type ? op_level(((sm_expr *)o1)->op) : 5;
-  int right_op_level = o2->my_type == sm_expr_type ? op_level(((sm_expr *)o1)->op) : 5;
-
-  if (left_op_level <= 2 && right_op_level <= 2 && left_op_level != mid_op_level) {
-    //(left)op(right)
-    if (!fake)
-      buffer[0] = '(';
-    int cursor = 1 + sm_object_sprint(o1, &(buffer[1]), fake);
-    if (!fake)
-      buffer[cursor] = ')';
-    cursor++;
-    if (!fake)
-      sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
-    cursor += sm_global_fn_name_len(expr->op);
-    if (!fake)
-      buffer[cursor] = '(';
-    cursor++;
-    cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
-    if (!fake)
-      buffer[cursor] = ')';
-    cursor++;
-    return cursor;
-  } else if (left_op_level <= 2 && left_op_level != mid_op_level) {
-    //(left)op right
-    if (!fake)
-      buffer[0] = '(';
-    int cursor = 1 + sm_object_sprint(o1, &(buffer[1]), fake);
-    if (!fake)
-      buffer[cursor] = ')';
-    cursor++;
-    if (!fake)
-      sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
-    cursor += sm_global_fn_name_len(expr->op);
-    cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
-    return cursor;
-  } else if (right_op_level <= 2 && right_op_level != mid_op_level) {
-    // left op(right)
-    int cursor = sm_object_sprint(o1, buffer, fake);
-    if (!fake)
-      sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
-    cursor += sm_global_fn_name_len(expr->op);
-    if (!fake)
-      buffer[cursor] = '(';
-    cursor++;
-    cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
-    if (!fake)
-      buffer[cursor] = ')';
-    cursor++;
-    return cursor;
-  } else {
-    // left op right
-    int cursor = sm_object_sprint(o1, buffer, fake);
-    if (!fake)
-      sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
-    cursor += sm_global_fn_name_len(expr->op);
-    cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
-    return cursor;
-  }
+  // left op right
+  int cursor = sm_object_sprint(o1, buffer, fake);
+  if (!fake)
+    sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+  cursor += sm_global_fn_name_len(expr->op);
+  cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
+  return cursor;
 }
 
 // New string describing this expression
