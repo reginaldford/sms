@@ -15,7 +15,7 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
   unsigned short int the_expr = obj->my_type;
-  if (the_expr == sm_pointer_type)
+  if (the_expr == SM_POINTER_TYPE)
     return ((sm_pointer *)obj)->address;
   else
     return sm_move_to_new_heap(obj);
@@ -28,12 +28,12 @@ sm_expr *inflate_siblings(sm_expr *siblings) {
   sm_object   *keepers[siblings->size];
   for (unsigned int i = 0; i < siblings->size; i++) {
     sm_object *current_sibling = sm_expr_get_arg(siblings, i);
-    if (current_sibling->my_type == sm_pointer_type) {
+    if (current_sibling->my_type == SM_POINTER_TYPE) {
       keepers[num_keepers++] = ((sm_pointer *)current_sibling)->address;
     }
   }
   if (num_keepers > 0) {
-    sm_expr *new_expr = sm_new_expr_n(sm_siblings_expr, num_keepers, num_keepers);
+    sm_expr *new_expr = sm_new_expr_n(SM_SIBLINGS_EXPR, num_keepers, num_keepers);
     for (unsigned int i = 0; i < num_keepers; i++) {
       sm_expr_set_arg(new_expr, i, keepers[i]);
     }
@@ -64,7 +64,7 @@ void sm_inflate_heap() {
     // scan_cursor is not referred to for the rest of the loop
     scan_cursor += sm_sizeof(current_obj);
     switch (current_obj->my_type) {
-    case sm_context_type: {
+    case SM_CONTEXT_TYPE: {
       sm_context *cx = (sm_context *)current_obj;
       // Meet the entries
       sm_context_entry *table = sm_context_entries(cx);
@@ -82,7 +82,7 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case sm_expr_type: {
+    case SM_EXPR_TYPE: {
       sm_expr *expr = (sm_expr *)current_obj;
       for (unsigned int i = 0; i < expr->size; i++) {
         sm_object *new_obj = sm_meet_object(sm_expr_get_arg(expr, i));
@@ -90,17 +90,17 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case sm_symbol_type: {
+    case SM_SYMBOL_TYPE: {
       sm_symbol *sym = (sm_symbol *)current_obj;
       sym->name      = (sm_string *)sm_meet_object((sm_object *)sym->name);
       break;
     }
-    case sm_meta_type: {
+    case SM_META_TYPE: {
       sm_meta *meta = (sm_meta *)current_obj;
       meta->address = (sm_object *)sm_meet_object(meta->address);
       break;
     }
-    case sm_fun_type: {
+    case SM_FUN_TYPE: {
       sm_fun *fun  = (sm_fun *)current_obj;
       fun->content = sm_meet_object((sm_object *)fun->content);
       if (fun->parent != NULL)
@@ -114,7 +114,7 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case sm_fun_param_type: {
+    case SM_FUN_PARAM_TYPE: {
       sm_fun_param_obj *param = (sm_fun_param_obj *)current_obj;
       param->name             = (sm_string *)sm_meet_object((sm_object *)param->name);
       if (param->default_val != NULL) {
@@ -122,7 +122,7 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case sm_local_type: {
+    case SM_LOCAL_TYPE: {
       sm_local *local = (sm_local *)current_obj;
       local->name     = (sm_string *)sm_meet_object((sm_object *)local->name);
       break;

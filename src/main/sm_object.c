@@ -6,9 +6,9 @@
 // This means the object evaluates to itself
 bool sm_object_is_literal(unsigned short int t) {
   switch (t) {
-  case sm_double_type:
-  case sm_meta_type:
-  case sm_string_type:
+  case SM_DOUBLE_TYPE:
+  case SM_META_TYPE:
+  case SM_STRING_TYPE:
     return true;
   default:
     return false;
@@ -40,23 +40,23 @@ sm_string *sm_object_to_string(sm_object *obj1) {
 // Return the length of the string
 unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   switch (obj1->my_type) {
-  case sm_double_type:
+  case SM_DOUBLE_TYPE:
     return sm_double_sprint((sm_double *)obj1, buffer, fake);
-  case sm_string_type:
+  case SM_STRING_TYPE:
     return sm_string_sprint((sm_string *)obj1, buffer, fake);
-  case sm_expr_type:
+  case SM_EXPR_TYPE:
     return sm_expr_sprint((sm_expr *)obj1, buffer, fake);
-  case sm_meta_type:
+  case SM_META_TYPE:
     return sm_meta_sprint((sm_meta *)obj1, buffer, fake);
-  case sm_context_type:
+  case SM_CONTEXT_TYPE:
     return sm_context_sprint((sm_context *)obj1, buffer, fake);
-  case sm_symbol_type:
+  case SM_SYMBOL_TYPE:
     return sm_symbol_sprint((sm_symbol *)obj1, buffer, fake);
-  case sm_fun_type:
+  case SM_FUN_TYPE:
     return sm_fun_sprint((sm_fun *)obj1, buffer, fake);
-  case sm_local_type:
+  case SM_LOCAL_TYPE:
     return sm_local_sprint((sm_local *)obj1, buffer, fake);
-  case sm_error_type:
+  case SM_ERROR_TYPE:
     return sm_error_sprint((sm_error *)obj1, buffer, fake);
   default: {
     if (!fake)
@@ -69,31 +69,31 @@ unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 // Return the size of the object in bytes
 int sm_sizeof(sm_object *obj1) {
   switch (obj1->my_type) {
-  case sm_double_type:
+  case SM_DOUBLE_TYPE:
     return sizeof(sm_double);
-  case sm_expr_type:
+  case SM_EXPR_TYPE:
     return sizeof(sm_expr) + sizeof(sm_object *) * ((sm_expr *)obj1)->capacity;
-  case sm_primitive_type:
+  case SM_PRIMITIVE_TYPE:
     return sizeof(sm_expr);
-  case sm_string_type:
+  case SM_STRING_TYPE:
     return sm_round_size(sizeof(sm_string) + ((sm_string *)obj1)->size + 1);
-  case sm_symbol_type:
+  case SM_SYMBOL_TYPE:
     return sizeof(sm_symbol);
-  case sm_context_type:
+  case SM_CONTEXT_TYPE:
     return sizeof(sm_context) + sizeof(sm_context_entry) * ((sm_context *)obj1)->capacity;
-  case sm_pointer_type:
+  case SM_POINTER_TYPE:
     return sizeof(sm_pointer);
-  case sm_meta_type:
+  case SM_META_TYPE:
     return sizeof(sm_meta);
-  case sm_fun_type:
+  case SM_FUN_TYPE:
     return sizeof(sm_fun) + sizeof(sm_fun_param) * ((sm_fun *)obj1)->num_params;
-  case sm_fun_param_type:
+  case SM_FUN_PARAM_TYPE:
     return sizeof(sm_fun_param_obj);
-  case sm_local_type:
+  case SM_LOCAL_TYPE:
     return sizeof(sm_local);
-  case sm_space_type:
+  case SM_SPACE_TYPE:
     return ((sm_space *)obj1)->size;
-  case sm_error_type:
+  case SM_ERROR_TYPE:
     return sizeof(sm_error);
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
@@ -105,7 +105,7 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
   if (self->my_type != other->my_type)
     return false;
   switch (self->my_type) {
-  case sm_double_type: {
+  case SM_DOUBLE_TYPE: {
     double value1 = ((sm_double *)self)->value;
     double value2 = ((sm_double *)other)->value;
     if (value1 == value2)
@@ -113,12 +113,12 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
     else
       return false;
   }
-  case sm_string_type:
+  case SM_STRING_TYPE:
     return strcmp(&((sm_string *)self)->content, &((sm_string *)other)->content) == 0;
-  case sm_symbol_type:
+  case SM_SYMBOL_TYPE:
     return strcmp(&(((sm_symbol *)self)->name->content), &(((sm_symbol *)other)->name->content)) ==
            0;
-  case sm_expr_type: {
+  case SM_EXPR_TYPE: {
     sm_expr *self_expr  = (sm_expr *)self;
     sm_expr *other_expr = (sm_expr *)other;
     if (self_expr->op != other_expr->op || self_expr->size != other_expr->size)
@@ -129,7 +129,7 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
     }
     return true;
   }
-  case sm_primitive_type:
+  case SM_PRIMITIVE_TYPE:
     return (void *)self == (void *)other;
   default:
     return false;
