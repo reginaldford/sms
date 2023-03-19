@@ -6,7 +6,7 @@
 bool sm_expr_has_num(sm_expr *expr, double n) {
   for (unsigned int i = 0; i < expr->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(expr, i);
-    if (current_obj->my_type == sm_double_type) {
+    if (current_obj->my_type == SM_DOUBLE_TYPE) {
       if (((sm_double *)current_obj)->value == n)
         return true;
     }
@@ -19,7 +19,7 @@ sm_expr *sm_expr_rm_num(sm_expr *expr, double to_rm) {
   sm_expr *result = sm_new_expr_n(expr->op, 0, expr->size);
   for (unsigned int i = 0; i < expr->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(expr, i);
-    if (current_obj->my_type == sm_double_type) {
+    if (current_obj->my_type == SM_DOUBLE_TYPE) {
       if (((sm_double *)current_obj)->value != to_rm) {
         result = sm_expr_append(result, current_obj);
       }
@@ -31,8 +31,8 @@ sm_expr *sm_expr_rm_num(sm_expr *expr, double to_rm) {
 
 // Return 0 if it's a times_expr and has_num(0)
 sm_expr *apply_constants0(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_times_expr && sm_expr_has_num(e, 0))
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_TIMES_EXPR && sm_expr_has_num(e, 0))
       return (sm_expr *)sm_new_double(0);
     else {
       sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size);
@@ -48,23 +48,23 @@ sm_expr *apply_constants0(sm_expr *e) {
 
 // Rm empties and singles
 sm_expr *apply_constants1(sm_expr *e) {
-  if (e->my_type != sm_expr_type) {
+  if (e->my_type != SM_EXPR_TYPE) {
     return e;
   }
   if (e->size == 1 && sm_is_infix(e->op)) {
     return (sm_expr *)sm_expr_get_arg(e, 0);
   }
   if (e->size == 0) {
-    if (e->op == sm_times_expr) {
+    if (e->op == SM_TIMES_EXPR) {
       return (sm_expr *)sm_new_double(1);
-    } else if (e->op == sm_plus_expr) {
+    } else if (e->op == SM_PLUS_EXPR) {
       return (sm_expr *)sm_new_double(0);
     }
   }
   sm_expr *new_e = sm_new_expr_n(e->op, 0, e->size);
   for (unsigned int i = 0; i < e->size; i++) {
     sm_object *obj = sm_expr_get_arg(e, i);
-    if (obj->my_type == sm_expr_type) {
+    if (obj->my_type == SM_EXPR_TYPE) {
       sm_expr *sub_e = apply_constants1((sm_expr *)obj);
       sm_expr_append(new_e, (sm_object *)sub_e);
     } else
@@ -75,8 +75,8 @@ sm_expr *apply_constants1(sm_expr *e) {
 
 // Return 1 of it's an empty times_expr
 sm_expr *apply_constants2(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_times_expr && e->size == 0)
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_TIMES_EXPR && e->size == 0)
       return (sm_expr *)sm_new_double(1);
     else {
       sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size);
@@ -92,10 +92,10 @@ sm_expr *apply_constants2(sm_expr *e) {
 
 // 0 / anything is 0
 sm_expr *apply_constants3(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_divide_expr && e->size == 2) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_DIVIDE_EXPR && e->size == 2) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
-      if (obj0->my_type == sm_double_type) {
+      if (obj0->my_type == SM_DOUBLE_TYPE) {
         if (((sm_double *)obj0)->value == 0) {
           return (sm_expr *)sm_new_double(0);
         }
@@ -113,16 +113,16 @@ sm_expr *apply_constants3(sm_expr *e) {
 
 // 0 - anything is -anything
 sm_expr *apply_constants4(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_minus_expr && e->size == 2) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_MINUS_EXPR && e->size == 2) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == sm_double_type) {
+      if (obj0->my_type == SM_DOUBLE_TYPE) {
         if (((sm_double *)obj0)->value == 0) {
-          if (obj1->my_type == sm_double_type) {
+          if (obj1->my_type == SM_DOUBLE_TYPE) {
             return (sm_expr *)sm_new_double(-1 * ((sm_double *)obj1)->value);
           } else
-            return sm_new_expr_2(sm_times_expr, (sm_object *)sm_new_double(-1), obj1);
+            return sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(-1), obj1);
         }
       }
     }
@@ -138,12 +138,12 @@ sm_expr *apply_constants4(sm_expr *e) {
 
 // a * b = ab
 sm_expr *apply_constants5(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_times_expr && e->size == 2) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_TIMES_EXPR && e->size == 2) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == sm_double_type) {
-        if (obj1->my_type == sm_double_type) {
+      if (obj0->my_type == SM_DOUBLE_TYPE) {
+        if (obj1->my_type == SM_DOUBLE_TYPE) {
           return (sm_expr *)sm_new_double(((sm_double *)obj0)->value * ((sm_double *)obj1)->value);
         }
       }
@@ -160,22 +160,22 @@ sm_expr *apply_constants5(sm_expr *e) {
 
 // a * (b*..) = ab * ...
 sm_expr *apply_constants6(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_times_expr && e->size == 2) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_TIMES_EXPR && e->size == 2) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == sm_double_type) {
-        if (obj1->my_type == sm_expr_type) {
+      if (obj0->my_type == SM_DOUBLE_TYPE) {
+        if (obj1->my_type == SM_EXPR_TYPE) {
           sm_object *leftmost = sm_expr_get_arg((sm_expr *)obj1, 0);
-          if (leftmost->my_type == sm_double_type) {
+          if (leftmost->my_type == SM_DOUBLE_TYPE) {
             sm_expr *result =
               (sm_expr *)sm_new_double(((sm_double *)obj0)->value * ((sm_double *)leftmost)->value);
             sm_expr *expr1     = ((sm_expr *)obj1);
-            sm_expr *remainder = sm_new_expr_n(sm_times_expr, 0, expr1->size - 1);
+            sm_expr *remainder = sm_new_expr_n(SM_TIMES_EXPR, 0, expr1->size - 1);
             for (unsigned int i = 1; i < expr1->size; i++) {
               sm_expr_append(remainder, sm_expr_get_arg(expr1, i));
             }
-            result = sm_new_expr_2(sm_times_expr, (sm_object *)result, (sm_object *)remainder);
+            result = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)result, (sm_object *)remainder);
             return result;
           }
         }
@@ -193,15 +193,15 @@ sm_expr *apply_constants6(sm_expr *e) {
 
 // a +- b = (a+-b)
 sm_expr *apply_constants7(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->size == 2 && (e->op == sm_plus_expr || e->op == sm_minus_expr)) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->size == 2 && (e->op == SM_PLUS_EXPR || e->op == SM_MINUS_EXPR)) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == sm_double_type) {
-        if (obj1->my_type == sm_double_type) {
+      if (obj0->my_type == SM_DOUBLE_TYPE) {
+        if (obj1->my_type == SM_DOUBLE_TYPE) {
           sm_double *d0 = (sm_double *)obj0;
           sm_double *d1 = (sm_double *)obj1;
-          if (e->op == sm_plus_expr)
+          if (e->op == SM_PLUS_EXPR)
             return (sm_expr *)sm_new_double(d0->value + d1->value);
           else
             return (sm_expr *)sm_new_double(d0->value - d1->value);
@@ -221,10 +221,10 @@ sm_expr *apply_constants7(sm_expr *e) {
 // anything ^ 1 = anything
 // anything ^ 0 = 1
 sm_expr *apply_constants8(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_pow_expr) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_POW_EXPR) {
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj1->my_type == sm_double_type) {
+      if (obj1->my_type == SM_DOUBLE_TYPE) {
         sm_double *d1 = (sm_double *)obj1;
         if (d1->value == 1)
           return (sm_expr *)sm_expr_get_arg(e, 0);
@@ -244,7 +244,7 @@ sm_expr *apply_constants8(sm_expr *e) {
 
 // Skip 0's in plus, skip 1's in times
 sm_expr *apply_constants9(sm_expr *self) {
-  if (self->my_type != sm_expr_type) {
+  if (self->my_type != SM_EXPR_TYPE) {
     return self;
   }
   sm_expr *orig_expr = self;
@@ -252,15 +252,15 @@ sm_expr *apply_constants9(sm_expr *self) {
   new_expr->op       = orig_expr->op;
   for (unsigned int i = 0; i < orig_expr->size; i++) {
     sm_object *arg = sm_expr_get_arg(orig_expr, i);
-    if (arg->my_type == sm_double_type) {
+    if (arg->my_type == SM_DOUBLE_TYPE) {
       sm_double *num = (sm_double *)arg;
       if (num->value == 0.0) {
-        if (orig_expr->op == sm_plus_expr || (orig_expr->op == sm_minus_expr && i > 0)) {
+        if (orig_expr->op == SM_PLUS_EXPR || (orig_expr->op == SM_MINUS_EXPR && i > 0)) {
           continue;
         }
       }
       if (num->value == 1.0) {
-        if (orig_expr->op == sm_times_expr || (orig_expr->op == sm_divide_expr && i > 0)) {
+        if (orig_expr->op == SM_TIMES_EXPR || (orig_expr->op == SM_DIVIDE_EXPR && i > 0)) {
           continue;
         }
       }
@@ -273,13 +273,13 @@ sm_expr *apply_constants9(sm_expr *self) {
 
 // const ^ const = const
 sm_expr *apply_constants10(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_pow_expr) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_POW_EXPR) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == sm_double_type) {
+      if (obj0->my_type == SM_DOUBLE_TYPE) {
         sm_double *d0 = (sm_double *)obj0;
-        if (obj1->my_type == sm_double_type) {
+        if (obj1->my_type == SM_DOUBLE_TYPE) {
           sm_double *d1 = (sm_double *)obj1;
           return (sm_expr *)sm_new_double(pow(d0->value, d1->value));
         }
@@ -297,18 +297,18 @@ sm_expr *apply_constants10(sm_expr *e) {
 
 // a / b , check if a%b==0, if so, simplify
 sm_expr *apply_constants11(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_divide_expr) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_DIVIDE_EXPR) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == sm_double_type) {
+      if (obj0->my_type == SM_DOUBLE_TYPE) {
         sm_double *d0 = (sm_double *)obj0;
-        if (obj1->my_type == sm_double_type) {
+        if (obj1->my_type == SM_DOUBLE_TYPE) {
           sm_double *d1 = (sm_double *)obj1;
           int        i0 = (int)d0->value;
           int        i1 = (int)d1->value;
           if (i0 == d0->value && i1 == d1->value && i1 % i0 == 0) {
-            return (sm_expr *)sm_new_expr_2(sm_divide_expr, (sm_object *)sm_new_double(1),
+            return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_double(1),
                                             (sm_object *)sm_new_double(i1 / i0));
           } else
             return (sm_expr *)sm_new_double(d0->value / d1->value);
@@ -327,16 +327,16 @@ sm_expr *apply_constants11(sm_expr *e) {
 
 // a ^ (b ^ c) = a ^ bc
 sm_expr *apply_constants12(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_pow_expr) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_POW_EXPR) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj1->my_type == sm_expr_type && ((sm_expr *)obj1)->op == sm_pow_expr) {
+      if (obj1->my_type == SM_EXPR_TYPE && ((sm_expr *)obj1)->op == SM_POW_EXPR) {
         sm_expr   *right_pow   = (sm_expr *)obj1;
         sm_object *objb        = sm_expr_get_arg(right_pow, 0);
         sm_object *objc        = sm_expr_get_arg(right_pow, 1);
-        sm_expr   *new_product = sm_new_expr_2(sm_times_expr, objb, objc);
-        sm_expr   *new_expr    = sm_new_expr_2(sm_pow_expr, obj0, (sm_object *)new_product);
+        sm_expr   *new_product = sm_new_expr_2(SM_TIMES_EXPR, objb, objc);
+        sm_expr   *new_expr    = sm_new_expr_2(SM_POW_EXPR, obj0, (sm_object *)new_product);
         return new_expr;
       }
     }
@@ -352,15 +352,15 @@ sm_expr *apply_constants12(sm_expr *e) {
 
 // (a ^ b) ^ c = a ^ bc
 sm_expr *apply_constants13(sm_expr *e) {
-  if (e->my_type == sm_expr_type) {
-    if (e->op == sm_pow_expr) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_POW_EXPR) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *objc = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == sm_expr_type && ((sm_expr *)obj0)->op == sm_pow_expr) {
+      if (obj0->my_type == SM_EXPR_TYPE && ((sm_expr *)obj0)->op == SM_POW_EXPR) {
         sm_object *objb        = sm_expr_get_arg((sm_expr *)obj0, 1);
         sm_object *obja        = sm_expr_get_arg((sm_expr *)obj0, 0);
-        sm_expr   *new_product = sm_new_expr_2(sm_times_expr, objb, objc);
-        sm_expr   *new_expr    = sm_new_expr_2(sm_pow_expr, obja, (sm_object *)new_product);
+        sm_expr   *new_product = sm_new_expr_2(SM_TIMES_EXPR, objb, objc);
+        sm_expr   *new_expr    = sm_new_expr_2(SM_POW_EXPR, obja, (sm_object *)new_product);
         return new_expr;
       }
     }

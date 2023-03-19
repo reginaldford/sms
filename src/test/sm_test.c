@@ -79,7 +79,7 @@ int get_alignment(int chapter, int subchapter, int test) {
 // with an array assigned to 'test'
 sm_context *check_parsed_object(sm_parse_result pr) {
   // We expect an array of arrays, each with 3 objects.
-  if (pr.parsed_object->my_type != sm_context_type) {
+  if (pr.parsed_object->my_type != SM_CONTEXT_TYPE) {
     printf("Top level object is not a context. Aborting.\n");
     return NULL;
   }
@@ -91,7 +91,7 @@ sm_context *check_parsed_object(sm_parse_result pr) {
     return NULL;
   }
   sm_object *found = sm_context_get(src.context, src.index);
-  if (found->my_type != sm_expr_type) {
+  if (found->my_type != SM_EXPR_TYPE) {
     printf("Value under 'test' should be an array.\n");
     return NULL;
   }
@@ -108,7 +108,7 @@ int check_specific_test(sm_expr *test_list, int test) {
            test_list->size - 1);
     exit(-1);
   }
-  if (obj->my_type != sm_expr_type) {
+  if (obj->my_type != SM_EXPR_TYPE) {
     printf("Top level array should only contain arrays. Aborting.\n");
     exit(-1);
   }

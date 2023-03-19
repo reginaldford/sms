@@ -6,7 +6,7 @@
 sm_context *sm_new_context(unsigned int size, unsigned int capacity, sm_context *parent) {
   sm_context *new_context =
     (sm_context *)sm_malloc(sizeof(sm_context) + sizeof(sm_context_entry) * capacity);
-  new_context->my_type  = sm_context_type;
+  new_context->my_type  = SM_CONTEXT_TYPE;
   new_context->parent   = parent;
   new_context->size     = size;
   new_context->capacity = capacity;
@@ -23,7 +23,7 @@ sm_context_entry *sm_context_entries(sm_context *context) {
 sm_context *sm_context_add_child(sm_context *cx, sm_object *child) {
   sm_expr *array = cx->children;
   if (array == NULL) {
-    cx->children = sm_new_expr(sm_siblings_expr, child);
+    cx->children = sm_new_expr(SM_SIBLINGS_EXPR, child);
     return cx;
   }
   cx->children = sm_expr_append(cx->children, child);
@@ -97,15 +97,15 @@ bool sm_context_update_relatives(sm_context *self, sm_context *old_self) {
       for (unsigned int i = 0; i < siblings->size; i++) {
         sm_object *obj = sm_expr_get_arg(siblings, i);
         switch (obj->my_type) {
-        case sm_context_type: {
+        case SM_CONTEXT_TYPE: {
           ((sm_context *)obj)->parent = self;
           break;
         }
-        case sm_meta_type: {
+        case SM_META_TYPE: {
           ((sm_meta *)obj)->scope = self;
           break;
         }
-        case sm_fun_type: {
+        case SM_FUN_TYPE: {
           ((sm_fun *)obj)->parent = self;
           break;
         }

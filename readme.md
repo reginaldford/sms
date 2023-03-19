@@ -1,8 +1,6 @@
 # Intro:
 
-SMS Stands for Symbolic Math System.
-
-Currently, SMS can serve as calculator for double-precision arithmetic, trigonometry and differentiation. The long term goal of SMS is to provide a simple general purpose programming language that focuses on mathematics and speed.
+SMS (Symbolic Math System) is a calculator that can perform double-precision arithmetic, trigonometry, and symbolic differentiation. It aims to become a simple untyped programming language that focuses on mathematics and speed. SMS has built-in functions for arithmetic operations, flow control, trigonometry, algebra, and calculus. SMS has features like anonymous functions, contexts, and custom memory heap size. It is Turing complete and will eventually have standard libraries. SMS can be downloaded and installed from the Releases page on GitHub. 
 
 In addition to providing a command line, SMS can interpret files.
 Run `sms -h` for command line options.
@@ -58,15 +56,25 @@ Contexts can be nested:
 
 `nested = { example = { x = [ 1, "two" ]; }; k = 5.123; } ;`
 
+Access fields of objects:
+
+`nested.example.x`
+
+Access array elements:
+
+`x = [ 1, "two" , "3" ];`
+
+`x[2]`
+
 Variables can be removed from the current context:
 
-`rm c;`
+`rm x;`
 
 Exit the program with:
 
 `exit; `
 
-The above features are premature because, though we can create nested objects and nested arrays, there is no way to refer to things inside an object from the outside and there is no way to access the elements of an array. As these features are added, this README will be updated. On the other hand, the anonymous functions can be created and called to make complex procedures already. Just note that type checking is essentially not being done for function calls, so we have undefined behaviour for errors like `"notANumber" + 5`;
+SMS still lacks a package management system and proper type checking. As these features are added, this README will be updated. Just note that type checking is essentially not being done for function calls, so we have undefined behaviour for errors like `"notANumber" + 5`;
 
 
 # FEATURES:

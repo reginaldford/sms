@@ -4,7 +4,7 @@
 
 sm_error *sm_new_error(sm_string *message, sm_string *source, unsigned int line) {
   sm_error *new_error = sm_malloc(sizeof(sm_error));
-  new_error->my_type  = sm_error_type;
+  new_error->my_type  = SM_ERROR_TYPE;
   new_error->message  = message;
   new_error->source   = source;
   new_error->line     = line;

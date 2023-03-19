@@ -11,20 +11,20 @@
 // These are the major object types of SMS
 // Keep syncronized with function sm_object_type_str
 enum sm_object_type {
-  sm_double_type,    // 0
-  sm_expr_type,      // 1
-  sm_primitive_type, // 2
-  sm_string_type,    // 3
-  sm_symbol_type,    // 4
-  sm_context_type,   // 5
-  sm_pointer_type,   // 6
-  sm_meta_type,      // 7
-  sm_space_type,     // 8
-  sm_fun_type,       // 9
-  sm_fun_param_type, // 10
-  sm_local_type,     // 11
-  sm_error_type,     // 12
-  sm_unknown_type    // 13
+  SM_DOUBLE_TYPE,    // 0
+  SM_EXPR_TYPE,      // 1
+  SM_PRIMITIVE_TYPE, // 2
+  SM_STRING_TYPE,    // 3
+  SM_SYMBOL_TYPE,    // 4
+  SM_CONTEXT_TYPE,   // 5
+  SM_POINTER_TYPE,   // 6
+  SM_META_TYPE,      // 7
+  SM_SPACE_TYPE,     // 8
+  SM_FUN_TYPE,       // 9
+  SM_FUN_PARAM_TYPE, // 10
+  SM_LOCAL_TYPE,     // 11
+  SM_ERROR_TYPE,     // 12
+  SM_UNKNOWN_TYPE    // 13
 };
 
 // Useful macros
