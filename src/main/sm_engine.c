@@ -40,7 +40,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_string *field_name = field_sym->name;
       if (base_obj->my_type != SM_CONTEXT_TYPE) {
         sm_string *base_str = sm_object_to_string(base_obj);
-        printf("Base of dot expression is not a context: %s\n", &(base_str->content));
+        printf("Attempting to apply . to an object that is not a context: %s\n",
+               &(base_str->content));
         return (sm_object *)sm_new_double(0);
       }
       sm_context                *base_cx = (sm_context *)base_obj;
@@ -52,6 +53,20 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         return (sm_object *)sm_new_double(0);
       }
       return sm_context_entries(sr.context)[sr.index].value;
+    }
+    case SM_PARENT_EXPR: {
+      sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (base_obj->my_type != SM_CONTEXT_TYPE) {
+        sm_string *base_str = sm_object_to_string(base_obj);
+        printf("Attempting to apply .. to an object that is not a context: %s\n",
+               &(base_str->content));
+        return (sm_object *)sm_new_double(0);
+      }
+      sm_context *cx = (sm_context *)base_obj;
+      if (cx->parent == NULL) {
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      }
+      return (sm_object *)cx->parent;
     }
     case SM_DIFF_EXPR: {
       sm_object *evaluated0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
