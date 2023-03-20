@@ -92,8 +92,7 @@ void _lex_cstr(char * cstr,int len);
 %left '^'
 %left ':'
 %left DOT
-
-
+%left PARENT
 %%
 
 
@@ -174,6 +173,9 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 }
 | EXPR '[' EXPR ']' {
   $$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);
+}
+| PARENT '(' EXPR ')' {
+  $$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);
 }
 
 FUN : FUN_INTRO EXPR {

@@ -21,6 +21,7 @@ digit [0-9]
 exit        {return EXIT;}
 clear       {return CLEAR;}
 "."         {return DOT;}
+"parent"        {return PARENT;}
 let         {return LET;}
 self        {return SELF;}
 if          {return IF;}
