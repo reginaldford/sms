@@ -40,6 +40,10 @@ Call the function with familiar syntax:
 
 `wave(4);`
 
+See the variables you have set with the self command:
+
+`self;`
+
 Take the derivative of any math expression:
 
 `diff(:sin(x),:x);`
@@ -60,11 +64,19 @@ Access fields of objects:
 
 `nested.example.x`
 
+Obtain the parent of an object:
+
+`self.parent`
+
+If statements:
+
+`if(nested.example.x[0] == 1, "It's a 1","It's not a 1");`
+
 Access array elements:
 
 `x = [ 1, "two" , "3" ];`
 
-`x[2]`
+`x[2];`
 
 Variables can be removed from the current context:
 
@@ -72,9 +84,11 @@ Variables can be removed from the current context:
 
 Exit the program with:
 
-`exit; `
+`exit;`
 
-SMS still lacks a package management system and proper type checking. As these features are added, this README will be updated. Just note that type checking is essentially not being done for function calls, so we have undefined behaviour for errors like `"notANumber" + 5`;
+Array element access, field access, parent command, diff, and simp are all new and will be in the 0.15 release.
+SMS still lacks a package management system, proper type checking, and many features of a more mature language. As these features are added, this README will be updated.
+Type checking is essentially not being done for function calls, so we have undefined behaviour for errors like `"notANumber" + 5`;
 
 
 # FEATURES:
