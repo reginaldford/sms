@@ -75,12 +75,13 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> LN
 %token <expr> EXP
 %token <expr> SQRT
-%token <expr> DIFF
-%token <expr> SIMP
 %token <expr> RM
 %token <expr> LET
 %token <expr> NOT
 %token <expr> ABS
+%token <expr> DIFF
+%token <expr> SIMP
+%token <expr> MAP
 %token DONE
 
 %left ';'
@@ -153,6 +154,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | ABS '(' EXPR ')' { $$ = sm_new_expr(SM_ABS_EXPR, (sm_object *)$3); }
 | DIFF '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_DIFF_EXPR, (sm_object *)$3, (sm_object *)$5); }
 | SIMP '(' EXPR ')' { $$ = sm_new_expr(SM_SIMP_EXPR, (sm_object *)$3); }
+| MAP '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_MAP_EXPR,(sm_object*)$3,(sm_object*)$5); }
 | EXPR_LIST ')' {}
 | CONTEXT{}
 | ARRAY{}

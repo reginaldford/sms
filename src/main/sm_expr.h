@@ -2,45 +2,46 @@
 
 // Denotes the type of expression
 enum SM_EXPR_TYPE {
-  SM_PLUS_EXPR,
-  SM_MINUS_EXPR,
-  SM_TIMES_EXPR,
-  SM_DIVIDE_EXPR,
-  SM_SQRT_EXPR,
-  SM_SIN_EXPR,
-  SM_COS_EXPR,
-  SM_TAN_EXPR,
-  SM_SINH_EXPR,
-  SM_COSH_EXPR,
-  SM_TANH_EXPR,
-  SM_POW_EXPR,
-  SM_CSC_EXPR,
-  SM_SEC_EXPR,
-  SM_COT_EXPR,
-  SM_CSCH_EXPR,
-  SM_SECH_EXPR,
-  SM_COTH_EXPR,
-  SM_LN_EXPR,
-  SM_EXP_EXPR,
-  SM_ABS_EXPR,
-  SM_DIFF_EXPR,
-  SM_SIMP_EXPR,
-  SM_ASSIGN_EXPR,
-  SM_TEST_EQ_EXPR,
-  SM_TEST_LT_EXPR,
-  SM_TEST_GT_EXPR,
-  SM_IF_EXPR,
-  SM_IF_ELSE_EXPR,
-  SM_LET_EXPR,
-  SM_THEN_EXPR,
-  SM_ARRAY_EXPR,
-  SM_SIBLINGS_EXPR,
-  SM_PRIM_EXPR,
-  SM_PARAM_LIST_EXPR,
-  SM_FUN_CALL_EXPR,
-  SM_DOT_EXPR,
-  SM_PARENT_EXPR,
-  SM_INDEX_EXPR
+  SM_PLUS_EXPR,       // 0
+  SM_MINUS_EXPR,      // 1
+  SM_TIMES_EXPR,      // 2
+  SM_DIVIDE_EXPR,     // 3
+  SM_SQRT_EXPR,       // 4
+  SM_SIN_EXPR,        // 5
+  SM_COS_EXPR,        // 6
+  SM_TAN_EXPR,        // 7
+  SM_SINH_EXPR,       // 8
+  SM_COSH_EXPR,       // 9
+  SM_TANH_EXPR,       // 10
+  SM_POW_EXPR,        // 11
+  SM_CSC_EXPR,        // 12
+  SM_SEC_EXPR,        // 13
+  SM_COT_EXPR,        // 14
+  SM_CSCH_EXPR,       // 15
+  SM_SECH_EXPR,       // 16
+  SM_COTH_EXPR,       // 17
+  SM_LN_EXPR,         // 18
+  SM_EXP_EXPR,        // 19
+  SM_ABS_EXPR,        // 20
+  SM_DIFF_EXPR,       // 21
+  SM_SIMP_EXPR,       // 22
+  SM_ASSIGN_EXPR,     // 23
+  SM_TEST_EQ_EXPR,    // 24
+  SM_TEST_LT_EXPR,    // 25
+  SM_TEST_GT_EXPR,    // 26
+  SM_IF_EXPR,         // 27
+  SM_IF_ELSE_EXPR,    // 28
+  SM_LET_EXPR,        // 29
+  SM_THEN_EXPR,       // 30
+  SM_ARRAY_EXPR,      // 31
+  SM_SIBLINGS_EXPR,   // 32
+  SM_PRIM_EXPR,       // 33
+  SM_PARAM_LIST_EXPR, // 34
+  SM_FUN_CALL_EXPR,   // 35
+  SM_DOT_EXPR,        // 36
+  SM_PARENT_EXPR,     // 37
+  SM_INDEX_EXPR,      // 38
+  SM_MAP_EXPR         // 39
 };
 
 // Head of an expression

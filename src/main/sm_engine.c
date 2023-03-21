@@ -9,6 +9,35 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_MAP_EXPR: {
+      // expecting a unary func
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj0->my_type != SM_FUN_TYPE) {
+        sm_string *obj_str = sm_object_to_string(obj0);
+        char      *cstr    = &(obj_str->content);
+        printf("Error: First argument to map should be a function. Instead, %s was provided.\n",
+               cstr);
+        return (sm_object *)sm_new_double(0);
+      }
+      if (obj1->my_type != SM_EXPR_TYPE) {
+        sm_string *obj_str = sm_object_to_string(obj1);
+        char      *cstr    = &(obj_str->content);
+        printf("Error: Second argument to map should be an expression or array. Instead, %s was "
+               "provided.\n",
+               cstr);
+        return (sm_object *)sm_new_double(0);
+      }
+      sm_fun  *fun    = (sm_fun *)obj0;
+      sm_expr *arr    = (sm_expr *)obj1;
+      sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size);
+      for (unsigned int i = 0; i < arr->size; i++) {
+        sm_object *current_obj = sm_expr_get_arg(arr, i);
+        sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj);
+        sm_expr_set_arg(output, i, sm_engine_eval(fun->content, fun->parent, new_sf));
+      }
+      return (sm_object *)output;
+    }
     case SM_INDEX_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (base_obj->my_type != SM_EXPR_TYPE) {
@@ -26,9 +55,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         printf("Error: Array index is not a number: %s\n", cstr);
         return (sm_object *)sm_new_double(0);
       }
-      sm_double *index_double = (sm_double *)index_obj;
-      int        index        = (int)index_double->value;
-      if (arr->size < index + 1 || index < 0) {
+      sm_double   *index_double = (sm_double *)index_obj;
+      unsigned int index        = (int)index_double->value;
+      if (arr->size < index + 1 || index_double->value < 0) {
         printf("Error: Index out of range: %i\n", index);
         return (sm_object *)sm_new_double(0);
       }

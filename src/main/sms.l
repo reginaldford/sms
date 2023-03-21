@@ -46,6 +46,7 @@ simp        {return SIMP;}
 rm          {return RM;}
 ==          {return EQEQ;}
 =>          {return ARROW;}
+map         {return MAP;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 
