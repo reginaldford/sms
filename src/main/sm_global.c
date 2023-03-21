@@ -92,11 +92,11 @@ char *sm_global_fn_name(unsigned short int which) {
   const unsigned short int num_functions = sm_global_num_fns();
 
   // Should be syncronized with enum SM_EXPR_TYPE
-  static char *response[] = {"+",        "-",    "*",    "/",   "sqrt", "sin",    "cos",  "tan",
-                             "sinh",     "cosh", "tanh", "^",   "csc",  "sec",    "cot",  "csch",
-                             "sech",     "coth", "ln",   "exp", "abs",  "diff",   "simp", "=",
-                             "==",       "<",    ">",    "if",  "if",   "let",    "",     "",
-                             "siblings", "prim", "",     "",    ".",    "parent", "",     "?"};
+  static char *response[] = {
+    "+",    "-",   "*",   "/",   "sqrt",   "sin",  "cos",  "tan", "sinh", "cosh", "tanh",
+    "^",    "csc", "sec", "cot", "csch",   "sech", "coth", "ln",  "exp",  "abs",  "diff",
+    "simp", "=",   "==",  "<",   ">",      "if",   "if",   "let", "",     "",     "siblings",
+    "prim", "",    "",    ".",   "parent", "map",  "",     "?"};
   if (which >= num_functions) {
     return response[num_functions];
   }
@@ -107,7 +107,7 @@ char *sm_global_fn_name(unsigned short int which) {
 unsigned int sm_global_fn_name_len(unsigned short int which) {
   static long unsigned int response_len[] = {1, 1, 1, 1, 4, 3, 3, 3, 4, 4, 4, 1, 3, 3,
                                              3, 4, 4, 4, 2, 3, 3, 4, 4, 1, 2, 1, 1, 2,
-                                             2, 3, 0, 0, 8, 4, 0, 0, 1, 6, 0, 1};
+                                             2, 3, 0, 0, 8, 4, 0, 0, 1, 6, 3, 0, 1};
   if (which >= sm_global_num_fns()) {
     return 1; // "?"
   }
@@ -115,7 +115,7 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
 }
 
 unsigned int sm_global_num_fns() {
-  static const unsigned short int num_fns = 40;
+  static const unsigned short int num_fns = 41;
   return num_fns;
 }
 
