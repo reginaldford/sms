@@ -307,11 +307,11 @@ sm_expr *apply_constants11(sm_expr *e) {
           sm_double *d1 = (sm_double *)obj1;
           int        i0 = (int)d0->value;
           int        i1 = (int)d1->value;
-          if (i0 == d0->value && i1 == d1->value && i1 % i0 == 0) {
-            return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_double(1),
-                                            (sm_object *)sm_new_double(i1 / i0));
+          if (i0 == d0->value && i1 == d1->value && i0 % i1 == 0) {
+            return (sm_expr *)((sm_object *)sm_new_double(i0 / i1));
           } else
-            return (sm_expr *)sm_new_double(d0->value / d1->value);
+            return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_double(i0),
+                                            (sm_object *)sm_new_double(i1));
         }
       }
     }
@@ -374,6 +374,89 @@ sm_expr *apply_constants13(sm_expr *e) {
     return e;
 }
 
+// a / b , check if sm_object_eq(a,b), if so, return 1
+sm_expr *apply_constants14(sm_expr *e) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    if (e->op == SM_DIVIDE_EXPR) {
+      sm_object *obj0 = sm_expr_get_arg(e, 0);
+      sm_object *obj1 = sm_expr_get_arg(e, 1);
+      if (sm_object_eq(obj0, obj1)) {
+        return (sm_expr *)((sm_object *)sm_new_double(1));
+      }
+    }
+    sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size);
+    for (unsigned int i = 0; i < e->size; i++) {
+      sm_expr *current_obj = (sm_expr *)sm_expr_get_arg(e, i);
+      sm_expr_append(new_expr, (sm_object *)apply_constants14(current_obj));
+    }
+    return new_expr;
+  } else
+    return e;
+}
+
+// return the first element (starting at pos) of this type or -1
+unsigned int find_next_not(sm_expr *e, unsigned int pos, unsigned short int t) {
+  for (unsigned int i = pos + 1; i < e->size; i++) {
+    sm_object *current_obj = sm_expr_get_arg(e, i);
+    if (current_obj->my_type != t) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+// +(...) or *(...) put all constants on the left and apply
+sm_expr *apply_constants15(sm_expr *e) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size);
+    if (e->op == SM_PLUS_EXPR || e->op == SM_TIMES_EXPR) {
+      unsigned int double_locations[e->size];
+      unsigned int num_count = 0;
+      for (unsigned int j = 0; j < e->size; j++) {
+        sm_object *current_obj = sm_expr_get_arg(e, j);
+        if (current_obj->my_type == SM_DOUBLE_TYPE) {
+          double_locations[num_count++] = j;
+        }
+      }
+      // put numbers first, unified
+      if (num_count > 0) {
+        unsigned int num_index;
+        double       calculation = 0;
+        if (e->op == SM_TIMES_EXPR)
+          calculation = 1;
+        for (num_index = 0; num_index < num_count; num_index++) {
+          sm_double *current_num = (sm_double *)sm_expr_get_arg(e, double_locations[num_index]);
+          if (e->op == SM_PLUS_EXPR)
+            calculation += current_num->value;
+          else
+            calculation *= current_num->value;
+        }
+        sm_expr_append(new_expr, (sm_object *)sm_new_double(calculation));
+      }
+      // then add the rest
+      unsigned int next_not = -1;
+      for (unsigned int last_i = num_count; last_i < e->size; last_i++) {
+        next_not = find_next_not(e, next_not, SM_DOUBLE_TYPE);
+        sm_expr_append(new_expr, sm_expr_get_arg(e, next_not));
+      }
+      return new_expr;
+    }
+    for (unsigned int i = 0; i < e->size; i++) {
+      sm_expr *current_obj = (sm_expr *)sm_expr_get_arg(e, i);
+      sm_expr_append(new_expr, (sm_object *)apply_constants15(current_obj));
+    }
+    return new_expr;
+  }
+  return e;
+}
+
+// More simplifications:
+//  a + -1 * b = a - b
+//+(a,*(-1,...))=-(a,....)
+//+(+(..),..)=+(..,..)
+// a * b * c == *(a , b , c)
+
+
 // Run each simplifier until the expression stops changing.
 sm_object *sm_simplify(sm_object *obj) {
   sm_expr *result      = (sm_expr *)obj;
@@ -394,6 +477,8 @@ sm_object *sm_simplify(sm_object *obj) {
     result      = apply_constants11(result);
     result      = apply_constants12(result);
     result      = apply_constants13(result);
+    result      = apply_constants14(result);
+    result      = apply_constants15(result);
   } while (sm_object_eq((sm_object *)last_result, (sm_object *)result) == false);
   return (sm_object *)result;
 }
