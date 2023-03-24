@@ -28,7 +28,7 @@ In SMS, whitespace characters (outside of strings) are ignored. All commands end
 # Features
 
 Check out `sms_src/example.sms` for example functions and ideas.
-You can also run `sms -i example.sms` to have a calculator loaded with some useful functions and constants.
+You can also run `sms -i example.sms` load SMS with useful functions and constants.
 
 In addition to the mathematical ideas covered in the example file, SMS has ambitions to be a general purpose programming language. Hence, SMS has premature general purpose programming features that will be embellished further in the near future:
 
@@ -72,6 +72,10 @@ If statements:
 
 `if(nested.example.x[0] == 1, "It's a 1","It's not a 1");`
 
+Map statements:
+
+`map((x)=>x^2+1,[1,2,3,4]);`
+
 Access array elements:
 
 `x = [ 1, "two" , "3" ];`
@@ -92,19 +96,18 @@ Type checking is essentially not being done for function calls, so we have undef
 
 
 # FEATURES:
-- [x] Mathematical evaluation. Commands like a=4*sin(3.14/8) will evaluate to a double precision decimal number.
-- [x] Copying garbage collector.
+- [x] Mathematical evaluation. Commands like `a=4*sin(3.14/8);` will evaluate to a double precision decimal number.
+- [x] Copying garbage collector. Allows for the entire program memory to compact itself into a small contiguous block after each command.
 - [x] Lexical scope.
 - [x] Command line flags to run scripts or initialize into a loaded REPL.
 - [x] Useful example.sms file with common conversion functions and constants.
 - [x] Custom memory heap size can be set from 100 kilobytes to 1 terrabyte.
 - [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
-- [x] Fast string manipulation techniques, that avoid unsafe character iteration algorithms.
-- [x] Only 2 uses of malloc in the interpreter: for the 2 heaps of the copying GC algorithm.
-- [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing.
+- [x] Safe and fast internal string manipulations, with no character counting and no intermediate buffers for expression printing.
+- [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing. For now, you can use `if` for conditionals and `map` (examples above);
 - [x] Recursive function calls.
-- [x] Local variables store an array index to their location in the stack frame. This is much faster than binary search.
-- [x] The maximum capacity for strings, arrays, and contexts is remarkably high. Generally, if a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters or: 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
+- [x] Local variables are implemented as array indices, making them fast.
+- [x] Huge expressions can be parsed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters or: 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
 - [x] A `diff` command for taking derivatives. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
 - [x] A `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
 
