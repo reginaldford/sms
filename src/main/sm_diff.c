@@ -53,6 +53,12 @@ bool has_symbol(sm_expr *self, sm_symbol *sym) {
     default:
       return false;
     }
+  }
+  case SM_SYMBOL_TYPE: {
+    sm_symbol *self_sym = (sm_symbol *)self;
+    if (sm_symbol_equal(self_sym, sym)) {
+      return true;
+    }
   default:
     return false;
   }
@@ -79,17 +85,27 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       return sm_diff(sm_diff(to_diff_twice, wrt), wrt);
     }
     case SM_POW_EXPR: {
-      if (has_symbol(expr, wrt)) {
-        sm_object *obj0 = sm_expr_get_arg(expr, 0);
-        sm_object *obj1 = sm_expr_get_arg(expr, 1);
-        //!! figure out it it's x^y or y^x, return accordingly
-        //!! or maybe it's both?
-        // if(has_symbol((sm_expr*)obj0,wrt)==true && has_symbol((sm_expr*)obj1,wrt)==false){
+      sm_object *obj0     = sm_expr_get_arg(expr, 0);
+      sm_object *obj1     = sm_expr_get_arg(expr, 1);
+      bool       obj0_has = has_symbol((sm_expr *)obj0, wrt);
+      bool       obj1_has = has_symbol((sm_expr *)obj1, wrt);
+      if (obj0_has && !obj1_has) {
         sm_object *deducted_expr =
           (sm_object *)sm_new_expr_2(SM_MINUS_EXPR, obj1, (sm_object *)sm_new_double(1));
         return (sm_object *)sm_new_expr_2(
           SM_TIMES_EXPR, obj1, (sm_object *)sm_new_expr_2(SM_POW_EXPR, obj0, deducted_expr));
-        // }
+      } else if (!obj0_has && obj1_has) {
+        sm_expr *ln_expr = sm_new_expr(SM_LN_EXPR, obj0);
+        sm_expr *result  = sm_new_expr_2(SM_TIMES_EXPR, obj0, (sm_object *)ln_expr);
+        return (sm_object *)result;
+      } else if (obj0_has && obj1_has) {
+        // solution is base^x*(x/base+ln(base))
+        sm_expr *p1 = sm_new_expr_2(SM_POW_EXPR, obj0, (sm_object *)wrt);
+        sm_expr *p2 = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)wrt, obj0);
+        sm_expr *p3 = sm_new_expr(SM_LN_EXPR, obj0);
+        sm_expr *p4 = sm_new_expr_2(SM_PLUS_EXPR, (sm_object *)p2, (sm_object *)p3);
+        sm_expr *p5 = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)p1, (sm_object *)p4);
+        return (sm_object *)p5;
       }
       return (sm_object *)sm_new_double(0);
     }
