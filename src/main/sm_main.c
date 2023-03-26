@@ -85,9 +85,11 @@ int main(int num_args, char **argv) {
     }
     sm_object *evaluated =
       sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-    sm_string *response = sm_object_to_string(evaluated);
-    printf("%s\n", &(response->content));
-    fflush(stdout);
+    if (evaluated != NULL) {
+      sm_string *response = sm_object_to_string(evaluated);
+      printf("%s\n", &(response->content));
+      fflush(stdout);
+    }
     sm_signal_handler(SIGQUIT);
   }
   start_repl();

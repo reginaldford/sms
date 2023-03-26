@@ -9,6 +9,19 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_SIZE_EXPR: {
+      sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (base_obj->my_type != SM_EXPR_TYPE) {
+        sm_string *str  = sm_object_to_string(base_obj);
+        char      *cstr = &(str->content);
+        printf(
+          "Error: Size function is applied to an object that is not an array or expression: %s\n",
+          cstr);
+        return (sm_object *)sm_new_double(-1);
+      }
+      sm_expr *arr = (sm_expr *)base_obj;
+      return (sm_object *)sm_new_double(arr->size);
+    }
     case SM_MAP_EXPR: {
       // expecting a unary func
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -87,7 +100,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (base_obj->my_type != SM_CONTEXT_TYPE) {
         sm_string *base_str = sm_object_to_string(base_obj);
-        printf("Attempting to apply .. to an object that is not a context: %s\n",
+        printf("Attempting to obtain parent of an object that is not a context: %s\n",
                &(base_str->content));
         return (sm_object *)sm_new_double(0);
       }
