@@ -41,7 +41,8 @@ enum SM_EXPR_TYPE {
   SM_DOT_EXPR,        // 36
   SM_PARENT_EXPR,     // 37
   SM_INDEX_EXPR,      // 38
-  SM_MAP_EXPR         // 39
+  SM_MAP_EXPR,        // 39
+  SM_SIZE_EXPR        // 40
 };
 
 // Head of an expression

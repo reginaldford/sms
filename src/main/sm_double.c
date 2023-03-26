@@ -35,4 +35,9 @@ unsigned int sm_double_sprint(sm_double *self, char *buffer, bool fake) {
 
 // Return the number of digits in this double
 // You can cast an int to a double and use this for ints
-int sm_double_len(double a) { return 1 + (int)(log(a) / log(10)); }
+int sm_double_len(double a) {
+  if (a >= 0)
+    return a == 0 ? 1 : 1 + (int)(log(a) / log(10));
+  else
+    return a == 0 ? 2 : 2 + (int)(log(-1 * a) / log(10));
+}

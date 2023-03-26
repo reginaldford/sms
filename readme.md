@@ -7,7 +7,7 @@ Run `sms -h` for command line options.
 
 Contexts are user defined objects with key-value pairs. Creating and running functions in SMS appears much like javascript's arrow-function syntax. Where javascript would have `Math.sqrt`, SMS has `sqrt`.
 
-SMS has the following built-in functions so far (in double precision):
+SMS has the following built-in functions (math operations are in double precision):
 
 Arithmetical operations: `+, -, *, /, ^, ln, exp, abs,  sqrt` 
 
@@ -28,7 +28,7 @@ In SMS, whitespace characters (outside of strings) are ignored. All commands end
 # Features
 
 Check out `sms_src/example.sms` for example functions and ideas.
-You can also run `sms -i example.sms` load SMS with useful functions and constants.
+You can also run `sms -i example.sms` to load SMS with useful functions and constants.
 
 In addition to the mathematical ideas covered in the example file, SMS has ambitions to be a general purpose programming language. Hence, SMS has premature general purpose programming features that will be embellished further in the near future:
 
@@ -81,6 +81,10 @@ Access array elements:
 `x = [ 1, "two" , "3" ];`
 
 `x[2];`
+
+Get the size of an array:
+
+`size(x);`
 
 Variables can be removed from the current context:
 

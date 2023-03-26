@@ -82,6 +82,9 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> DIFF
 %token <expr> SIMP
 %token <expr> MAP
+%token <expr> PARENT
+%token <expr> SIZE
+
 %token DONE
 
 %left ';'
@@ -93,7 +96,6 @@ void _lex_cstr(char * cstr,int len);
 %left '^'
 %left ':'
 %left DOT
-%left PARENT
 %%
 
 
@@ -178,6 +180,9 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 }
 | PARENT '(' EXPR ')' {
   $$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);
+}
+| SIZE '(' EXPR ')' {
+  $$ = sm_new_expr(SM_SIZE_EXPR,(sm_object*)$3);
 }
 
 FUN : FUN_INTRO EXPR {
