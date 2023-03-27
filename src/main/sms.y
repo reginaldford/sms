@@ -84,6 +84,9 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> MAP
 %token <expr> PARENT
 %token <expr> SIZE
+%token <expr> WHILE
+%token <expr> PRINT
+%token <expr> TO_STRING
 
 %token DONE
 
@@ -169,21 +172,14 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | LT{}
 | GT{}
 | SEQUENCE {}
-| SYM DOT SYM {
-  $$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);
-}
-| EXPR DOT SYM {
-  $$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);
-}
-| EXPR '[' EXPR ']' {
-  $$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);
-}
-| PARENT '(' EXPR ')' {
-  $$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);
-}
-| SIZE '(' EXPR ')' {
-  $$ = sm_new_expr(SM_SIZE_EXPR,(sm_object*)$3);
-}
+| SYM DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
+| EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
+| EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
+| PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);}
+| SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_SIZE_EXPR,(sm_object*)$3);}
+| WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| PRINT '(' EXPR ')' {$$ = sm_new_expr(SM_PRINT_EXPR,(sm_object*)$3);}
+| TO_STRING '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local

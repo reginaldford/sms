@@ -2,6 +2,16 @@
 
 #include "sms.h"
 
+bool is_true(sm_object *obj) {
+  if (obj->my_type == SM_SYMBOL_TYPE) {
+    sm_symbol *sym = (sm_symbol *)obj;
+    if (strncmp(&(sym->name->content), "true", 4) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Recursive engine, uses the C stack for the SMS stack
 sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf) {
   switch (input->my_type) {
@@ -9,6 +19,32 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_TO_STRING_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_object_to_string(evaluated);
+      break;
+    }
+    case SM_PRINT_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (evaluated->my_type != SM_STRING_TYPE) {
+        sm_string *obj_str = sm_object_to_string(evaluated);
+        char      *cstr    = &(obj_str->content);
+        printf("Error: Trying to print something that is not a string: %s\n", cstr);
+      }
+      sm_string *smstr = (sm_string *)evaluated;
+      printf("%s", &(smstr->content));
+      return evaluated;
+      break;
+    }
+    case SM_WHILE_EXPR: {
+      sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 0);
+      sm_object *expression = sm_expr_get_arg(sme, 1);
+      while (is_true(sm_engine_eval((sm_object *)condition, current_cx, sf))) {
+        sm_engine_eval(expression, current_cx, sf);
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      break;
+    }
     case SM_SIZE_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (base_obj->my_type != SM_EXPR_TYPE) {

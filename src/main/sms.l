@@ -48,6 +48,9 @@ rm          {return RM;}
 =>          {return ARROW;}
 map         {return MAP;}
 size        {return SIZE;}
+while       {return WHILE;}
+print       {return PRINT;}
+to_string   {return TO_STRING;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 
