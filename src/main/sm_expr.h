@@ -40,9 +40,9 @@ enum SM_EXPR_TYPE {
   SM_FUN_CALL_EXPR,   // 35
   SM_DOT_EXPR,        // 36
   SM_PARENT_EXPR,     // 37
-  SM_INDEX_EXPR,      // 38
+  SM_SIZE_EXPR,       // 38
   SM_MAP_EXPR,        // 39
-  SM_SIZE_EXPR,       // 40
+  SM_INDEX_EXPR,      // 40
   SM_WHILE_EXPR,      // 41
   SM_PRINT_EXPR,      // 42
   SM_TO_STRING_EXPR,  // 43
