@@ -1,13 +1,13 @@
 # Introduction:
 
-SMS (Symbolic Math System) is a terminal based calculator that can perform double-precision arithmetic, trigonometry, and symbolic differentiation. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS has built-in functions for arithmetic operations, flow control, trigonometry, algebra, and calculus. SMS has features such as a garbage collector, anonymous functions, contexts (user-defined objects), and custom memory heap size. SMS is Turing complete and will eventually have a full standard library to support most scientific computing needs. SMS can be downloaded and installed from the Releases page on GitHub. 
+SMS (Symbolic Math System) is a terminal based calculator. SMS has built-in functions for arithmetic operations, flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. 
 
 In addition to providing a command line, SMS can interpret files.
 Run `sms -h` for command line options.
 
-Unlike Javascript, Math functions in SMS are immutable first-class global keywords.
+Unlike Javascript, Math functions in SMS are global keywords.
 
-For example, taking a square root in javascript may look like `Math.sqrt(x)`. In SMS, this function is permanently available as  `sqrt(x)`.
+For example, taking a square root in javascript may look like `Math.sqrt(x)`. In SMS, this same function is permanently available as  `sqrt(x)`.
 
 SMS has the following built-in functions (math operations are in double precision):
 
@@ -19,7 +19,7 @@ Trigonometry: `sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sech, csch, coth`
 
 Algebra: `simp` for simplifying expressions. Uses a multipass algorithm, which is constantly being improved.
 
-Calculus: `diff` for taking derivatives. Example below.
+Calculus: `diff` for taking derivatives.
 
 # HOW TO DOWNLOAD & RUN / Install
 - At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
@@ -67,7 +67,7 @@ In SMS, whitespace characters (outside of strings) are ignored. All commands end
 - [x] Custom memory heap size can be set from 100 kilobytes to 1 terrabyte.
 - [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
 - [x] Safe and fast internal string manipulations, with no character counting and no intermediate buffers for expression printing.
-- [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing. For now, you can use `if` for conditionals and `map` (examples above);
+- [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing. For now, you can use `if` for conditionals and `map` (examples below);
 - [x] Recursive function calls.
 - [x] Local variables are implemented as array indices, making them fast.
 - [x] Huge expressions can be parsed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters or: 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
@@ -165,5 +165,4 @@ Check out `sms_src/example.sms` for example functions and ideas.
 You can also run `sms -i example.sms` to load SMS with useful functions and constants.
 
 Array element access, field access,`size`,`parse`,`eval`, `parent`, `diff`,`simp` are not in the 0.14 release and will be in the 0.15 release.
-SMS still lacks a package management system, proper syntax error reporting, and many other features of a mature scripting language.
-As these features are added, this README will be updated.
+SMS still lacks a package management system, proper syntax error reporting, and many other features of a mature scripting language. As these features are added, this README will be updated.
