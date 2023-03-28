@@ -46,6 +46,7 @@ enum SM_EXPR_TYPE {
   SM_WHILE_EXPR,      // 41
   SM_PRINT_EXPR,      // 42
   SM_TO_STRING_EXPR,  // 43
+  SM_EVAL_EXPR,       // 43
   SM_UNKNOWN_EXPR     // 44
 };
 
