@@ -18,7 +18,7 @@ sm_parse_result sm_parse_more() {
   return (sm_parse_result){.return_val = result, .parsed_object = sm_global_parser_output(NULL)};
 }
 
-// Parse a null-terminated string
+// Parse a string with known length
 sm_parse_result sm_parse_cstr(char *cstr, int len) {
   lex_cstr(cstr, len);
   int result = yyparse();

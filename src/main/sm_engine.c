@@ -19,6 +19,24 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_PARSE_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (evaluated->my_type != SM_STRING_TYPE) {
+        sm_string *obj_str = sm_object_to_string((sm_object *)evaluated);
+        char      *cstr    = &(obj_str->content);
+        printf("Attempting to parse something that is not a string: %s\n", cstr);
+      }
+      sm_string *str     = (sm_string *)evaluated;
+      char      *cstr    = &(str->content);
+      cstr[str->size]    = ';'; // Temporarily replacing the NULL char
+      sm_parse_result pr = sm_parse_cstr(cstr, str->size + 1);
+      cstr[str->size]    = '\0'; // Place the null char back
+      if (pr.return_val != 0) {
+        printf("Error: Parser failed and returned %i\n", pr.return_val);
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      } else
+        return pr.parsed_object;
+    }
     case SM_TO_STRING_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_object_to_string(evaluated);
@@ -318,8 +336,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     }
     case SM_IF_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_symbol *sym              = (sm_symbol *)condition_result;
-      if (strncmp(&(sym->name->content), "true", 4) == 0) {
+      if (is_true(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
       return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
@@ -330,8 +347,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (condition_result->my_type != SM_SYMBOL_TYPE) {
         return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       }
-      sm_symbol *sym = (sm_symbol *)condition_result;
-      if (strncmp(&(sym->name->content), "true", 4) == 0) {
+      if (is_true(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);

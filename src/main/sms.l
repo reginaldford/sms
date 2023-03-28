@@ -52,6 +52,10 @@ while       {return WHILE;}
 print       {return PRINT;}
 to_string   {return TO_STRING;}
 eval        {return EVAL;}
+parse       {return PARSE;}
+parse_file  {return PARSE_FILE;}
+read_file   {return READ_FILE;}
+write_file  {return WRITE_FILE;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 

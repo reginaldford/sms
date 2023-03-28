@@ -46,8 +46,12 @@ enum SM_EXPR_TYPE {
   SM_WHILE_EXPR,      // 41
   SM_PRINT_EXPR,      // 42
   SM_TO_STRING_EXPR,  // 43
-  SM_EVAL_EXPR,       // 43
-  SM_UNKNOWN_EXPR     // 44
+  SM_EVAL_EXPR,       // 44
+  SM_PARSE_EXPR,      // 45
+  SM_PARSE_FILE_EXPR, // 46
+  SM_READ_FILE_EXPR,  // 47
+  SM_WRITE_FILE_EXPR, // 48
+  SM_UNKNOWN_EXPR     // 49
 };
 
 // Head of an expression
