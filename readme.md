@@ -1,11 +1,13 @@
-# Intro:
+# Introduction:
 
-SMS (Symbolic Math System) is a calculator that can perform double-precision arithmetic, trigonometry, and symbolic differentiation. It aims to become a simple untyped programming language that focuses on mathematics and speed. SMS has built-in functions for arithmetic operations, flow control, trigonometry, algebra, and calculus. SMS has features like anonymous functions, contexts, and custom memory heap size. It is Turing complete and will eventually have standard libraries. SMS can be downloaded and installed from the Releases page on GitHub. 
+SMS (Symbolic Math System) is a terminal based calculator that can perform double-precision arithmetic, trigonometry, and symbolic differentiation. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS has built-in functions for arithmetic operations, flow control, trigonometry, algebra, and calculus. SMS has features such as a garbage collector, anonymous functions, contexts (user-defined objects), and custom memory heap size. SMS is Turing complete and will eventually have a full standard library to support most scientific computing needs. SMS can be downloaded and installed from the Releases page on GitHub. 
 
 In addition to providing a command line, SMS can interpret files.
 Run `sms -h` for command line options.
 
-Contexts are user defined objects with key-value pairs. Creating and running functions in SMS appears much like javascript's arrow-function syntax. Where javascript would have `Math.sqrt`, SMS has `sqrt`.
+Unlike Javascript, Math functions in SMS are immutable first-class global keywords.
+
+For example, taking a square root in javascript may look like `Math.sqrt(x)`. In SMS, this function is permanently available as  `sqrt(x)`.
 
 SMS has the following built-in functions (math operations are in double precision):
 
@@ -22,15 +24,80 @@ Calculus: `diff` for taking derivatives. Example below.
 # HOW TO DOWNLOAD & RUN / Install
 - At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
 
+
+# How to Compile for Latest Features
+
+Required Packages:
+
+- Flex
+
+- Bison
+
+- GCC or CLANG compiler
+
+- GNU Make ( or compatible build program )
+
+The makefile uses clang by default.
+Edit the first lines of the makefile to use your preferred compiler and make program if necessary.
+
+Once you have the necessary packages installed (GCC/Clang, Flex, and Bison),
+Change directory to the top level of the project (where LICENSE.txt is located) and run:
+
+`make`
+
+Upon success, you will have a portable executable called 'sms' in the bin directory.
+
+On Linux/Unix systems, You may be able to build and install in one step:
+
+`sudo make install`
+
+This just copies the executable to /usr/bin/sms after compilation.
+
+
+
+
 In SMS, whitespace characters (outside of strings) are ignored. All commands end with a semicolon (`;`) .
 
+# Language Features, Specs and Design:
+- [x] Mathematical evaluation. Commands like `a=4*sin(3.14/8);` will evaluate to a double precision decimal number.
+- [x] Copying garbage collector. Allows for the entire program memory to compact itself into a small contiguous block after each command.
+- [x] Lexical scope.
+- [x] Command line flags to run scripts or initialize into a loaded REPL.
+- [x] Useful example.sms file with common conversion functions and constants.
+- [x] Custom memory heap size can be set from 100 kilobytes to 1 terrabyte.
+- [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
+- [x] Safe and fast internal string manipulations, with no character counting and no intermediate buffers for expression printing.
+- [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing. For now, you can use `if` for conditionals and `map` (examples above);
+- [x] Recursive function calls.
+- [x] Local variables are implemented as array indices, making them fast.
+- [x] Huge expressions can be parsed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters or: 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
+- [x] A `diff` command for taking derivatives. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
+- [x] A `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
 
-# Features
+# Plans:
+- [ ] Standard libraries: file, string, array, math, matrix, net, etc.
+- [ ] Support for booting from a serialized memory heap.
+- [ ] 'Last moment' garbage collection.
+- [ ] Tail call optimization.
+- [ ] Package system.
+- [ ] Precise syntax error reporting.
+- [ ] Modern terminal support
+- [ ] Try/Catch error syntax.
+- [ ] Dynamic heap size, with min, max, and max_emptiness specs.
+- [ ] An integral command for taking integrals.
+- [ ] Arbitrary precision support.
+- [ ] General documentation.
+- [ ] Thread forking support.
+- [ ] Some Unicode support.
+- [ ] Simple Webserver and networking tools.
+- [ ] A community!
 
-Check out `sms_src/example.sms` for example functions and ideas.
-You can also run `sms -i example.sms` to load SMS with useful functions and constants.
 
-In addition to the mathematical ideas covered in the example file, SMS has ambitions to be a general purpose programming language. Hence, SMS has premature general purpose programming features that will be embellished further in the near future:
+# Tutorial:
+
+You can learn most of the language by trying the following commands in order.
+
+Once you have the SMS prompt running, you can enter the following commands:
 
 Anonymous functions with javascript-like syntax:
 
@@ -52,7 +119,7 @@ Simplify an expression:
 
 `simp(:(a*x^(5-4)),:x);`
 
-User objects (contexts):
+User objects (contexts) which are key-value stores:
 
 `car = { weight = 2.2; speed = 5; license_plate = "smthg_fnny"; } ; `
 
@@ -94,70 +161,9 @@ Exit the program with:
 
 `exit;`
 
-Array element access, field access, parent command, diff, and simp are all new and will be in the 0.15 release.
-SMS still lacks a package management system, proper type checking, and many features of a more mature language. As these features are added, this README will be updated.
-Type checking is essentially not being done for function calls, so we have undefined behaviour for errors like `"notANumber" + 5`;
+Check out `sms_src/example.sms` for example functions and ideas.
+You can also run `sms -i example.sms` to load SMS with useful functions and constants.
 
-
-# FEATURES:
-- [x] Mathematical evaluation. Commands like `a=4*sin(3.14/8);` will evaluate to a double precision decimal number.
-- [x] Copying garbage collector. Allows for the entire program memory to compact itself into a small contiguous block after each command.
-- [x] Lexical scope.
-- [x] Command line flags to run scripts or initialize into a loaded REPL.
-- [x] Useful example.sms file with common conversion functions and constants.
-- [x] Custom memory heap size can be set from 100 kilobytes to 1 terrabyte.
-- [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
-- [x] Safe and fast internal string manipulations, with no character counting and no intermediate buffers for expression printing.
-- [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing. For now, you can use `if` for conditionals and `map` (examples above);
-- [x] Recursive function calls.
-- [x] Local variables are implemented as array indices, making them fast.
-- [x] Huge expressions can be parsed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters or: 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
-- [x] A `diff` command for taking derivatives. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
-- [x] A `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
-
-# PLANS:
-- [ ] Standard libraries: file, string, array, math, matrix, net, etc.
-- [ ] Support for booting from a serialized memory heap.
-- [ ] 'Last moment' garbage collection.
-- [ ] Tail call optimization.
-- [ ] Package system.
-- [ ] Precise syntax error reporting.
-- [ ] Modern terminal support
-- [ ] Try/Catch error syntax.
-- [ ] Dynamic heap size, with min, max, and max_emptiness specs.
-- [ ] An integral command for taking integrals.
-- [ ] Arbitrary precision support.
-- [ ] General documentation.
-- [ ] Thread forking support.
-- [ ] Some Unicode support.
-- [ ] Simple Webserver and networking tools.
-- [ ] A community!
-
-
-# HOW TO COMPILE
-
-Required Packages:
-
-- Flex
-
-- Bison
-
-- GCC or CLANG compiler
-
-- GNU Make ( or compatible build program )
-
-The makefile uses clang by default.
-Edit the first lines of the makefile to use your preferred compiler and make program if necessary.
-
-Once you have the necessary packages installed (GCC/Clang, Flex, and Bison),
-Change directory to the top level of the project (where LICENSE.txt is located) and run:
-
-`make`
-
-Upon success, you will have a portable executable called 'sms' in the bin directory.
-
-On Linux/Unix systems, You may be able to build and install in one step:
-
-`sudo make install`
-
-This just copies the executable to /usr/bin/sms after compilation.
+Array element access, field access,`size`,`parse`,`eval`, `parent`, `diff`,`simp` are not in the 0.14 release and will be in the 0.15 release.
+SMS still lacks a package management system, proper syntax error reporting, and many other features of a mature scripting language.
+As these features are added, this README will be updated.
