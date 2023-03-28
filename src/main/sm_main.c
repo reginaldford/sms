@@ -76,7 +76,7 @@ int main(int num_args, char **argv) {
   if (options->eval_flag) {
     sm_parse_result pr = sm_parse_cstr(options->eval_cmd, options->eval_cmd_len);
     if (pr.return_val != 0) {
-      printf("Parsing failed.\n");
+      printf("Error: Parser failed and returned %i\n", pr.return_val);
       sm_signal_handler(SIGQUIT);
     }
     if (pr.parsed_object == NULL) {
