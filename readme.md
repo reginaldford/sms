@@ -1,5 +1,4 @@
 # Introduction:
-
 SMS (Symbolic Math System) is a terminal based calculator. SMS has built-in functions for arithmetic operations, flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. 
 
 In addition to providing a command line, SMS can interpret files.
@@ -21,12 +20,11 @@ Algebra: `simp` for simplifying expressions. Uses a multipass algorithm, which i
 
 Calculus: `diff` for taking derivatives.
 
-# HOW TO DOWNLOAD & RUN / Install
+# How to Download and Run/Install a Release
 - At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
 
 
 # How to Compile for Latest Features
-
 Required Packages:
 
 - Flex
@@ -51,12 +49,8 @@ On Linux/Unix systems, You may be able to build and install in one step:
 
 `sudo make install`
 
-This just copies the executable to /usr/bin/sms after compilation.
+This command builds the executable and copies it to /usr/bin/sms
 
-
-
-
-In SMS, whitespace characters (outside of strings) are ignored. All commands end with a semicolon (`;`) .
 
 # Language Features, Specs and Design:
 - [x] Mathematical evaluation. Commands like `a=4*sin(3.14/8);` will evaluate to a double precision decimal number.
@@ -67,12 +61,12 @@ In SMS, whitespace characters (outside of strings) are ignored. All commands end
 - [x] Custom memory heap size can be set from 100 kilobytes to 1 terrabyte.
 - [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
 - [x] Safe and fast internal string manipulations, with no character counting and no intermediate buffers for expression printing.
-- [x] Turing completeness. Store variables, run inequality tests, loops, if-statements. Note that, though the control flow is there, many library functions are missing. For now, you can use `if` for conditionals and `map` (examples below);
+- [x] Turing completeness.
 - [x] Recursive function calls.
 - [x] Local variables are implemented as array indices, making them fast.
-- [x] Huge expressions can be parsed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters or: 3) You are legitimately reaching the max heap size of 1 terrabyte of memory for SMS (successfully using -m 1000000).
-- [x] A `diff` command for taking derivatives. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
-- [x] A `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
+- [x] 'Huge' expressions can be parsed and processed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters into a single array or string, or: 3) You are using `-m 1000000` to provide the maximum heap size (1 terrabyte), and have used all of the memory while parsing.
+- [x] `diff` command for automatic differentiation. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
+- [x] `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
 
 # Plans:
 - [ ] Standard libraries: file, string, array, math, matrix, net, etc.
@@ -94,10 +88,9 @@ In SMS, whitespace characters (outside of strings) are ignored. All commands end
 
 
 # Tutorial:
-
 You can learn most of the language by trying the following commands in order.
 
-Once you have the SMS prompt running, you can enter the following commands:
+Once you have the SMS prompt running, you can enter the following commands. Note: In SMS, whitespace characters (outside of strings) are ignored. All commands end with a semicolon (`;`).
 
 Anonymous functions with javascript-like syntax:
 
@@ -129,11 +122,11 @@ Contexts can be nested:
 
 Access fields of objects:
 
-`nested.example.x`
+`nested.example.x;`
 
 Obtain the parent of an object:
 
-`self.parent`
+`self.parent;`
 
 If statements:
 
