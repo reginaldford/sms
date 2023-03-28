@@ -87,6 +87,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> WHILE
 %token <expr> PRINT
 %token <expr> TO_STRING
+%token <expr> EVAL
 
 %token DONE
 
@@ -180,6 +181,8 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | PRINT '(' EXPR ')' {$$ = sm_new_expr(SM_PRINT_EXPR,(sm_object*)$3);}
 | TO_STRING '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
+| EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}
+| EVAL '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local

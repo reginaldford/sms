@@ -51,6 +51,7 @@ size        {return SIZE;}
 while       {return WHILE;}
 print       {return PRINT;}
 to_string   {return TO_STRING;}
+eval        {return EVAL;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 

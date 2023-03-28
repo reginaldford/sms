@@ -22,7 +22,20 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     case SM_TO_STRING_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_object_to_string(evaluated);
-      break;
+    }
+    case SM_EVAL_EXPR: {
+      sm_context *where_to_eval = current_cx;
+      if (sme->size > 1) {
+        where_to_eval = (sm_context *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+        if (where_to_eval->my_type != SM_CONTEXT_TYPE) {
+          sm_string *obj_str = sm_object_to_string((sm_object *)where_to_eval);
+          char      *cstr    = &(obj_str->content);
+          printf("Error: Second argument to eval is not a context: %s\n", cstr);
+          return (sm_object *)sm_new_double(0);
+        }
+      }
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), where_to_eval, sf);
+      return sm_engine_eval(evaluated, where_to_eval, sf);
     }
     case SM_PRINT_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -314,7 +327,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     }
     case SM_IF_ELSE_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_symbol *sym              = (sm_symbol *)condition_result;
+      if (condition_result->my_type != SM_SYMBOL_TYPE) {
+        return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      }
+      sm_symbol *sym = (sm_symbol *)condition_result;
       if (strncmp(&(sym->name->content), "true", 4) == 0) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
