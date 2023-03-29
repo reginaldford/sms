@@ -2,19 +2,12 @@
 
 #include "sms.h"
 
+// Return whether these two symbols have the same name.
 bool sm_symbol_equal(sm_symbol *s1, sm_symbol *s2) {
-  return !strcmp(&s1->name->content, &s2->name->content);
+  return !strncmp(&s1->name->content, &s2->name->content, MIN(s1->name->size, s2->name->size));
 }
 
-// distribute
-// group like terms
-// apply constant arith
-// x+0=x
-// x-0=x
-// x*1=x
-// x/1=x
-// x^1=x
-// *x^-1=/x
+// return true only if the expression tree 'self' contains the symbol sym
 bool has_symbol(sm_expr *self, sm_symbol *sym) {
   switch (self->my_type) {
   case SM_EXPR_TYPE: {
@@ -184,6 +177,68 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       } else
         return (sm_object *)sm_new_double(0);
     }
+    case SM_SEC_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *diff_outside = (sm_object *)sm_new_expr(SM_TAN_EXPR, sm_expr_get_arg(expr, 0));
+        sm_object *diff_inside  = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside);
+      } else
+        return (sm_object *)sm_new_double(0);
+    }
+    case SM_CSC_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *diff_outside = (sm_object *)sm_new_expr_3(
+          SM_TIMES_EXPR, (sm_object *)sm_new_expr(SM_CSC_EXPR, sm_expr_get_arg(expr, 0)),
+          (sm_object *)sm_new_expr(SM_COT_EXPR, sm_expr_get_arg(expr, 0)),
+          (sm_object *)sm_new_double(-1));
+        sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside);
+      } else
+        return (sm_object *)sm_new_double(0);
+    }
+    case SM_COT_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *csc_sq = (sm_object *)sm_new_expr_2(
+          SM_POW_EXPR, (sm_object *)sm_new_expr(SM_CSC_EXPR, sm_expr_get_arg(expr, 0)),
+          (sm_object *)sm_new_double(2));
+        sm_object *diff_outside =
+          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(-1), csc_sq);
+        sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside);
+      } else
+        return (sm_object *)sm_new_double(0);
+    }
+    case SM_SECH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *diff_outside = (sm_object *)sm_new_expr(SM_TANH_EXPR, sm_expr_get_arg(expr, 0));
+        sm_object *diff_inside  = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside);
+      } else
+        return (sm_object *)sm_new_double(0);
+    }
+    case SM_CSCH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *diff_outside = (sm_object *)sm_new_expr_3(
+          SM_TIMES_EXPR, (sm_object *)sm_new_double(-1),
+          (sm_object *)sm_new_expr(SM_COTH_EXPR, sm_expr_get_arg(expr, 0)),
+          (sm_object *)sm_new_expr(SM_CSCH_EXPR, sm_expr_get_arg(expr, 0)));
+        sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside);
+      } else
+        return (sm_object *)sm_new_double(0);
+    }
+    case SM_COTH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *csch_sq = (sm_object *)sm_new_expr_2(
+          SM_POW_EXPR, (sm_object *)sm_new_expr(SM_CSCH_EXPR, sm_expr_get_arg(expr, 0)),
+          (sm_object *)sm_new_double(2));
+        sm_object *diff_outside =
+          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(-1), csch_sq);
+        sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside);
+      } else
+        return (sm_object *)sm_new_double(0);
+    }
     case SM_SINH_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *diff_outside = (sm_object *)sm_new_expr(SM_COSH_EXPR, sm_expr_get_arg(expr, 0));
@@ -212,7 +267,6 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       } else
         return (sm_object *)sm_new_double(0);
     }
-
     default: {
       return (sm_object *)sm_new_double(0);
     }

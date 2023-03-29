@@ -36,10 +36,6 @@ enum sm_object_type {
   printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
   fflush(stdout);
 
-// Windows <signal.h> lacks these signals because it isn't even POSIX
-#define SIGHUP 1
-#define SIGQUIT 3
-
 #include "sm_options.h"
 #include "sm_stack.h"
 #include "sm_string.h"
