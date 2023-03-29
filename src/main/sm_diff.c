@@ -12,9 +12,12 @@ bool has_symbol(sm_expr *self, sm_symbol *sym) {
   switch (self->my_type) {
   case SM_EXPR_TYPE: {
     switch (((sm_expr *)self)->op) {
-    case SM_SQRT_EXPR:
+    case SM_PLUS_EXPR:
     case SM_MINUS_EXPR:
+    case SM_TIMES_EXPR:
+    case SM_DIVIDE_EXPR:
     case SM_POW_EXPR:
+    case SM_SQRT_EXPR:
     case SM_SIN_EXPR:
     case SM_COS_EXPR:
     case SM_TAN_EXPR:
@@ -24,9 +27,9 @@ bool has_symbol(sm_expr *self, sm_symbol *sym) {
     case SM_CSC_EXPR:
     case SM_SEC_EXPR:
     case SM_COT_EXPR:
-    case SM_TIMES_EXPR:
-    case SM_DIVIDE_EXPR:
-    case SM_PLUS_EXPR: {
+    case SM_CSCH_EXPR:
+    case SM_SECH_EXPR:
+    case SM_COTH_EXPR: {
       for (unsigned int i = 0; i < self->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(self, i);
         switch (current_obj->my_type) {
@@ -58,6 +61,8 @@ bool has_symbol(sm_expr *self, sm_symbol *sym) {
   }
 }
 
+// Return an expression that is the derivative of obj, with respect to wrt
+// If the object is not an expression, just return the object.
 sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
   switch (obj->my_type) {
   case SM_SYMBOL_TYPE: {
