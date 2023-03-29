@@ -1,19 +1,20 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 // Denotes the type of expression
+// Must be in the same order as sm_global_fn_name
 enum SM_EXPR_TYPE {
   SM_PLUS_EXPR,       // 0
   SM_MINUS_EXPR,      // 1
   SM_TIMES_EXPR,      // 2
   SM_DIVIDE_EXPR,     // 3
-  SM_SQRT_EXPR,       // 4
-  SM_SIN_EXPR,        // 5
-  SM_COS_EXPR,        // 6
-  SM_TAN_EXPR,        // 7
-  SM_SINH_EXPR,       // 8
-  SM_COSH_EXPR,       // 9
-  SM_TANH_EXPR,       // 10
-  SM_POW_EXPR,        // 11
+  SM_POW_EXPR,        // 4
+  SM_SQRT_EXPR,       // 5
+  SM_SIN_EXPR,        // 6
+  SM_COS_EXPR,        // 7
+  SM_TAN_EXPR,        // 8
+  SM_SINH_EXPR,       // 9
+  SM_COSH_EXPR,       // 10
+  SM_TANH_EXPR,       // 11
   SM_CSC_EXPR,        // 12
   SM_SEC_EXPR,        // 13
   SM_COT_EXPR,        // 14
