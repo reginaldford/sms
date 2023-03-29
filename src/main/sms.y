@@ -188,7 +188,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}
 | EVAL '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3);}
-| PARSE_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3);}
+| PARSE_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_FILE_EXPR,(sm_object*)$3);}
 | READ_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_READ_FILE_EXPR,(sm_object*)$3);}
 | WRITE_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_WRITE_FILE_EXPR,(sm_object*)$3);}
 

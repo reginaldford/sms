@@ -19,6 +19,23 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_PARSE_FILE_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (evaluated->my_type != SM_STRING_TYPE) {
+        printf("Must pass a string to parse_file.\n");
+      }
+      sm_string      *str  = (sm_string *)evaluated;
+      char           *cstr = &(str->content);
+      sm_parse_result pr   = sm_parse_file(cstr);
+      if (pr.return_val != 0) {
+        printf("Error: Parser failed and returned %i.\n", pr.return_val);
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      } else {
+        sm_parse_done();
+        return pr.parsed_object;
+      }
+      break;
+    }
     case SM_PARSE_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (evaluated->my_type != SM_STRING_TYPE) {
@@ -32,7 +49,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_parse_result pr = sm_parse_cstr(cstr, str->size + 1);
       cstr[str->size]    = '\0'; // Place the null char back
       if (pr.return_val != 0) {
-        printf("Error: Parser failed and returned %i\n", pr.return_val);
+        printf("Error: Parser failed and returned %i.\n", pr.return_val);
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       } else
         return pr.parsed_object;
