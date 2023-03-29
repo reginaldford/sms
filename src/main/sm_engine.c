@@ -19,6 +19,31 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_READ_FILE_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (evaluated->my_type != SM_STRING_TYPE) {
+        sm_string *obj_str = sm_object_to_string((sm_object *)evaluated);
+        char      *cstr    = &(obj_str->content);
+        printf("When using read_file(filename), filename must be a string. Value provided: %s\n",
+               cstr);
+      }
+      sm_string *fname_str  = (sm_string *)evaluated;
+      char      *fname_cstr = &(fname_str->content);
+      if (access(fname_cstr, F_OK) != 0) {
+        printf("read_file failed because the file, %s ,does not exist.\n", fname_cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      FILE *fptr;
+      fptr = fopen(fname_cstr, "r");
+      fseek(fptr, 0, SEEK_END);
+      long       len    = ftell(fptr);
+      sm_string *output = sm_new_string(len, "");
+      fseek(fptr, 0, SEEK_SET);
+      fread(&(output->content), 1, len, fptr);
+      fclose(fptr);
+      *(&output->content + len) = '\0';
+      return (sm_object *)output;
+    }
     case SM_PARSE_FILE_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (evaluated->my_type != SM_STRING_TYPE) {
