@@ -60,7 +60,8 @@ enum SM_EXPR_TYPE {
   SM_OR_EXPR,         // 54
   SM_INPUT_EXPR,      // 55
   SM_ESCAPE_EXPR,     // 56
-  SM_UNKNOWN_EXPR     // 57
+  SM_EXIT_EXPR,       // 57
+  SM_UNKNOWN_EXPR     // 58
 };
 
 // Head of an expression

@@ -99,7 +99,7 @@ char *sm_global_fn_name(unsigned short int which) {
     "siblings",   "prim",  "",      "",          ".",    "parent", "size",       "map",
     "",           "while", "print", "to_string", "eval", "parse",  "parse_file", "read_file",
     "write_file", "rand",  "round", "<=",        ">=",   "not",    "or",         "input",
-    "escape",     "?"};
+    "escape",     "exit",  "?"};
   if (which >= num_functions) {
     return response[num_functions];
   }
@@ -109,8 +109,8 @@ char *sm_global_fn_name(unsigned short int which) {
 // corresponding string length of the string that would come from the sm_global_fn_name(which)
 unsigned int sm_global_fn_name_len(unsigned short int which) {
   static long unsigned int response_len[] = {
-    1, 1, 1, 1, 1, 4, 3, 3, 3, 4, 4, 4, 3, 3, 3, 4, 4, 4,  2, 3,  3, 4, 4, 1, 2, 1, 1, 2, 2,
-    3, 0, 0, 8, 4, 0, 0, 1, 6, 4, 3, 0, 5, 5, 9, 4, 5, 10, 9, 10, 4, 5, 2, 2, 3, 2, 5, 6, 1};
+    1, 1, 1, 1, 1, 4, 3, 3, 3, 4, 4, 4, 3, 3, 3, 4, 4,  4, 2,  3, 3, 4, 4, 1, 2, 1, 1, 2, 2, 3,
+    0, 0, 8, 4, 0, 0, 1, 6, 4, 3, 0, 5, 5, 9, 4, 5, 10, 9, 10, 4, 5, 2, 2, 3, 2, 5, 6, 4, 1};
   if (which >= sm_global_num_fns()) {
     return 1; // "?"
   }

@@ -40,7 +40,7 @@ void run_file(sm_options *options, bool init) {
   do {
     if (pr.return_val != 0) {
       printf("Error parsing the file. Parser returned %i\n", pr.return_val);
-      sm_signal_handler(SIGQUIT);
+      sm_signal_exit(1);
     }
     if (pr.parsed_object != NULL) {
       sm_object *evaluated =
@@ -53,7 +53,7 @@ void run_file(sm_options *options, bool init) {
   } while (pr.parsed_object != last_parsed_obj);
   sm_parse_done();
   if (!init)
-    sm_signal_handler(SIGQUIT);
+    sm_signal_exit(1);
 }
 
 // Main entry point
@@ -77,11 +77,11 @@ int main(int num_args, char **argv) {
     sm_parse_result pr = sm_parse_cstr(options->eval_cmd, options->eval_cmd_len);
     if (pr.return_val != 0) {
       printf("Error: Parser failed and returned %i\n", pr.return_val);
-      sm_signal_handler(SIGQUIT);
+      sm_signal_exit(1);
     }
     if (pr.parsed_object == NULL) {
       printf("Parser returned nothing.\n");
-      sm_signal_handler(SIGQUIT);
+      sm_signal_exit(1);
     }
     sm_object *evaluated =
       sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
@@ -90,8 +90,8 @@ int main(int num_args, char **argv) {
       printf("%s\n", &(response->content));
       fflush(stdout);
     }
-    sm_signal_handler(SIGQUIT);
+    sm_signal_exit(0);
   }
   start_repl();
-  sm_signal_handler(SIGQUIT);
+  sm_signal_exit(0);
 }
