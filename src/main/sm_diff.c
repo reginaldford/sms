@@ -88,16 +88,24 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       bool       obj0_has = has_symbol((sm_expr *)obj0, wrt);
       bool       obj1_has = has_symbol((sm_expr *)obj1, wrt);
       if (obj0_has && !obj1_has) {
+        // f(x)^n => n*f(x)^(n-1)
         sm_object *deducted_expr =
           (sm_object *)sm_new_expr_2(SM_MINUS_EXPR, obj1, (sm_object *)sm_new_double(1));
-        return (sm_object *)sm_new_expr_2(
-          SM_TIMES_EXPR, obj1, (sm_object *)sm_new_expr_2(SM_POW_EXPR, obj0, deducted_expr));
+        sm_object *pow_expr = (sm_object *)sm_new_expr_2(SM_POW_EXPR, obj0, deducted_expr);
+        sm_object *diff_outside =
+          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, sm_expr_get_arg(expr, 1), pow_expr);
+        sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_outside, diff_inside);
       } else if (!obj0_has && obj1_has) {
-        sm_expr *ln_expr = sm_new_expr(SM_LN_EXPR, obj0);
-        sm_expr *result  = sm_new_expr_2(SM_TIMES_EXPR, obj0, (sm_object *)ln_expr);
-        return (sm_object *)result;
+        // a^f(x) => ln(a)*a^f(x)*f'(x)
+        sm_object *ln_expr      = (sm_object *)sm_new_expr(SM_LN_EXPR, obj0);
+        sm_object *pow_expr     = (sm_object *)sm_new_expr_2(SM_POW_EXPR, obj0, obj1);
+        sm_object *diff_outside = (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, ln_expr, pow_expr);
+        sm_object *diff_inside  = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_outside, diff_inside);
       } else if (obj0_has && obj1_has) {
-        // solution is base^x*(x/base+ln(base))
+        // f(x)^g(x)
+        //  solution is f(x)^g(x)*(g(x)/f(x)+ln(f(x)))
         sm_expr *p1 = sm_new_expr_2(SM_POW_EXPR, obj0, (sm_object *)wrt);
         sm_expr *p2 = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)wrt, obj0);
         sm_expr *p3 = sm_new_expr(SM_LN_EXPR, obj0);
@@ -186,7 +194,7 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       if (has_symbol(expr, wrt)) {
         sm_object *diff_outside = (sm_object *)sm_new_expr(SM_TAN_EXPR, sm_expr_get_arg(expr, 0));
         sm_object *diff_inside  = sm_diff(sm_expr_get_arg(expr, 0), wrt);
-        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_outside, diff_inside);
       } else
         return (sm_object *)sm_new_double(0);
     }
@@ -215,8 +223,11 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
     }
     case SM_SECH_EXPR: {
       if (has_symbol(expr, wrt)) {
-        sm_object *diff_outside = (sm_object *)sm_new_expr(SM_TANH_EXPR, sm_expr_get_arg(expr, 0));
-        sm_object *diff_inside  = sm_diff(sm_expr_get_arg(expr, 0), wrt);
+        sm_object *diff_outside = (sm_object *)sm_new_expr_3(
+          SM_TIMES_EXPR, (sm_object *)sm_new_double(-1),
+          (sm_object *)sm_new_expr(SM_TANH_EXPR, sm_expr_get_arg(expr, 0)),
+          (sm_object *)sm_new_expr(SM_SECH_EXPR, sm_expr_get_arg(expr, 0)));
+        sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside);
       } else
         return (sm_object *)sm_new_double(0);
