@@ -35,6 +35,7 @@ sm_context_entry *sm_context_entries(struct sm_context *context);
 sm_search_result  sm_context_find_index(struct sm_context *context, struct sm_string *var_string);
 sm_search_result_cascading sm_context_find_far(sm_context *context, sm_string *var_string);
 sm_context  *sm_context_set(struct sm_context *context, struct sm_string *name, void *val);
+sm_context  *sm_context_let(struct sm_context *context, struct sm_string *name, void *val);
 bool         sm_context_rm(sm_context *self, sm_symbol *sym);
 unsigned int sm_context_sprint(sm_context *self, char *buffer, bool fake);
 unsigned int sm_context_entry_sprint(sm_context_entry *ce, char *buffer, bool fake);

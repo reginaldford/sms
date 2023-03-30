@@ -131,11 +131,22 @@ sm_context *sm_context_set(sm_context *context, sm_string *name, void *val) {
     context_entries[sr.index].value   = val;
     return context;
   }
-  sm_search_result sr2 = sm_context_find_index(current_context, name);
+  sm_context_let(context, name, val);
+  return context;
+}
+
+// Add a key_value with this key and value
+sm_context *sm_context_let(sm_context *context, sm_string *name, void *val) {
+  sm_context      *current_context = context;
+  sm_search_result sr              = sm_context_find_index(current_context, name);
+  if (sr.found == true) {
+    sm_context_entry *context_entries = sm_context_entries(context);
+    context_entries[sr.index].value   = val;
+    return current_context;
+  }
   if (current_context->size == current_context->capacity) {
     unsigned int new_capacity =
       ((unsigned int)(current_context->capacity * sm_global_growth_factor(0))) + 1;
-
     sm_context *new_cx = (sm_context *)sm_realloc(
       (sm_object *)current_context, sizeof(sm_context) + sizeof(sm_context_entry) * new_capacity);
     new_cx->capacity = new_capacity;
@@ -144,10 +155,10 @@ sm_context *sm_context_set(sm_context *context, sm_string *name, void *val) {
   }
   current_context->size += 1;
   sm_context_entry *context_entries = sm_context_entries(current_context);
-  for (unsigned int i = current_context->size; i > sr2.index + 1; i--)
+  for (unsigned int i = current_context->size; i > sr.index + 1; i--)
     context_entries[i - 1] = context_entries[i - 2];
-  context_entries[sr2.index].name  = name;
-  context_entries[sr2.index].value = val;
+  context_entries[sr.index].name  = name;
+  context_entries[sr.index].value = val;
   return current_context;
 }
 

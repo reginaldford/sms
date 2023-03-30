@@ -4,28 +4,40 @@
 
 void sm_signal_handler(int signal_number) {
   char *signal_name = "";
+  int   exit_code;
   switch (signal_number) {
   case SIGQUIT:
     signal_name = "SIGQUIT";
+    exit_code   = 0;
+    break;
   case SIGHUP:
     signal_name = "SIGHUP";
+    exit_code   = 0;
+    break;
   case SIGABRT:
     signal_name = "SIGABRT";
+    exit_code   = 1;
+    break;
   case SIGILL:
     signal_name = "SIGILL";
+    exit_code   = 1;
+    break;
   case SIGINT:
     signal_name = "SIGINT";
-  case SIGTERM: {
+    exit_code   = 1;
+    break;
+  case SIGTERM:
     signal_name = "SIGTERM";
-    printf("\n<Received signal: %s. Exiting.>\n", signal_name);
-    sm_mem_cleanup();
-    exit(0);
+    exit_code   = 0;
+    break;
+  case SIGFPE:
+    signal_name = "SIGFPE";
+    exit_code   = 1;
     break;
   }
-  case SIGFPE: {
-    printf("\n<RECEIVED FPE SIGNAL.>\n");
-  }
-  }
+  printf("\n<Received signal: %s. Cleaning up and exiting now.>\n", signal_name);
+  sm_mem_cleanup();
+  exit(exit_code);
 }
 
 void sm_register_signals() {
@@ -45,4 +57,10 @@ void sm_register_signals() {
   signal(SIGTERM, sm_signal_handler);
   // Trap (for debugger)
   //  signal(SIGTRAP, sm_signal_handler);
+}
+
+// Exit SMS with this exit code
+void sm_signal_exit(int exit_code) {
+  sm_mem_cleanup();
+  exit(exit_code);
 }

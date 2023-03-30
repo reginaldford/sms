@@ -19,6 +19,24 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_EXIT_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_DOUBLE_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("Error: Exit command requires an integer. Instead, %s was provided.\n", cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      int exit_code = ((sm_double *)obj0)->value;
+      sm_signal_exit(exit_code);
+      break;
+    }
+    case SM_LET_EXPR: {
+      sm_symbol *sym   = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      current_cx       = sm_context_let(current_cx, sym->name, value);
+      return (sm_object *)current_cx;
+    }
     case SM_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
@@ -354,8 +372,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       }
     }
     case SM_THEN_EXPR: {
-      sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      for (unsigned int i = 1; i < sme->size - 1; i++)
+      for (unsigned int i = 0; i + 1 < sme->size; i++)
         sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
       return sm_engine_eval(sm_expr_get_arg(sme, sme->size - 1), current_cx, sf);
     }

@@ -127,14 +127,14 @@ COMMAND : EXPR ';' {
     YYACCEPT;
   }
 }
-| LET SYM '=' EXPR ';' { printf("Activated let command ! (incomplete) \n"); }
 | error ';' { YYABORT; }
 | DONE      { YYACCEPT;}
-| EXIT ';'  { sm_signal_handler(SIGQUIT); }
 
 
 
 EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
+| EXIT '(' EXPR ')'  { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3);  }
+| LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4);}
 | SYM{}
 | EXPR '+' EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object *)$1, (sm_object *)$3); }
 | EXPR '-' EXPR { $$ = sm_new_expr_2(SM_MINUS_EXPR, (sm_object *)$1, (sm_object *)$3); }
@@ -381,7 +381,7 @@ CONTEXT_LIST : '{' ASSIGNMENT ';' ASSIGNMENT {
 | CONTEXT_LIST ';' ASSIGNMENT {
   sm_string  *name   = ((sm_symbol *)sm_expr_get_arg($3, 0))->name;
   sm_object  *value  = (sm_object *)sm_expr_get_arg($3, 1);
-  sm_context *new_cx = sm_context_set($1, name, value);
+  sm_context *new_cx = sm_context_let($1, name, value);
   $$                 = new_cx;
 }
 
