@@ -6,6 +6,9 @@ void sm_init(sm_options *options) {
   // Register the signal handler
   sm_register_signals();
 
+  // Seed the random number generator with the current time
+  srand(time(NULL));
+
   // Initialize the current mem heap
   double mem_mbytes = 50;
   if (options != NULL && options->mem_flag) {

@@ -77,7 +77,6 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> SQRT
 %token <expr> RM
 %token <expr> LET
-%token <expr> NOT
 %token <expr> ABS
 %token <expr> DIFF
 %token <expr> SIMP
@@ -92,7 +91,14 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> PARSE_FILE
 %token <expr> READ_FILE
 %token <expr> WRITE_FILE
-
+%token <expr> RAND
+%token <expr> ROUND
+%token <expr> LT_EQ
+%token <expr> GT_EQ
+%token <expr> NOT
+%token <expr> OR
+%token <expr> INPUT
+%token <expr> ESCAPE
 %token DONE
 
 %left ';'
@@ -176,6 +182,8 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | EQ{}
 | LT{}
 | GT{}
+| EXPR LT_EQ EXPR { $$ = sm_new_expr_2(SM_LT_EQ_EXPR,(sm_object*)$1,(sm_object*)$3);};
+| EXPR GT_EQ EXPR { $$ = sm_new_expr_2(SM_GT_EQ_EXPR,(sm_object*)$1,(sm_object*)$3);};
 | SEQUENCE {}
 | SYM DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
@@ -190,7 +198,15 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3);}
 | PARSE_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_FILE_EXPR,(sm_object*)$3);}
 | READ_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_READ_FILE_EXPR,(sm_object*)$3);}
-| WRITE_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_WRITE_FILE_EXPR,(sm_object*)$3);}
+| WRITE_FILE '(' EXPR ',' EXPR ')' {
+  $$ = sm_new_expr_2(SM_WRITE_FILE_EXPR,(sm_object*)$3,(sm_object*)$5);
+  }
+| RAND  '(' ')' { $$ = sm_new_expr_n(SM_RAND_EXPR,0,0);};
+| ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);};
+| NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);};
+| INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};
+| EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3);};
+| ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_ESCAPE_EXPR,(sm_object*)$3);};
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local

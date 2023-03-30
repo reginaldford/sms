@@ -52,7 +52,15 @@ enum SM_EXPR_TYPE {
   SM_PARSE_FILE_EXPR, // 46
   SM_READ_FILE_EXPR,  // 47
   SM_WRITE_FILE_EXPR, // 48
-  SM_UNKNOWN_EXPR     // 49
+  SM_RAND_EXPR,       // 49
+  SM_ROUND_EXPR,      // 50
+  SM_LT_EQ_EXPR,      // 51
+  SM_GT_EQ_EXPR,      // 52
+  SM_NOT_EXPR,        // 53
+  SM_OR_EXPR,         // 54
+  SM_INPUT_EXPR,      // 55
+  SM_ESCAPE_EXPR,     // 56
+  SM_UNKNOWN_EXPR     // 57
 };
 
 // Head of an expression
