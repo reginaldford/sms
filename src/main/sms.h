@@ -8,6 +8,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <time.h>
 
 // These are the major object types of SMS
 // Keep syncronized with function sm_object_type_str

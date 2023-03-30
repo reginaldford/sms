@@ -118,3 +118,47 @@ unsigned int sm_string_sprint(sm_string *self, char *to_str, bool fake) {
     to_str[j] = '\"';
   return j + 1;
 }
+
+
+// Escapes a cstr to another cstr with c style escapes
+// Returns the length
+sm_string *sm_string_escape(sm_string *input) {
+  unsigned int len = input->size;
+  // Replace the escape codes in place
+  unsigned int i        = 0; // Index during the scan of input string
+  int          final_i  = 0; // Index of output
+  char        *from_str = &input->content;
+  char         to_str[input->size];
+  while (i < len) {
+    if (from_str[i] == '\\') {
+      // This is an escape code. Replace it with the appropriate character.
+      switch (from_str[i + 1]) {
+      case 'n':
+        to_str[final_i] = '\n';
+        break;
+      case 't':
+        to_str[final_i] = '\t';
+        break;
+      case 'r':
+        to_str[final_i] = '\r';
+        break;
+      case '\\':
+        to_str[final_i] = '\\';
+        break;
+      case '"':
+        to_str[final_i] = '\"';
+        break;
+      default: // Unrecognized escape. backslash as default
+        to_str[final_i] = '\\';
+        break;
+      }
+      i += 2; // Skip the escape code
+    } else {
+      // Pass through regular characters
+      to_str[final_i] = from_str[i];
+      i++;
+    }
+    final_i++;
+  }
+  return sm_new_string(final_i, to_str);
+}

@@ -56,6 +56,14 @@ parse       {return PARSE;}
 parse_file  {return PARSE_FILE;}
 read_file   {return READ_FILE;}
 write_file  {return WRITE_FILE;}
+rand        {return RAND;}
+round       {return ROUND;}
+"<="        {return LT_EQ;}
+">="        {return GT_EQ;}
+not         {return NOT;}
+or          {return OR;}
+input       {return INPUT;}
+escape      {return ESCAPE;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 

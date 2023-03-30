@@ -5,7 +5,7 @@
 bool is_true(sm_object *obj) {
   if (obj->my_type == SM_SYMBOL_TYPE) {
     sm_symbol *sym = (sm_symbol *)obj;
-    if (strncmp(&(sym->name->content), "true", 4) == 0) {
+    if (sym->name->size == 4 && strncmp(&(sym->name->content), "true", 4) == 0) {
       return true;
     }
   }
@@ -19,6 +19,94 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_ESCAPE_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_STRING_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("Error: Applying escape to something that is not a string: %s\n", cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      return (sm_object *)sm_string_escape((sm_string *)obj0);
+    }
+    case SM_INPUT_EXPR: {
+      char input_str[500];
+      fgets(input_str, sizeof(input_str), stdin);
+      // we remove the trailing newline character
+      return (sm_object *)sm_new_string(strlen(input_str) - 1, input_str);
+    }
+    case SM_OR_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj0->my_type == SM_SYMBOL_TYPE) {
+        if (is_true(obj0)) {
+          return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+        }
+      }
+      if (obj1->my_type == SM_SYMBOL_TYPE) {
+        if (is_true(obj1)) {
+          return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+        }
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+    case SM_NOT_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type == SM_SYMBOL_TYPE) {
+        if (is_true(obj0) == false) {
+          return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+        }
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+    case SM_ROUND_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_DOUBLE_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("failed to round. Not a number: %s\n", cstr);
+      }
+      sm_double *number    = (sm_double *)obj0;
+      double     val       = number->value;
+      int        floor_val = val > 0 ? val + 0.5 : val - 0.5;
+      return (sm_object *)sm_new_double(floor_val);
+    }
+    case SM_RAND_EXPR: {
+      return (sm_object *)sm_new_double(((double)rand()) / ((double)RAND_MAX));
+    }
+    case SM_WRITE_FILE_EXPR: {
+      // obtain the file name
+      sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (evaluated_fname->my_type != SM_STRING_TYPE) {
+        sm_string *obj_str    = sm_object_to_string((sm_object *)evaluated_fname);
+        char      *fname_cstr = &(obj_str->content);
+        printf("When using write_file(filename,content), filename must be a string. Value "
+               "provided: %s\n",
+               fname_cstr);
+      }
+      sm_string *fname_str  = (sm_string *)evaluated_fname;
+      char      *fname_cstr = &(fname_str->content);
+      // obtain the content to write
+      sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (evaluated_content->my_type != SM_STRING_TYPE) {
+        sm_string *obj_str      = sm_object_to_string((sm_object *)evaluated_content);
+        char      *content_cstr = &(obj_str->content);
+        printf(
+          "When using write_file(filename,content), content must be a string. Value provided: %s\n",
+          content_cstr);
+      }
+      sm_string *content_str  = (sm_string *)evaluated_content;
+      char      *content_cstr = &(content_str->content);
+      FILE      *fptr         = fopen(fname_cstr, "w");
+      // check that file can be opened for writing
+      if (fptr == NULL) {
+        printf("write_file failed to open: %s\n", fname_cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      fprintf(fptr, "%s", content_cstr);
+      fclose(fptr);
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+    }
     case SM_READ_FILE_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (evaluated->my_type != SM_STRING_TYPE) {
@@ -33,8 +121,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         printf("read_file failed because the file, %s ,does not exist.\n", fname_cstr);
         return (sm_object *)sm_new_string(0, "");
       }
-      FILE *fptr;
-      fptr = fopen(fname_cstr, "r");
+      FILE *fptr = fopen(fname_cstr, "r");
       fseek(fptr, 0, SEEK_END);
       long       len    = ftell(fptr);
       sm_string *output = sm_new_string(len, "");
@@ -105,7 +192,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         printf("Error: Trying to print something that is not a string: %s\n", cstr);
       }
       sm_string *smstr = (sm_string *)evaluated;
-      printf("%s", &(smstr->content));
+      puts(&(smstr->content));
       return evaluated;
       break;
     }
@@ -457,6 +544,46 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       }
       return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
                                       current_cx);
+    }
+    case SM_GT_EQ_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj0->my_type != SM_DOUBLE_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf(">= failed. First argument is not a number: %s\n", cstr);
+      }
+      if (obj1->my_type != SM_DOUBLE_TYPE) {
+        sm_string *str  = sm_object_to_string(obj1);
+        char      *cstr = &(str->content);
+        printf(">= failed. Second argument is not a number: %s\n", cstr);
+      }
+      double val0 = ((sm_double *)obj0)->value;
+      double val1 = ((sm_double *)obj1)->value;
+      if (val0 >= val1)
+        return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+    case SM_LT_EQ_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj0->my_type != SM_DOUBLE_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("<= failed. First argument is not a number: %s\n", cstr);
+      }
+      if (obj1->my_type != SM_DOUBLE_TYPE) {
+        sm_string *str  = sm_object_to_string(obj1);
+        char      *cstr = &(str->content);
+        printf("<= failed. Second argument is not a number: %s\n", cstr);
+      }
+      double val0 = ((sm_double *)obj0)->value;
+      double val1 = ((sm_double *)obj1)->value;
+      if (val0 <= val1)
+        return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
     default:
       return input;
