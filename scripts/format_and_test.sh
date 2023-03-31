@@ -2,7 +2,7 @@
 cd ..
 make clean
 cd scripts
-./clang_format_all.sh
+./clang-format-all.sh
 cd ..
 make all
 cd bin

@@ -61,8 +61,8 @@ enum SM_EXPR_TYPE {
   SM_INPUT_EXPR,      // 55
   SM_ESCAPE_EXPR,     // 56
   SM_EXIT_EXPR,       // 57
-  SM_STRLEN_EXPR,       // 58
-  SM_STRCAT_EXPR,       // 59
+  SM_STRLEN_EXPR,     // 58
+  SM_STRCAT_EXPR,     // 59
   SM_UNKNOWN_EXPR     // 60
 };
 

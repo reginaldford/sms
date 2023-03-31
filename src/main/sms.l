@@ -73,7 +73,7 @@ strcat      {return STRCAT;}
    yylval.num = sm_new_double(atof(yytext));
    return NUM;
   }
-[\<\>\!]\= { return yytext[0]; }
+[\<\>]\= { return yytext[0]; }
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
 ({digit}?+{alpha}?+_?+)?+\'?+ {
     yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
