@@ -85,6 +85,8 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> MAP
 %token <expr> PARENT
 %token <expr> SIZE
+%token <expr> STRLEN
+%token <expr> STRCAT
 %token <expr> WHILE
 %token <expr> PRINT
 %token <expr> TO_STRING
@@ -194,6 +196,8 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);}
 | SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_SIZE_EXPR,(sm_object*)$3);}
+| STRLEN '(' EXPR ')' {$$ = sm_new_expr(SM_STRLEN_EXPR,(sm_object*)$3);}
+| STRCAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STRCAT_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | PRINT '(' EXPR ')' {$$ = sm_new_expr(SM_PRINT_EXPR,(sm_object*)$3);}
 | TO_STRING '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
