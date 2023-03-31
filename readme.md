@@ -1,24 +1,33 @@
 # Introduction:
 SMS (Symbolic Math System) is a terminal based calculator. SMS has built-in functions for arithmetic operations, flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. 
 
+# Longer Introduction:
+
 In addition to providing a command line, SMS can interpret files.
 Run `sms -h` for command line options.
 
 Unlike Javascript, Math functions in SMS are global keywords.
 
-For example, taking a square root in javascript may look like `Math.sqrt(x)`. In SMS, this same function is permanently available as  `sqrt(x)`.
+For example, taking a square root in javascript may look like `Math.sqrt(x)`. In SMS, this same function is permanently available as  `sqrt(x)`. Another major difference between SMS and javascript is that SMS provides the meta operator (`:`) which allows developers to capture expressions for metaprogramming.
 
 SMS has the following built-in functions (math operations are in double precision):
 
 Arithmetical operations: `+, -, *, /, ^, ln, exp, abs,  sqrt` 
-
-Flow control: `if, ==, >, <, map`
 
 Trigonometry: `sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sech, csch, coth`
 
 Algebra: `simp` for simplifying expressions. Uses a multipass algorithm, which is constantly being improved.
 
 Calculus: `diff` for taking derivatives.
+
+Flow control: `if, map, while, eval, ==, >, >=, <, <=, exit`
+
+Strings: `strcat, strlen, parse, to_string`
+
+Files: `read_file , parse_file, write_file`
+
+A help command with explanations and examples for each SMS command will be created soon.
+For now, we have the list above and the tutorial below.
 
 # How to Download and Run/Install a Release
 - At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
@@ -88,7 +97,7 @@ This command builds the executable and copies it to /usr/bin/sms
 
 
 # Tutorial:
-You can learn most of the language by trying the following commands in order.
+You can learn the basics of SMS by trying the following commands in order.
 
 Once you have the SMS prompt running, you can enter the following commands. Note: In SMS, whitespace characters (outside of strings) are ignored. All commands end with a semicolon (`;`).
 
@@ -150,9 +159,9 @@ Variables can be removed from the current context:
 
 `rm x;`
 
-Exit the program with:
+Exit SMS with ctrl+c, or exit with a specific code:
 
-`exit;`
+`exit(0);`
 
 Check out `sms_src/example.sms` for example functions and ideas.
 You can also run `sms -i example.sms` to load SMS with useful functions and constants.
