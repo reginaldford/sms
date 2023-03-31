@@ -27,9 +27,9 @@ enum SM_EXPR_TYPE {
   SM_DIFF_EXPR,       // 21
   SM_SIMP_EXPR,       // 22
   SM_ASSIGN_EXPR,     // 23
-  SM_TEST_EQ_EXPR,    // 24
-  SM_TEST_LT_EXPR,    // 25
-  SM_TEST_GT_EXPR,    // 26
+  SM_EQ_EXPR,    // 24
+  SM_LT_EXPR,    // 25
+  SM_GT_EXPR,    // 26
   SM_IF_EXPR,         // 27
   SM_IF_ELSE_EXPR,    // 28
   SM_LET_EXPR,        // 29

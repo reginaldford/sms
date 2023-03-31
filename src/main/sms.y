@@ -45,8 +45,10 @@ void _lex_cstr(char * cstr,int len);
 %type <expr> ARRAY
 %type <expr> ARRAY_LIST
 %type <expr> EQ
-%type <expr> GT
-%type <expr> LT
+%type <expr> TEST_LT
+%type <expr> TEST_GT
+%type <expr> TEST_LT_EQ
+%type <expr> TEST_GT_EQ
 %type <expr> SEQUENCE
 %type <expr> SEQUENCE_LIST
 %type <expr> COMMAND
@@ -93,6 +95,8 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> WRITE_FILE
 %token <expr> RAND
 %token <expr> ROUND
+%token <expr> LT
+%token <expr> GT
 %token <expr> LT_EQ
 %token <expr> GT_EQ
 %token <expr> NOT
@@ -180,10 +184,10 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | FUN{}
 | IF_STATEMENT{}
 | EQ{}
-| LT{}
-| GT{}
-| EXPR LT_EQ EXPR { $$ = sm_new_expr_2(SM_LT_EQ_EXPR,(sm_object*)$1,(sm_object*)$3);};
-| EXPR GT_EQ EXPR { $$ = sm_new_expr_2(SM_GT_EQ_EXPR,(sm_object*)$1,(sm_object*)$3);};
+| TEST_LT{}
+| TEST_GT{}
+| TEST_LT_EQ{}
+| TEST_GT_EQ{}
 | SEQUENCE {}
 | SYM DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
@@ -261,20 +265,31 @@ EXPR_LIST : '+' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object 
 | '/' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$3, (sm_object *)$5); }
 | EXPR_LIST ',' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
 
-LT : '<' '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(SM_TEST_LT_EXPR, (sm_object *)($3), (sm_object *)($5));
+TEST_LT : '<' '(' EXPR ',' EXPR ')' {
+  $$ = sm_new_expr_2(SM_LT_EXPR, (sm_object *)($3), (sm_object *)($5));
 }
-| EXPR '<' EXPR { $$ = sm_new_expr_2(SM_TEST_LT_EXPR, (sm_object *)($1), (sm_object *)($3)); }
+| EXPR '<' EXPR { $$ = sm_new_expr_2(SM_LT_EXPR, (sm_object *)($1), (sm_object *)($3)); }
 
-GT : '>' '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(SM_TEST_GT_EXPR, (sm_object *)($3), (sm_object *)($5));
+TEST_GT : '>' '(' EXPR ',' EXPR ')' {
+  $$ = sm_new_expr_2(SM_GT_EXPR, (sm_object *)($3), (sm_object *)($5));
 }
-| EXPR '>' EXPR { $$ = sm_new_expr_2(SM_TEST_GT_EXPR, (sm_object *)($1), (sm_object *)($3)); }
+| EXPR '>' EXPR { $$ = sm_new_expr_2(SM_GT_EXPR, (sm_object *)($1), (sm_object *)($3)); }
+
+TEST_LT_EQ: LT_EQ '(' EXPR ',' EXPR ')' {
+  $$ = sm_new_expr_2(SM_LT_EQ_EXPR, (sm_object *)($3), (sm_object *)($5));
+}
+| EXPR LT_EQ EXPR { $$ = sm_new_expr_2(SM_LT_EQ_EXPR,(sm_object*)$1,(sm_object*)$3);};
+
+TEST_GT_EQ: GT_EQ '(' EXPR ',' EXPR ')' {
+  $$ = sm_new_expr_2(SM_GT_EQ_EXPR, (sm_object *)($3), (sm_object *)($5));
+}
+| EXPR GT_EQ EXPR { $$ = sm_new_expr_2(SM_GT_EQ_EXPR,(sm_object*)$1,(sm_object*)$3);};
+
 
 EQ : EQEQ '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(SM_TEST_EQ_EXPR, (sm_object *)($3), (sm_object *)($5));
+  $$ = sm_new_expr_2(SM_EQ_EXPR, (sm_object *)($3), (sm_object *)($5));
 }
-| EXPR EQEQ EXPR { $$ = sm_new_expr_2(SM_TEST_EQ_EXPR, (sm_object *)($1), (sm_object *)($3)); }
+| EXPR EQEQ EXPR { $$ = sm_new_expr_2(SM_EQ_EXPR, (sm_object *)($1), (sm_object *)($3)); }
 
 IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(SM_IF_EXPR, (sm_object *)($3), (sm_object *)($5));

@@ -1,7 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
-#include "sm_main.h"
 
 /* GLOBALS
 Globals in this project use functions f(x):
