@@ -19,6 +19,41 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+            case SM_STRCAT_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj0->my_type != SM_STRING_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("Error: strcat command requires 2 strings. Instead, %s was provided as the first argument.\n", cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      if (obj1->my_type != SM_STRING_TYPE) {
+        sm_string *str  = sm_object_to_string(obj1);
+        char      *cstr = &(str->content);
+        printf("Error: strcat command requires 2 strings. Instead, %s was provided as the second argument.\n", cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      sm_string * str0 = (sm_string*)obj0;
+      sm_string * str1 = (sm_string*)obj1;
+      sm_string * new_str = sm_new_string_manual(str0->size+str1->size);
+      char * content = &(new_str->content);
+      strncat(content,&(str0->content),str0->size);
+      strncat(content+str0->size,&(str1->content),str1->size);
+      return (sm_object*)new_str;
+      break;
+    }
+        case SM_STRLEN_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_STRING_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("Error: strlen command requires a string. Instead, %s was provided.\n", cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      return (sm_object*)sm_new_double(((sm_string*)obj0)->size);
+      break;
+    }
     case SM_EXIT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type != SM_DOUBLE_TYPE) {

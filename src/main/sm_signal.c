@@ -35,7 +35,7 @@ void sm_signal_handler(int signal_number) {
     exit_code   = 1;
     break;
   }
-  printf("\n<Received signal: %s. Cleaning up and exiting now.>\n", signal_name);
+  printf("\n<Received signal: %s. Exiting now.>\n", signal_name);
   sm_mem_cleanup();
   exit(exit_code);
 }

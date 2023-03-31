@@ -64,6 +64,8 @@ not         {return NOT;}
 or          {return OR;}
 input       {return INPUT;}
 escape      {return ESCAPE;}
+strlen      {return STRLEN;}
+strcat      {return STRCAT;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 
