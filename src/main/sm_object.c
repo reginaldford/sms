@@ -68,6 +68,7 @@ unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 
 // Return the size of the object in bytes
 int sm_sizeof(sm_object *obj1) {
+  // printf("type: %i\n",obj1->my_type);
   switch (obj1->my_type) {
   case SM_DOUBLE_TYPE:
     return sizeof(sm_double);
@@ -97,7 +98,8 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(sm_error);
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
-    exit(0);
+    // sm_sprint_dump();
+    exit(1);
   }
 }
 

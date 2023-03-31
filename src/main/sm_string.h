@@ -5,8 +5,8 @@
 typedef struct sm_string {
   short int    my_type;
   unsigned int size;
-  int          space; // make string at least 16 bytes
-  char         content;
+  int          space;   // make string at least 16 bytes
+  char         content; // stores NULL if nothing else
 } sm_string;
 
 char        *sm_strncpy(char *dest, const char *src, unsigned int n);

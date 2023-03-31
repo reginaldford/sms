@@ -71,6 +71,7 @@ typedef struct sm_expr {
   enum SM_EXPR_TYPE op;
   unsigned int      capacity;
   unsigned int      size;
+  short             filler;
 } sm_expr;
 
 sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op1, unsigned int size, unsigned int capacity);
