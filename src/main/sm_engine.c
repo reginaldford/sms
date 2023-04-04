@@ -585,7 +585,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
                                       current_cx);
     }
-    case SM_EQ_EXPR: {
+    case SM_EQEQ_EXPR: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj1->my_type == SM_DOUBLE_TYPE) {

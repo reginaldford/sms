@@ -53,7 +53,7 @@ void _lex_cstr(char * cstr,int len);
 %type <expr> SEQUENCE_LIST
 %type <expr> COMMAND
 
-%token CLEAR FORMAT LS NEWLINE EXIT SELF IF
+%token CLEAR LS EXIT SELF IF
 
 %token DOT
 %token <fun> ARROW
@@ -296,9 +296,9 @@ TEST_GT_EQ: GT_EQ '(' EXPR ',' EXPR ')' {
 
 
 EQ : EQEQ '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(SM_EQ_EXPR, (sm_object *)($3), (sm_object *)($5));
+  $$ = sm_new_expr_2(SM_EQEQ_EXPR, (sm_object *)($3), (sm_object *)($5));
 }
-| EXPR EQEQ EXPR { $$ = sm_new_expr_2(SM_EQ_EXPR, (sm_object *)($1), (sm_object *)($3)); }
+| EXPR EQEQ EXPR { $$ = sm_new_expr_2(SM_EQEQ_EXPR, (sm_object *)($1), (sm_object *)($3)); }
 
 IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(SM_IF_EXPR, (sm_object *)($3), (sm_object *)($5));

@@ -91,14 +91,16 @@ char *sm_global_fn_name(unsigned short int which) {
   const unsigned short int num_functions = sm_global_num_fns();
   // Should be syncronized with enum SM_EXPR_TYPE
   static char *response[] = {
-    "+",          "-",     "*",     "/",         "^",    "sqrt",   "sin",        "cos",
-    "tan",        "sinh",  "cosh",  "tanh",      "csc",  "sec",    "cot",        "csch",
-    "sech",       "coth",  "ln",    "exp",       "abs",  "diff",   "simp",       "=",
-    "==",         "<",     ">",     "if",        "if",   "let",    "",           "",
-    "siblings",   "prim",  "",      "",          ".",    "parent", "size",       "map",
-    "",           "while", "print", "to_string", "eval", "parse",  "parse_file", "read_file",
-    "write_file", "rand",  "round", "<=",        ">=",   "not",    "or",         "input",
-    "escape",     "exit",  "?"};
+    "exit",     "clear",      "self",       "let",        "=",         "rm",       ".",
+    "parent",   "+",          "-",          "*",          "/",         "^",        "sin",
+    "cos",      "tan",        "sinh",       "cosh",       "tanh",      "csc",      "sec",
+    "cot",      "csch",       "sech",       "coth",       "exp",       "ln",       "sqrt",
+    "abs",      "diff",       "simp",       "if",         "if",        "==",       "<",
+    ">",        "<=",         ">=",         ";",          "",          "size",     "",
+    "map",      "while",      "eval",       "parse",      "to_string", "print",    "println",
+    "input",    "file_parse", "file_read",  "file_write", "random",    "round",    "not",
+    "or",       "escape",     "strlen",     "strcat",     "strpart",   "strupper", "strlower",
+    "strisnum", "fun_call",   "param_list", "siblings",   "prim",      "?"};
   if (which >= num_functions) {
     return response[num_functions];
   }
@@ -108,8 +110,9 @@ char *sm_global_fn_name(unsigned short int which) {
 // corresponding string length of the string that would come from the sm_global_fn_name(which)
 unsigned int sm_global_fn_name_len(unsigned short int which) {
   static long unsigned int response_len[] = {
-    1, 1, 1, 1, 1, 4, 3, 3, 3, 4, 4, 4, 3, 3, 3, 4, 4,  4, 2,  3, 3, 4, 4, 1, 2, 1, 1, 2, 2, 3,
-    0, 0, 8, 4, 0, 0, 1, 6, 4, 3, 0, 5, 5, 9, 4, 5, 10, 9, 10, 4, 5, 2, 2, 3, 2, 5, 6, 4, 1};
+    4, 5, 4, 3, 1,  2, 1,  6, 1, 1, 1, 1, 1, 3, 3, 3, 4, 4, 4, 3,  3, 3, 4,
+    4, 4, 3, 2, 4,  3, 4,  4, 2, 2, 2, 1, 1, 2, 2, 1, 0, 4, 0, 3,  5, 4, 5,
+    9, 5, 7, 5, 10, 9, 10, 6, 5, 3, 2, 6, 6, 6, 7, 8, 8, 8, 8, 10, 8, 4, 1};
   if (which >= sm_global_num_fns()) {
     return 1; // "?"
   }

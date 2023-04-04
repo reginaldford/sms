@@ -56,14 +56,14 @@ to_string   {return TO_STRING;}
 size        {return SIZE;}
 print       {return PRINT;}
 println     {return PRINTLN;}
+input       {return INPUT;}
 file_parse  {return FILE_PARSE;}
 file_read   {return FILE_READ;}
 file_write  {return FILE_WRITE;}
-random        {return RANDOM;}
+random      {return RANDOM;}
 round       {return ROUND;}
 not         {return NOT;}
 or          {return OR;}
-input       {return INPUT;}
 escape      {return ESCAPE;}
 strlen      {return STRLEN;}
 strcat      {return STRCAT;}

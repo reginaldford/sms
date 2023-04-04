@@ -3,67 +3,75 @@
 // Denotes the type of expression
 // Must be in the same order as sm_global_fn_name
 enum SM_EXPR_TYPE {
-  SM_PLUS_EXPR,       // 0
-  SM_MINUS_EXPR,      // 1
-  SM_TIMES_EXPR,      // 2
-  SM_DIVIDE_EXPR,     // 3
-  SM_POW_EXPR,        // 4
-  SM_SQRT_EXPR,       // 5
-  SM_SIN_EXPR,        // 6
-  SM_COS_EXPR,        // 7
-  SM_TAN_EXPR,        // 8
-  SM_SINH_EXPR,       // 9
-  SM_COSH_EXPR,       // 10
-  SM_TANH_EXPR,       // 11
-  SM_CSC_EXPR,        // 12
-  SM_SEC_EXPR,        // 13
-  SM_COT_EXPR,        // 14
-  SM_CSCH_EXPR,       // 15
-  SM_SECH_EXPR,       // 16
-  SM_COTH_EXPR,       // 17
-  SM_LN_EXPR,         // 18
-  SM_EXP_EXPR,        // 19
-  SM_ABS_EXPR,        // 20
-  SM_DIFF_EXPR,       // 21
-  SM_SIMP_EXPR,       // 22
-  SM_ASSIGN_EXPR,     // 23
-  SM_EQ_EXPR,         // 24
-  SM_LT_EXPR,         // 25
-  SM_GT_EXPR,         // 26
-  SM_IF_EXPR,         // 27
-  SM_IF_ELSE_EXPR,    // 28
-  SM_LET_EXPR,        // 29
-  SM_THEN_EXPR,       // 30
-  SM_ARRAY_EXPR,      // 31
-  SM_SIBLINGS_EXPR,   // 32
-  SM_PRIM_EXPR,       // 33
-  SM_PARAM_LIST_EXPR, // 34
-  SM_FUN_CALL_EXPR,   // 35
-  SM_DOT_EXPR,        // 36
-  SM_PARENT_EXPR,     // 37
-  SM_SIZE_EXPR,       // 38
-  SM_MAP_EXPR,        // 39
-  SM_INDEX_EXPR,      // 40
-  SM_WHILE_EXPR,      // 41
-  SM_PRINT_EXPR,      // 42
-  SM_TO_STRING_EXPR,  // 43
-  SM_EVAL_EXPR,       // 44
-  SM_PARSE_EXPR,      // 45
-  SM_FILE_PARSE_EXPR, // 46
-  SM_FILE_READ_EXPR,  // 47
-  SM_FILE_WRITE_EXPR, // 48
-  SM_RANDOM_EXPR,     // 49
-  SM_ROUND_EXPR,      // 50
-  SM_LT_EQ_EXPR,      // 51
-  SM_GT_EQ_EXPR,      // 52
-  SM_NOT_EXPR,        // 53
-  SM_OR_EXPR,         // 54
-  SM_INPUT_EXPR,      // 55
-  SM_ESCAPE_EXPR,     // 56
-  SM_EXIT_EXPR,       // 57
-  SM_STRLEN_EXPR,     // 58
-  SM_STRCAT_EXPR,     // 59
-  SM_UNKNOWN_EXPR     // 60
+  SM_EXIT_EXPR,
+  SM_CLEAR_EXPR,
+  SM_SELF_EXPR,
+  SM_LET_EXPR,
+  SM_ASSIGN_EXPR,
+  SM_RM_EXPR,
+  SM_DOT_EXPR,
+  SM_PARENT_EXPR,
+  SM_PLUS_EXPR,
+  SM_MINUS_EXPR,
+  SM_TIMES_EXPR,
+  SM_DIVIDE_EXPR,
+  SM_POW_EXPR,
+  SM_SIN_EXPR,
+  SM_COS_EXPR,
+  SM_TAN_EXPR,
+  SM_SINH_EXPR,
+  SM_COSH_EXPR,
+  SM_TANH_EXPR,
+  SM_CSC_EXPR,
+  SM_SEC_EXPR,
+  SM_COT_EXPR,
+  SM_CSCH_EXPR,
+  SM_SECH_EXPR,
+  SM_COTH_EXPR,
+  SM_EXP_EXPR,
+  SM_LN_EXPR,
+  SM_SQRT_EXPR,
+  SM_ABS_EXPR,
+  SM_DIFF_EXPR,
+  SM_SIMP_EXPR,
+  SM_IF_EXPR,
+  SM_IF_ELSE_EXPR,
+  SM_EQEQ_EXPR,
+  SM_LT_EXPR,
+  SM_GT_EXPR,
+  SM_LT_EQ_EXPR,
+  SM_GT_EQ_EXPR,
+  SM_THEN_EXPR,
+  SM_ARRAY_EXPR,
+  SM_SIZE_EXPR,
+  SM_INDEX_EXPR,
+  SM_MAP_EXPR,
+  SM_WHILE_EXPR,
+  SM_EVAL_EXPR,
+  SM_PARSE_EXPR,
+  SM_TO_STRING_EXPR,
+  SM_PRINT_EXPR,
+  SM_PRINTLN_EXPR,
+  SM_INPUT_EXPR,
+  SM_FILE_PARSE_EXPR,
+  SM_FILE_READ_EXPR,
+  SM_FILE_WRITE_EXPR,
+  SM_RANDOM_EXPR,
+  SM_ROUND_EXPR,
+  SM_NOT_EXPR,
+  SM_OR_EXPR,
+  SM_ESCAPE_EXPR,
+  SM_STRLEN_EXPR,
+  SM_STRCAT_EXPR,
+  SM_STRPART_EXPR,
+  SM_STRUPPER_EXPR,
+  SM_STRLOWER_EXPR,
+  SM_STRISNUM_EXPR,
+  SM_FUN_CALL_EXPR,
+  SM_PARAM_LIST_EXPR,
+  SM_SIBLINGS_EXPR,
+  SM_PRIM_EXPR,
+  SM_UNKNOWN_EXPR
 };
 
 // Head of an expression
