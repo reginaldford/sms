@@ -128,10 +128,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       int        floor_val = val > 0 ? val + 0.5 : val - 0.5;
       return (sm_object *)sm_new_double(floor_val);
     }
-    case SM_RAND_EXPR: {
+    case SM_RANDOM_EXPR: {
       return (sm_object *)sm_new_double(((double)rand()) / ((double)RAND_MAX));
     }
-    case SM_WRITE_FILE_EXPR: {
+    case SM_FILE_WRITE_EXPR: {
       // obtain the file name
       sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (evaluated_fname->my_type != SM_STRING_TYPE) {
@@ -164,7 +164,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       fclose(fptr);
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
-    case SM_READ_FILE_EXPR: {
+    case SM_FILE_READ_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (evaluated->my_type != SM_STRING_TYPE) {
         sm_string *obj_str = sm_object_to_string((sm_object *)evaluated);
@@ -188,7 +188,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       *(&output->content + len) = '\0';
       return (sm_object *)output;
     }
-    case SM_PARSE_FILE_EXPR: {
+    case SM_FILE_PARSE_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (evaluated->my_type != SM_STRING_TYPE) {
         printf("Must pass a string to parse_file.\n");

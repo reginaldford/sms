@@ -87,15 +87,20 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> SIZE
 %token <expr> STRLEN
 %token <expr> STRCAT
+%token <expr> STRPART
+%token <expr> STRUPPER
+%token <expr> STRLOWER
+%token <expr> STRISNUM
 %token <expr> WHILE
 %token <expr> PRINT
+%token <expr> PRINTLN
 %token <expr> TO_STRING
 %token <expr> EVAL
 %token <expr> PARSE
-%token <expr> PARSE_FILE
-%token <expr> READ_FILE
-%token <expr> WRITE_FILE
-%token <expr> RAND
+%token <expr> FILE_PARSE
+%token <expr> FILE_READ
+%token <expr> FILE_WRITE
+%token <expr> RANDOM
 %token <expr> ROUND
 %token <expr> LT
 %token <expr> GT
@@ -204,12 +209,12 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}
 | EVAL '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3);}
-| PARSE_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_FILE_EXPR,(sm_object*)$3);}
-| READ_FILE '(' EXPR ')' {$$ = sm_new_expr(SM_READ_FILE_EXPR,(sm_object*)$3);}
-| WRITE_FILE '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(SM_WRITE_FILE_EXPR,(sm_object*)$3,(sm_object*)$5);
+| FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
+| FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3);}
+| FILE_WRITE '(' EXPR ',' EXPR ')' {
+  $$ = sm_new_expr_2(SM_FILE_WRITE_EXPR,(sm_object*)$3,(sm_object*)$5);
   }
-| RAND  '(' ')' { $$ = sm_new_expr_n(SM_RAND_EXPR,0,0);};
+| RANDOM  '(' ')' { $$ = sm_new_expr_n(SM_RANDOM_EXPR,0,0);};
 | ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);};
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);};
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};

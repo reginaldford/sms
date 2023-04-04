@@ -20,11 +20,11 @@ digit [0-9]
 [ \t\f\v\n] { ; }
 exit        {return EXIT;}
 clear       {return CLEAR;}
-"."         {return DOT;}
-"parent"    {return PARENT;}
-let         {return LET;}
 self        {return SELF;}
-if          {return IF;}
+let         {return LET;}
+rm          {return RM;}
+"."         {return DOT;}
+parent      {return PARENT;}
 sin         {return SIN;}
 cos         {return COS;}
 tan         {return TAN;}
@@ -43,29 +43,34 @@ sqrt        {return SQRT;}
 abs         {return ABS;}
 diff        {return DIFF;}
 simp        {return SIMP;}
-rm          {return RM;}
-==          {return EQEQ;}
-=>          {return ARROW;}
+if          {return IF;}
 map         {return MAP;}
-size        {return SIZE;}
 while       {return WHILE;}
-print       {return PRINT;}
-to_string   {return TO_STRING;}
 eval        {return EVAL;}
 parse       {return PARSE;}
-parse_file  {return PARSE_FILE;}
-read_file   {return READ_FILE;}
-write_file  {return WRITE_FILE;}
-rand        {return RAND;}
-round       {return ROUND;}
+to_string   {return TO_STRING;}
+==          {return EQEQ;}
+=>          {return ARROW;}
 "<="        {return LT_EQ;}
 ">="        {return GT_EQ;}
+size        {return SIZE;}
+print       {return PRINT;}
+println     {return PRINTLN;}
+file_parse  {return FILE_PARSE;}
+file_read   {return FILE_READ;}
+file_write  {return FILE_WRITE;}
+random        {return RANDOM;}
+round       {return ROUND;}
 not         {return NOT;}
 or          {return OR;}
 input       {return INPUT;}
 escape      {return ESCAPE;}
 strlen      {return STRLEN;}
 strcat      {return STRCAT;}
+strpart     {return STRPART;}
+strupper    {return STRUPPER;}
+strlower    {return STRLOWER;}
+strisnum    {return STRISNUM;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 
@@ -122,7 +127,6 @@ strcat      {return STRCAT;}
       }
     final_i ++;
   }
-    //use the output here
     yylval.str = sm_new_string(final_i,text);
     return STRING;
   }
