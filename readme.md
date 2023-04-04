@@ -24,7 +24,7 @@ Flow control: `if, map, while, eval, ==, >, >=, <, <=, exit`
 
 Strings: `strcat, strlen, parse, to_string`
 
-Files: `read_file , parse_file, write_file`
+Files: `file_read , file_parse, file_write`
 
 A help command with explanations and examples for each SMS command will be created soon.
 For now, we have the list above and the tutorial below.
@@ -135,7 +135,7 @@ Access fields of objects:
 
 Obtain the parent of an object:
 
-`self.parent;`
+`parent(self);`
 
 If statements:
 

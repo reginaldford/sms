@@ -49,10 +49,10 @@ enum SM_EXPR_TYPE {
   SM_TO_STRING_EXPR,  // 43
   SM_EVAL_EXPR,       // 44
   SM_PARSE_EXPR,      // 45
-  SM_PARSE_FILE_EXPR, // 46
-  SM_READ_FILE_EXPR,  // 47
-  SM_WRITE_FILE_EXPR, // 48
-  SM_RAND_EXPR,       // 49
+  SM_FILE_PARSE_EXPR, // 46
+  SM_FILE_READ_EXPR,  // 47
+  SM_FILE_WRITE_EXPR, // 48
+  SM_RANDOM_EXPR,     // 49
   SM_ROUND_EXPR,      // 50
   SM_LT_EQ_EXPR,      // 51
   SM_GT_EQ_EXPR,      // 52
@@ -67,7 +67,8 @@ enum SM_EXPR_TYPE {
 };
 
 // Head of an expression
-// Assumed to have size of pointers following the structure
+// Assumed to have pointers following the structure for each argument
+// Size denotes the number of trailing pointers.
 typedef struct sm_expr {
   short int         my_type;
   enum SM_EXPR_TYPE op;
@@ -76,11 +77,11 @@ typedef struct sm_expr {
   short             filler;
 } sm_expr;
 
-sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op1, unsigned int size, unsigned int capacity);
 sm_expr *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg);
-sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg);
 sm_expr *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2);
 sm_expr *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
+sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op1, unsigned int size, unsigned int capacity);
+sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg);
 unsigned int sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);
 unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake);
 sm_string   *sm_expr_to_string(sm_expr *expr);
