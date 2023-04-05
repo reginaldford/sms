@@ -71,6 +71,10 @@ strpart     {return STRPART;}
 strupper    {return STRUPPER;}
 strlower    {return STRLOWER;}
 strisnum    {return STRISNUM;}
+date_str    {return DATE_STR;}
+date        {return DATE;}
+time        {return TIME;}
+sleep        {return SLEEP;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 

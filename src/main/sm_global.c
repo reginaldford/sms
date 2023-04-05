@@ -100,7 +100,8 @@ char *sm_global_fn_name(unsigned short int which) {
     "map",      "while",      "eval",       "parse",      "to_string", "print",    "println",
     "input",    "file_parse", "file_read",  "file_write", "random",    "round",    "not",
     "or",       "escape",     "strlen",     "strcat",     "strpart",   "strupper", "strlower",
-    "strisnum", "fun_call",   "param_list", "siblings",   "prim",      "?"};
+    "strisnum", "fun_call",   "param_list", "siblings",   "prim",      "date_str", "date",
+    "time",     "?"};
   if (which >= num_functions) {
     return response[num_functions];
   }
@@ -110,9 +111,9 @@ char *sm_global_fn_name(unsigned short int which) {
 // corresponding string length of the string that would come from the sm_global_fn_name(which)
 unsigned int sm_global_fn_name_len(unsigned short int which) {
   static long unsigned int response_len[] = {
-    4, 5, 4, 3, 1,  2, 1,  6, 1, 1, 1, 1, 1, 3, 3, 3, 4, 4, 4, 3,  3, 3, 4,
-    4, 4, 3, 2, 4,  3, 4,  4, 2, 2, 2, 1, 1, 2, 2, 1, 0, 4, 0, 3,  5, 4, 5,
-    9, 5, 7, 5, 10, 9, 10, 6, 5, 3, 2, 6, 6, 6, 7, 8, 8, 8, 8, 10, 8, 4, 1};
+    4, 5, 4,  3, 1,  2, 1, 6, 1, 1, 1, 1, 1, 3, 3, 3, 4, 4,  4, 3, 3, 3, 4, 4,
+    4, 3, 2,  4, 3,  4, 4, 2, 2, 2, 1, 1, 2, 2, 1, 0, 4, 0,  3, 5, 4, 5, 9, 5,
+    7, 5, 10, 9, 10, 6, 5, 3, 2, 6, 6, 6, 7, 8, 8, 8, 8, 10, 8, 4, 8, 4, 4, 1};
   if (which >= sm_global_num_fns()) {
     return 1; // "?"
   }
@@ -120,7 +121,7 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
 }
 
 unsigned int sm_global_num_fns() {
-  static const unsigned short int num_fns = 58;
+  static const unsigned short int num_fns = 71;
   return num_fns;
 }
 

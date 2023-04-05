@@ -91,6 +91,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> STRUPPER
 %token <expr> STRLOWER
 %token <expr> STRISNUM
+%token <expr> ESCAPE
 %token <expr> WHILE
 %token <expr> PRINT
 %token <expr> PRINTLN
@@ -109,7 +110,10 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> NOT
 %token <expr> OR
 %token <expr> INPUT
-%token <expr> ESCAPE
+%token <expr> DATE_STR
+%token <expr> DATE
+%token <expr> TIME
+%token <expr> SLEEP
 %token DONE
 
 %left ';'
@@ -222,6 +226,10 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3);};
 | ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_ESCAPE_EXPR,(sm_object*)$3);};
+| DATE_STR '(' ')' { $$ = sm_new_expr_n(SM_DATE_STR_EXPR,0,0);};
+| DATE '(' ')' { $$ = sm_new_expr_n(SM_DATE_EXPR,0,0);};
+| TIME '(' ')' { $$ = sm_new_expr_n(SM_TIME_EXPR,0,0);};
+| SLEEP '(' EXPR ')' { $$ = sm_new_expr(SM_SLEEP_EXPR,(sm_object*)$3);};
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local
