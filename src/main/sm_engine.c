@@ -1,6 +1,8 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
+#include "sys/time.h"
+#include <errno.h>
 
 bool is_true(sm_object *obj) {
   if (obj->my_type == SM_SYMBOL_TYPE) {
@@ -19,6 +21,58 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_DATE_EXPR: {
+      time_t     rawtime;
+      struct tm *timeinfo;
+      time(&rawtime);
+      timeinfo            = localtime(&rawtime);
+      int     *time_array = (int *)timeinfo;
+      sm_expr *result     = sm_new_expr_n(SM_ARRAY_EXPR, 9, 9);
+      for (int i = 0; i < 9; i++)
+        sm_expr_set_arg(result, i, (sm_object *)sm_new_double(time_array[i]));
+      return (sm_object *)result;
+      break;
+    }
+    case SM_SLEEP_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_DOUBLE_TYPE) {
+        printf("ERROR: Passing non-number to sleep function.\n");
+        return (sm_object *)sm_new_double(0);
+      }
+      int tms = (int)((sm_double *)obj0)->value;
+      if (tms < 0) {
+        printf("ERROR: sleep function was provided a negative value.\n");
+        return (sm_object *)sm_new_double(0);
+      }
+      struct timespec ts;
+      int             ret;
+      ts.tv_sec  = tms / 1000;
+      ts.tv_nsec = (tms % 1000) * 1000000;
+      do {
+        ret = nanosleep(&ts, &ts);
+      } while (ret);
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+    }
+    case SM_DATE_STR_EXPR: {
+      time_t     rawtime;
+      struct tm *timeinfo;
+      time(&rawtime);
+      timeinfo          = localtime(&rawtime);
+      sm_string *result = sm_new_string_manual(24);
+      sprintf(&(result->content), "%s", asctime(timeinfo));
+      (&result->content)[24] = '\0';
+      return (sm_object *)result;
+      break;
+    }
+    case SM_TIME_EXPR: {
+      struct timeval t;
+      gettimeofday(&t, NULL);
+      sm_expr *result = sm_new_expr_n(SM_ARRAY_EXPR, 2, 2);
+      sm_expr_set_arg(result, 0, (sm_object *)sm_new_double(t.tv_sec));
+      sm_expr_set_arg(result, 1, (sm_object *)sm_new_double(t.tv_usec));
+      return (sm_object *)result;
+      break;
+    }
     case SM_STRPART_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
@@ -302,6 +356,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       }
       sm_string *smstr = (sm_string *)evaluated;
       printf("%s", &(smstr->content));
+      fflush(stdout);
       return evaluated;
       break;
     }
@@ -314,6 +369,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       }
       sm_string *smstr = (sm_string *)evaluated;
       printf("%s\n", &(smstr->content));
+      fflush(stdout);
       return evaluated;
       break;
     }
