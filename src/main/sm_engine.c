@@ -19,13 +19,65 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_STRPART_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      if (obj0->my_type != SM_STRING_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("Error: strpart function requires a string and 2 numbers. Instead, %s was provided "
+               "as the first "
+               "argument.\n",
+               cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      if (obj1->my_type != SM_DOUBLE_TYPE) {
+        sm_string *str  = sm_object_to_string(obj1);
+        char      *cstr = &(str->content);
+        printf("Error: strpart function requires a string and 2 numbers. Instead, %s was provided "
+               "as the second "
+               "argument.\n",
+               cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      if (obj2->my_type != SM_DOUBLE_TYPE) {
+        sm_string *str  = sm_object_to_string(obj2);
+        char      *cstr = &(str->content);
+        printf("Error: strpart function requires a string and 2 numbers. Instead, %s was provided "
+               "as the third argument.\n",
+               cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      sm_string *str0  = (sm_string *)obj0;
+      sm_double *start = (sm_double *)obj1;
+      sm_double *len   = (sm_double *)obj2;
+
+      if (start->value < 0 || start->value >= str0->size) {
+        printf("Error: Using strpart(str,start,len) where start is out of range: %i",
+               (int)start->value);
+        return (sm_object *)sm_new_string(0, "");
+      }
+
+      if (len->value > str0->size - start->value) {
+        printf("Error: Using strpart(str,start,len) where len is out of range: %i",
+               (int)len->value);
+        return (sm_object *)sm_new_string(0, "");
+      }
+
+      sm_string *new_str = sm_new_string_manual((int)len->value);
+      char      *content = &(new_str->content);
+      sm_strncpy(content, &(str0->content) + (int)start->value, (int)len->value);
+      return (sm_object *)new_str;
+      break;
+    }
     case SM_STRCAT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);
         char      *cstr = &(str->content);
-        printf("Error: strcat command requires 2 strings. Instead, %s was provided as the first "
+        printf("Error: strcat function requires 2 strings. Instead, %s was provided as the first "
                "argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -33,7 +85,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (obj1->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj1);
         char      *cstr = &(str->content);
-        printf("Error: strcat command requires 2 strings. Instead, %s was provided as the second "
+        printf("Error: strcat function requires 2 strings. Instead, %s was provided as the second "
                "argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -52,7 +104,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (obj0->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);
         char      *cstr = &(str->content);
-        printf("Error: strlen command requires a string. Instead, %s was provided.\n", cstr);
+        printf("Error: strlen function requires a string. Instead, %s was provided.\n", cstr);
         return (sm_object *)sm_new_string(0, "");
       }
       return (sm_object *)sm_new_double(((sm_string *)obj0)->size);
@@ -63,7 +115,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (obj0->my_type != SM_DOUBLE_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);
         char      *cstr = &(str->content);
-        printf("Error: Exit command requires an integer. Instead, %s was provided.\n", cstr);
+        printf("Error: Exit function requires an integer. Instead, %s was provided.\n", cstr);
         return (sm_object *)sm_new_string(0, "");
       }
       int exit_code = ((sm_double *)obj0)->value;
@@ -249,7 +301,19 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         printf("Error: Trying to print something that is not a string: %s\n", cstr);
       }
       sm_string *smstr = (sm_string *)evaluated;
-      puts(&(smstr->content));
+      printf("%s", &(smstr->content));
+      return evaluated;
+      break;
+    }
+    case SM_PRINTLN_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (evaluated->my_type != SM_STRING_TYPE) {
+        sm_string *obj_str = sm_object_to_string(evaluated);
+        char      *cstr    = &(obj_str->content);
+        printf("Error: Trying to print something that is not a string: %s\n", cstr);
+      }
+      sm_string *smstr = (sm_string *)evaluated;
+      printf("%s\n", &(smstr->content));
       return evaluated;
       break;
     }
