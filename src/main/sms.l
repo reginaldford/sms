@@ -64,17 +64,19 @@ random      {return RANDOM;}
 round       {return ROUND;}
 not         {return NOT;}
 or          {return OR;}
-escape      {return ESCAPE;}
-strlen      {return STRLEN;}
-strcat      {return STRCAT;}
-strpart     {return STRPART;}
-strupper    {return STRUPPER;}
-strlower    {return STRLOWER;}
-strisnum    {return STRISNUM;}
+str_escape  {return STR_ESCAPE;}
+str_len     {return STR_LEN;}
+str_find    {return STR_FIND;}
+str_add     {return STR_ADD;}
+str_divide  {return STR_DIVIDE;}
+str_part    {return STR_PART;}
+str_upper   {return STR_UPPER;}
+str_lower   {return STR_LOWER;}
+str_isnum   {return STR_ISNUM;}
 date_str    {return DATE_STR;}
 date        {return DATE;}
 time        {return TIME;}
-sleep        {return SLEEP;}
+sleep       {return SLEEP;}
 <<EOF>>     {return DONE;};
 '\0'        {return DONE;};
 

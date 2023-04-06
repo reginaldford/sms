@@ -75,7 +75,7 @@ int get_alignment(int chapter, int subchapter, int test) {
   return alignment;
 }
 
-// Returns 0 if pr contains a successfully pared context
+// Returns 0 if pr contains a successfully paired context
 // with an array assigned to 'test'
 sm_context *check_parsed_object(sm_parse_result pr) {
   // We expect an array of arrays, each with 3 objects.
