@@ -10,24 +10,187 @@ Unlike Javascript, Math functions in SMS are global keywords.
 
 For example, taking a square root in javascript may look like `Math.sqrt(x)`. In SMS, this same function is permanently available as  `sqrt(x)`. Another major difference between SMS and javascript is that SMS provides the meta operator (`:`) which allows developers to capture expressions for metaprogramming.
 
-SMS has the following built-in functions (math operations are in double precision):
+The following is 'hello world' in SMS:
 
-Arithmetical operations: `+, -, *, /, ^, ln, exp, abs,  sqrt` 
+`println("Hello world!");`
 
-Trigonometry: `sin, cos, tan, sinh, cosh, tanh, sec, csc, cot, sech, csch, coth`
+# Cheat Sheet
 
-Algebra: `simp` for simplifying expressions. Uses a multipass algorithm, which is constantly being improved.
+Click on the chapter names below to expand the manual for that chapter.
 
-Calculus: `diff` for taking derivatives.
+<details>
+  <summary>Math</summary>
+  
+    1. a + b ; // add two numbers
+    
+    2. +( a, b, c) ; // 2 or more numbers can be added with prefix notation.
+    
+    3. a * b ; // mulitply two numbers;
+    
+    4. *( a, b, ..); // multiply 2 or more numbers
+    
+    5. a - b ; // subtract two numbers;
+    
+    6. -(a,b...) ; //substract remaining numbers from the first
+    
+    7. a / b ; //divide a by b
+    
+    8. /(a,b,...) //divide a by b, then divide by remaining numbers
+    
+    9. a ^ b; // raise a to the power of b
+    
+    9. sin(x); cos(x); tan(x); // trig functions
+    
+    10. sinh(x); cosh(x); tanh(x); // hyperbolic trig functions
+    
+    11. sec(x); csc(x); cot(x); // inverse trig funtions
+    
+    12. sech(x); csch(x); coth(x); // inverse hyperbolic trig functions
+    
+    13. abs(x); //return the absolute value of x
+    
+    14. exp(x); //Euler's number, raised to the power of x
+    
+    15. ln(x); //natural log of x
+    
+    16. sqrt(x); //square root of x
+    
+    17. diff(:sin(x),:x); //return the derivative of sin(x) with respect to x
+   
+   18. simp(:expr); // attempt to simplify the given expression.
+   
+  
+</details>
 
-Flow control: `if, map, while, eval, ==, >, >=, <, <=, exit`
 
-Strings: `strcat, strlen, parse, to_string`
+<details>
+  <summary>Equality</summary>
+  
+    1. a == b // returns true if a is the same value as b, else, returns false.
+  
+    2. a > b // returns true if a is more than b, else, returns false
+    
+    3. a < b // returns true if a is less than b, else ,returns false
+    
+    3. a >= b // returns true if a is more than or equal to b, else ,returns false
+    
+    4. a <= b // returns true if a is less than or equal to b, else ,returns false
+    
+</details>
 
-Files: `file_read , file_parse, file_write`
+<details>
+  <summary>Flow Control</summary>
+  
+    1. twice = (x) => 2 * x; // make a function that doubles numbers. 
+    
+    2. quad = (x,a,b,c) => a*x^2+b*x+c; //a quadratic function in x
+    
+    2. ( command1 ; command2 ; ... ) // this unites multiple commands into 1 command. Does not make a new scope.
+        
+    3. if(condition, command); // execute command if true, else return false
+  
+    4. if(condition, command1, command2); // if condition evaluates to true, executes command1, else executes command2
+  
+    5. while(condition , statement) // continually repeat statement until condition is false
+  
+    6. map( function, expression ) // return a new array where each element is the result of applying function to the correlating element of the given expression.
+  
+    7. not( boolean ) // if boolean is false, returns true, otherwise, returns false.
+    
+    8. exit(n); // quit SMS and return this integer to the OS as the command return value
+    
+</details>
+<details>
+  <summary>Contexts</summary>
+  
+    1. let var = value ;  // creates a new variable in the current context with the given value.
+  
+    2. rm var; // removes the variable from the current context.
+  
+    3. var = value; // searches for var in this context, then up the parent path, and if found, sets to value, else a new variable is created in the current context.
+    
+    4. context = { var1 = value1; var2 = value2 }; // builds a context with 2 variables and saves it under the variable 'context'
+  
+    5. context.var1; // retreive the value of a specific variable from the context
+    
+    6. parent(context); // return the parent scope of the provided context
+</details>
 
-A help command with explanations and examples for each SMS command will be created soon.
-For now, we have the list above and the tutorial below.
+<details>
+  <summary>Arrays</summary>
+  
+    1. [ expr1, expr2 ] // create an array by evaluating expressions
+    
+    2. :[ expr1 , expr2 ] // create an array of unevaluated expressions
+    
+    3. array[ i ] // return the i'th  element of the array, where i=0 is the first element
+    
+    4. size( array ) // return the number of elements in the array
+    
+    5. size( expr ) // returns the number of arguments in the expression
+    
+</details>
+
+<details>
+  <summary>Strings</summary>
+  
+    1. let s = "example\nstring"; // s is now a string with a newline escape code (\n)
+    
+    2. str_find(s,to_find);       // returns the first location of to_find
+    
+    3. str_len(s);  // returns the length of string s
+    
+    4. str_escape(s); // converts any escape codes into their correlating character
+    
+    5. str_add(s1,s2); // returns a string that is the concatenation of s1 with s2 in order.
+    
+    6. str_part(s1,start,len) // returns a part of the string, starting at index start, and with length len.
+    
+    7. to_string(object0); // return the string representation of object0
+    
+    8. input(); // allow the user to enter a string of text, which becomes the return value
+    
+    9. print(s1); //print the string s1
+    
+    10. println(s1); //prnt the string s1 and go to the next line
+    
+    
+</details>
+
+<details>
+  <summary>Files</summary>
+  
+    1. file_read("test.txt"); //reads test.txt , paths are relative to the working directory
+    
+    2. file_write(fname, content); // takes a string for the file name to write to, and a string for the content to write
+    
+    3. file_parse(fname); // Parses the file into a single object. Else , exits the program. (this will be fixed to return false)
+    
+</details>
+
+<details>
+  <summary>Date and Time</summary>
+  
+    1. date() // returns the date and time in the form of an array of 9 numbers, listed with their array index: 
+    //0: seconds (0-60)
+    //1: minutes (0-59)
+    //2: hours (0-23)
+    //3: Day of month (1-31)
+    //4: months since January (0-11)
+    //5: Years since 1900
+    //6: Days since Sunday (0-6)
+    //7: Days since January 1 (0-365)
+    //8: Dayslights Savings flag (positive if daylight savings is in effect, 0 if not, negative if this is unknown)
+  
+    2. time() // returns an array with 2 values: the time since January 1, 1970 in microseconds, then milliseconds.
+    
+    3. date_str() // returns the date in a 24 character string, like: "Thu Apr  6 01:20:24 2023"
+    
+    4. sleep(n) // pause execution for n millseconds.
+    
+</details>
+
+
 
 # How to Download and Run/Install a Release
 - At the [ Releases page ](https://github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somwhere like /usr/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
@@ -78,7 +241,7 @@ This command builds the executable and copies it to /usr/bin/sms
 - [x] `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
 
 # Plans:
-- [ ] Standard libraries: file, string, array, math, matrix, net, etc.
+- [ ] Example suite
 - [ ] Support for booting from a serialized memory heap.
 - [ ] 'Last moment' garbage collection.
 - [ ] Tail call optimization.
@@ -95,76 +258,3 @@ This command builds the executable and copies it to /usr/bin/sms
 - [ ] Simple Webserver and networking tools.
 - [ ] A community!
 
-
-# Tutorial:
-You can learn the basics of SMS by trying the following commands in order.
-
-Once you have the SMS prompt running, you can enter the following commands. Note: In SMS, whitespace characters (outside of strings) are ignored. All commands end with a semicolon (`;`).
-
-Anonymous functions with javascript-like syntax:
-
-`wave = (x) => sin(x) + 0.5 * cos(x * 2);`
-
-Call the function with familiar syntax:
-
-`wave(4);`
-
-See the variables you have set with the self command:
-
-`self;`
-
-Take the derivative of any math expression:
-
-`diff(:sin(x),:x);`
-
-Simplify an expression:
-
-`simp(:(a*x^(5-4)),:x);`
-
-User objects (contexts) which are key-value stores:
-
-`car = { weight = 2.2; speed = 5; license_plate = "smthg_fnny"; } ; `
-
-Contexts can be nested:
-
-`nested = { example = { x = [ 1, "two" ]; }; k = 5.123; } ;`
-
-Access fields of objects:
-
-`nested.example.x;`
-
-Obtain the parent of an object:
-
-`parent(self);`
-
-If statements:
-
-`if(nested.example.x[0] == 1, "It's a 1","It's not a 1");`
-
-Map statements:
-
-`map((x)=>x^2+1,[1,2,3,4]);`
-
-Access array elements:
-
-`x = [ 1, "two" , "3" ];`
-
-`x[2];`
-
-Get the size of an array:
-
-`size(x);`
-
-Variables can be removed from the current context:
-
-`rm x;`
-
-Exit SMS with ctrl+c, or exit with a specific code:
-
-`exit(0);`
-
-Check out `sms_src/example.sms` for example functions and ideas.
-You can also run `sms -i example.sms` to load SMS with useful functions and constants.
-
-Array element access, field access,`size`,`parse`,`eval`, `parent`, `diff`,`simp` are not in the 0.14 release and will be in the 0.15 release.
-SMS still lacks a package management system, proper syntax error reporting, and many other features of a mature scripting language. As these features are added, this README will be updated.
