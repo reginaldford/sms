@@ -73,14 +73,45 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)result;
       break;
     }
-    case SM_STRPART_EXPR: {
+    case SM_STR_FIND_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj0->my_type != SM_STRING_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("Error: str_find function requires 2 strings. Instead, %s was provided "
+               "as the first "
+               "argument.\n",
+               cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      if (obj1->my_type != SM_STRING_TYPE) {
+        sm_string *str  = sm_object_to_string(obj0);
+        char      *cstr = &(str->content);
+        printf("Error: str_find function requires 2 strings. Instead, %s was provided "
+               "as the second "
+               "argument.\n",
+               cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      char *cstr0   = &((sm_string *)obj0)->content;
+      char *to_find = &((sm_string *)obj1)->content;
+
+      char *strstr_result = strstr(cstr0, to_find);
+      if (strstr_result != NULL)
+        return (sm_object *)sm_new_double(strstr_result - cstr0);
+      else
+        return (sm_object *)sm_new_double(-1);
+      break;
+    }
+    case SM_STR_PART_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);
         char      *cstr = &(str->content);
-        printf("Error: strpart function requires a string and 2 numbers. Instead, %s was provided "
+        printf("Error: str_part function requires a string and 2 numbers. Instead, %s was provided "
                "as the first "
                "argument.\n",
                cstr);
@@ -89,7 +120,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (obj1->my_type != SM_DOUBLE_TYPE) {
         sm_string *str  = sm_object_to_string(obj1);
         char      *cstr = &(str->content);
-        printf("Error: strpart function requires a string and 2 numbers. Instead, %s was provided "
+        printf("Error: str_part function requires a string and 2 numbers. Instead, %s was provided "
                "as the second "
                "argument.\n",
                cstr);
@@ -98,7 +129,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (obj2->my_type != SM_DOUBLE_TYPE) {
         sm_string *str  = sm_object_to_string(obj2);
         char      *cstr = &(str->content);
-        printf("Error: strpart function requires a string and 2 numbers. Instead, %s was provided "
+        printf("Error: str_part function requires a string and 2 numbers. Instead, %s was provided "
                "as the third argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -108,13 +139,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_double *len   = (sm_double *)obj2;
 
       if (start->value < 0 || start->value >= str0->size) {
-        printf("Error: Using strpart(str,start,len) where start is out of range: %i",
+        printf("Error: Using str_part(str,start,len) where start is out of range: %i",
                (int)start->value);
         return (sm_object *)sm_new_string(0, "");
       }
 
       if (len->value > str0->size - start->value) {
-        printf("Error: Using strpart(str,start,len) where len is out of range: %i",
+        printf("Error: Using str_part(str,start,len) where len is out of range: %i",
                (int)len->value);
         return (sm_object *)sm_new_string(0, "");
       }
@@ -125,13 +156,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)new_str;
       break;
     }
-    case SM_STRCAT_EXPR: {
+    case SM_STR_ADD_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);
         char      *cstr = &(str->content);
-        printf("Error: strcat function requires 2 strings. Instead, %s was provided as the first "
+        printf("Error: str_add function requires 2 strings. Instead, %s was provided as the first "
                "argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -139,7 +170,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (obj1->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj1);
         char      *cstr = &(str->content);
-        printf("Error: strcat function requires 2 strings. Instead, %s was provided as the second "
+        printf("Error: str_add function requires 2 strings. Instead, %s was provided as the second "
                "argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -153,12 +184,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)new_str;
       break;
     }
-    case SM_STRLEN_EXPR: {
+    case SM_STR_LEN_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);
         char      *cstr = &(str->content);
-        printf("Error: strlen function requires a string. Instead, %s was provided.\n", cstr);
+        printf("Error: str_len function requires a string. Instead, %s was provided.\n", cstr);
         return (sm_object *)sm_new_string(0, "");
       }
       return (sm_object *)sm_new_double(((sm_string *)obj0)->size);
@@ -182,7 +213,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       current_cx       = sm_context_let(current_cx, sym->name, value);
       return (sm_object *)current_cx;
     }
-    case SM_ESCAPE_EXPR: {
+    case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);

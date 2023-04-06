@@ -85,13 +85,15 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> MAP
 %token <expr> PARENT
 %token <expr> SIZE
-%token <expr> STRLEN
-%token <expr> STRCAT
-%token <expr> STRPART
-%token <expr> STRUPPER
-%token <expr> STRLOWER
-%token <expr> STRISNUM
-%token <expr> ESCAPE
+%token <expr> STR_LEN
+%token <expr> STR_FIND
+%token <expr> STR_ADD
+%token <expr> STR_DIVIDE
+%token <expr> STR_PART
+%token <expr> STR_UPPER
+%token <expr> STR_LOWER
+%token <expr> STR_ISNUM
+%token <expr> STR_ESCAPE
 %token <expr> WHILE
 %token <expr> PRINT
 %token <expr> PRINTLN
@@ -205,16 +207,14 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);}
 | SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_SIZE_EXPR,(sm_object*)$3);}
-| STRLEN '(' EXPR ')' {$$ = sm_new_expr(SM_STRLEN_EXPR,(sm_object*)$3);}
-| STRCAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STRCAT_EXPR,(sm_object*)$3,(sm_object*)$5);}
-| STRPART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_STRPART_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7);}
 | WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
-| PRINT '(' EXPR ')' {$$ = sm_new_expr(SM_PRINT_EXPR,(sm_object*)$3);}
-| PRINTLN '(' EXPR ')' {$$ = sm_new_expr(SM_PRINTLN_EXPR,(sm_object*)$3);}
-| TO_STRING '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}
 | EVAL '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3);}
+| TO_STRING '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
+| PRINT '(' EXPR ')' {$$ = sm_new_expr(SM_PRINT_EXPR,(sm_object*)$3);}
+| PRINTLN '(' EXPR ')' {$$ = sm_new_expr(SM_PRINTLN_EXPR,(sm_object*)$3);}
+| INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3);}
 | FILE_WRITE '(' EXPR ',' EXPR ')' {
@@ -223,9 +223,16 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | RANDOM  '(' ')' { $$ = sm_new_expr_n(SM_RANDOM_EXPR,0,0);};
 | ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);};
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);};
-| INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3);};
-| ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_ESCAPE_EXPR,(sm_object*)$3);};
+| STR_ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_STR_ESCAPE_EXPR,(sm_object*)$3);};
+| STR_LEN '(' EXPR ')' {$$ = sm_new_expr(SM_STR_LEN_EXPR,(sm_object*)$3);}
+| STR_FIND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_FIND_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| STR_ADD '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_ADD_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| STR_DIVIDE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_DIVIDE_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| STR_PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_STR_PART_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7);}
+| STR_UPPER '(' EXPR ')' {$$ = sm_new_expr(SM_STR_UPPER_EXPR,(sm_object*)$3);}
+| STR_LOWER '(' EXPR ')' {$$ = sm_new_expr(SM_STR_UPPER_EXPR,(sm_object*)$3);}
+| STR_ISNUM '(' EXPR ')' {$$ = sm_new_expr(SM_STR_ISNUM_EXPR,(sm_object*)$3);}
 | DATE_STR '(' ')' { $$ = sm_new_expr_n(SM_DATE_STR_EXPR,0,0);};
 | DATE '(' ')' { $$ = sm_new_expr_n(SM_DATE_EXPR,0,0);};
 | TIME '(' ')' { $$ = sm_new_expr_n(SM_TIME_EXPR,0,0);};
