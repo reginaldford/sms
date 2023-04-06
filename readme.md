@@ -8,7 +8,11 @@ Run `sms -h` for command line options.
 
 Unlike Javascript, Math functions in SMS are global keywords.
 
-For example, taking a square root in javascript may look like `Math.sqrt(x)`. In SMS, this same function is permanently available as  `sqrt(x)`. Another major difference between SMS and javascript is that SMS provides the meta operator (`:`) which allows developers to capture expressions for metaprogramming.
+For example, taking a square root in javascript may look like `Math.sqrt(x)`. In SMS, this same function is permanently available as  `sqrt(x)`.
+
+Another major difference between SMS and javascript is that SMS provides the meta operator (`:`) which allows developers to capture expressions for metaprogramming.
+
+For example, taking a derivative of `sin(x)` with respect to `x` may be done with `diff(:sin(x),:x);` where the colon prevents SMS from evaluating the input and ultimately preserving the symbolic expression.
 
 The following is 'hello world' in SMS:
 
@@ -16,7 +20,7 @@ The following is 'hello world' in SMS:
 
 # Cheat Sheet
 
-Click on the chapter names below to expand the manual for that chapter.
+Click on the chapter names below to expand the cheat sheet for that chapter.
 
 <details>
   <summary>Math</summary>
