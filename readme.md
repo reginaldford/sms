@@ -43,25 +43,25 @@ Click on the chapter names below to expand the cheat sheet for that chapter.
     
     9. a ^ b; // raise a to the power of b
     
-    9. sin(x); cos(x); tan(x); // trig functions
+    10. sin(x); cos(x); tan(x); // trig functions
     
-    10. sinh(x); cosh(x); tanh(x); // hyperbolic trig functions
+    11. sinh(x); cosh(x); tanh(x); // hyperbolic trig functions
     
-    11. sec(x); csc(x); cot(x); // inverse trig funtions
+    12. sec(x); csc(x); cot(x); // inverse trig funtions
     
-    12. sech(x); csch(x); coth(x); // inverse hyperbolic trig functions
+    13. sech(x); csch(x); coth(x); // inverse hyperbolic trig functions
     
-    13. abs(x); //return the absolute value of x
+    14. abs(x); //return the absolute value of x
     
-    14. exp(x); //Euler's number, raised to the power of x
+    15. exp(x); //Euler's number, raised to the power of x
     
-    15. ln(x); //natural log of x
+    16. ln(x); //natural log of x
     
-    16. sqrt(x); //square root of x
+    17. sqrt(x); //square root of x
     
-    17. diff(:sin(x),:x); //return the derivative of sin(x) with respect to x
+    18. diff(:sin(x),:x); //return the derivative of sin(x) with respect to x
    
-   18. simp(:expr); // attempt to simplify the given expression.
+    19. simp(:expr); // attempt to simplify the given expression.
    
   
 </details>
@@ -89,19 +89,19 @@ Click on the chapter names below to expand the cheat sheet for that chapter.
     
     2. quad = (x,a,b,c) => a*x^2+b*x+c; //a quadratic function in x
     
-    2. ( command1 ; command2 ; ... ) // this unites multiple commands into 1 command. Does not make a new scope.
+    3. ( command1 ; command2 ; ... ) // this unites multiple commands into 1 command. Does not make a new scope.
         
-    3. if(condition, command); // execute command if true, else return false
+    4. if(condition, command); // execute command if true, else return false
   
-    4. if(condition, command1, command2); // if condition evaluates to true, executes command1, else executes command2
+    5. if(condition, command1, command2); // if condition evaluates to true, executes command1, else executes command2
   
-    5. while(condition , statement) // continually repeat statement until condition is false
+    6. while(condition , statement) // continually repeat statement until condition is false
   
-    6. map( function, expression ) // return a new array where each element is the result of applying function to the correlating element of the given expression.
+    7. map( function, expression ) // return a new array where each element is the result of applying function to the correlating element of the given expression.
   
-    7. not( boolean ) // if boolean is false, returns true, otherwise, returns false.
-    
-    8. exit(n); // quit SMS and return this integer to the OS as the command return value
+    8. not( boolean ) // if boolean is false, returns true, otherwise, returns false.
+   
+    9. exit(n); // quit SMS and return this integer to the OS as the command return value
     
 </details>
 <details>
