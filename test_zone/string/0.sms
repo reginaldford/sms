@@ -1,0 +1,15 @@
+{ // string manipulations
+  a="this";
+  b="That";
+  tests=[
+    [  str_add(a,b)   , "thisThat"       ,  "str_add 1"],
+    [  str_add(b,a)   , "Thatthis"       ,  "str_add 2"],
+    [  str_add(str_add(b,a),a)   , "Thatthisthis" ,  "str_add 3"],
+    [  str_find(a,b)   , -1      ,  "str_find 1"],
+    [  str_find(a,"is")   , 2    ,  "str_find 2"],
+    [  str_find(b,"t")    , 3    ,  "str_find 3"],
+    [  str_part(b,1,3)    ,   "hat"   ,   "str_part 1"],
+    [  str_part(b,2,2)    ,   "at"    ,   "str_part 2"],
+    [  str_part(a,1,3)    ,   "his"   ,   "str_part 3"],
+  ];
+};

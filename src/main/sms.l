@@ -98,7 +98,7 @@ sleep       {return SLEEP;}
   // Text after the first quotation will be at &(yytext[1])
   // We also have string length yyleng-2, for trimming quotes.
   char *text = &(yytext[1]) ;
-  
+
   // Replace the escape codes in place
   int i = 0;       // Index during the scan of input string
   int final_i = 0; // Index of output
@@ -143,10 +143,6 @@ sleep       {return SLEEP;}
 
 void _lex_file(char * fpath){
   FILE *f = fopen(fpath,"rb");
-  if(access(fpath,F_OK)!=0){
-    printf("File not found: %s\n",fpath);
-    exit(-1);
-  }
   YY_BUFFER_STATE bs = yy_create_buffer(f,YY_BUF_SIZE);
   yypush_buffer_state(bs);
 }

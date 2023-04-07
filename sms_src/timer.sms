@@ -1,0 +1,11 @@
+// This program counts for time_to_wait seconds
+let time_to_wait=20;
+let n=0;
+while(n<time_to_wait,(
+  print(to_string(n));
+  sleep(500);
+  print(", ");
+  sleep(500);
+  n=n+1)
+);
+println("DONE!");

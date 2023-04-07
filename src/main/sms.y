@@ -430,8 +430,15 @@ CONTEXT_LIST : '{' ASSIGNMENT ';' ASSIGNMENT {
 %%
 
 
-void lex_file(char *fpath){
+bool lex_file(char *fpath){
+  FILE *f = fopen(fpath,"rb");
+  if(access(fpath,F_OK)!=0){
+    printf("File not found: %s\n",fpath);
+    return false;
+  }
+
   _lex_file(fpath);
+  return true;
 }
 
 void done_lexing_file(){
