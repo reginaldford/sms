@@ -13,6 +13,8 @@ typedef struct sm_fun_param {
   struct sm_string *name;
   struct sm_object *default_val;
   short int         known_expr;
+  short int         filler1;
+  short int         filler2;
 } sm_fun_param;
 
 // wrapper to make a resizeable sm_object
