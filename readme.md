@@ -76,9 +76,9 @@ Click on the chapter names below to expand the cheat sheet for that chapter.
     
     3. a < b // returns true if a is less than b, else ,returns false
     
-    3. a >= b // returns true if a is more than or equal to b, else ,returns false
+    4. a >= b // returns true if a is more than or equal to b, else ,returns false
     
-    4. a <= b // returns true if a is less than or equal to b, else ,returns false
+    5. a <= b // returns true if a is less than or equal to b, else ,returns false
     
 </details>
 
@@ -190,7 +190,7 @@ Click on the chapter names below to expand the cheat sheet for that chapter.
     
     3. date_str() // returns the date in a 24 character string, like: "Thu Apr  6 01:20:24 2023"
     
-    4. sleep(n) // pause execution for n millseconds.
+    4. sleep(n) // pause execution for n milliseconds.
     
 </details>
 
