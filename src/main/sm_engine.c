@@ -211,7 +211,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_symbol *sym   = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       current_cx       = sm_context_let(current_cx, sym->name, value);
-      return (sm_object *)current_cx;
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -570,7 +570,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_symbol *sym   = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_context_set(current_cx, sym->name, value);
-      return (sm_object *)sm_new_expr_2(SM_ASSIGN_EXPR, (sm_object *)sym, value);
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
     case SM_PLUS_EXPR: {
       double sum = ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf))->value;

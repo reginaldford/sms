@@ -16,6 +16,10 @@
     {
       name= "file";
       num_subchapters = 1;
+    },
+    {
+      name= "string";
+      num_subchapters = 1;
     }
   ];
 };

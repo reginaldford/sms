@@ -18,6 +18,8 @@ The following is 'hello world' in SMS:
 
 `println("Hello world!");`
 
+Line comments start with `//` which causes the remainder of the line to be ignored.
+
 # Cheat Sheet
 
 Click on the chapter names below to expand the cheat sheet for that chapter.
@@ -62,10 +64,8 @@ Click on the chapter names below to expand the cheat sheet for that chapter.
     18. diff(:sin(x),:x); //return the derivative of sin(x) with respect to x
    
     19. simp(:expr); // attempt to simplify the given expression.
-   
   
 </details>
-
 
 <details>
   <summary>Equality</summary>

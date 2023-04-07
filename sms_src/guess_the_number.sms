@@ -1,0 +1,18 @@
+// Allows the user to guess a hidden random value until they guess correctly
+// Currently needs to be written with a then-block, but this is a temperary workaround
+
+let answer = round(100*random());
+let user_guess = -1;
+(
+  while(not(user_guess==answer), (
+    print("Guess the number: ");
+    user_guess = parse(input());
+    if(user_guess>answer,
+      print("You guessed too high.\n"));
+    if(user_guess<answer,
+      print("You guessed too low.\n"))
+  ));
+  print("Congratulations! You WON!\n");
+  print("The answer is: ");
+  println(to_string(answer))
+);
