@@ -44,8 +44,11 @@ void run_file(sm_options *options, bool init) {
     if (pr.parsed_object != NULL) {
       sm_object *evaluated =
         sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-      sm_string *response = sm_object_to_string(evaluated);
-      printf("%s\n", &(response->content));
+      // TODO: Debug mode, printing every command result
+      // if(debug_mod){
+      //  sm_string *response = sm_object_to_string(evaluated);
+      //  printf("%s\n", &(response->content));
+      // }
       last_parsed_obj = pr.parsed_object;
     }
     pr = sm_parse_more();

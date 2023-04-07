@@ -91,17 +91,17 @@ char *sm_global_fn_name(unsigned short int which) {
   const unsigned short int num_functions = sm_global_num_fns();
   // Should be syncronized with enum SM_EXPR_TYPE
   static char *response[] = {
-    "exit",      "clear",      "self",      "let",        "=",         "rm",       ".",
-    "parent",    "+",          "-",         "*",          "/",         "^",        "sin",
-    "cos",       "tan",        "sinh",      "cosh",       "tanh",      "csc",      "sec",
-    "cot",       "csch",       "sech",      "coth",       "exp",       "ln",       "sqrt",
-    "abs",       "diff",       "simp",      "if",         "if",        "==",       "<",
-    ">",         "<=",         ">=",        ";",          "",          "size",     "",
-    "map",       "while",      "eval",      "parse",      "to_string", "print",    "println",
-    "input",     "file_parse", "file_read", "file_write", "random",    "round",    "not",
-    "or",        "str_escape", "str_len",   "str_find",   "str_add",   "str_part", "str_upper",
-    "str_lower", "str_isnum",  "fun_call",  "param_list", "siblings",  "prim",     "date_str",
-    "date",      "time",       "?"};
+    "exit",      "clear",      "self",      "let",        "=",          "rm",         ".",
+    "parent",    "+",          "-",         "*",          "/",          "^",          "sin",
+    "cos",       "tan",        "sinh",      "cosh",       "tanh",       "csc",        "sec",
+    "cot",       "csch",       "sech",      "coth",       "exp",        "ln",         "sqrt",
+    "abs",       "diff",       "simp",      "if",         "if",         "==",         "<",
+    ">",         "<=",         ">=",        ";",          "",           "size",       "",
+    "map",       "while",      "eval",      "parse",      "to_string",  "print",      "println",
+    "input",     "file_parse", "file_read", "file_write", "random",     "round",      "not",
+    "or",        "str_escape", "str_len",   "str_find",   "str_add",    "str_divide", "str_part",
+    "str_upper", "str_lower",  "str_isnum", "fun_call",   "", "siblings",   "prim",
+    "date_str",  "date",       "time",      "?"};
   if (which >= num_functions) {
     return response[num_functions];
   }
@@ -111,9 +111,9 @@ char *sm_global_fn_name(unsigned short int which) {
 // corresponding string length of the string that would come from the sm_global_fn_name(which)
 unsigned int sm_global_fn_name_len(unsigned short int which) {
   static long unsigned int response_len[] = {
-    4,  5, 4,  3, 1, 2, 1, 6,  1, 1, 1, 1, 1, 3, 3, 3, 4,  4, 4, 3, 3, 3, 4, 4, 4,
-    3,  2, 4,  3, 4, 4, 2, 2,  2, 1, 1, 2, 2, 1, 0, 4, 0,  3, 5, 4, 5, 9, 5, 7, 5,
-    10, 9, 10, 6, 5, 3, 2, 10, 7, 8, 7, 8, 9, 9, 9, 8, 10, 8, 4, 8, 4, 4, 1};
+    4,  5, 4,  3, 1, 2, 1, 6,  1, 1, 1, 1,  1, 3, 3, 3, 4, 4,  4, 3, 3, 3, 4, 4, 4,
+    3,  2, 4,  3, 4, 4, 2, 2,  2, 1, 1, 2,  2, 1, 0, 4, 0, 3,  5, 4, 5, 9, 5, 7, 5,
+    10, 9, 10, 6, 5, 3, 2, 10, 7, 8, 7, 10, 8, 9, 9, 9, 8, 0, 8, 4, 8, 4, 4, 1};
   if (which >= sm_global_num_fns()) {
     return 1; // "?"
   }
@@ -121,7 +121,7 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
 }
 
 unsigned int sm_global_num_fns() {
-  static const unsigned short int num_fns = 73;
+  static const unsigned short int num_fns = 74;
   return num_fns;
 }
 

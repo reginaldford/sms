@@ -17,7 +17,7 @@ int chapter_2(int test) {
     printf("%i: expression: %s is %i characters long and prints as %s\n", i, op_name, len, to_str);
     if (strlen(sm_global_fn_name(i)) != len) {
       printf("string length mismatch: the counted length is %lu but the global setting is %i\n",
-             strlen(sm_global_fn_name(i)), len);
+             (long unsigned int)strlen(sm_global_fn_name(i)), len);
       num_fails++;
     }
   }
