@@ -5,7 +5,7 @@
     [map((z)=>sqrt(z+2*z^2-z^3), [1 ,1.5 ,2]), [1.414213562373095,1.620185174601965,1.414213562373095], "sqrt of cubic map"],
     [map((z)=>-z, [1 ,-1 ,0]), [-1,1,-0], "negative map"],
     [map((z)=>-z^2, [1 ,-2 ,0,3]), [-1,-4,-0,-9], "square map"],
-    [map((str)=>str_add(str,"more"), ["1","two","_X_"]), ["1more","twomore","_X_more"], "str_cat map 1"],
-    [map((str)=>str_add(str_add("start_",str),str), ["1","two","_X_"]), ["start_11","start_twotwo","start__X__X_"], "str_cat map 2"],
+    [map((str)=>str+(str,"more"), ["1","two","_X_"]), ["1more","twomore","_X_more"], "str_cat map 1"],
+    [map((str)=>str+(str+("start_",str),str), ["1","two","_X_"]), ["start_11","start_twotwo","start__X__X_"], "str_cat map 2"],
   ];
 };

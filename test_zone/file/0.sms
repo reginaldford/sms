@@ -1,0 +1,6 @@
+{ // file operations
+  tests=[
+    [ str_tofile("test_file_0.txt","This is a test.\nAnd line 2."),true,  "writing a file"],
+    [ file_tostr("test_file_0.txt"),"This is a test.\nAnd line 2.","reading the file that was written"],
+  ];
+};

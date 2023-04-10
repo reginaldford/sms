@@ -2,9 +2,9 @@
   a="this";
   b="That";
   tests=[
-    [  str_add(a,b)   , "thisThat"       ,  "str_add 1"],
-    [  str_add(b,a)   , "Thatthis"       ,  "str_add 2"],
-    [  str_add(str_add(b,a),a)   , "Thatthisthis" ,  "str_add 3"],
+    [  str+(a,b)   , "thisThat"       ,  "str+ 1"],
+    [  str+(b,a)   , "Thatthis"       ,  "str+ 2"],
+    [  str+(str+(b,a),a)   , "Thatthisthis" ,  "str+ 3"],
     [  str_find(a,b)   , -1      ,  "str_find 1"],
     [  str_find(a,"is")   , 2    ,  "str_find 2"],
     [  str_find(b,"t")    , 3    ,  "str_find 3"],
