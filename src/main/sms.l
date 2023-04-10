@@ -98,7 +98,14 @@ cx_map        {return CX_MAP;}
 file_parse  {return FILE_PARSE;}
 file_tostr  {return FILE_TOSTR;}
 file_toblk  {return FILE_TOBLK;}
+file_exists {return FILE_EXISTS;}
+file_date   {return FILE_DATE;}
+file_cp     {return FILE_CP;}
+file_mv     {return FILE_MV;}
+file_rm     {return FILE_RM;}
+file_size   {return FILE_SIZE;}
 str_tofile  {return STR_TOFILE;}
+
 csv_toarr   {return CSV_TOARR;}
 arr_tocsv   {return ARR_TOCSV;}
 blk_tofile  {return BLK_TOFILE;}
