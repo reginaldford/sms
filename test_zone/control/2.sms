@@ -3,6 +3,6 @@
   tests=[
     [while(x<10,x=x+1), true, "basic while"],
     [while(x>0,x=x-1), true, "rewinding while"],
-    [while(x<5,(x=x+1;println("repeatingThis"))), true, "repeating message"],
+    [while(x<5,(x=x+1;print("repeatingThis"))), true, "repeating message"],
   ];
 };

@@ -1,0 +1,24 @@
+//Simply prints the time every second
+//For now, we cannot create new variables inside the while loop
+
+let d = date();
+
+// represents a number from 0 to 99
+// with 2 characters.
+two_digits=(x)=>(
+  if(x<10,
+    str+("0",to_str(x)),
+    to_str(x)
+  )
+);
+
+// prints the time with constant width
+while(true,(
+  d = date();
+  print(two_digits(d[2]));
+  print(":");
+  print(two_digits(d[1]));
+  print(":");
+  print(two_digits(d[0]) str+ "\n");
+  sleep(1000)
+));

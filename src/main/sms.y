@@ -53,10 +53,16 @@ void _lex_cstr(char * cstr,int len);
 %type <expr> SEQUENCE_LIST
 %type <expr> COMMAND
 
-%token CLEAR LS EXIT SELF IF
+%token SELF
+%token LS
+%token CD
+%token PWD
+%token CLEAR
+
+%token EXIT
+%token HELP
 
 %token DOT
-%token <fun> ARROW
 %token <num> NUM
 %token <expr> PIPE
 %token <expr> EQEQ
@@ -65,57 +71,173 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> SIN
 %token <expr> COS
 %token <expr> TAN
+%token <expr> ASIN
+%token <expr> ACOS
+%token <expr> ATAN
 %token <expr> SINH
 %token <expr> COSH
 %token <expr> TANH
+%token <expr> ASINH
+%token <expr> ACOSH
+%token <expr> ATANH
 %token <expr> SECH
 %token <expr> CSCH
 %token <expr> COTH
+%token <expr> ASECH
+%token <expr> ACSCH
+%token <expr> ACOTH
 %token <expr> SEC
 %token <expr> CSC
 %token <expr> COT
+%token <expr> ASEC
+%token <expr> ACSC
+%token <expr> ACOT
 %token <expr> LN
+%token <expr> LOG
 %token <expr> EXP
 %token <expr> SQRT
+%token <expr> ABS
+
 %token <expr> RM
 %token <expr> LET
-%token <expr> ABS
+
 %token <expr> DIFF
 %token <expr> SIMP
+%token <expr> INT
+
+%token IF
+%token <expr> WHILE
+%token <expr> DO_WHILE
 %token <expr> MAP
 %token <expr> PARENT
-%token <expr> SIZE
-%token <expr> STR_LEN
-%token <expr> STR_FIND
-%token <expr> STR_ADD
-%token <expr> STR_DIVIDE
-%token <expr> STR_PART
-%token <expr> STR_UPPER
-%token <expr> STR_LOWER
-%token <expr> STR_ISNUM
-%token <expr> STR_ESCAPE
-%token <expr> WHILE
-%token <expr> PRINT
-%token <expr> PRINTLN
-%token <expr> TO_STRING
 %token <expr> EVAL
+%token <expr> EVAL_FAST
 %token <expr> PARSE
+%token <expr> RUNTIME_META
+
+%token <expr> NEW_ARR
+%token <expr> SIZE
+%token <expr> ARR_PLUS
+%token <expr> PART
+
+%token <expr> STR_SIZE
+%token <expr> STR_CAT
+%token <expr> STR_GET
+%token <expr> STR_SET
+%token <expr> STR_MAP
+%token <expr> STR_FIND
+%token <expr> STR_FINDR
+%token <expr> STR_SPLIT
+%token <expr> STR_PART
+%token <expr> STR_UNESCAPE
+%token <expr> STR_ESCAPE
+%token <expr> STR_SETCHAR
+%token <expr> STR_GETCHAR
+%token <expr> STR_TONUMS
+%token <expr> STR_TOFILE
+%token <expr> STR_CMP
+%token <expr> STR_REPEAT
+%token <expr> STR_TOBLK
+%token <expr> NEW_STR
+%token <expr> TO_STR
+%token <expr> TO_STRFMT
+
+%token <expr> NEW_BLK
+%token <expr> BLK_MAP
+%token <expr> BLK_UNITE
+%token <expr> BLK_PART
+%token <expr> BLK_TONUMS
+%token <expr> NUMS_TOBLK
+%token <expr> BLK_TOFILE
+%token <expr> BLK_PRINT
+%token <expr> BLK_SET
+%token <expr> BLK_GET
+%token <expr> BLK_TOSTR
+%token <expr> BLK_SIZE
+
+%token <expr> PRINT
+%token <expr> INPUT
+
 %token <expr> FILE_PARSE
 %token <expr> FILE_READ
 %token <expr> FILE_WRITE
+%token <expr> CSV_TOFILE
+%token <expr> CSV_TOARR
+%token <expr> FILE_TOCSV
+%token <expr> FILE_TOSTR
+%token <expr> FILE_TOBLK
+
 %token <expr> RANDOM
+%token <expr> SEED
 %token <expr> ROUND
+%token <expr> FLOOR
+%token <expr> CEIL
 %token <expr> LT
 %token <expr> GT
 %token <expr> LT_EQ
 %token <expr> GT_EQ
+%token <expr> NOTEQ
 %token <expr> NOT
 %token <expr> OR
-%token <expr> INPUT
+%token <expr> AND
+%token <expr> XOR
+
+
+%token <expr> NEW_CX
+%token <expr> CX_KEYS
+%token <expr> CX_VALUES
+%token <expr> CX_LET
+%token <expr> CX_SET
+%token <expr> CX_CLEAR
+%token <expr> CX_IMPORT
+%token <expr> CX_MAP
+%token <expr> CX_CONTAINING
+%token <expr> CX_SIZE
+%token <expr> CX_RM
+
+%token <expr> NEW_FN
+%token <fun> ARROW
+%token <expr> FN_XPR
+%token <expr> FN_PARAMS
+%token <expr> FN_PARENT
+%token <expr> FN_SETPARENT
+
+%token <expr> NEW_XPR
+%token <expr> XPR_OP
+%token <expr> XPR_SETOP
+%token <expr> XPR_OPSTR
+
+%token <expr> NUMS_TOSTR
+%token <expr> NEW_NUMS
+
+%token <expr> ARR_TOCSV
+%token <expr> ARR_REPEAT
+%token <expr> ARR_CAT
+
+%token <expr> MALLOC_OBJ
+%token <expr> FREE_OBJ
+%token <expr> COPY
+%token <expr> DEEP_COPY
+
+%token <expr> SYM_NAME
+
+%token <expr> MEM_SAVEFILE
+%token <expr> MEM_READFILE
+%token <expr> MEM_CHECKFILE
+
 %token <expr> DATE_STR
 %token <expr> DATE
 %token <expr> TIME
 %token <expr> SLEEP
+%token <expr> EXEC
+%token <expr> FORK
+%token <expr> GETARGS
+%token <expr> GETOPTIONS
+%token <expr> SETOPTIONS
+%token <expr> RESETOPTIONS
+%token <expr> GC
+%token <expr> THISPROCESS
+
 %token DONE
 
 %left ';'
@@ -211,28 +333,23 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}
 | EVAL '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3);}
-| TO_STRING '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
+| TO_STR '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
 | PRINT '(' EXPR ')' {$$ = sm_new_expr(SM_PRINT_EXPR,(sm_object*)$3);}
-| PRINTLN '(' EXPR ')' {$$ = sm_new_expr(SM_PRINTLN_EXPR,(sm_object*)$3);}
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
-| FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3);}
-| FILE_WRITE '(' EXPR ',' EXPR ')' {
-  $$ = sm_new_expr_2(SM_FILE_WRITE_EXPR,(sm_object*)$3,(sm_object*)$5);
-  }
+| FILE_TOSTR '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_TOSTR_EXPR,(sm_object*)$3);}
+| STR_TOFILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_TOFILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | RANDOM  '(' ')' { $$ = sm_new_expr_n(SM_RANDOM_EXPR,0,0);};
 | ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);};
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);};
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3);};
 | STR_ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_STR_ESCAPE_EXPR,(sm_object*)$3);};
-| STR_LEN '(' EXPR ')' {$$ = sm_new_expr(SM_STR_LEN_EXPR,(sm_object*)$3);}
+| STR_SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_STR_SIZE_EXPR,(sm_object*)$3);}
 | STR_FIND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_FIND_EXPR,(sm_object*)$3,(sm_object*)$5);}
-| STR_ADD '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_ADD_EXPR,(sm_object*)$3,(sm_object*)$5);}
-| STR_DIVIDE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_DIVIDE_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| STR_CAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_CAT_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| EXPR STR_CAT EXPR {$$ = sm_new_expr_2(SM_STR_CAT_EXPR,(sm_object*)$1,(sm_object*)$3);}
+| STR_SPLIT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_SPLIT_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | STR_PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_STR_PART_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7);}
-| STR_UPPER '(' EXPR ')' {$$ = sm_new_expr(SM_STR_UPPER_EXPR,(sm_object*)$3);}
-| STR_LOWER '(' EXPR ')' {$$ = sm_new_expr(SM_STR_UPPER_EXPR,(sm_object*)$3);}
-| STR_ISNUM '(' EXPR ')' {$$ = sm_new_expr(SM_STR_ISNUM_EXPR,(sm_object*)$3);}
 | DATE_STR '(' ')' { $$ = sm_new_expr_n(SM_DATE_STR_EXPR,0,0);};
 | DATE '(' ')' { $$ = sm_new_expr_n(SM_DATE_EXPR,0,0);};
 | TIME '(' ')' { $$ = sm_new_expr_n(SM_TIME_EXPR,0,0);};

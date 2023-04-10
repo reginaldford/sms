@@ -4,16 +4,14 @@ let first_time=[];
 let new_time=[];
 let time_elapsed=0;
 
-benchmark=(expr)=>(
-  print("Benchmarking: ");
-  println(to_string(expr));
+benchmark = (expr) =>   (
+  output("Benchmarking: " str+ to_str(expr) str+ "\n");
   first_time = time();
   eval(expr);
   new_time = time();
-  println("Total time:");
-  time_elapsed = (new_time[0]-first_time[0])*1000+0.001*(new_time[1]-first_time[1]);
-  print(to_string(time_elapsed));
-  println(" milliseconds")
+  output("Total time:\n");
+  time_elapsed = 1000 * (new_time[0] - first_time[0]) +  0.001 * (new_time[1] - first_time[1]);
+  output(to_str(time_elapsed) str+ " milliseconds\n")
 );
 
 fib = (n) => if( n < 2 , 1 ,fib(n - 1) + fib(n - 2));

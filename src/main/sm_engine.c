@@ -77,32 +77,27 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
-        sm_string *str  = sm_object_to_string(obj0);
-        char      *cstr = &(str->content);
-        printf("Error: str_find function requires 2 strings. Instead, %s was provided "
-               "as the first "
+        const char *cstr = &((sm_string *)obj0)->content;
+        printf("Error: str_find function requires 2 strings. Instead, %s was provided as the first "
                "argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
       }
       if (obj1->my_type != SM_STRING_TYPE) {
-        sm_string *str  = sm_object_to_string(obj0);
-        char      *cstr = &(str->content);
-        printf("Error: str_find function requires 2 strings. Instead, %s was provided "
-               "as the second "
-               "argument.\n",
+        const char *cstr = &((sm_string *)obj1)->content;
+        printf("Error: str_find function requires 2 strings. Instead, %s was provided as the "
+               "second argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
       }
-      char *cstr0   = &((sm_string *)obj0)->content;
-      char *to_find = &((sm_string *)obj1)->content;
-
-      char *strstr_result = strstr(cstr0, to_find);
-      if (strstr_result != NULL)
-        return (sm_object *)sm_new_double(strstr_result - cstr0);
-      else
+      const char *cstr0   = &((sm_string *)obj0)->content;
+      const char *to_find = &((sm_string *)obj1)->content;
+      const char *result  = strstr(cstr0, to_find);
+      if (result != NULL) {
+        return (sm_object *)sm_new_double(result - cstr0);
+      } else {
         return (sm_object *)sm_new_double(-1);
-      break;
+      }
     }
     case SM_STR_PART_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -156,7 +151,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)new_str;
       break;
     }
-    case SM_STR_ADD_EXPR: {
+    case SM_STR_CAT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
@@ -184,7 +179,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)new_str;
       break;
     }
-    case SM_STR_LEN_EXPR: {
+    case SM_STR_SIZE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);
@@ -268,7 +263,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     case SM_RANDOM_EXPR: {
       return (sm_object *)sm_new_double(((double)rand()) / ((double)RAND_MAX));
     }
-    case SM_FILE_WRITE_EXPR: {
+    case SM_STR_TOFILE_EXPR: {
       // obtain the file name
       sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (evaluated_fname->my_type != SM_STRING_TYPE) {
@@ -301,7 +296,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       fclose(fptr);
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
-    case SM_FILE_READ_EXPR: {
+    case SM_FILE_TOSTR_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (evaluated->my_type != SM_STRING_TYPE) {
         sm_string *obj_str = sm_object_to_string((sm_object *)evaluated);
@@ -388,20 +383,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_string *smstr = (sm_string *)evaluated;
       printf("%s", &(smstr->content));
       fflush(stdout);
-      return evaluated;
-      break;
-    }
-    case SM_PRINTLN_EXPR: {
-      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (evaluated->my_type != SM_STRING_TYPE) {
-        sm_string *obj_str = sm_object_to_string(evaluated);
-        char      *cstr    = &(obj_str->content);
-        printf("Error: Trying to print something that is not a string: %s\n", cstr);
-      }
-      sm_string *smstr = (sm_string *)evaluated;
-      printf("%s\n", &(smstr->content));
-      fflush(stdout);
-      return evaluated;
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
       break;
     }
     case SM_WHILE_EXPR: {
@@ -475,7 +457,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_double   *index_double = (sm_double *)index_obj;
       unsigned int index        = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
-        printf("Error: Index out of range: %i\n", index);
+        printf("Error: Index out of range: %i . Array size is %i\n", index, arr->size);
         return (sm_object *)sm_new_double(0);
       }
       return sm_expr_get_arg(arr, index);
@@ -739,6 +721,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     case SM_EQEQ_EXPR: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj1 == obj2) {
+        return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      }
       if (obj1->my_type == SM_DOUBLE_TYPE) {
         if (obj2->my_type == SM_DOUBLE_TYPE) {
           double v1 = ((sm_double *)obj1)->value;

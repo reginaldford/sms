@@ -2,7 +2,7 @@
 let time_to_wait=20;
 let n=0;
 while(n<time_to_wait,(
-  print(to_string(n));
+  print(to_str(n));
   sleep(500);
   print(", ");
   sleep(500);

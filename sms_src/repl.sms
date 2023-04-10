@@ -1,0 +1,13 @@
+//A repl written in SMS!
+//Does not require a semicolon, but
+//Only allows single line commands
+
+let in = "";
+let ans = [];
+
+while(true,(
+  print("> ");
+  in = input();
+  ans = eval(parse(in));
+  print(to_str(ans) str+ "\n")));
+
