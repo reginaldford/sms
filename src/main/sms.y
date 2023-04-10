@@ -159,13 +159,17 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> INPUT
 
 %token <expr> FILE_PARSE
-%token <expr> FILE_READ
-%token <expr> FILE_WRITE
+%token <expr> FILE_TOSTR
+%token <expr> FILE_TOBLK
+%token <expr> FILE_EXISTS
+%token <expr> FILE_DATE
+%token <expr> FILE_CP
+%token <expr> FILE_MV
+%token <expr> FILE_RM
+%token <expr> FILE_SIZE
 %token <expr> CSV_TOFILE
 %token <expr> CSV_TOARR
 %token <expr> FILE_TOCSV
-%token <expr> FILE_TOSTR
-%token <expr> FILE_TOBLK
 
 %token <expr> RANDOM
 %token <expr> SEED
