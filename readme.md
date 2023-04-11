@@ -1,5 +1,5 @@
 # Introduction:
-SMS (Symbolic Math System) is a terminal based calculator. SMS has built-in functions for arithmetic operations, flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. 
+SMS (Symbolic Math System) is a terminal based calculator. SMS has built-in functions for arithmetic operations, programmatic flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. 
 
 # Longer Introduction:
 
@@ -65,10 +65,12 @@ Click on the chapter names below to expand the cheat sheet for that chapter.
     16. ln(x); //natural log of x
     
     17. sqrt(x); //square root of x
+
+    18. random(); //generate a random number from 0 to 1
     
-    18. diff(:sin(x),:x); //return the derivative of sin(x) with respect to x
+    19. diff(:sin(x),:x); //return the derivative of sin(x) with respect to x
    
-    19. simp(:expr); // attempt to simplify the given expression
+    20. simp(:expr); // attempt to simplify the given expression
   
 </details>
 
