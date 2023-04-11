@@ -179,9 +179,9 @@ sleep       {return SLEEP;}
 exec_file        {return EXEC;}
 fork_file        {return FORK;}
 
-_pwd           {return PWD;}
-_ls            {return LS;}
-_cd            {return CD;}
+pwd           {return PWD;}
+ls            {return LS;}
+cd            {return CD;}
 _thisprocess   {return THISPROCESS;}
 _getargs       {return GETARGS;}
 _getoptions    {return GETOPTIONS;}

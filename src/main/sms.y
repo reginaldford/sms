@@ -159,13 +159,17 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> INPUT
 
 %token <expr> FILE_PARSE
-%token <expr> FILE_READ
-%token <expr> FILE_WRITE
+%token <expr> FILE_TOSTR
+%token <expr> FILE_TOBLK
+%token <expr> FILE_EXISTS
+%token <expr> FILE_DATE
+%token <expr> FILE_CP
+%token <expr> FILE_MV
+%token <expr> FILE_RM
+%token <expr> FILE_SIZE
 %token <expr> CSV_TOFILE
 %token <expr> CSV_TOARR
 %token <expr> FILE_TOCSV
-%token <expr> FILE_TOSTR
-%token <expr> FILE_TOBLK
 
 %token <expr> RANDOM
 %token <expr> SEED
@@ -354,6 +358,11 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | DATE '(' ')' { $$ = sm_new_expr_n(SM_DATE_EXPR,0,0);};
 | TIME '(' ')' { $$ = sm_new_expr_n(SM_TIME_EXPR,0,0);};
 | SLEEP '(' EXPR ')' { $$ = sm_new_expr(SM_SLEEP_EXPR,(sm_object*)$3);};
+| LS '(' ')' { $$ = sm_new_expr_n(SM_LS_EXPR,0,0);};
+| CD '(' EXPR ')' { $$ = sm_new_expr(SM_CD_EXPR,(sm_object*)$3);};
+| PWD '(' ')' { $$ = sm_new_expr_n(SM_PWD_EXPR,0,0);};
+| LOG '(' EXPR ')' { $$ = sm_new_expr(SM_LOG_EXPR,(sm_object*)$3);};
+| RUNTIME_META '(' EXPR ')' { $$ = sm_new_expr(SM_RUNTIME_META_EXPR, (sm_object*)$3);};
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local
