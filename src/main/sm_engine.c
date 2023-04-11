@@ -3,6 +3,11 @@
 #include "sms.h"
 #include "sys/time.h"
 #include <errno.h>
+#include <dirent.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
 
 bool is_true(sm_object *obj) {
   if (obj->my_type == SM_SYMBOL_TYPE) {
@@ -53,6 +58,65 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       } while (ret);
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
+    case SM_LS_EXPR: {
+      DIR               *dir;
+      struct dirent     *entry;
+      struct stat        file_stat;
+      const unsigned int MAX_ENTRIES = 1000;
+      sm_string         *entry_names[MAX_ENTRIES];
+      bool               entry_types[MAX_ENTRIES];
+      unsigned int       i = 0;
+
+      char cwd[1024];
+      if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      } else {
+        // perror("getcwd() error");
+        printf("Error: Current working directory is invalid: %s .\n", cwd);
+        return (sm_object *)sm_new_double(0);
+      }
+
+      dir = opendir(cwd);
+      if (dir == NULL) {
+        printf("Error: Current working directory is invalid: %s .\n", cwd);
+        return (sm_object *)sm_new_double(0);
+      }
+
+      while ((entry = readdir(dir)) != NULL && i < MAX_ENTRIES) {
+        char *full_path = malloc(strlen(cwd) + strlen(entry->d_name) + 2);
+        sprintf(full_path, "%s/%s", cwd, entry->d_name);
+        stat(full_path, &file_stat);
+        free(full_path);
+        entry_names[i] = sm_new_string(strlen(entry->d_name), entry->d_name);
+        // S_ISDIR returns nonzero if it's a directory
+        entry_types[i] = S_ISDIR(file_stat.st_mode) != 0;
+        i++;
+      }
+      closedir(dir);
+
+      sm_expr *names_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i);
+      sm_expr *types_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i);
+      for (unsigned int names_i = 0; names_i < i; names_i++) {
+        sm_expr_set_arg(names_arr, names_i, (sm_object *)entry_names[names_i]);
+        if (entry_types[names_i] != 0)
+          sm_expr_set_arg(types_arr, names_i, (sm_object *)sm_new_symbol(sm_new_string(4, "true")));
+        else
+          sm_expr_set_arg(types_arr, names_i,
+                          (sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+      }
+      sm_expr *result =
+        sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)names_arr, (sm_object *)types_arr);
+      return (sm_object *)result;
+    }
+
+    case SM_CD_EXPR: {
+      sm_string *path      = (sm_string *)sm_expr_get_arg(sme, 0);
+      char      *path_cstr = &path->content;
+      if (chdir(path_cstr) == 0)
+        return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+
     case SM_DATE_STR_EXPR: {
       time_t     rawtime;
       struct tm *timeinfo;
@@ -64,6 +128,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)result;
       break;
     }
+
     case SM_TIME_EXPR: {
       struct timeval t;
       gettimeofday(&t, NULL);
