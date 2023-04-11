@@ -107,7 +107,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)names_arr, (sm_object *)types_arr);
       return (sm_object *)result;
     }
-
+    case SM_PWD_EXPR: {
+      char cwd[1024];
+      if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      } else {
+        printf("Error: Current working directory is invalid: %s .\n", cwd);
+        return (sm_object *)sm_new_double(0);
+      }
+      return (sm_object *)sm_new_string(strlen(cwd), cwd);
+    }
     case SM_CD_EXPR: {
       sm_string *path      = (sm_string *)sm_expr_get_arg(sme, 0);
       char      *path_cstr = &path->content;
@@ -116,7 +124,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
-
     case SM_DATE_STR_EXPR: {
       time_t     rawtime;
       struct tm *timeinfo;
@@ -222,7 +229,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (obj0->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj0);
         char      *cstr = &(str->content);
-        printf("Error: str_add function requires 2 strings. Instead, %s was provided as the first "
+        printf("Error: str+ function requires 2 strings. Instead, %s was provided as the first "
                "argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -230,7 +237,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (obj1->my_type != SM_STRING_TYPE) {
         sm_string *str  = sm_object_to_string(obj1);
         char      *cstr = &(str->content);
-        printf("Error: str_add function requires 2 strings. Instead, %s was provided as the second "
+        printf("Error: str+ function requires 2 strings. Instead, %s was provided as the second "
                "argument.\n",
                cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -460,6 +467,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
       break;
     }
+    case SM_DO_WHILE_EXPR: {
+      sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
+      sm_object *expression = sm_expr_get_arg(sme, 0);
+      do {
+        sm_engine_eval(expression, current_cx, sf);
+      } while (is_true(sm_engine_eval((sm_object *)condition, current_cx, sf)));
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      break;
+    }
     case SM_SIZE_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (base_obj->my_type != SM_EXPR_TYPE) {
@@ -648,73 +664,78 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)sm_new_double(quotient);
     }
     case SM_POW_EXPR: {
-      sm_double *left_side  = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *right_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      return (sm_object *)sm_new_double(pow(left_side->value, right_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *arg1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      return (sm_object *)sm_new_double(pow(arg0->value, arg1->value));
     }
     case SM_SIN_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(sin(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(sin(arg0->value));
     }
     case SM_COS_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(cos(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(cos(arg0->value));
     }
     case SM_TAN_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(tan(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(tan(arg0->value));
     }
     case SM_SEC_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(1.0 / cos(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / cos(arg0->value));
     }
     case SM_CSC_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(1.0 / sin(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / sin(arg0->value));
     }
     case SM_COT_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(1.0 / tan(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / tan(arg0->value));
     }
     case SM_SINH_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(sinh(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(sinh(arg0->value));
     }
     case SM_COSH_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(cosh(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(cosh(arg0->value));
     }
     case SM_TANH_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(tanh(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(tanh(arg0->value));
     }
     case SM_SECH_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(1.0 / cosh(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / cosh(arg0->value));
     }
     case SM_CSCH_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(1.0 / sinh(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / sinh(arg0->value));
     }
     case SM_COTH_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(1.0 / tanh(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(1.0 / tanh(arg0->value));
     }
     case SM_LN_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(log(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(log(arg0->value));
+    }
+    case SM_LOG_EXPR: {
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *arg1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      return (sm_object *)sm_new_double(log(arg0->value) / log(arg1->value));
     }
     case SM_EXP_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(exp(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(exp(arg0->value));
     }
     case SM_SQRT_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_double(sqrt(left_side->value));
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_double(sqrt(arg0->value));
     }
     case SM_ABS_EXPR: {
-      sm_double *left_side = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      double     x         = left_side->value;
+      sm_double *arg0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      double     x    = arg0->value;
       return (sm_object *)sm_new_double(x < 0 ? -1 * x : x);
     }
     case SM_IF_EXPR: {
@@ -722,8 +743,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (is_true(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
-      return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
-                                      current_cx);
+      return (sm_object *)(sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
     case SM_IF_ELSE_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -763,8 +783,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
           else
             return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
         }
-        return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
-                                        current_cx);
+        return (sm_object *)(sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }
     }
     case SM_GT_EXPR: {
@@ -780,8 +799,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
             return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
         }
       }
-      return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
-                                      current_cx);
+      return (sm_object *)(sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
     case SM_EQEQ_EXPR: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -799,8 +817,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
             return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
         }
       }
-      return (sm_object *)sm_new_meta((sm_object *)sm_new_symbol(sm_new_string(5, "false")),
-                                      current_cx);
+      return (sm_object *)(sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
     case SM_GT_EQ_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -841,6 +858,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+    case SM_RUNTIME_META_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_meta(obj0, current_cx);
     }
     default:
       return input;
