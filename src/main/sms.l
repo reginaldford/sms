@@ -178,6 +178,8 @@ nums_toblk  {return NUMS_TOBLK;}
 nums_tostr  {return NUMS_TOSTR;}
 nums_tocsv  {return NUMS_TOSTR;}
 
+meta        {return RUNTIME_META;}
+
 date_str    {return DATE_STR;}
 date        {return DATE;}
 time        {return TIME;}
@@ -207,7 +209,9 @@ _mem_checkfile {return MEM_CHECKFILE;}
    return NUM;
   }
 [\<\>]\= { return yytext[0]; }
+
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
+
 ({digit}?+{alpha}?+_?+)?+\'?+ {
     yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
     return SYM;
