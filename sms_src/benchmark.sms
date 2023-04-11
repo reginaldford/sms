@@ -5,13 +5,13 @@ let new_time=[];
 let time_elapsed=0;
 
 benchmark = (expr) =>   (
-  output("Benchmarking: " str+ to_str(expr) str+ "\n");
+  print("Benchmarking: " str+ to_str(expr) str+ "\n");
   first_time = time();
   eval(expr);
   new_time = time();
-  output("Total time:\n");
+  print("Total time:\n");
   time_elapsed = 1000 * (new_time[0] - first_time[0]) +  0.001 * (new_time[1] - first_time[1]);
-  output(to_str(time_elapsed) str+ " milliseconds\n")
+  print(to_str(time_elapsed) str+ " milliseconds\n")
 );
 
 fib = (n) => if( n < 2 , 1 ,fib(n - 1) + fib(n - 2));
