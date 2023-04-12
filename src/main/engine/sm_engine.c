@@ -348,7 +348,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       char *fname_cstr = &(fname_str->content);
       if (access(fname_cstr, F_OK) != 0) {
-        printf("read_file failed because the file, %s ,does not exist.\n", fname_cstr);
+        printf("file_tostr failed because the file, %s ,does not exist.\n", fname_cstr);
         return (sm_object *)sm_new_string(0, "");
       }
       FILE *fptr = fopen(fname_cstr, "r");
@@ -403,7 +403,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)sm_object_to_string(evaluated);
     }
     case SM_EVAL_EXPR: {
-      sm_context *where_to_eval=current_cx;
+      sm_context *where_to_eval = current_cx;
       if (sme->size > 1) {
         sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
         if (expect_type(evaluated, 1, SM_CONTEXT_TYPE, SM_EVAL_EXPR))
@@ -450,7 +450,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     case SM_SIZE_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_expr   *arr;
-      if (expect_type(base_obj,0, SM_EXPR_TYPE, SM_SIZE_EXPR))
+      if (expect_type(base_obj, 0, SM_EXPR_TYPE, SM_SIZE_EXPR))
         arr = (sm_expr *)base_obj;
       else
         return (sm_object *)sm_new_double(-1);
@@ -460,14 +460,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       // expecting a unary func
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_fun    *fun;
-      if (expect_type(obj0,0, SM_FUN_TYPE, SM_MAP_EXPR))
+      if (expect_type(obj0, 0, SM_FUN_TYPE, SM_MAP_EXPR))
         fun = (sm_fun *)obj0;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
 
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_expr   *arr;
-      if (expect_type(obj1, 1,SM_EXPR_TYPE, SM_MAP_EXPR))
+      if (expect_type(obj1, 1, SM_EXPR_TYPE, SM_MAP_EXPR))
         arr = (sm_expr *)obj1;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -482,7 +482,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     case SM_INDEX_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_expr   *arr;
-      if (expect_type(base_obj,0, SM_EXPR_TYPE, SM_INDEX_EXPR))
+      if (expect_type(base_obj, 0, SM_EXPR_TYPE, SM_INDEX_EXPR))
         arr = (sm_expr *)base_obj;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -500,49 +500,47 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return sm_expr_get_arg(arr, index);
     }
     case SM_DOT_EXPR: {
-      sm_object *base_obj   = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
-      sm_string *field_name = field_sym->name;
-      if (base_obj->my_type != SM_CONTEXT_TYPE) {
-        sm_string *base_str = sm_object_to_string(base_obj);
-        printf("Attempting to apply . to an object that is not a context: %s\n",
-               &(base_str->content));
-        return (sm_object *)sm_new_double(0);
-      }
-      sm_context                *base_cx = (sm_context *)base_obj;
-      sm_search_result_cascading sr      = sm_context_find_far(base_cx, field_name);
+      sm_object  *base_obj   = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_symbol  *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
+      sm_string  *field_name = field_sym->name;
+      sm_context *base_cx;
+
+      if (expect_type(base_obj, 0, SM_CONTEXT_TYPE, SM_DOT_EXPR))
+        base_cx = (sm_context *)base_obj;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
+      sm_search_result_cascading sr = sm_context_find_far(base_cx, field_name);
       if (sr.found != true) {
         sm_string *base_str = sm_object_to_string(base_obj);
-        printf("Could not find variable: %s within %s\n", &(field_name->content),
+        printf("Error: Could not find variable: %s within %s\n", &(field_name->content),
                &(base_str->content));
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }
       return sm_context_entries(sr.context)[sr.index].value;
     }
     case SM_PARENT_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (base_obj->my_type != SM_CONTEXT_TYPE) {
-        sm_string *base_str = sm_object_to_string(base_obj);
-        printf("Attempting to obtain parent of an object that is not a context: %s\n",
-               &(base_str->content));
-        return (sm_object *)sm_new_double(0);
-      }
-      sm_context *cx = (sm_context *)base_obj;
-      if (cx->parent == NULL) {
+      sm_context *base_cx;
+
+      if (expect_type(base_obj, 0, SM_CONTEXT_TYPE, SM_DOT_EXPR))
+        base_cx = (sm_context *)base_obj;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
+      if (base_cx->parent == NULL) {
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }
-      return (sm_object *)cx->parent;
+      return (sm_object *)base_cx->parent;
     }
     case SM_DIFF_EXPR: {
       sm_object *evaluated0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *evaluated1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (evaluated1->my_type != SM_SYMBOL_TYPE) {
-        printf("Error: Second arg to diff is not a symbol: ");
-        sm_string *not_sym_str = sm_object_to_string(evaluated1);
-        printf("%s.\n", &(not_sym_str->content));
-        return (sm_object *)sm_new_double(0);
-      }
-      sm_object *result = sm_diff(evaluated0, (sm_symbol *)evaluated1);
+      sm_symbol * sym1;
+      if(expect_type(evaluated1,SM_SYMBOL_TYPE,0,SM_DIFF_EXPR))
+        sym1=(sm_symbol*)evaluated1;
+      else return (sm_object*) sm_new_symbol(sm_new_string(5,"false"));
+      sm_object *result = sm_diff(evaluated0, sym1);
       result            = sm_simplify(result);
       return result;
     }
@@ -565,14 +563,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
           sm_strncpy((&err_msg->content) + 27, &fun_sym->name->content, fun_sym->name->size);
           return (sm_object *)sm_new_error(err_msg, sm_new_string(1, "."), 0);
         }
-        if (found->my_type != SM_FUN_TYPE) {
-          printf("Error: %s exists, but is not a function.\n", &(fun_sym->name->content));
-          sm_string *err_msg = sm_new_string(47 + fun_sym->name->size,
-                                             "Error: Variable exists, but is not a function: ");
-          sm_strncpy((&err_msg->content) + 47, &fun_sym->name->content, fun_sym->name->size);
-          return (sm_object *)sm_new_error(err_msg, sm_new_string(1, "."), 0);
-        }
-        sm_fun *found_fun = (sm_fun *)found;
+        sm_fun * found_fun;
+        if(expect_type(found,SM_FUN_TYPE,0,SM_FUN_CALL_EXPR))
+          found_fun = (sm_fun*)found;
+          else return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
         return sm_engine_eval(found_fun->content, found_fun->parent, new_args);
       } else if (fun->my_type == SM_FUN_TYPE) {
         return sm_engine_eval(fun->content, fun->parent, new_args);
