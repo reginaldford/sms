@@ -586,7 +586,7 @@ void lex_cstr(char * cstr,int len){
 
 void yyerror(const char *msg) {
   // Use this function to investigate the error.
-  fprintf(stderr, "Parser error on line: %i %s\n",yylineno, msg);
+  fprintf(stderr, "Error on line: %i %s\n",yylineno, msg);
   //Parsing a file will stop here, but repl will continue and needs a line increment
   yylineno++;
 }
