@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // new sm_fun structure
 sm_fun *sm_new_fun(sm_context *parent, unsigned short int num_params, sm_object *content) {

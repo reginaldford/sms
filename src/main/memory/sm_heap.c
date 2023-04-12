@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // For rounding up object size to the next multiple of 4 bytes.
 int sm_round_size(int size) { return ((size) + 3) & ~3; }

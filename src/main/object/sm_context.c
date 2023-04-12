@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // Create a new context, an array of key_values sorted by key
 sm_context *sm_new_context(unsigned int size, unsigned int capacity, sm_context *parent) {

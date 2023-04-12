@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // A local variable stores the index of the 'stack frame' array.
 sm_local *sm_new_local(unsigned short int index, sm_string *name) {

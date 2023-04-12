@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // Return whether these two symbols have the same name.
 bool sm_symbol_equal(sm_symbol *s1, sm_symbol *s2) {

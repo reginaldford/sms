@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 sm_symbol *sm_new_symbol(sm_string *sym_name) {
   sm_symbol *sym = (sm_symbol *)sm_malloc(sizeof(sm_symbol));

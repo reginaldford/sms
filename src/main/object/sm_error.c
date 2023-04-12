@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 sm_error *sm_new_error(sm_string *message, sm_string *source, unsigned int line) {
   sm_error *new_error = sm_malloc(sizeof(sm_error));
