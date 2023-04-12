@@ -25,17 +25,20 @@ TARGET_SMS      := sms
 TARGET_SMS_DBG  := sms_dbg
 TARGET_TEST     := sms_test
 TARGET_KT       := sms_kernel_test
+THREADS					:= 4	#match the number of threads on your machine
 
-# There 2 are not files
+# These 2 are not files
 .PHONY: $(TARGET_SMS) all
+
+
 
 # Parallel processing for default case
 $(TARGET_SMS):
-	$(MAKE) -j4 bin/$(TARGET_SMS)
+	$(MAKE) -j$(THREADS) bin/$(TARGET_SMS)
 
 # Parallel processing for dev case
 all:
-	$(MAKE) -j4 dev
+	$(MAKE) -j$(THREADS) dev
 
 # sms executable
 bin/$(TARGET_SMS): $(OBJS0) $(OBJS1) $(BUILD_DIR)/$(SRC_DIR1)/sm_main.c.o 
