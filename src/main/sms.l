@@ -60,6 +60,7 @@ while       {return WHILE;}
 dowhile     {return DO_WHILE;}
 eval        {return EVAL;}
 eval_fast   {return EVAL_FAST;}
+fails       {return FAILS;}
 parse       {return PARSE;}
 "to_str"    {return TO_STR;}
 "to_strfmt" {return TO_STRFMT;}
