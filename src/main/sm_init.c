@@ -9,7 +9,7 @@ void sm_init(sm_options *options) {
   // Seed the random number generator with the current time
   srand(time(NULL));
 
-  // Initialize the current mem heap
+  // Initialize the current memory heap
   double mem_mbytes = 50;
   if (options != NULL && options->mem_flag) {
     mem_mbytes = options->mem_mbytes;
@@ -38,5 +38,5 @@ void sm_init(sm_options *options) {
                                   .value = (sm_object *)sm_new_symbol(sm_new_string(4, "true"))};
 
   // Initialize the global context
-  sm_stack_push(sm_global_lex_stack(NULL), sm_new_context(0, 0, parent_cx));
+  sm_stack_push(sm_global_lex_stack(NULL), sm_new_context(0, 50, parent_cx));
 }

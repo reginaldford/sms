@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // Copy the object to the new heap
 // Leave an sm_pointer in the old space

@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // New meta, a pointer to an object
 sm_meta *sm_new_meta(sm_object *address, sm_context *context) {

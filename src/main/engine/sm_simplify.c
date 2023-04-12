@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // Whether an expression contains a specific double
 bool sm_expr_has_num(sm_expr *expr, double n) {

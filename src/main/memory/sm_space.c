@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // Overwrites an existing object to create a space or returns NULL
 sm_space *sm_new_space(void *trash, unsigned int size) {

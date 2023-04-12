@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 // New expression object with n arguments
 // Make sure to fill in the arguments afterward

@@ -1,7 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
-#include "../bison_flex/y.tab.h"
+#include "../sms.h"
+#include "../../bison_flex/y.tab.h"
 
 void scan_str(const char *cstr, int len);
 void end_scan_str(void);

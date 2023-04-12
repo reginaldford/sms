@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
+#include "../sms.h"
 
 sm_double *sm_new_double(double value) {
   struct sm_double *newnum = (sm_double *)sm_malloc(sizeof(sm_double));

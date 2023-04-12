@@ -57,12 +57,12 @@ bin/$(TARGET_KT): $(OBJS0) $(OBJS4) $(OBJS3)
 	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS4) $(OBJS0) $(OBJS3) -o $@
 
 # Bison generates the parser
-$(SRC_DIR0)/y.tab.c $(SRC_DIR0)/y.tab.h: $(SRC_DIR1)/sms.y
-	bison -d $(SRC_DIR1)/sms.y -o $(SRC_DIR0)/y.tab.c
+$(SRC_DIR0)/y.tab.c $(SRC_DIR0)/y.tab.h: $(SRC_DIR1)/parser/sms.y
+	bison -d $(SRC_DIR1)/parser/sms.y -o $(SRC_DIR0)/y.tab.c
 	
 # Flex generates the lexer
-$(SRC_DIR0)/lex.yy.c: $(SRC_DIR0)/y.tab.h $(SRC_DIR0)/y.tab.c $(SRC_DIR1)/sms.l
-	flex --yylineno -o $(SRC_DIR0)/lex.yy.c $(SRC_DIR1)/sms.l 
+$(SRC_DIR0)/lex.yy.c: $(SRC_DIR0)/y.tab.h $(SRC_DIR0)/y.tab.c $(SRC_DIR1)/parser/sms.l
+	flex --yylineno -o $(SRC_DIR0)/lex.yy.c $(SRC_DIR1)/parser/sms.l 
 
 # Compile .o files from .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -87,7 +87,7 @@ clean:
 		
 # Install the binary to a unix-like system
 install:
-	$(MAKE) -j4 bin/$(TARGET_SMS)
+	$(MAKE) -j$(THREADS) bin/$(TARGET_SMS)
 	cp -fv bin/$(TARGET_SMS) $(INSTALL_DIR)/$(TARGET_SMS)
 	chmod +x $(INSTALL_DIR)/$(TARGET_SMS)
 
