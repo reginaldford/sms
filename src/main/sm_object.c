@@ -15,19 +15,6 @@ bool sm_object_is_literal(unsigned short int t) {
   }
 }
 
-// Return the object type as a string.
-// Keep syncronized with sms.h sm_object_type list
-sm_string *sm_object_type_str(unsigned short int t) {
-  static char *response_string[]     = {"double",  "expression", "primitive", "string", "symbol",
-                                        "context", "pointer",    "key_value", "meta",   "space",
-                                        "fun",     "fun_param",  "local",     "?"};
-  static int   response_string_len[] = {6, 10, 9, 6, 6, 7, 7, 9, 4, 5, 3, 9, 5, 1};
-  if (t < ARRAY_SIZE(response_string_len))
-    return sm_new_string(response_string_len[t], response_string[t]);
-  else
-    return sm_new_string(10, "NoSuchType");
-}
-
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
   sm_string   *new_str     = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));
