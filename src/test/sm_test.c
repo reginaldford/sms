@@ -263,6 +263,7 @@ int main(int num_args, char **argv) {
             exit(test_result);
           }
           num_fails += test_result;
+          sm_garbage_collect();
         }
       }
     }
@@ -279,6 +280,7 @@ int main(int num_args, char **argv) {
           exit(test_result);
         }
         num_fails += test_result;
+        sm_garbage_collect();
       }
     }
   } else if (test == -1) {

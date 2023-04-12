@@ -386,7 +386,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PARSE_EXPR))
         str = (sm_string *)evaluated;
       else {
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }
       char *cstr         = &(str->content);
       cstr[str->size]    = ';'; // Temporarily replacing the NULL char
@@ -403,7 +403,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)sm_object_to_string(evaluated);
     }
     case SM_EVAL_EXPR: {
-      sm_context *where_to_eval;
+      sm_context *where_to_eval=current_cx;
       if (sme->size > 1) {
         sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
         if (expect_type(evaluated, 1, SM_CONTEXT_TYPE, SM_EVAL_EXPR))
