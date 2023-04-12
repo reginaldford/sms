@@ -55,7 +55,7 @@ bin/$(TARGET_KT): $(OBJS0) $(OBJS4) $(OBJS3)
 
 # Bison generates the parser
 $(SRC_DIR0)/y.tab.c $(SRC_DIR0)/y.tab.h: $(SRC_DIR1)/sms.y
-	bison -dy $(SRC_DIR1)/sms.y -o $(SRC_DIR0)/y.tab.c
+	bison -d $(SRC_DIR1)/sms.y -o $(SRC_DIR0)/y.tab.c
 	
 # Flex generates the lexer
 $(SRC_DIR0)/lex.yy.c: $(SRC_DIR0)/y.tab.h $(SRC_DIR0)/y.tab.c $(SRC_DIR1)/sms.l

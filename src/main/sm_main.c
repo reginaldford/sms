@@ -3,6 +3,8 @@
 #include "sms.h"
 #include "../bison_flex/y.tab.h"
 
+extern int yylineno;
+
 // Run user command line
 void start_repl() {
   // Read, Evaluate, Print Loop
@@ -19,6 +21,8 @@ void start_repl() {
       printf("%s\n", &(result_str->content));
       // Cleanup
       sm_garbage_collect();
+      // Count this as a line
+      yylineno++;
     } else {
       printf("Error: parser returned %i\n", pr.return_val);
     }

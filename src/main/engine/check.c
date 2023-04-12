@@ -9,7 +9,7 @@ bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_
   if (arg_n->my_type != arg_type) {
     sm_string  *str  = sm_object_to_string(arg_n);
     const char *cstr = &(str->content);
-    printf("Error: %s requires argument %i to have type %s but %s has type %s\n",
+    printf("Type Mismatch: %s requires argument %i to have type %s but %s has type %s\n",
            sm_global_fn_name(checker), arg_num, sm_global_type_name(arg_type), cstr,
            sm_global_type_name(arg_n->my_type));
     return false;

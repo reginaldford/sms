@@ -9,13 +9,16 @@
 #include "../main/sms.h"
 
 extern int yylex();
-void       yyerror(char *msg);
+extern int yylineno;
+void       yyerror(const char *msg);
 
 void _lex_file(char *fpath);
 void _done_lexing_file();
 void _lex_cstr(char * cstr,int len);
 
 %}
+
+%define parse.error verbose
 
 %union {
   sm_double        *num;
@@ -259,6 +262,7 @@ void _lex_cstr(char * cstr,int len);
 
 COMMAND : EXPR ';' {
   sm_global_parser_output((sm_object *)($1));
+  //yylineno++;
   YYACCEPT;
 }
 | RM SYM ';' {
@@ -580,7 +584,9 @@ void lex_cstr(char * cstr,int len){
   _lex_cstr(cstr,len);
 }
 
-void yyerror(char *msg) {
+void yyerror(const char *msg) {
   // Use this function to investigate the error.
-  fprintf(stderr, "Error: %s\n", msg);
+  fprintf(stderr, "Parser error on line: %i %s\n",yylineno, msg);
+  //Parsing a file will stop here, but repl will continue and needs a line increment
+  yylineno++;
 }
