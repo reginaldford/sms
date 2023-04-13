@@ -4,8 +4,8 @@
 // with 2 characters.
 two_digits=(x)=>(
   if(x<10,
-    str+("0",to_str(x)),
-    to_str(x)
+    "0" str+ toStr(x),
+    toStr(x)
   )
 );
 
@@ -13,9 +13,11 @@ two_digits=(x)=>(
 while(true,(
   d = date();
   // Convert military time to 12-hr
-  if(d[2]>12,
-    print(two_digits(d[2]-12)),
-    print(two_digits(d[2])));  
+	print(two_digits(
+		if(d[2]>12,
+			d[2]-12,
+			d[2])));
+
   print(":");
   print(two_digits(d[1]));
   print(":");

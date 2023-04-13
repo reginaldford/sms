@@ -9,5 +9,5 @@ while(true,(
   print("> ");
   in = input();
   ans = eval(parse(in));
-  print(to_str(ans) str+ "\n")));
+  print(toStr(ans) str+ "\n")));
 

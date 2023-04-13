@@ -14,5 +14,5 @@ while(true,(
   print("Enter x: ");
   let x = parse(input());
   print("The factorial of x is " str+
-    to_str(factorial(x)) str+ "\n")
+    toStr(factorial(x)) str+ "\n")
 ));
