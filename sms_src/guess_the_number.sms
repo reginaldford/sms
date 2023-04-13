@@ -13,5 +13,5 @@ let user_guess = -1;
       print("You guessed too low.\n"))
   ));
   print("Congratulations! You WON!\n");
-  print("The answer is: " str+ to_str(answer) str+ "\n")
+  print("The answer is: " str+ toStr(answer) str+ "\n")
 );

@@ -329,11 +329,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     case SM_RANDOM_EXPR: {
       return (sm_object *)sm_new_double(((double)rand()) / ((double)RAND_MAX));
     }
-    case SM_STR_TOFILE_EXPR: {
+    case SM_FILE_WRITE_STR_EXPR: {
       // obtain the content to write
       sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *content_str;
-      if (expect_type(evaluated_content, 0, SM_STRING_TYPE, SM_STR_TOFILE_EXPR))
+      if (expect_type(evaluated_content, 0, SM_STRING_TYPE, SM_FILE_WRITE_STR_EXPR))
         content_str = (sm_string *)evaluated_content;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -342,7 +342,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       // obtain the file name
       sm_string *fname_str;
       sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type(evaluated_fname, 1, SM_STRING_TYPE, SM_STR_TOFILE_EXPR))
+      if (expect_type(evaluated_fname, 1, SM_STRING_TYPE, SM_FILE_WRITE_STR_EXPR))
         fname_str = (sm_string *)evaluated_fname;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -358,16 +358,16 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       fclose(fptr);
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
-    case SM_FILE_TOSTR_EXPR: {
+    case SM_FILE_READ_STR_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_TOSTR_EXPR))
+      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_WRITE_STR_EXPR))
         fname_str = (sm_string *)evaluated;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       char *fname_cstr = &(fname_str->content);
       if (access(fname_cstr, F_OK) != 0) {
-        printf("file_tostr failed because the file, %s ,does not exist.\n", fname_cstr);
+        printf("fileWrite failed because the file, %s ,does not exist.\n", fname_cstr);
         return (sm_object *)sm_new_string(0, "");
       }
       FILE *fptr = fopen(fname_cstr, "r");
@@ -598,11 +598,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       } else {
         return sm_engine_eval((sm_object *)fun, current_cx, new_args);
       }
+      break;
     }
     case SM_THEN_EXPR: {
       for (unsigned int i = 0; i + 1 < sme->size; i++)
         sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
       return sm_engine_eval(sm_expr_get_arg(sme, sme->size - 1), current_cx, sf);
+      break;
     }
     case SM_ASSIGN_EXPR: {
       sm_symbol *sym;
@@ -617,6 +619,33 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       } else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+    }
+    case SM_ASSIGN_LOCAL_EXPR: {
+      sm_object *obj0  = sm_expr_get_arg(sme, 0);
+      sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj0->my_type == SM_LOCAL_TYPE) {
+        sm_local *lcl = (sm_local *)obj0;
+        sm_expr_set_arg(sf, lcl->index, value);
+      } else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      break;
+    }
+    case SM_ASSIGN_INDEX_EXPR: {
+      // expecting a[4]=value=> =index_expr(a,4,value);
+      sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type(obj0, 0, SM_EXPR_TYPE, SM_ASSIGN_INDEX_EXPR)) {
+        sm_expr *arr = (sm_expr *)obj0;
+        if (expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_ASSIGN_INDEX_EXPR)) {
+          sm_double *index = (sm_double *)obj1;
+          sm_expr_set_arg(arr, index->value, obj2);
+          return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+        } else
+          return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
     case SM_PLUS_EXPR: {
       double sum = 0;

@@ -5,11 +5,11 @@
     [  str+(a,b)   , "thisThat"       ,  "str+ 1"],
     [  str+(b,a)   , "Thatthis"       ,  "str+ 2"],
     [  str+(str+(b,a),a)   , "Thatthisthis" ,  "str+ 3"],
-    [  str_find(a,b)   , -1      ,  "str_find 1"],
-    [  str_find(a,"is")   , 2    ,  "str_find 2"],
-    [  str_find(b,"t")    , 3    ,  "str_find 3"],
-    [  str_part(b,1,3)    ,   "hat"   ,   "str_part 1"],
-    [  str_part(b,2,2)    ,   "at"    ,   "str_part 2"],
-    [  str_part(a,1,3)    ,   "his"   ,   "str_part 3"],
+    [  strFind(a,b)   , -1      ,  "strFind 1"],
+    [  strFind(a,"is")   , 2    ,  "strFind 2"],
+    [  strFind(b,"t")    , 3    ,  "strFind 3"],
+    [  strPart(b,1,3)    ,   "hat"   ,   "strPart 1"],
+    [  strPart(b,2,2)    ,   "at"    ,   "strPart 2"],
+    [  strPart(a,1,3)    ,   "his"   ,   "strPart 3"],
   ];
 };

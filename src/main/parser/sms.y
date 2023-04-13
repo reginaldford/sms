@@ -41,6 +41,7 @@ void _lex_cstr(char * cstr,int len);
 %type <expr> IF_STATEMENT
 %type <meta> META_EXPR
 %type <expr> ASSIGNMENT
+%type <expr> INDEX_ASSIGNMENT
 %type <context> CONTEXT
 %type <context> CONTEXT_LIST
 %type <expr> EXPR
@@ -138,7 +139,6 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> STR_SETCHAR
 %token <expr> STR_GETCHAR
 %token <expr> STR_TONUMS
-%token <expr> STR_TOFILE
 %token <expr> STR_CMP
 %token <expr> STR_REPEAT
 %token <expr> STR_TOBLK
@@ -163,10 +163,11 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> INPUT
 
 %token <expr> FILE_PARSE
-%token <expr> FILE_TOSTR
-%token <expr> FILE_TOBLK
+%token <expr> FILE_READ_STR
+%token <expr> FILE_WRITE_STR
 %token <expr> FILE_EXISTS
-%token <expr> FILE_DATE
+%token <expr> FILE_STAT
+%token <expr> FILE_TOBLK
 %token <expr> FILE_CP
 %token <expr> FILE_MV
 %token <expr> FILE_RM
@@ -239,7 +240,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> SLEEP
 %token <expr> EXEC
 %token <expr> FORK
-%token <expr> GETARGS
+%token <expr> ARGS
 %token <expr> GETOPTIONS
 %token <expr> SETOPTIONS
 %token <expr> RESETOPTIONS
@@ -325,6 +326,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | ARRAY{}
 | META_EXPR{}
 | ASSIGNMENT{}
+| INDEX_ASSIGNMENT{}
 | FUN_CALL{}
 | FUN{}
 | IF_STATEMENT{}
@@ -337,6 +339,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | SYM DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
+| SYM '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);}
 | SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_SIZE_EXPR,(sm_object*)$3);}
 | WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
@@ -351,8 +354,8 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | PRINT '(' EXPR ')' {$$ = sm_new_expr(SM_PRINT_EXPR,(sm_object*)$3);}
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
-| FILE_TOSTR '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_TOSTR_EXPR,(sm_object*)$3);}
-| STR_TOFILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_TOFILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| FILE_READ_STR '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_STR_EXPR,(sm_object*)$3);}
+| FILE_WRITE_STR '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_WRITE_STR_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | RANDOM  '(' ')' { $$ = sm_new_expr_n(SM_RANDOM_EXPR,0,0);};
 | ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);};
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);};
@@ -414,6 +417,8 @@ PARAM_LIST_OPEN : '(' SYM ',' {
 }
 
 ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(SM_ASSIGN_EXPR, (sm_object *)($1), (sm_object *)($3)); }
+
+INDEX_ASSIGNMENT : SYM '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
 
 SEQUENCE : SEQUENCE_LIST ')' {}
 
