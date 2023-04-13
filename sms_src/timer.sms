@@ -8,4 +8,4 @@ while(n<time_to_wait,(
   sleep(500);
   n=n+1)
 );
-println("DONE!");
+print("DONE!\n");

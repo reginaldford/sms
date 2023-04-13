@@ -1,0 +1,18 @@
+// Asks for a value x, and prints the factorial of x
+// Repeats continually until the user closes by signal
+
+factorial=(counter)=>(
+  let fac = 1;
+  while( counter > 0, (
+    fac = fac * counter;
+    counter = counter -1
+  ));
+  fac
+);
+
+while(true,(
+  print("Enter x: ");
+  let x = parse(input());
+  print("The factorial of x is " str+
+    to_str(factorial(x)) str+ "\n")
+));

@@ -445,6 +445,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       for (unsigned int i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
       putchar('\0');
+      fflush(stdout);
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
       break;
     }
@@ -605,13 +606,16 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     }
     case SM_ASSIGN_EXPR: {
       sm_symbol *sym;
-      sm_object *obj0 = sm_expr_get_arg(sme, 0);
-      if (expect_type(obj0, 0, SM_SYMBOL_TYPE, SM_ASSIGN_EXPR))
-        sym = (sm_symbol *)obj0;
-      else
-        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      sm_object *obj0  = sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_context_set(current_cx, sym->name, value);
+      if (obj0->my_type == SM_LOCAL_TYPE) {
+        sm_local *lcl = (sm_local *)obj0;
+        sm_expr_set_arg(sf, lcl->index, value);
+      } else if (expect_type(obj0, 0, SM_SYMBOL_TYPE, SM_ASSIGN_EXPR)) {
+        sym = (sm_symbol *)obj0;
+        sm_context_set(current_cx, sym->name, value);
+      } else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
     case SM_PLUS_EXPR: {
