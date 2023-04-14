@@ -103,12 +103,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       }
 
       while ((entry = readdir(dir)) != NULL && i < MAX_ENTRIES) {
-        char *full_path = malloc(strlen(cwd) + strlen(entry->d_name) + 2);
+        char full_path[strlen(cwd) + strlen(entry->d_name) + 2];
         sprintf(full_path, "%s/%s", cwd, entry->d_name);
         stat(full_path, &file_stat);
-        free(full_path);
         entry_names[i] = sm_new_string(strlen(entry->d_name), entry->d_name);
-        // S_ISDIR returns nonzero if it's a directory
+        // S_ISDIR returns nonzero iff it's a directory
         entry_types[i] = S_ISDIR(file_stat.st_mode) != 0;
         i++;
       }
@@ -351,7 +350,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       FILE *fptr = fopen(fname_cstr, "w");
       // check that file can be opened for writing
       if (fptr == NULL) {
-        printf("write_file failed to open: %s\n", fname_cstr);
+        printf("fileWriteStr failed to open: %s\n", fname_cstr);
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }
       fprintf(fptr, "%s", content_cstr);
@@ -367,7 +366,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       char *fname_cstr = &(fname_str->content);
       if (access(fname_cstr, F_OK) != 0) {
-        printf("fileWrite failed because the file, %s ,does not exist.\n", fname_cstr);
+        printf("fileReadStr failed because the file, %s ,does not exist.\n", fname_cstr);
         return (sm_object *)sm_new_string(0, "");
       }
       FILE *fptr = fopen(fname_cstr, "r");

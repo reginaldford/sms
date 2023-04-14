@@ -1,4 +1,4 @@
-{ // string manipulations
+{ # string manipulations
   a="this";
   b="That";
   tests=[

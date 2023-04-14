@@ -1,4 +1,4 @@
-{ // Basic calculations
+{ # Basic calculations
 tests=[
     [ 2 + 3 , 5 , "2+3"],
     [ 2 * 3 , 6 , "2*3"],

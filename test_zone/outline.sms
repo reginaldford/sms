@@ -1,5 +1,5 @@
-{ // This file is parsed by sms_tests for a test plan
-  // Compare this to the output of ls -R at this directory
+{ # This file is parsed by sms_tests for a test plan
+  # Compare this to the output of ls -R at this directory
   chapters = [
     {
       name= "parser";

@@ -218,7 +218,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
     return SYM;
   }
 
-"//".* {/*comment*/};
+"#".* {/*comment*/};
 
 
 \"([^"\\]|\\.)*\" {

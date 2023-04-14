@@ -1,4 +1,4 @@
-//Use this to benchmark something
+#Use this to benchmark something
 
 let first_time=[];
 let new_time=[];

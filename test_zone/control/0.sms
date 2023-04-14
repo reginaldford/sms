@@ -1,4 +1,4 @@
-{ //if statements
+{ #if statements
   tests=[
     [if(2<5,"hello","goodbye"),"hello","2<5?"],
     [if(2>5,"hello","goodbye"),"goodbye","2>5?"],

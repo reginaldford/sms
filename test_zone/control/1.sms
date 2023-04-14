@@ -1,4 +1,4 @@
-{ //map statements
+{ #map statements
   tests=[
     [map((x)=>2*x, [ 1 ,2 ,3]), [ 2,4,6], "twice map"],
     [map((y)=>2*y+3, [1 ,2 ,3]), [ 5,7,9], "linear map"],
