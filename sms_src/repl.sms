@@ -1,6 +1,7 @@
-//A repl written in SMS!
-//Does not require a semicolon, but
-//Only allows single line commands
+#!/usr/local/bin/sms
+#A repl written in SMS!
+#Does not require a semicolon, but
+#Only allows single line commands
 
 let in = "";
 let ans = [];

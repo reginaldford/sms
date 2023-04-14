@@ -1,5 +1,5 @@
-// Allows the user to guess a hidden random value until they guess correctly
-// Currently needs to be written with a then-block, but this is a temperary workaround
+# Allows the user to guess a hidden random value until they guess correctly
+# Currently needs to be written with a then-block, but this is a temperary workaround
 
 let answer = round(100*random());
 let user_guess = -1;

@@ -1,4 +1,4 @@
-{ // file operations
+{ # file operations
   tests=[
     [ fileWriteStr("This is a test.\nAnd line 2.","test_file_0.txt"),true,  "writing a file"],
     [ fileReadStr("test_file_0.txt"),"This is a test.\nAnd line 2.","reading the file that was written"],

@@ -80,6 +80,7 @@ int main(int num_args, char **argv) {
     run_file(options, false);
   }
   if (options->eval_flag) {
+    printf("Evaluating: %s.\n", options->eval_cmd);
     sm_parse_result pr = sm_parse_cstr(options->eval_cmd, options->eval_cmd_len);
     if (pr.return_val != 0) {
       printf("Error: Parser failed and returned %i\n", pr.return_val);
@@ -91,11 +92,9 @@ int main(int num_args, char **argv) {
     }
     sm_object *evaluated =
       sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-    if (evaluated != NULL) {
-      sm_string *response = sm_object_to_string(evaluated);
-      printf("%s\n", &(response->content));
-      fflush(stdout);
-    }
+    sm_string *response = sm_object_to_string(evaluated);
+    printf("%s\n", &(response->content));
+    fflush(stdout);
     sm_signal_exit(0);
   }
   start_repl();

@@ -1,5 +1,6 @@
-// Asks for a value x, and prints the factorial of x
-// Repeats continually until the user closes by signal
+#!/usr/local/bin/sms
+# Asks for a value x, and prints the factorial of x
+# Repeats continually until the user closes by signal
 
 factorial=(counter)=>(
   let fac = 1;

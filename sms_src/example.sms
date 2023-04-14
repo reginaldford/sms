@@ -1,43 +1,43 @@
-// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
+# Read https:#raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-// Example Functions and Constants
-// Use this file by running:
-// sms -i <path> where <path> is the path to this file.
+# Example Functions and Constants
+# Use this file by running:
+# sms -i <path> where <path> is the path to this file.
 
-// Euler's number
+# Euler's number
 E = exp(1);
 
-// Golden radio
+# Golden radio
 PHI = 1.618033988749895;
 
-//Acceleration due to gravity near Earth's surface
+#Acceleration due to gravity near Earth's surface
 G = 9.807;
 
-//Quadratic formula
+#Quadratic formula
 quad = (a,b,c) => [
   (-b + sqrt(b ^ 2 - 4 * a * c))/(2 * a),
   (-b - sqrt(b ^ 2 - 4 * a * c))/(2 * a)
 ];
 
-//Euclidean distance formula
+#Euclidean distance formula
 dist = (a,b) => sqrt(a ^ 2 + b ^ 2);
 
 
-// Unit conversions
+# Unit conversions
 
-// Temp
+# Temp
 c_to_f = (c)       => c * 9 / 5 + 32;
 f_to_c = (f)       => (f - 32) * 5 / 9;
 
-// Angle
+# Angle
 to_rad = (degrees) => degrees * PI / 180;
 to_deg = (radians) => radians * 180 / PI;
 
-// Weight
+# Weight
 p_to_kg = (p)      => p / 2.205;
 kg_to_p = (kg)     => kg * 2.205;
 
-// Length
+# Length
 in_to_cm = (in)    => in * 2.54;
 in_to_ft = (in)    => in / 12;
 
@@ -59,5 +59,5 @@ mi_to_m = (mi)     => mi * 1609;
 ft_to_mi = (f)     => f / 5280;
 mi_to_ft = (mi)    => mi * 5280;
 
-// Calculate the nth value of the Fibonacci sequence
+# Calculate the nth value of the Fibonacci sequence
 fib = (n) => if( n < 2 , 1 ,fib(n - 1) + fib(n - 2));

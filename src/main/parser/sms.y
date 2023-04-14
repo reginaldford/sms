@@ -421,6 +421,7 @@ ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(SM_ASSIGN_EXPR, (sm_object *)($1)
 INDEX_ASSIGNMENT : SYM '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
 
 SEQUENCE : SEQUENCE_LIST ')' {}
+| SEQUENCE_LIST ';' ')' {}
 
 SEQUENCE_LIST : '(' EXPR ';' EXPR { $$ = sm_new_expr_2(SM_THEN_EXPR, (sm_object *)$2, (sm_object *)$4); }
 | SEQUENCE_LIST ';' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
@@ -429,6 +430,7 @@ EXPR_LIST : '+' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object 
 | '-' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_MINUS_EXPR, (sm_object *)$3, (sm_object *)$5); }
 | '*' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$3, (sm_object *)$5); }
 | '/' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$3, (sm_object *)$5); }
+| STR_CAT '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$3, (sm_object *)$5); }
 | EXPR_LIST ',' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
 
 TEST_LT : '<' '(' EXPR ',' EXPR ')' {

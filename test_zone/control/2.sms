@@ -1,4 +1,4 @@
-{ //while statements
+{ #while statements
   x=0;
   tests=[
     [while(x<10,x=x+1), true, "basic while"],
