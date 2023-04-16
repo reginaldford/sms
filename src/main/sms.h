@@ -41,7 +41,7 @@ enum sm_object_type {
 #include "object/sm_string.h"
 #include "object/sm_object.h"
 #include "parser/sm_parse_result.h"
-#include "sm_options.h"
+#include "sm_args.h"
 #include "sm_init.h"
 #include "sm_stack.h"
 #include "memory/sm_heap.h"

@@ -1,6 +1,14 @@
 { # file operations
   tests=[
-    [ fileWriteStr("This is a test.\nAnd line 2.","test_file_0.txt"),true,  "writing a file"],
-    [ fileReadStr("test_file_0.txt"),"This is a test.\nAnd line 2.","reading the file that was written"],
+    [ fileWrite("test_file_0.txt","str1"),true,  "Writing a file"],
+    [ fileRead("test_file_0.txt"),"str1","Reading the file that was written"],
+    [ fileExists("test_file_0.txt"),true,"Checking the the file exists"],
+    [ fileExists("random.txt"),false,"random.txt does not exist"],
+    [ size(fileStat("test_file_0.txt")),16,"Getting stat info for this file."],
+    [ fileAppend("test_file_0.txt", "STR2"),true,"Appending a string to the file"],
+    [ filePart("test_file_0.txt",0,4),"str1","Aquire first part of the file"],
+    [ filePart("test_file_0.txt",3,4),"1STR","Aquire other part of the file"],
+    [ fileRm("test_file_0.txt"),true,"Delete the file"],
+    [ fileRm("random.txt"),false,"Deleting random.txt should fail"]
   ];
 };

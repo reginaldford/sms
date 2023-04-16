@@ -159,14 +159,17 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> BLK_TOSTR
 %token <expr> BLK_SIZE
 
-%token <expr> PRINT
+%token <expr> PUT
+%token <expr> PUTLN
 %token <expr> INPUT
 
 %token <expr> FILE_PARSE
-%token <expr> FILE_READ_STR
-%token <expr> FILE_WRITE_STR
+%token <expr> FILE_READ
+%token <expr> FILE_PART
+%token <expr> FILE_WRITE
 %token <expr> FILE_EXISTS
 %token <expr> FILE_STAT
+%token <expr> FILE_APPEND
 %token <expr> FILE_TOBLK
 %token <expr> FILE_CP
 %token <expr> FILE_MV
@@ -351,11 +354,17 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | FAILS '(' EXPR ')' {$$ = sm_new_expr(SM_FAILS_EXPR,(sm_object*)$3);}
 | PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3);}
 | TO_STR '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
-| PRINT '(' EXPR ')' {$$ = sm_new_expr(SM_PRINT_EXPR,(sm_object*)$3);}
+| PUT '(' EXPR ')' {$$ = sm_new_expr(SM_PUT_EXPR,(sm_object*)$3);}
+| PUTLN '(' EXPR ')' {$$ = sm_new_expr(SM_PUTLN_EXPR,(sm_object*)$3);}
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
-| FILE_READ_STR '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_STR_EXPR,(sm_object*)$3);}
-| FILE_WRITE_STR '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_WRITE_STR_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3);}
+| FILE_PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_FILE_PART_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7);}
+| FILE_WRITE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_WRITE_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| FILE_APPEND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_APPEND_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| FILE_EXISTS '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_EXISTS_EXPR,(sm_object*)$3);}
+| FILE_RM '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_RM_EXPR,(sm_object*)$3);}
+| FILE_STAT '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_STAT_EXPR,(sm_object*)$3);}
 | RANDOM  '(' ')' { $$ = sm_new_expr_n(SM_RANDOM_EXPR,0,0);};
 | ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);};
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);};

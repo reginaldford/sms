@@ -4,9 +4,9 @@
 
 // Stores a static structure with processed command line information
 // or prints helping information for command line arguments and exits.
-sm_options *sm_process_args(int num_args, char **argv) {
-  static char             *valid_flags = "-e -h -i -m -s";
-  static struct sm_options options;
+sm_args *sm_process_args(int num_args, char **argv) {
+  static char          *valid_flags = "-e -h -i -m -s";
+  static struct sm_args options;
   options.script_flag   = false;
   options.script_fp[0]  = '\0';
   options.script_fp_len = 0;

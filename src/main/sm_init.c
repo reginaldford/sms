@@ -2,7 +2,7 @@
 
 #include "sms.h"
 
-void sm_init(sm_options *options) {
+void sm_init(sm_args *options) {
   // Register the signal handler
   sm_register_signals();
 

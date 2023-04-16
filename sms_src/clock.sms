@@ -1,5 +1,5 @@
 #!/usr/local/bin/sms
-#Simply prints the time every second
+# Simply puts the time every second
 
 # Represents a number from 0 to 99
 # with 2 characters.
@@ -14,14 +14,13 @@ two_digits=(x)=>(
 while(true,(
   d = date();
   # Convert military time to 12-hr
-	print(two_digits(
+	put(two_digits(
 		if(d[2]>12,
 			d[2]-12,
 			d[2])));
-
-  print(":");
-  print(two_digits(d[1]));
-  print(":");
-  print(two_digits(d[0]) str+ "\n");
-  sleep(1000)
+  put(":");
+  put(two_digits(d[1]));
+  put(":");
+  putln(two_digits(d[0]));
+  sleep(1000);
 ));

@@ -7,8 +7,8 @@ let in = "";
 let ans = [];
 
 while(true,(
-  print("> ");
+  put("> ");
   in = input();
   ans = eval(parse(in));
-  print(toStr(ans) str+ "\n")));
+  putln(toStr(ans))));
 
