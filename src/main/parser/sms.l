@@ -75,7 +75,8 @@ xor         {return XOR;}
 and         {return AND;}
 
 input       {return INPUT;}
-print      {return PRINT;}
+put         {return PUT;}
+putln       {return PUTLN;}
 
 let         {return LET;}
 self        {return SELF;}
@@ -97,7 +98,8 @@ cxImport     {return CX_IMPORT;}
 cxMap        {return CX_MAP;}
 
 fileParse    {return FILE_PARSE;}
-fileReadStr  {return FILE_READ_STR;}
+fileRead     {return FILE_READ;}
+filePart     {return FILE_PART;}
 fileToblk    {return FILE_TOBLK;}
 fileExists   {return FILE_EXISTS;}
 fileStat     {return FILE_STAT;}
@@ -105,7 +107,8 @@ fileCp       {return FILE_CP;}
 fileMv       {return FILE_MV;}
 fileRm       {return FILE_RM;}
 fileSize     {return FILE_SIZE;}
-fileWriteStr {return FILE_WRITE_STR;}
+fileWrite    {return FILE_WRITE;}
+fileAppend   {return FILE_APPEND;}
 
 csvToArr   {return CSV_TOARR;}
 arrToCsv   {return ARR_TOCSV;}

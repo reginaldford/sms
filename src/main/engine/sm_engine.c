@@ -9,7 +9,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-// the engine should return an error if this returns false
+// The engine should return an error if this returns false
 // and the next function will complain about type mismatch,
 // going up the callstack, until we hit a try or not
 // the checker is the type number of the function which is checking
@@ -26,8 +26,8 @@ bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_
   return true;
 }
 
-// future symbol system will optimize this out
-// so that any two symbols with the same name will by the same symbol
+// Future symbol system will optimize this function
+// so that any two symbols with the same name will be the same symbol
 bool is_true(sm_object *obj) {
   if (obj->my_type == SM_SYMBOL_TYPE) {
     sm_symbol *sym = (sm_symbol *)obj;
@@ -38,7 +38,7 @@ bool is_true(sm_object *obj) {
   return false;
 }
 
-// Recursive engine, uses the C stack for the SMS stack
+// Recursive engine
 sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf) {
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
@@ -103,8 +103,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       }
 
       while ((entry = readdir(dir)) != NULL && i < MAX_ENTRIES) {
-        char full_path[strlen(cwd) + strlen(entry->d_name) + 2];
-        sprintf(full_path, "%s/%s", cwd, entry->d_name);
+        unsigned int path_length = strlen(cwd) + strlen(entry->d_name) + 1;
+        char         full_path[path_length + 1];
+        snprintf(full_path, path_length + 1, "%s/%s", cwd, entry->d_name);
         stat(full_path, &file_stat);
         entry_names[i] = sm_new_string(strlen(entry->d_name), entry->d_name);
         // S_ISDIR returns nonzero iff it's a directory
@@ -159,7 +160,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       time(&rawtime);
       timeinfo          = localtime(&rawtime);
       sm_string *result = sm_new_string_manual(24);
-      sprintf(&(result->content), "%s", asctime(timeinfo));
+      snprintf(&(result->content), 25, "%s", asctime(timeinfo));
       (&result->content)[24] = '\0';
       return (sm_object *)result;
       break;
@@ -328,24 +329,24 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     case SM_RANDOM_EXPR: {
       return (sm_object *)sm_new_double(((double)rand()) / ((double)RAND_MAX));
     }
-    case SM_FILE_WRITE_STR_EXPR: {
-      // obtain the content to write
-      sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_string *content_str;
-      if (expect_type(evaluated_content, 0, SM_STRING_TYPE, SM_FILE_WRITE_STR_EXPR))
-        content_str = (sm_string *)evaluated_content;
-      else
-        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-      char *content_cstr = &(content_str->content);
-
+    case SM_FILE_WRITE_EXPR: {
       // obtain the file name
       sm_string *fname_str;
-      sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type(evaluated_fname, 1, SM_STRING_TYPE, SM_FILE_WRITE_STR_EXPR))
+      sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (expect_type(evaluated_fname, 0, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
         fname_str = (sm_string *)evaluated_fname;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       char *fname_cstr = &(fname_str->content);
+
+      // obtain the content to write
+      sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_string *content_str;
+      if (expect_type(evaluated_content, 1, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
+        content_str = (sm_string *)evaluated_content;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      char *content_cstr = &(content_str->content);
 
       FILE *fptr = fopen(fname_cstr, "w");
       // check that file can be opened for writing
@@ -357,10 +358,39 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       fclose(fptr);
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
-    case SM_FILE_READ_STR_EXPR: {
+    case SM_FILE_APPEND_EXPR: {
+      // obtain the file name
+      sm_string *fname_str;
+      sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (expect_type(evaluated_fname, 0, SM_STRING_TYPE, SM_FILE_APPEND_EXPR))
+        fname_str = (sm_string *)evaluated_fname;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      char *fname_cstr = &(fname_str->content);
+
+      // obtain the content to write
+      sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_string *content_str;
+      if (expect_type(evaluated_content, 1, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
+        content_str = (sm_string *)evaluated_content;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      char *content_cstr = &(content_str->content);
+
+      FILE *fptr = fopen(fname_cstr, "a");
+      // check that file can be opened for writing
+      if (fptr == NULL) {
+        printf("fileAppendStr failed to open for appending: %s\n", fname_cstr);
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      }
+      fputs(content_cstr, fptr);
+      fclose(fptr);
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+    }
+    case SM_FILE_READ_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_WRITE_STR_EXPR))
+      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_READ_EXPR))
         fname_str = (sm_string *)evaluated;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -377,6 +407,119 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       fread(&(output->content), 1, len, fptr);
       fclose(fptr);
       *(&output->content + len) = '\0';
+      return (sm_object *)output;
+    }
+    case SM_FILE_PART_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_string *fname_str;
+      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_PART_EXPR))
+        fname_str = (sm_string *)evaluated;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      char *fname_cstr = &(fname_str->content);
+
+      evaluated = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_double *start_pos;
+      if (expect_type(evaluated, 1, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
+        start_pos = (sm_double *)evaluated;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
+      evaluated = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      sm_double *length;
+      if (expect_type(evaluated, 2, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
+        length = (sm_double *)evaluated;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
+
+      if (access(fname_cstr, F_OK) != 0) {
+        printf("filePart failed because the file, %s ,does not exist.\n", fname_cstr);
+        return (sm_object *)sm_new_string(0, "");
+      }
+      FILE *fptr = fopen(fname_cstr, "r");
+      // Get length of file
+      fseek(fptr, 0, SEEK_END);
+      long file_length = ftell(fptr);
+
+      if (file_length < length->value) {
+        fclose(fptr);
+        printf("filePart failed because part length is out of range: %i\n", (int)length->value);
+      }
+      fseek(fptr, start_pos->value, SEEK_SET);
+      sm_string *output = sm_new_string_manual((int)length->value);
+      fread(&(output->content), 1, (int)length->value, fptr);
+      fclose(fptr);
+      *(&output->content + ((int)length->value)) = '\0';
+      return (sm_object *)output;
+    }
+    case SM_FILE_EXISTS_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_string *fname_str;
+      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_EXISTS_EXPR))
+        fname_str = (sm_string *)evaluated;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      char *fname_cstr = &(fname_str->content);
+
+      FILE *file = fopen(fname_cstr, "r");
+      if (file == NULL) {
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      }
+      fclose(file);
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+    }
+
+    case SM_FILE_RM_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_string *fname_str;
+      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_RM_EXPR))
+        fname_str = (sm_string *)evaluated;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      char *fname_cstr = &(fname_str->content);
+
+      int result = remove(fname_cstr);
+      if (result != 0) {
+        printf("fileRm failed: Could not rm file: %s\n", fname_cstr);
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      }
+
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+    }
+    case SM_FILE_STAT_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_string *fname_str;
+      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_STAT_EXPR))
+        fname_str = (sm_string *)evaluated;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      char       *fname_cstr = &(fname_str->content);
+      struct stat filestat;
+      sm_expr    *output;
+      if (stat(fname_cstr, &filestat) == 0) {
+        // build an array with stat information.
+        output = sm_new_expr_n(SM_ARRAY_EXPR, 16, 16);
+        sm_expr_set_arg(output, 0, (sm_object *)sm_new_double(filestat.st_dev));
+        sm_expr_set_arg(output, 1, (sm_object *)sm_new_double(filestat.st_ino));
+        sm_expr_set_arg(output, 2, (sm_object *)sm_new_double(filestat.st_mode));
+        sm_expr_set_arg(output, 3, (sm_object *)sm_new_double(filestat.st_nlink));
+        sm_expr_set_arg(output, 4, (sm_object *)sm_new_double(filestat.st_uid));
+        sm_expr_set_arg(output, 5, (sm_object *)sm_new_double(filestat.st_gid));
+        sm_expr_set_arg(output, 6, (sm_object *)sm_new_double(filestat.st_rdev));
+        sm_expr_set_arg(output, 7, (sm_object *)sm_new_double(filestat.st_size));
+        sm_expr_set_arg(output, 8, (sm_object *)sm_new_double(filestat.st_blksize));
+        sm_expr_set_arg(output, 9, (sm_object *)sm_new_double(filestat.st_blocks));
+        sm_expr_set_arg(output, 10, (sm_object *)sm_new_double(filestat.st_atim.tv_sec));
+        sm_expr_set_arg(output, 11, (sm_object *)sm_new_double(filestat.st_atim.tv_nsec));
+        sm_expr_set_arg(output, 12, (sm_object *)sm_new_double(filestat.st_mtim.tv_sec));
+        sm_expr_set_arg(output, 13, (sm_object *)sm_new_double(filestat.st_mtim.tv_nsec));
+        sm_expr_set_arg(output, 14, (sm_object *)sm_new_double(filestat.st_ctim.tv_sec));
+        sm_expr_set_arg(output, 15, (sm_object *)sm_new_double(filestat.st_ctim.tv_nsec));
+      } else {
+        printf("Failed to get file information.\n");
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      }
       return (sm_object *)output;
     }
     case SM_FILE_PARSE_EXPR: {
@@ -432,10 +575,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), where_to_eval, sf);
       return sm_engine_eval(evaluated, where_to_eval, sf);
     }
-    case SM_PRINT_EXPR: {
+    case SM_PUT_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PRINT_EXPR))
+      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUT_EXPR))
         str = (sm_string *)evaluated;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -443,6 +586,23 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       str = (sm_string *)evaluated;
       for (unsigned int i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
+      putchar('\0');
+      fflush(stdout);
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      break;
+    }
+    case SM_PUTLN_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_string *str;
+      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUTLN_EXPR))
+        str = (sm_string *)evaluated;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
+      str = (sm_string *)evaluated;
+      for (unsigned int i = 0; i < str->size; i++)
+        putchar((&str->content)[i]);
+      putchar('\n');
       putchar('\0');
       fflush(stdout);
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
@@ -736,6 +896,41 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       return (sm_object *)sm_new_double(tan(num0->value));
     }
+
+    case SM_ASIN_EXPR: {
+      // arcsin(x) = 2 * ln((1 + x^2 / (1 + sqrt(1 - x^2))^2) / sqrt(1 + x^4))
+      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *num0;
+      if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_SIN_EXPR)) {
+        num0 = (sm_double *)arg0;
+      } else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      printf("asin is not implemented yet.\n");
+      return (sm_object *)sm_new_double((num0->value));
+    }
+    case SM_ACOS_EXPR: {
+      // acos(x) = pi/2 - ln((1 + ix / sqrt(1 - x^2)) / (1 - ix / sqrt(1 - x^2))) / 2i
+      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *num0;
+      if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COS_EXPR)) {
+        num0 = (sm_double *)arg0;
+      } else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      printf("acos is not implemented yet.\n");
+      return (sm_object *)sm_new_double((num0->value));
+    }
+    case SM_ATAN_EXPR: {
+      // arctan(x) = ln((1 + ix) / (1 - ix)) / 2i
+      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *num0;
+      if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TAN_EXPR)) {
+        num0 = (sm_double *)arg0;
+      } else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      printf("atan is not implemented yet.\n");
+      return (sm_object *)sm_new_double((num0->value));
+    }
+
     case SM_SEC_EXPR: {
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *num0;
@@ -817,7 +1012,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       return (sm_object *)sm_new_double(1.0 / tanh(num0->value));
     }
-
     case SM_LN_EXPR: {
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *num0;
@@ -989,8 +1183,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     }
     default:
       return input;
-    } // end of switch inside expr case
-  }   // end of expr case
+    } // End of switch inside expr case
+  }   // End of expr case
   case SM_META_TYPE: {
     return ((sm_meta *)input)->address;
   }

@@ -1,7 +1,8 @@
-#Simply prints the time every second
+#!/usr/local/bin/sms
+#Simply puts the time every second
 
 # Print the time with constant width
 while(true,(
-  print(strPart(dateStr(),11,8) str+ "\n");
+  put(strPart(dateStr(),11,8) str+ "\n");
   sleep(1000)
 ));

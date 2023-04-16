@@ -31,7 +31,7 @@ void start_repl() {
 
 // If init is true , run file at options.init_fp then exit
 // If init is false, run file at options.script_fp
-void run_file(sm_options *options, bool init) {
+void run_file(sm_args *options, bool init) {
   sm_parse_result pr;
   sm_object      *last_parsed_obj = NULL;
   char           *file_path;
@@ -69,7 +69,7 @@ int main(int num_args, char **argv) {
   printf("Version 0.155\n");
   // Process command line args
   sm_global_options(sm_process_args(num_args, argv));
-  sm_options *options = sm_global_options(NULL);
+  sm_args *options = sm_global_options(NULL);
   sm_init(options);
   if (options->init_flag) {
     printf("Initializing with: %s... \n", options->init_fp);
@@ -99,4 +99,5 @@ int main(int num_args, char **argv) {
   }
   start_repl();
   sm_signal_exit(0);
+  return 0;
 }
