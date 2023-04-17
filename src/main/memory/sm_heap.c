@@ -140,10 +140,11 @@ int sm_mem_dump(sm_heap *heap, char *name) {
 // Take multiple snapshots of both heaps for inflation debugging
 void sm_dump_and_count() {
   char       fname[20];
-  static int index = 0;
-  sprintf(fname, "current_%i.mem", index);
+  static int index     = 1;
+  int        index_len = log(index) / log(10);
+  snprintf(fname, 12 + index_len, "current_%i.mem", index);
   sm_mem_dump(sm_global_current_heap(NULL), fname);
-  sprintf(fname, "other_%i.mem", index);
+  snprintf(fname, 10 + index_len, "other_%i.mem", index);
   sm_mem_dump(sm_global_current_heap(NULL), fname);
 }
 

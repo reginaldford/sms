@@ -2,10 +2,10 @@
 let time_to_wait=20;
 let n=0;
 while(n<time_to_wait,(
-  print(toStr(n));
+  put(toStr(n));
   sleep(500);
-  print(", ");
+  put(", ");
   sleep(500);
   n=n+1)
 );
-print("DONE!\n");
+putln("DONE!");

@@ -1,5 +1,5 @@
 #!/usr/local/bin/sms
-# Asks for a value x, and prints the factorial of x
+# Asks for a value x, and puts the factorial of x
 # Repeats continually until the user closes by signal
 
 factorial=(counter)=>(
@@ -12,8 +12,8 @@ factorial=(counter)=>(
 );
 
 while(true,(
-  print("Enter x: ");
+  put("Enter x: ");
   let x = parse(input());
-  print("The factorial of x is " str+
-    toStr(factorial(x)) str+ "\n")
+  putln("The factorial of x is " str+
+    toStr(factorial(x)))
 ));

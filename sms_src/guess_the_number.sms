@@ -5,13 +5,13 @@ let answer = round(100*random());
 let user_guess = -1;
 (
   while(not(user_guess==answer), (
-    print("Guess the number: ");
+    put("Guess the number: ");
     user_guess = parse(input());
     if(user_guess>answer,
-      print("You guessed too high.\n"));
+      put("You guessed too high.\n"));
     if(user_guess<answer,
-      print("You guessed too low.\n"))
+      put("You guessed too low.\n"))
   ));
-  print("Congratulations! You WON!\n");
-  print("The answer is: " str+ toStr(answer) str+ "\n")
+  put("Congratulations! You WON!\n");
+  putln("The answer is: " str+ toStr(answer))
 );

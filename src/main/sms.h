@@ -30,6 +30,7 @@ enum sm_object_type {
 };
 
 // Useful macros
+#define ABS(x) (x < 0 ? -1 * x : x)
 #define MIN(x, y) (x < y ? x : y)
 #define MAX(x, y) (x > y ? x : y)
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x))
@@ -37,11 +38,11 @@ enum sm_object_type {
   printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
   fflush(stdout);
 
+#include "sm_env.h"
 #include "sm_signal.h"
 #include "object/sm_string.h"
 #include "object/sm_object.h"
 #include "parser/sm_parse_result.h"
-#include "sm_args.h"
 #include "sm_init.h"
 #include "sm_stack.h"
 #include "memory/sm_heap.h"
