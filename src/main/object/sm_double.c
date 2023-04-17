@@ -22,9 +22,9 @@ sm_string *sm_double_to_string(sm_double *self) {
 unsigned int sm_double_sprint(sm_double *self, char *buffer, bool fake) {
   char internal_buf[17];
   if (!fake)
-    sprintf(buffer, "%.*g", 16, self->value);
+    snprintf(buffer, 16, "%.16g", self->value);
   else {
-    sprintf(internal_buf, "%.*g", 16, self->value);
+    snprintf(internal_buf, 16, "%.16g", self->value);
     buffer = internal_buf;
   }
   unsigned short int count = 0;

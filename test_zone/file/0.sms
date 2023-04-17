@@ -9,6 +9,7 @@
     [ filePart("test_file_0.txt",0,4),"str1","Aquire first part of the file"],
     [ filePart("test_file_0.txt",3,4),"1STR","Aquire other part of the file"],
     [ fileRm("test_file_0.txt"),true,"Delete the file"],
+    [ fileExists("test_file_0.txt"),false,"Check that the file no longer exists."],
     [ fileRm("random.txt"),false,"Deleting random.txt should fail"]
   ];
 };

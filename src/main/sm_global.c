@@ -188,11 +188,11 @@ sm_object *sm_global_parser_output(sm_object *replacement) {
 }
 
 // Options from the command line arguments
-sm_args *sm_global_options(sm_args *replacement) {
-  static sm_args *options;
+sm_env *sm_global_options(sm_env *replacement) {
+  static sm_env *options;
   if (replacement != NULL) {
-    sm_args *temp = options;
-    options       = replacement;
+    sm_env *temp = options;
+    options      = replacement;
     return temp;
   } else {
     return options;

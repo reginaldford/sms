@@ -152,18 +152,25 @@ int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter,
 // Run an sms file with tests
 // If test == -1, do all tests
 // Else, run the specified test
-int perform_test_subchapter(int chapter, int subchapter, int test, char *test_zone_path) {
+int perform_test_subchapter(unsigned int chapter, unsigned int subchapter, int test,
+                            char *test_zone_path) {
   int num_fails = 0;
-  if (chapter < -1 || chapter >= num_chapters()) {
+  if (chapter >= num_chapters()) {
     printf("Test chapter: %i out of range.\n", chapter);
     printf("Valid test chapters are from 0 to %i.\n", num_chapters() - 1);
-  } else if (subchapter < -1 || subchapter >= num_subchapters(chapter)) {
+  } else if (subchapter >= num_subchapters(chapter)) {
     printf("Subchapter: %i out of range (max acceptable value is: %i).\n", subchapter,
            num_subchapters(chapter) - 1);
   } else {
     sm_init(NULL);
     char buf[64];
-    sprintf(buf, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
+    int  len = 0;
+    if (subchapter != 0)
+      len = 7 + strlen(test_zone_path) + strlen(chapter_name(chapter)) + log(subchapter) / log(1);
+    else
+      len = 7 + strlen(test_zone_path) + strlen(chapter_name(chapter)) + 1;
+
+    snprintf(buf, len, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
     // If test_zone_path is empty string, then we need to remove the leading "/" from buf
     if (test_zone_path[0] == '\0') {
       for (int i = 0; buf[i] != '\0' && i < 64; i++) {
@@ -250,11 +257,11 @@ int main(int num_args, char **argv) {
   // passing -1 means to test all.
   if (chapter == -1) {
     printf("Testing all %i Chapters\n", num_chapters());
-    for (int ch = 0; ch < num_chapters(); ch++) {
+    for (unsigned int ch = 0; ch < num_chapters(); ch++) {
       if (num_subchapters(ch) > 0) {
         printf("Testing Chapter %i, which has %i subchapters ( from %i.0 to %i.%i )\n", ch,
                num_subchapters(ch), ch, ch, num_subchapters(ch) - 1);
-        for (int sub_ch = 0; sub_ch < num_subchapters(ch); sub_ch++) {
+        for (unsigned int sub_ch = 0; sub_ch < num_subchapters(ch); sub_ch++) {
           printf("Testing Subchapter %i.%i\n", ch, sub_ch);
           int test_result =
             perform_test_subchapter(ch, sub_ch, -1, global_test_outline(NULL)->test_zone_path);

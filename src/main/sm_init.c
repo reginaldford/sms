@@ -2,7 +2,7 @@
 
 #include "sms.h"
 
-void sm_init(sm_args *options) {
+void sm_init(sm_env *env) {
   // Register the signal handler
   sm_register_signals();
 
@@ -11,9 +11,8 @@ void sm_init(sm_args *options) {
 
   // Initialize the current memory heap
   double mem_mbytes = 50;
-  if (options != NULL && options->mem_flag) {
-    mem_mbytes = options->mem_mbytes;
-    printf("Custom Heap Size: %f MB\n", mem_mbytes);
+  if (env != NULL && env->mem_flag) {
+    mem_mbytes = env->mem_mbytes;
   }
   // Start with half of the heap size allocated.
   // During first gc, a second heap of the same size will be allocated.

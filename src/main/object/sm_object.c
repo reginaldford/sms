@@ -46,8 +46,11 @@ unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_ERROR_TYPE:
     return sm_error_sprint((sm_error *)obj1, buffer, fake);
   default: {
-    if (!fake)
-      sprintf(buffer, "?(%i)", obj1->my_type);
+    if (!fake) {
+      if (obj1->my_type != 0)
+        snprintf(buffer, 3 + log(ABS(obj1->my_type)) / log(10), "?(%i)", obj1->my_type);
+    } else
+      snprintf(buffer, 4, "?(%i)", obj1->my_type);
     return 3 + sm_double_len((double)obj1->my_type);
   }
   }
