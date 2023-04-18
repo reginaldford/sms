@@ -1,5 +1,5 @@
 %{
-  // The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +42,7 @@ void _lex_cstr(char * cstr,int len);
 %type <meta> META_EXPR
 %type <expr> ASSIGNMENT
 %type <expr> INDEX_ASSIGNMENT
+%type <expr> DOT_ASSIGNMENT
 %type <context> CONTEXT
 %type <context> CONTEXT_LIST
 %type <expr> EXPR
@@ -331,6 +332,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | META_EXPR{}
 | ASSIGNMENT{}
 | INDEX_ASSIGNMENT{}
+| DOT_ASSIGNMENT{}
 | FUN_CALL{}
 | FUN{}
 | IF_STATEMENT{}
@@ -428,7 +430,12 @@ PARAM_LIST_OPEN : '(' SYM ',' {
 
 ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(SM_ASSIGN_EXPR, (sm_object *)($1), (sm_object *)($3)); }
 
-INDEX_ASSIGNMENT : SYM '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
+INDEX_ASSIGNMENT : EXPR '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_INDEX_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
+| SYM '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_INDEX_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
+
+DOT_ASSIGNMENT : EXPR '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
+| SYM '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
+
 
 SEQUENCE : SEQUENCE_LIST ')' {}
 | SEQUENCE_LIST ';' ')' {}
@@ -575,7 +582,7 @@ bool lex_file(char *fpath){
     return false;
   }
 
-  _lex_file(fpath);
+_lex_file(fpath);
   return true;
 }
 

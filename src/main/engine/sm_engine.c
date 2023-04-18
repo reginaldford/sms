@@ -751,6 +751,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         sm_fun *found_fun;
         if (expect_type(found, 0, SM_FUN_TYPE, SM_FUN_CALL_EXPR)) {
           found_fun = (sm_fun *)found;
+          // TODO: Speed up idea ! problem is , this changes the toStr of this function call
+          // so to use this speedup, we need to store 3 things in a function call:
+          // 1: expression of the fn 2: the evaluated expression or false 3: the args
+          // that way, we can keep the found function without changing the representation
+          // sm_expr_set_arg(sme,0,found);
           return sm_engine_eval(found_fun->content, found_fun->parent, new_args);
         } else
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -798,8 +803,34 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         sm_expr *arr = (sm_expr *)obj0;
         if (expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_ASSIGN_INDEX_EXPR)) {
           sm_double *index = (sm_double *)obj1;
-          sm_expr_set_arg(arr, index->value, obj2);
-          return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+          if (index->value >= arr->size || index->value < -0) {
+            printf("Error: Index out of range: %i\n", (int)index->value);
+            return (sm_object *)sm_new_error(sm_new_string(19, "Index out of range"),
+                                             sm_new_string(1, "?"), 0);
+          }
+          sm_expr *new_arr = sm_expr_set_arg(arr, index->value, obj2);
+          return (sm_object *)new_arr;
+        } else
+          return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+    case SM_ASSIGN_DOT_EXPR: {
+      // expecting a[4]=value=> =index_expr(a,4,value);
+      sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type(obj0, 0, SM_EXPR_TYPE, SM_ASSIGN_INDEX_EXPR)) {
+        sm_expr *arr = (sm_expr *)obj0;
+        if (expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_ASSIGN_INDEX_EXPR)) {
+          sm_double *index = (sm_double *)obj1;
+          if (index->value >= arr->size || index->value < -0) {
+            printf("Error: Index out of range: %i\n", (int)index->value);
+            return (sm_object *)sm_new_error(sm_new_string(19, "Index out of range"),
+                                             sm_new_string(1, "?"), 0);
+          }
+          sm_expr *new_arr = sm_expr_set_arg(arr, index->value, obj2);
+          return (sm_object *)new_arr;
         } else
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }
