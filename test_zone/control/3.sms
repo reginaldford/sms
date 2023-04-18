@@ -1,0 +1,18 @@
+{ #function calls
+	a=-1;
+	b=2;
+	c=3;
+  f=(x)=>a*x^2+b*x+c;
+  g=(x,y)=>f(x)/y;
+  farray=[f,g];
+  tests=[
+    [f(4), -5, "fun call"],
+    [f("4"), false, "wrong type returns false"],
+    [g(4,1/2), -10, "fun calls another fun"],
+    [self.f(4), -5, "object function call"],
+    [farray[0](4), -5, "array function call"],
+    [farray[1](4,1/2), -10, "array function call 2"],
+    [self.farray[0](4,0.5), -5, "object array function call"],
+    [self.farray[1](4,0.5), -10, "object array function call 2"],
+  ];
+};

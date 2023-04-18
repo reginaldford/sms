@@ -731,12 +731,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return sm_simplify(evaluated0);
     }
     case SM_FUN_CALL_EXPR: {
-      sm_fun         *fun      = (sm_fun *)sm_expr_get_arg(sme, 0);
       struct sm_expr *args     = (struct sm_expr *)sm_expr_get_arg(sme, 1);
       sm_expr        *new_args = (sm_expr *)sm_engine_eval((sm_object *)args, current_cx, sf);
-      // When the function did not exist at fun_call creation time
-      if (fun->my_type == SM_SYMBOL_TYPE) {
-        sm_symbol *fun_sym = (sm_symbol *)fun;
+      sm_object      *obj0     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, new_args);
+
+      if (obj0->my_type == SM_FUN_TYPE) {
+        sm_fun *fun = (sm_fun *)obj0;
+        return sm_engine_eval(fun->content, fun->parent, new_args);
+      } else if (obj0->my_type == SM_SYMBOL_TYPE) {
+        sm_symbol *fun_sym = (sm_symbol *)obj0;
         sm_object *found   = sm_context_get_by_name_far(current_cx, fun_sym->name);
         if (found == NULL) {
           printf("Error: Function not found: %s\n", &(fun_sym->name->content));
@@ -746,17 +749,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
           return (sm_object *)sm_new_error(err_msg, sm_new_string(1, "."), 0);
         }
         sm_fun *found_fun;
-        if (expect_type(found, 0, SM_FUN_TYPE, SM_FUN_CALL_EXPR))
+        if (expect_type(found, 0, SM_FUN_TYPE, SM_FUN_CALL_EXPR)) {
           found_fun = (sm_fun *)found;
-        else
+          return sm_engine_eval(found_fun->content, found_fun->parent, new_args);
+        } else
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-
-        return sm_engine_eval(found_fun->content, found_fun->parent, new_args);
-      } else if (fun->my_type == SM_FUN_TYPE) {
-        return sm_engine_eval(fun->content, fun->parent, new_args);
-      } else {
-        return sm_engine_eval((sm_object *)fun, current_cx, new_args);
-      }
+      } else
+        return obj0;
       break;
     }
     case SM_THEN_EXPR: {
@@ -1031,9 +1030,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       sm_double *num1;
       if (expect_type(arg1, 1, SM_DOUBLE_TYPE, SM_LOG_EXPR)) {
-        num0 = (sm_double *)arg1;
+        num1 = (sm_double *)arg1;
       } else
-        return (sm_object *)sm_new_double(pow(num0->value, num1->value));
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      return (sm_object *)sm_new_double(log(num1->value) / log(num0->value));
     }
     case SM_EXP_EXPR: {
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);

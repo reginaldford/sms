@@ -98,6 +98,7 @@ cxImport     {return CX_IMPORT;}
 cxMap        {return CX_MAP;}
 
 fileParse    {return FILE_PARSE;}
+fileRun      {return FILE_RUN;}
 fileRead     {return FILE_READ;}
 filePart     {return FILE_PART;}
 fileToblk    {return FILE_TOBLK;}
