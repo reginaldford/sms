@@ -106,29 +106,29 @@ char *sm_global_fn_name(unsigned short int which) {
   const unsigned short int num_functions = sm_global_num_fns();
   // Should be syncronized with enum SM_EXPR_TYPE
   static char *response[] = {
-    "exit",       "help",      "clear",    "self",     "ls",        "cd",
-    "pwd",        "let",       "=",        "=",        "=",         "rm",
-    "dot",        "+",         "-",        "*",        "/",         "^",
-    "sin",        "cos",       "tan",      "asin",     "acos",      "atan",
-    "sinh",       "cosh",      "tanh",     "asinh",    "acosh",     "atanh",
-    "csc",        "sec",       "cot",      "acsc",     "asec",      "acot",
-    "csch",       "sech",      "coth",     "acsch",    "asech",     "acoth",
-    "ln",         "log",       "exp",      "sqrt",     "abs",       "diff",
-    "simp",       "int",       "if",       "if",       "map",       "parent",
-    "while",      "doWhile",   "eval",     "evalFast", "error",     "parse",
-    "meta",       "==",        "<",        ">",        "<=",        ">=",
-    "",           "",          "",         "toStr",    "put",       "putln",
-    "input",      "fileParse", "fileRead", "fileRun",  "filePart",  "fileExists",
-    "fileStat",   "fileToBlk", "fileCp",   "fileMv",   "fileRm",    "fileWrite",
-    "fileAppend", "csvToArr",  "arrToCSV", "newArr",   "arr+",      "arr*",
-    "part",       "size",      "random",   "round",    "not",       "or",
-    "xor",        "strSize",   "strGet",   "strSet",   "strMap",    "strFind",
-    "strFindR",   "str+",      "strSplit", "strPart",  "strEscape", "strUnescape",
-    "strToNums",  "strCmp",    "str*",     "strToBlk", "newStr",    "toStr",
-    "toStrFmt",   "newBlk",    "blkMap",   "blkUnite", "blkPart",   "blkToNums",
-    "numsToBlk",  "blkToFile", "blkPrint", "blkSet",   "blkGet",    "blkToStr",
-    "blkSize",    "",          "",         "siblings", "prim",      "dateStr",
-    "date",       "time",      "sleep",    "?"};
+    "exit",        "help",       "clear",     "self",     "ls",       "cd",
+    "pwd",         "let",        "=",         "=",        "=",        "=",
+    "rm",          "dot",        "+",         "-",        "*",        "/",
+    "^",           "sin",        "cos",       "tan",      "asin",     "acos",
+    "atan",        "sinh",       "cosh",      "tanh",     "asinh",    "acosh",
+    "atanh",       "csc",        "sec",       "cot",      "acsc",     "asec",
+    "acot",        "csch",       "sech",      "coth",     "acsch",    "asech",
+    "acoth",       "ln",         "log",       "exp",      "sqrt",     "abs",
+    "diff",        "simp",       "int",       "if",       "if",       "map",
+    "parent",      "while",      "doWhile",   "eval",     "evalFast", "error",
+    "parse",       "meta",       "==",        "<",        ">",        "<=",
+    ">=",          "",           "",          "",         "toStr",    "put",
+    "putln",       "input",      "fileParse", "fileRead", "fileRun",  "filePart",
+    "fileExists",  "fileStat",   "fileToBlk", "fileCp",   "fileMv",   "fileRm",
+    "fileWrite",   "fileAppend", "csvToArr",  "arrToCSV", "newArr",   "arr+",
+    "arr*",        "part",       "size",      "random",   "round",    "not",
+    "or",          "xor",        "strSize",   "strGet",   "strSet",   "strMap",
+    "strFind",     "strFindR",   "str+",      "strSplit", "strPart",  "strEscape",
+    "strUnescape", "strToNums",  "strCmp",    "str*",     "strToBlk", "newStr",
+    "toStr",       "toStrFmt",   "newBlk",    "blkMap",   "blkUnite", "blkPart",
+    "blkToNums",   "numsToBlk",  "blkToFile", "blkPrint", "blkSet",   "blkGet",
+    "blkToStr",    "blkSize",    "",          "",         "siblings", "prim",
+    "dateStr",     "date",       "time",      "sleep",    "?"};
   if (which >= num_functions) {
     return response[num_functions];
   }
@@ -138,11 +138,11 @@ char *sm_global_fn_name(unsigned short int which) {
 // corresponding string length of the string that would come from the sm_global_fn_name(which)
 unsigned int sm_global_fn_name_len(unsigned short int which) {
   static long unsigned int response_len[] = {
-    4,  4, 5, 4, 2, 2, 3, 3, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 3, 3, 3, 4,  4, 4,  4, 4, 4, 5,
-    5,  5, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 2, 3, 3, 4, 3, 4, 4, 3,  2, 2,  3, 6, 5, 7,
-    4,  8, 5, 5, 4, 2, 1, 1, 2, 2, 0, 0, 0, 5, 3, 5, 5, 9, 8, 7, 8, 10, 8, 9,  6, 6, 6, 9,
-    10, 8, 8, 6, 4, 4, 4, 4, 6, 5, 3, 2, 3, 7, 6, 6, 6, 7, 8, 4, 8, 7,  9, 11, 9, 6, 4, 8,
-    6,  5, 8, 6, 6, 8, 7, 9, 9, 9, 8, 6, 6, 8, 7, 0, 0, 8, 4, 7, 4, 4,  5, 1};
+    4, 4,  5, 4, 2, 2, 3, 3, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 3, 3, 3, 4,  4, 4,  4, 4, 4,
+    5, 5,  5, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 2, 3, 3, 4, 3, 4, 4, 3,  2, 2,  3, 6, 5,
+    7, 4,  8, 5, 5, 4, 2, 1, 1, 2, 2, 0, 0, 0, 5, 3, 5, 5, 9, 8, 7, 8, 10, 8, 9,  6, 6, 6,
+    9, 10, 8, 8, 6, 4, 4, 4, 4, 6, 5, 3, 2, 3, 7, 6, 6, 6, 7, 8, 4, 8, 7,  9, 11, 9, 6, 4,
+    8, 6,  5, 8, 6, 6, 8, 7, 9, 9, 9, 8, 6, 6, 8, 7, 0, 0, 8, 4, 7, 4, 4,  5, 1};
   if (which >= sm_global_num_fns()) {
     return 1; // "?"
   }
@@ -150,7 +150,7 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
 }
 
 unsigned int sm_global_num_fns() {
-  static const unsigned short int num_fns = 132;
+  static const unsigned short int num_fns = 137;
   return num_fns;
 }
 
