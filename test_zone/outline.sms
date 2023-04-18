@@ -7,7 +7,7 @@
     },
     {
       name= "control";
-      num_subchapters = 3;
+      num_subchapters = 4;
     },
     {
       name= "math";

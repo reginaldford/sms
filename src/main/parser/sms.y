@@ -165,6 +165,7 @@ void _lex_cstr(char * cstr,int len);
 
 %token <expr> FILE_PARSE
 %token <expr> FILE_READ
+%token <expr> FILE_RUN
 %token <expr> FILE_PART
 %token <expr> FILE_WRITE
 %token <expr> FILE_EXISTS
@@ -476,35 +477,21 @@ IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
 }
 
 FUN_CALL : FUN_CALL_OPEN ')' {}
-| SYM '(' ')'{
+| EXPR '(' ')'{
   // store the function in the fun_call here
   // index: 0   1
-  // value: fun args
-  // if the function doesnt exist yet:
-  // value: symbol args
-  sm_string * var_name = $1->name;
-  sm_object * found = sm_context_get_by_name_far(*(sm_global_lex_stack(NULL)->top),var_name);
-  if(found==NULL){
-    found=(sm_object*)$1;
-  }
+  // value: expr args
   sm_expr * args= sm_new_expr_n(SM_PARAM_LIST_EXPR,0,0);
-  $$ = sm_new_expr_2(SM_FUN_CALL_EXPR, (sm_object *)found, (sm_object *)args);
+  $$ = sm_new_expr_2(SM_FUN_CALL_EXPR, (sm_object *)$1, (sm_object *)args);
 }
 
-FUN_CALL_OPEN : SYM '(' EXPR {
+FUN_CALL_OPEN : EXPR '(' EXPR {
   // store the function in the fun_call here
   // index: 0   1
-  // value: fun args
-  // if the function doesnt exist yet:
-  // value: symbol args
-  sm_string * var_name = $1->name;
-  sm_object * found = sm_context_get_by_name_far(*(sm_global_lex_stack(NULL)->top),var_name);
-  if(found==NULL){
-    found=(sm_object*)$1;
-  }
+  // value: expr args
   sm_expr * args= sm_new_expr_n(SM_PARAM_LIST_EXPR,1,2);
   args=sm_expr_set_arg(args,0,(sm_object*)$3);
-  $$ = sm_new_expr_2(SM_FUN_CALL_EXPR, (sm_object *)found, (sm_object *)args);
+  $$ = sm_new_expr_2(SM_FUN_CALL_EXPR, (sm_object *)$1, (sm_object *)args);
 }
 | FUN_CALL_OPEN ',' EXPR {
   sm_expr * args = (sm_expr*)sm_expr_get_arg($1,1);
