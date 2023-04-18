@@ -1,3 +1,4 @@
+#!/usr/local/bin/sms -q
 # Allows the user to guess a hidden random value until they guess correctly
 # Currently needs to be written with a then-block, but this is a temperary workaround
 

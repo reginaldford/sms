@@ -1,3 +1,7 @@
+#!/usr/local/bin/sms -q
 fib = (n) => if( n < 2 , 1 ,fib(n - 1) + fib(n - 2));
-put("Give me a number to fib: ");
-putln(toStr(fib(parse(input()))));
+
+while(true,(
+	put("Give me a number to fib: ");
+	putln(toStr(fib(parse(input()))));
+));

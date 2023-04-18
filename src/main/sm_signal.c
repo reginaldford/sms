@@ -35,7 +35,8 @@ void sm_signal_handler(int signal_number) {
     exit_code   = 1;
     break;
   }
-  printf("\n<Received signal: %s. Exiting with code: %i>\n", signal_name, exit_code);
+  if (sm_global_environment(NULL)->quiet_mode == false)
+    printf("\n<Received signal: %s. Exiting with code: %i>\n", signal_name, exit_code);
   sm_mem_cleanup();
   fflush(stdout);
   exit(exit_code);
@@ -63,7 +64,8 @@ void sm_register_signals() {
 // Exit SMS with this exit code
 void sm_signal_exit(int exit_code) {
   sm_mem_cleanup();
-  printf("<Exiting with code: %i>\n", exit_code);
+  if (sm_global_environment(NULL)->quiet_mode == false)
+    printf("<Exiting with code: %i>\n", exit_code);
   fflush(stdout);
   exit(exit_code);
 }
