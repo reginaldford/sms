@@ -19,7 +19,7 @@ void check_init(sm_env *env) {
       print_intro();
     sm_init(env);
     env->initialized = true;
-    sm_global_options(env);
+    sm_global_environment(env);
   }
 }
 
@@ -94,20 +94,20 @@ int main(int num_args, char *argv[]) {
 
   opterr = 0; // Disable error messages for unknown options
   char opt;
-  while ((opt = getopt(num_args, argv, "qhm:e:s:l:")) != -1) {
+  while ((opt = getopt(num_args, argv, "qhm:e:s:i:")) != -1) {
     switch (opt) {
     case 'h':
       printf("SMS Help\n");
       printf("Running sms with no flags will start the command line.\n");
-      printf("Flag:                                      Example:\n");
-      printf("-h Help.                                   sms -h\n");
-      printf("-q Quiet mode, does not print intro        sms -q -s script.sms\n");
-      printf("-m Set the heap size in MB. Default: 50.   sms -m 150\n");
-      printf("-e Execute a calculation.                  sms -e 2+2\n");
-      printf("-s Run Script file.                        sms -s script.sms\n");
-      printf("-l Load a file, then run the REPL          sms -l script.sms\n");
-      printf("\nIf the -m flag is used, it must be first.  sms -m 4 -s x1.sms -s x2.sms -i\n");
-      printf("Flags (other can -m) can be repeated and are executed in order.\n");
+      printf(" Flag:                                      Example:\n");
+      printf("-h Help.                                     sms -h\n");
+      printf("-q Quiet mode, does not print intro/outro.   sms -q -s script.sms\n");
+      printf("-m Set the heap size in MB. Default: 50.     sms -m 150\n");
+      printf("-e Print the evaluation of an expression.    sms -e \"2*sin(PI/4)\"\n");
+      printf("-s Run Script file.                          sms -s script.sms\n");
+      printf("-i Run a file, then start the REPL.          sms -i script.sms\n");
+      printf("\nIf the -m flag is used, it must be first.  sms -m 4 -s x1.sms -i x2.sms\n");
+      printf("Some flags can be repeated and all flags are executed in order.\n");
       clean_exit(&env, 0);
       break;
     case 'q':
@@ -168,7 +168,7 @@ int main(int num_args, char *argv[]) {
         printf("Running: %s... \n", env.script_fp);
       run_file(optarg, &env);
       break;
-    case 'l':
+    case 'i':
       sm_strncpy(&(env.script_fp[0]), optarg, strlen(optarg));
       check_init(&env);
       if (env.quiet_mode == false)

@@ -1,11 +1,18 @@
-# This program counts for time_to_wait seconds
-let time_to_wait=20;
-let n=0;
-while(n<time_to_wait,(
-  put(toStr(n));
-  sleep(500);
-  put(", ");
-  sleep(500);
-  n=n+1)
+#!/usr/local/bin/sms -q
+# This program asks the user for how many seconds to wait
+# and then, the program counts that many seconds
+
+put("How many seconds to set on the timer? ");
+	let time_to_wait_str = input();
+(
+	let time_to_wait=eval(parse(time_to_wait_str));
+	let n=0;
+	putln("Timer set to " str+ toStr(time_to_wait) str+ " seconds.");
+	while(n<time_to_wait,(
+	  put(toStr(n));
+	  sleep(500);
+	  put(", ");
+	  sleep(500);
+	  n=n+1;));
+	putln("DONE!");
 );
-putln("DONE!");

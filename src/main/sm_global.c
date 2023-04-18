@@ -188,7 +188,7 @@ sm_object *sm_global_parser_output(sm_object *replacement) {
 }
 
 // Options from the command line arguments
-sm_env *sm_global_options(sm_env *replacement) {
+sm_env *sm_global_environment(sm_env *replacement) {
   static sm_env *options;
   if (replacement != NULL) {
     sm_env *temp = options;
