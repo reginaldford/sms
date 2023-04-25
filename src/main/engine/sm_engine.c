@@ -339,9 +339,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sm_new_string(0, "");
       double val       = number->value;
       int    floor_val = val > 0 ? val + 0.5 : val - 0.5;
-      srand(time(NULL));
-
-      return (sm_object *)sm_new_double(floor_val);
+      srand((int)floor_val);
+      return (sm_object*)sm_new_symbol(sm_new_string(5,"true"));;
     }
     case SM_FILE_WRITE_EXPR: {
       // obtain the file name

@@ -6,7 +6,7 @@ let new_time=[];
 let time_elapsed=0;
 let answer=0;
 
-benchmark = (expr) =>   (
+let benchmark = (expr) =>   (
   put("Benchmarking: " str+ toStr(expr) str+ "\n");
   first_time = time();
   answer=eval(expr);
@@ -17,5 +17,5 @@ benchmark = (expr) =>   (
   putln(toStr(time_elapsed) str+ " milliseconds")
 );
 
-fib = (n) => if( n <= 1 , n ,fib(n - 1) + fib(n - 2));
+let fib = (n) => if( n <= 1 , n ,fib(n - 1) + fib(n - 2));
 benchmark(:fib(27));

@@ -25,7 +25,7 @@ void _lex_cstr(char * cstr,int len);
   sm_symbol        *sym;
   sm_expr          *expr;
   sm_string        *str;
-  sm_cx       *context;
+  sm_cx            *context;
   sm_meta          *meta;
   sm_fun           *fun;
   sm_expr          *param_list;
