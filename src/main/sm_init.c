@@ -6,14 +6,11 @@ void sm_init(sm_env *env) {
   // Register the signal handler
   sm_register_signals();
 
-  // Seed the random number generator with the current time
-  srand(time(NULL));
-
   // Initialize the current memory heap
   double mem_mbytes = 50;
-  if (env != NULL && env->mem_flag) {
+  if (env != NULL)
     mem_mbytes = env->mem_mbytes;
-  }
+
   // Start with half of the heap size allocated.
   // During first gc, a second heap of the same size will be allocated.
   sm_global_current_heap(sm_new_heap(mem_mbytes * 1024 * 1024 / 2));
@@ -25,17 +22,11 @@ void sm_init(sm_env *env) {
   sm_global_lex_stack(sm_new_stack(100));
 
   // Build the global context's parent
-  sm_context       *parent_cx = sm_new_context(3, 3, NULL);
-  sm_context_entry *parents   = sm_context_entries(parent_cx);
-  // The keys MUST be in strcmp order
-  parents[0] = (sm_context_entry){.name  = sm_new_string(2, "PI"),
-                                  .value = (sm_object *)sm_new_double(3.14159265358979323846)};
-  parents[1] = (sm_context_entry){.name  = sm_new_string(5, "false"),
-                                  .value = (sm_object *)sm_new_symbol(sm_new_string(5, "false"))};
-
-  parents[2] = (sm_context_entry){.name  = sm_new_string(4, "true"),
-                                  .value = (sm_object *)sm_new_symbol(sm_new_string(4, "true"))};
+  sm_cx *parent_cx = sm_new_cx(NULL);
+  sm_cx_let(parent_cx, "PI", 2, (sm_object *)sm_new_double(3.14159265358979323846));
+  sm_cx_let(parent_cx, "true", 4, (sm_object *)sm_new_symbol(sm_new_string(4, "true")));
+  sm_cx_let(parent_cx, "false", 5, (sm_object *)sm_new_symbol(sm_new_string(5, "false")));
 
   // Initialize the global context
-  sm_stack_push(sm_global_lex_stack(NULL), sm_new_context(0, 50, parent_cx));
+  sm_stack_push(sm_global_lex_stack(NULL), sm_new_cx(parent_cx));
 }

@@ -25,7 +25,7 @@ void _lex_cstr(char * cstr,int len);
   sm_symbol        *sym;
   sm_expr          *expr;
   sm_string        *str;
-  sm_context       *context;
+  sm_cx       *context;
   sm_meta          *meta;
   sm_fun           *fun;
   sm_expr          *param_list;
@@ -116,7 +116,9 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> MAP
 %token <expr> PARENT
 %token <expr> EVAL
+%token <expr> EVAL_IN_CX
 %token <expr> EVAL_FAST
+%token <expr> EVAL_FAST_IN_CX
 %token <expr> FAILS
 %token <expr> PARSE
 %token <expr> RUNTIME_META
@@ -268,11 +270,11 @@ void _lex_cstr(char * cstr,int len);
 
 COMMAND : EXPR ';' {
   sm_global_parser_output((sm_object *)($1));
-  //yylineno++;
   YYACCEPT;
 }
 | RM SYM ';' {
-  bool success = (sm_expr *)sm_context_rm(*(sm_global_lex_stack(NULL)->top), (sm_symbol *)$2);
+  bool success = (sm_expr *)sm_cx_rm(*(sm_global_lex_stack(NULL)->top), (&((sm_symbol
+  *)$2)->name->content),(((sm_symbol*)$2)->name->size));
   if (success == true) {
     sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "true")));
     YYACCEPT;
@@ -351,9 +353,9 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | DO_WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_DO_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}
-| EVAL '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| EVAL_IN_CX '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | EVAL_FAST '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_FAST_EXPR,(sm_object*)$3);}
-| EVAL_FAST '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_FAST_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| EVAL_FAST_IN_CX '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_FAST_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | FAILS '(' EXPR ')' {$$ = sm_new_expr(SM_FAILS_EXPR,(sm_object*)$3);}
 | PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3);}
 | TO_STR '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3);}
@@ -362,6 +364,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);};
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3);}
+| FILE_RUN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_READ_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | FILE_PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_FILE_PART_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7);}
 | FILE_WRITE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_WRITE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | FILE_APPEND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_APPEND_EXPR,(sm_object*)$3,(sm_object*)$5);}
@@ -369,6 +372,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | FILE_RM '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_RM_EXPR,(sm_object*)$3);}
 | FILE_STAT '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_STAT_EXPR,(sm_object*)$3);}
 | RANDOM  '(' ')' { $$ = sm_new_expr_n(SM_RANDOM_EXPR,0,0);};
+| SEED  '(' EXPR ')' { $$ = sm_new_expr(SM_SEED_EXPR,(sm_object*)$3);};
 | ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);};
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);};
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3);};
@@ -395,9 +399,8 @@ FUN : FUN_INTRO EXPR {
 }
 
 FUN_INTRO : PARAM_LIST ARROW {
-  sm_context * parent_cx = *(sm_global_lex_stack(NULL)->top);
+  sm_cx * parent_cx = *(sm_global_lex_stack(NULL)->top);
   sm_fun *new_fun = sm_new_fun(parent_cx, ($1)->size, (sm_object *)NULL);
-  sm_context_add_child(parent_cx, (sm_object*)new_fun);
   for (unsigned int i = 0; i < ($1)->size; i++) {
     sm_fun_param_obj *po = (sm_fun_param_obj *)sm_expr_get_arg($1, i);
     sm_fun_set_param(new_fun, i, po->name, po->default_val, po->known_expr);
@@ -435,7 +438,6 @@ INDEX_ASSIGNMENT : EXPR '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_IND
 
 DOT_ASSIGNMENT : EXPR '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
 | SYM '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
-
 
 SEQUENCE : SEQUENCE_LIST ')' {}
 | SEQUENCE_LIST ';' ')' {}
@@ -525,50 +527,44 @@ CONTEXT : CONTEXT_LIST '}' {
   sm_stack_pop(sm_global_lex_stack(NULL));
 }
 | '{' ASSIGNMENT ';' '}' {
-  sm_context *parent_cx         = *(sm_global_lex_stack(NULL)->top);
-  sm_context *new_cx            = sm_new_context(1, 1, parent_cx);
+  sm_cx *parent_cx         = *(sm_global_lex_stack(NULL)->top);
+  sm_cx *new_cx            = sm_new_cx(parent_cx);
   sm_string  *name              = ((sm_symbol *)sm_expr_get_arg($2, 0))->name;
   sm_object  *value             = (sm_object *)sm_expr_get_arg($2, 1);
-  *(sm_context_entries(new_cx)) = (sm_context_entry){.name = name, .value = value};
-  sm_context_add_child(parent_cx, (sm_object *)new_cx);
+  sm_cx_let(new_cx,&name->content,name->size,value);
   $$ = new_cx;
 }
 | '{' ASSIGNMENT '}' {
-  sm_context *parent_cx         = *(sm_global_lex_stack(NULL)->top);
-  sm_context *new_cx            = sm_new_context(1, 1, parent_cx);
+  sm_cx *parent_cx         = *(sm_global_lex_stack(NULL)->top);
+  sm_cx *new_cx            = sm_new_cx(parent_cx);
   sm_string  *name              = ((sm_symbol *)sm_expr_get_arg($2, 0))->name;
   sm_object  *value             = ((sm_object *)sm_expr_get_arg($2, 1));
-  *(sm_context_entries(new_cx)) = (sm_context_entry){.name = name, .value = value};
-  sm_context_add_child(parent_cx, (sm_object *)new_cx);
+  sm_cx_let(new_cx,&name->content,name->size,value);
   $$ = new_cx;
 }
 | '{' '}' {
-  sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
-  sm_context *new_cx    = sm_new_context(0, 0, parent_cx);
-  sm_context_add_child(parent_cx, (sm_object *)new_cx);
+  sm_cx *parent_cx = *(sm_global_lex_stack(NULL)->top);
+  sm_cx *new_cx    = sm_new_cx(parent_cx);
   $$ = new_cx;
 }
 
 CONTEXT_LIST : '{' ASSIGNMENT ';' ASSIGNMENT {
-  sm_context *parent_cx = *(sm_global_lex_stack(NULL)->top);
-  sm_context *new_cx    = sm_new_context(2, 2, parent_cx);
-  sm_context_add_child(parent_cx, (sm_object *)new_cx);
-  sm_context_entry *arr    = sm_context_entries(new_cx);
+  sm_cx *parent_cx = *(sm_global_lex_stack(NULL)->top);
+  sm_cx *new_cx    = sm_new_cx(parent_cx);
   sm_string        *name   = ((sm_symbol *)sm_expr_get_arg($2, 0))->name;
   sm_string        *name2  = ((sm_symbol *)sm_expr_get_arg($4, 0))->name;
   sm_object        *value  = (sm_object *)sm_expr_get_arg($2, 1);
   sm_object        *value2 = (sm_object *)sm_expr_get_arg($4, 1);
-  short int         toggle = strcmp(&(name->content), &(name2->content)) < 0 ? 0 : 1;
-  arr[toggle % 2]          = (sm_context_entry){.name = name, .value = value};
-  arr[(toggle + 1) % 2]    = (sm_context_entry){.name = name2, .value = value2};
+  sm_cx_let(new_cx,&name->content,name->size,value);
+  sm_cx_let(new_cx,&name2->content,name2->size,value2);
   sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL), new_cx));
   $$ = new_cx;
 }
 | CONTEXT_LIST ';' ASSIGNMENT {
   sm_string  *name   = ((sm_symbol *)sm_expr_get_arg($3, 0))->name;
   sm_object  *value  = (sm_object *)sm_expr_get_arg($3, 1);
-  sm_context *new_cx = sm_context_let($1, name, value);
-  $$                 = new_cx;
+  sm_cx_let($1, &name->content,name->size, value);
+  $$                 = $1;
 }
 
 

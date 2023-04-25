@@ -4,7 +4,7 @@
 
 // New stack (not an object)
 sm_stack *sm_new_stack(unsigned int capacity) {
-  sm_stack *new_stack = malloc(sizeof(sm_stack) + sizeof(sm_context *) * capacity);
+  sm_stack *new_stack = malloc(sizeof(sm_stack) + sizeof(sm_cx *) * capacity);
   new_stack->capacity = capacity;
   new_stack->top      = sm_stack_empty_top(new_stack);
   return new_stack;
@@ -39,7 +39,6 @@ sm_stack *sm_stack_pop(sm_stack *self) {
 // Special pointer location relative to the stack object
 // which means that the stack is empty.
 void **sm_stack_empty_top(sm_stack *self) { return ((void **)&(self[1])) - 1; }
-
 
 unsigned int sm_stack_size(sm_stack *self) {
   if (self->top == sm_stack_empty_top(self))

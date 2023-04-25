@@ -17,73 +17,75 @@ digit [0-9]
 
 %%
 
-[ \t\f\v\n] { ; }
-exit        {return EXIT;}
-help        {return HELP;}
+[ \t\f\v\n]  { ; }
+exit         {return EXIT;}
+help         {return HELP;}
 
-sin         {return SIN;}
-cos         {return COS;}
-tan         {return TAN;}
-asin        {return ASIN;}
-acos        {return ACOS;}
-atan        {return ATAN;}
-sinh        {return SINH;}
-cosh        {return COSH;}
-tanh        {return TANH;}
-asin        {return ASINH;}
-acos        {return ACOSH;}
-atan        {return ATANH;}
-sec         {return SEC;}
-csc         {return CSC;}
-cot         {return COT;}
-sec         {return ASEC;}
-csc         {return ACSC;}
-cot         {return ACOT;}
-sec         {return SECH;}
-csc         {return CSCH;}
-cot         {return COTH;}
-sech        {return ASECH;}
-csch        {return ACSCH;}
-coth        {return ACOTH;}
-exp         {return EXP;}
-ln          {return LN;}
-log         {return LOG;}
-sqrt        {return SQRT;}
-abs         {return ABS;}
+sin          {return SIN;}
+cos          {return COS;}
+tan          {return TAN;}
+asin         {return ASIN;}
+acos         {return ACOS;}
+atan         {return ATAN;}
+sinh         {return SINH;}
+cosh         {return COSH;}
+tanh         {return TANH;}
+asin         {return ASINH;}
+acos         {return ACOSH;}
+atan         {return ATANH;}
+sec          {return SEC;}
+csc          {return CSC;}
+cot          {return COT;}
+sec          {return ASEC;}
+csc          {return ACSC;}
+cot          {return ACOT;}
+sec          {return SECH;}
+csc          {return CSCH;}
+cot          {return COTH;}
+sech         {return ASECH;}
+csch         {return ACSCH;}
+coth         {return ACOTH;}
+exp          {return EXP;}
+ln           {return LN;}
+log          {return LOG;}
+sqrt         {return SQRT;}
+abs          {return ABS;}
 
-diff        {return DIFF;}
-simp        {return SIMP;}
-int         {return INT;}
+diff         {return DIFF;}
+simp         {return SIMP;}
+int          {return INT;}
 
-if          {return IF;}
-while       {return WHILE;}
-doWhile     {return DO_WHILE;}
-eval        {return EVAL;}
-evalFast   {return EVAL_FAST;}
-fails       {return FAILS;}
-parse       {return PARSE;}
-"toStr"    {return TO_STR;}
-"toStrFmt" {return TO_STRFMT;}
-==          {return EQEQ;}
-!=          {return NOTEQ;}
-"<="        {return LT_EQ;}
-">="        {return GT_EQ;}
+if           {return IF;}
+while        {return WHILE;}
+doWhile      {return DO_WHILE;}
+eval         {return EVAL;}
+evalInCX     {return EVAL_IN_CX;}
+evalFast     {return EVAL_FAST;}
+evalFastInCX {return EVAL_FAST_IN_CX;}
+fails        {return FAILS;}
+parse        {return PARSE;}
+"toStr"      {return TO_STR;}
+"toStrFmt"   {return TO_STRFMT;}
+==           {return EQEQ;}
+!=           {return NOTEQ;}
+"<="         {return LT_EQ;}
+">="         {return GT_EQ;}
 
-not         {return NOT;}
-or          {return OR;}
-xor         {return XOR;}
-and         {return AND;}
+not          {return NOT;}
+or           {return OR;}
+xor          {return XOR;}
+and          {return AND;}
 
-input       {return INPUT;}
-put         {return PUT;}
-putln       {return PUTLN;}
+input        {return INPUT;}
+put          {return PUT;}
+putln        {return PUTLN;}
 
-let         {return LET;}
-self        {return SELF;}
-clear       {return CLEAR;}
-"."         {return DOT;}
-parent      {return PARENT;}
-rm          {return RM;}
+let          {return LET;}
+self         {return SELF;}
+clear        {return CLEAR;}
+"."          {return DOT;}
+parent       {return PARENT;}
+rm           {return RM;}
 
 newCx        {return NEW_CX;}
 cxLet        {return CX_LET;}
@@ -217,7 +219,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
 
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
 
-({digit}?+{alpha}?+_?+)?+\'?+ {
+({alpha}?+{digit}?+_?+)?+\'?+ {
     yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
     return SYM;
   }

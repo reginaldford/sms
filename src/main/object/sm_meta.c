@@ -3,7 +3,7 @@
 #include "../sms.h"
 
 // New meta, a pointer to an object
-sm_meta *sm_new_meta(sm_object *address, sm_context *context) {
+sm_meta *sm_new_meta(sm_object *address, sm_cx *context) {
   sm_meta *smm = sm_malloc(sizeof(sm_meta));
   smm->my_type = SM_META_TYPE;
   smm->address = address;

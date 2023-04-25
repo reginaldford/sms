@@ -2,7 +2,6 @@
 
 #include "../sms.h"
 #include "sys/time.h"
-#include <errno.h>
 #include <dirent.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -10,7 +9,7 @@
 #include <sys/stat.h>
 
 // The engine should return an error if this returns false
-// and the next function will complain about type mismatch,
+// and the child function will complain about type mismatch,
 // going up the callstack, until we hit a try or not
 // the checker is the type number of the function which is checking
 bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_type,
@@ -39,7 +38,7 @@ bool is_true(sm_object *obj) {
 }
 
 // Recursive engine
-sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf) {
+sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;
@@ -91,7 +90,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       char cwd[1024];
       if (getcwd(cwd, sizeof(cwd)) != NULL) {
       } else {
-        // perror("getcwd() error");
         printf("Error: Current working directory is invalid: %s .\n", cwd);
         return (sm_object *)sm_new_double(0);
       }
@@ -101,7 +99,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         printf("Error: Current working directory is invalid: %s .\n", cwd);
         return (sm_object *)sm_new_double(0);
       }
-
       while ((entry = readdir(dir)) != NULL && i < MAX_ENTRIES) {
         unsigned int path_length = strlen(cwd) + strlen(entry->d_name) + 1;
         char         full_path[path_length + 1];
@@ -170,6 +167,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       gettimeofday(&t, NULL);
       sm_expr *result = sm_new_expr_n(SM_ARRAY_EXPR, 2, 2);
       sm_expr_set_arg(result, 0, (sm_object *)sm_new_double(t.tv_sec));
+      sm_expr_set_arg(result, 1, (sm_object *)sm_new_double(t.tv_usec));
       sm_expr_set_arg(result, 1, (sm_object *)sm_new_double(t.tv_usec));
       return (sm_object *)result;
       break;
@@ -273,8 +271,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     case SM_LET_EXPR: {
       sm_symbol *sym   = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      current_cx       = sm_context_let(current_cx, sym->name, value);
-      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      if (expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_LET_EXPR)) {
+        if (sm_cx_let(current_cx, &sym->name->content, sym->name->size, value))
+          return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -328,6 +329,19 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     }
     case SM_RANDOM_EXPR: {
       return (sm_object *)sm_new_double(((double)rand()) / ((double)RAND_MAX));
+    }
+    case SM_SEED_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *number;
+      if (expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_SEED_EXPR))
+        number = (sm_double *)obj0;
+      else
+        return (sm_object *)sm_new_string(0, "");
+      double val       = number->value;
+      int    floor_val = val > 0 ? val + 0.5 : val - 0.5;
+      srand(time(NULL));
+
+      return (sm_object *)sm_new_double(floor_val);
     }
     case SM_FILE_WRITE_EXPR: {
       // obtain the file name
@@ -564,15 +578,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return (sm_object *)sm_object_to_string(evaluated);
     }
     case SM_EVAL_EXPR: {
-      sm_context *where_to_eval = current_cx;
-      if (sme->size > 1) {
-        sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-        if (expect_type(evaluated, 1, SM_CONTEXT_TYPE, SM_EVAL_EXPR))
-          where_to_eval = (sm_context *)evaluated;
-        else
-          return (sm_object *)sm_new_double(0);
-      }
-      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), where_to_eval, sf);
+      sm_cx     *where_to_eval = current_cx;
+      sm_object *evaluated     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return sm_engine_eval(evaluated, where_to_eval, sf);
+    }
+    case SM_EVAL_IN_CX_EXPR: {
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1      = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_cx     *where_to_eval;
+      if (expect_type(obj1, 1, SM_CX_TYPE, SM_EVAL_IN_CX_EXPR))
+        where_to_eval = (sm_cx *)evaluated;
+      else
+        return (sm_object *)sm_new_double(0);
       return sm_engine_eval(evaluated, where_to_eval, sf);
     }
     case SM_PUT_EXPR: {
@@ -582,7 +599,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         str = (sm_string *)evaluated;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-
       str = (sm_string *)evaluated;
       for (unsigned int i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
@@ -598,7 +614,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         str = (sm_string *)evaluated;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-
       str = (sm_string *)evaluated;
       for (unsigned int i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
@@ -645,7 +660,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         fun = (sm_fun *)obj0;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_expr   *arr;
       if (expect_type(obj1, 1, SM_EXPR_TYPE, SM_MAP_EXPR))
@@ -681,34 +695,31 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       return sm_expr_get_arg(arr, index);
     }
     case SM_DOT_EXPR: {
-      sm_object  *base_obj   = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_symbol  *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
-      sm_string  *field_name = field_sym->name;
-      sm_context *base_cx;
-
-      if (expect_type(base_obj, 0, SM_CONTEXT_TYPE, SM_DOT_EXPR))
-        base_cx = (sm_context *)base_obj;
+      sm_object *base_obj   = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
+      sm_string *field_name = field_sym->name;
+      sm_cx     *base_cx;
+      if (expect_type(base_obj, 0, SM_CX_TYPE, SM_DOT_EXPR))
+        base_cx = (sm_cx *)base_obj;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-
-      sm_search_result_cascading sr = sm_context_find_far(base_cx, field_name);
-      if (sr.found != true) {
+      sm_object *sr = sm_cx_get_far(base_cx, &field_name->content, field_name->size);
+      if (sr == NULL) {
         sm_string *base_str = sm_object_to_string(base_obj);
         printf("Error: Could not find variable: %s within %s\n", &(field_name->content),
                &(base_str->content));
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }
-      return sm_context_entries(sr.context)[sr.index].value;
+      // return sm_cx_entries(sr.context)[sr.index].value;
+      return (sm_object *)sr;
     }
     case SM_PARENT_EXPR: {
-      sm_object  *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_context *base_cx;
-
-      if (expect_type(base_obj, 0, SM_CONTEXT_TYPE, SM_DOT_EXPR))
-        base_cx = (sm_context *)base_obj;
+      sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_cx     *base_cx;
+      if (expect_type(base_obj, 0, SM_CX_TYPE, SM_DOT_EXPR))
+        base_cx = (sm_cx *)base_obj;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-
       if (base_cx->parent == NULL) {
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }
@@ -734,13 +745,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       struct sm_expr *args     = (struct sm_expr *)sm_expr_get_arg(sme, 1);
       sm_expr        *new_args = (sm_expr *)sm_engine_eval((sm_object *)args, current_cx, sf);
       sm_object      *obj0     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, new_args);
-
       if (obj0->my_type == SM_FUN_TYPE) {
         sm_fun *fun = (sm_fun *)obj0;
         return sm_engine_eval(fun->content, fun->parent, new_args);
       } else if (obj0->my_type == SM_SYMBOL_TYPE) {
         sm_symbol *fun_sym = (sm_symbol *)obj0;
-        sm_object *found   = sm_context_get_by_name_far(current_cx, fun_sym->name);
+        sm_object *found =
+          sm_cx_get_far(current_cx, &(fun_sym->name->content), fun_sym->name->size);
         if (found == NULL) {
           printf("Error: Function not found: %s\n", &(fun_sym->name->content));
           sm_string *err_msg =
@@ -773,15 +784,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
       sm_symbol *sym;
       sm_object *obj0  = sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (obj0->my_type == SM_LOCAL_TYPE) {
-        sm_local *lcl = (sm_local *)obj0;
-        sm_expr_set_arg(sf, lcl->index, value);
-      } else if (expect_type(obj0, 0, SM_SYMBOL_TYPE, SM_ASSIGN_EXPR)) {
+      if (expect_type(obj0, 0, SM_SYMBOL_TYPE, SM_ASSIGN_EXPR)) {
         sym = (sm_symbol *)obj0;
-        sm_context_set(current_cx, sym->name, value);
-      } else
-        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+        if (sm_cx_set(current_cx, &sym->name->content, sym->name->size, value))
+          return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
     case SM_ASSIGN_LOCAL_EXPR: {
       sm_object *obj0  = sm_expr_get_arg(sme, 0);
@@ -926,7 +934,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       return (sm_object *)sm_new_double(tan(num0->value));
     }
-
     case SM_ASIN_EXPR: {
       // arcsin(x) = 2 * ln((1 + x^2 / (1 + sqrt(1 - x^2))^2) / sqrt(1 + x^4))
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1225,12 +1232,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_context *current_cx, sm_expr *sf)
     return input;
   }
   case SM_SYMBOL_TYPE: {
-    sm_symbol                 *sym      = (sm_symbol *)input;
-    sm_string                 *var_name = sym->name;
-    sm_search_result_cascading sr       = sm_context_find_far(current_cx, var_name);
-    if (sr.found == true) {
-      return sm_context_entries(sr.context)[sr.index].value;
-    } else {
+    sm_symbol *sym      = (sm_symbol *)input;
+    sm_string *var_name = sym->name;
+    sm_object *sr       = sm_cx_get_far(current_cx, &(var_name->content), var_name->size);
+    if (sr != NULL)
+      return sr;
+    else {
       // should return error object
       printf("Could not find variable: %s\n", &(var_name->content));
       return (sm_object *)sm_new_double(0);

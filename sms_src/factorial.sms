@@ -2,18 +2,21 @@
 # Asks for a value x, and puts the factorial of x
 # Repeats continually until the user closes by signal
 
-factorial=(counter)=>(
-  let fac = 1;
+let fac =1;
+let x = 1;
+
+let factorial=(counter)=>(
+  fac = 1;
   while( counter > 0, (
     fac = fac * counter;
     counter = counter -1
   ));
-  fac
+  fac;
 );
 
 while(true,(
   put("Enter x: ");
-  let x = parse(input());
-  putln("The factorial of x is " str+
-    toStr(factorial(x)))
+  x = parse(input());
+  putln("The factorial of " str+ toStr(x)  str+ " is " str+
+    toStr(factorial(x)));
 ));

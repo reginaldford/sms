@@ -2,7 +2,7 @@
 
 #include "../sms.h"
 
-// For rounding up object size to the next multiple of 4 bytes.
+// For rounding up object size to the child multiple of 4 bytes.
 int sm_round_size(int size) { return ((size) + 3) & ~3; }
 
 // Create a new heap of some capacity
@@ -50,7 +50,8 @@ sm_search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size
     return (sm_search_result){.found = true, .index = guess_point};
   if (comparison < 0) {
     return (sm_search_result){.found = false, .index = guess_point + 1};
-  } else { // comparison > 0
+  } else // comparison > 0
+  {
     return (sm_search_result){.found = false, .index = guess_point};
   }
 }

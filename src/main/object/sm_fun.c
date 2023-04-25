@@ -3,7 +3,7 @@
 #include "../sms.h"
 
 // new sm_fun structure
-sm_fun *sm_new_fun(sm_context *parent, unsigned short int num_params, sm_object *content) {
+sm_fun *sm_new_fun(sm_cx *parent, unsigned short int num_params, sm_object *content) {
   sm_fun *self     = sm_malloc(sizeof(sm_fun) + num_params * sizeof(sm_fun_param));
   self->my_type    = SM_FUN_TYPE;
   self->parent     = parent;

@@ -14,42 +14,11 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 // If obj is an sm_pointer, the object was alreay moved to the new heap
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
-  unsigned short int the_expr = obj->my_type;
-  if (the_expr == SM_POINTER_TYPE)
+  unsigned short int obj_type = obj->my_type;
+  if (obj_type == SM_POINTER_TYPE)
     return ((sm_pointer *)obj)->address;
   else
     return sm_move_to_new_heap(obj);
-}
-
-// If a sibling ptr aims at an sm_pointer, then it was already copied to new space by GC
-// Therefore, it's not garbage, and we will keep it
-sm_expr *inflate_siblings(sm_expr *siblings) {
-  unsigned int num_keepers = 0;
-  sm_object   *keepers[siblings->size];
-  for (unsigned int i = 0; i < siblings->size; i++) {
-    sm_object *current_sibling = sm_expr_get_arg(siblings, i);
-    if (current_sibling->my_type == SM_POINTER_TYPE) {
-      keepers[num_keepers++] = ((sm_pointer *)current_sibling)->address;
-    }
-  }
-  if (num_keepers > 0) {
-    sm_expr *new_expr = sm_new_expr_n(SM_SIBLINGS_EXPR, num_keepers, num_keepers);
-    for (unsigned int i = 0; i < num_keepers; i++) {
-      sm_expr_set_arg(new_expr, i, keepers[i]);
-    }
-    return new_expr;
-  }
-  return NULL;
-}
-
-// GC for the internal parent/child references in contexts
-void inflate_all_siblings() {
-  sm_expr *arr = sm_global_parents(NULL);
-  for (unsigned int i = 0; i < arr->size; i++) {
-    sm_context *parent = (sm_context *)sm_expr_get_arg(arr, i);
-    parent->children   = inflate_siblings(parent->children);
-  }
-  arr->size = 0;
 }
 
 // Copy the objects referenced by the current_obj into the new heap
@@ -64,21 +33,30 @@ void sm_inflate_heap() {
     // scan_cursor is not referred to for the rest of the loop
     scan_cursor += sm_sizeof(current_obj);
     switch (current_obj->my_type) {
-    case SM_CONTEXT_TYPE: {
-      sm_context *cx = (sm_context *)current_obj;
-      // Meet the entries
-      sm_context_entry *table = sm_context_entries(cx);
-      for (unsigned int i = 0; i < ((sm_context *)current_obj)->size; i++) {
-        table[i].name  = (sm_string *)sm_meet_object((sm_object *)table[i].name);
-        table[i].value = sm_meet_object(table[i].value);
+    case SM_CX_TYPE: {
+      sm_cx      *cx  = (sm_cx *)current_obj;
+      sm_cx_node *cxn = &cx->content;
+      // Meet the content ptrs
+      for (int i = 0; i < 64; i++) {
+        void *child = cxn->child[i];
+        if (child != NULL)
+          cxn->child[i] = (sm_cx_node *)sm_meet_object((sm_object *)child);
       }
       // Meet the parent
       if (cx->parent != NULL)
-        cx->parent = (sm_context *)sm_meet_object((sm_object *)cx->parent);
-      // Save the siblings list for later processing
-      if (cx->children != NULL) {
-        sm_expr *e = sm_expr_append(sm_global_parents(NULL), (sm_object *)cx);
-        sm_global_parents(e);
+        cx->parent = (sm_cx *)sm_meet_object((sm_object *)cx->parent);
+      break;
+    }
+    case SM_CX_NODE_TYPE: {
+      sm_cx_node *cxn = (sm_cx_node *)current_obj;
+      // Meet the value
+      if (cxn->value != NULL)
+        cxn->value = sm_meet_object((sm_object *)cxn->value);
+      // Meet the child ptrs
+      for (int i = 0; i < 64; i++) {
+        void *child = cxn->child[i];
+        if (child != NULL)
+          cxn->child[i] = (sm_cx_node *)sm_meet_object((sm_object *)child);
       }
       break;
     }
@@ -104,7 +82,7 @@ void sm_inflate_heap() {
       sm_fun *fun  = (sm_fun *)current_obj;
       fun->content = sm_meet_object((sm_object *)fun->content);
       if (fun->parent != NULL)
-        fun->parent = (sm_context *)sm_meet_object((sm_object *)fun->parent);
+        fun->parent = (sm_cx *)sm_meet_object((sm_object *)fun->parent);
       for (unsigned short int i = 0; i < fun->num_params; i++) {
         sm_fun_param *param = sm_fun_get_param(fun, i);
         param->name         = (sm_string *)sm_meet_object((sm_object *)param->name);
@@ -152,13 +130,10 @@ void sm_garbage_collect() {
 
     // Copy root (the global context)
     *(sm_global_lex_stack(NULL)->top) =
-      (sm_context *)sm_move_to_new_heap((sm_object *)*(sm_global_lex_stack(NULL)->top));
+      (sm_cx *)sm_move_to_new_heap((sm_object *)*(sm_global_lex_stack(NULL)->top));
 
     // Inflate
     sm_inflate_heap();
-
-    // Inflate context siblings arrays last
-    inflate_all_siblings();
 
     // For tracking purposes
     sm_gc_count(1);

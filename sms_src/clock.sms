@@ -3,7 +3,7 @@
 
 # Represents a number from 0 to 99
 # with 2 characters.
-two_digits=(x)=>(
+let two_digits=(x)=>(
   if(x<10,
     "0" str+ toStr(x),
     toStr(x)
@@ -11,6 +11,8 @@ two_digits=(x)=>(
 );
 
 # Print the time with constant width
+let d = date();
+
 while(true,(
   d = date();
   # Convert military time to 12-hr

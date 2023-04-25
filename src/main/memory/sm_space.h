@@ -7,13 +7,18 @@ typedef struct sm_space {
   unsigned short int  size;
 } sm_space;
 
-
 // Not part of the heap
 // Has pointers to spaces following the struct
 typedef struct sm_space_array {
   unsigned int size;
   unsigned int capacity;
 } sm_space_array;
+
+// by setting found to false and using index to indicate where it would be
+typedef struct sm_search_result {
+  bool         found;
+  unsigned int index;
+} sm_search_result;
 
 sm_space        *sm_new_space(void *trash, unsigned int size);
 sm_space_array  *sm_new_space_array(unsigned int size, unsigned int capacity);
