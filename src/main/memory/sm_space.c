@@ -79,7 +79,8 @@ sm_search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
     return (sm_search_result){.found = true, .index = guess_point};
   if (comparison < 0) {
     return (sm_search_result){.found = false, .index = guess_point + 1};
-  } else { // comparison > 0
+  } else // comparison > 0
+  {
     return (sm_search_result){.found = false, .index = guess_point};
   }
 }

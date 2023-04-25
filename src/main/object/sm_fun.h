@@ -3,7 +3,7 @@
 // understood to have array of num_param sm_fun_param following this structure
 typedef struct sm_fun {
   short int          my_type;
-  struct sm_context *parent;
+  struct sm_cx      *parent;
   unsigned short int num_params;
   struct sm_object  *content;
 } sm_fun;
@@ -26,8 +26,8 @@ typedef struct sm_fun_param_obj {
   short int          known_expr;
 } sm_fun_param_obj;
 
-sm_fun *sm_new_fun(struct sm_context *parent, unsigned short int num_params, sm_object *content);
-unsigned int      sm_fun_sprint(sm_fun *self, char *buffer, bool fake);
+sm_fun      *sm_new_fun(struct sm_cx *parent, unsigned short int num_params, sm_object *content);
+unsigned int sm_fun_sprint(sm_fun *self, char *buffer, bool fake);
 sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val,
                                        enum sm_object_type known_expr);
 sm_fun_param     *sm_fun_get_param(sm_fun *self, unsigned short int i);

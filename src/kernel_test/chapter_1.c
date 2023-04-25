@@ -7,7 +7,7 @@ int chapter_1(int test) {
   sm_init(NULL);
   printf("Generating 100 empty contexts.\n");
   for (int i = 0; i < 100; i++)
-    sm_new_context(0, 0, NULL);
+    sm_new_cx(NULL);
   printf("Running GC.\n");
   sm_garbage_collect();
   sm_string      *s  = sm_new_string(0, "");

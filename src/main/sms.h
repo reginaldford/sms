@@ -18,15 +18,16 @@ enum sm_object_type {
   SM_PRIMITIVE_TYPE, // 2
   SM_STRING_TYPE,    // 3
   SM_SYMBOL_TYPE,    // 4
-  SM_CONTEXT_TYPE,   // 5
-  SM_POINTER_TYPE,   // 6
-  SM_META_TYPE,      // 7
-  SM_SPACE_TYPE,     // 8
-  SM_FUN_TYPE,       // 9
-  SM_FUN_PARAM_TYPE, // 10
-  SM_LOCAL_TYPE,     // 11
-  SM_ERROR_TYPE,     // 12
-  SM_UNKNOWN_TYPE    // 13
+  SM_CX_TYPE,        // 5
+  SM_CX_NODE_TYPE,   // 6
+  SM_POINTER_TYPE,   // 7
+  SM_META_TYPE,      // 8
+  SM_SPACE_TYPE,     // 9
+  SM_FUN_TYPE,       // 10
+  SM_FUN_PARAM_TYPE, // 11
+  SM_LOCAL_TYPE,     // 12
+  SM_ERROR_TYPE,     // 13
+  SM_UNKNOWN_TYPE    // 14
 };
 
 // Useful macros
@@ -51,7 +52,7 @@ enum sm_object_type {
 #include "object/sm_local.h"
 #include "object/sm_symbol.h"
 #include "object/sm_expr.h"
-#include "object/sm_context.h"
+#include "object/sm_cx.h"
 #include "object/sm_meta.h"
 #include "object/sm_error.h"
 #include "memory/sm_pointer.h"

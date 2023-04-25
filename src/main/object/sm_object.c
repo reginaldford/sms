@@ -7,7 +7,6 @@
 bool sm_object_is_literal(unsigned short int t) {
   switch (t) {
   case SM_DOUBLE_TYPE:
-  case SM_META_TYPE:
   case SM_STRING_TYPE:
     return true;
   default:
@@ -35,8 +34,8 @@ unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
     return sm_expr_sprint((sm_expr *)obj1, buffer, fake);
   case SM_META_TYPE:
     return sm_meta_sprint((sm_meta *)obj1, buffer, fake);
-  case SM_CONTEXT_TYPE:
-    return sm_context_sprint((sm_context *)obj1, buffer, fake);
+  case SM_CX_TYPE:
+    return sm_cx_sprint((sm_cx *)obj1, buffer, fake);
   case SM_SYMBOL_TYPE:
     return sm_symbol_sprint((sm_symbol *)obj1, buffer, fake);
   case SM_FUN_TYPE:
@@ -70,8 +69,10 @@ int sm_sizeof(sm_object *obj1) {
     return sm_round_size(sizeof(sm_string) + ((sm_string *)obj1)->size + 1);
   case SM_SYMBOL_TYPE:
     return sizeof(sm_symbol);
-  case SM_CONTEXT_TYPE:
-    return sizeof(sm_context) + sizeof(sm_context_entry) * ((sm_context *)obj1)->capacity;
+  case SM_CX_TYPE:
+    return sizeof(sm_cx);
+  case SM_CX_NODE_TYPE:
+    return sizeof(sm_cx_node);
   case SM_POINTER_TYPE:
     return sizeof(sm_pointer);
   case SM_META_TYPE:
@@ -86,6 +87,7 @@ int sm_sizeof(sm_object *obj1) {
     return ((sm_space *)obj1)->size;
   case SM_ERROR_TYPE:
     return sizeof(sm_error);
+
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
     // sm_sprint_dump();

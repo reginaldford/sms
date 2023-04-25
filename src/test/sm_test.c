@@ -77,25 +77,25 @@ int get_alignment(int chapter, int subchapter, int test) {
 
 // Returns 0 if pr contains a successfully paired context
 // with an array assigned to 'test'
-sm_context *check_parsed_object(sm_parse_result pr) {
+sm_cx *check_parsed_object(sm_parse_result pr) {
   // We expect an array of arrays, each with 3 objects.
-  if (pr.parsed_object->my_type != SM_CONTEXT_TYPE) {
+  if (pr.parsed_object->my_type != SM_CX_TYPE) {
     printf("Top level object is not a context. Aborting.\n");
     return NULL;
   }
-  sm_context                *test_env = (sm_context *)pr.parsed_object;
-  sm_search_result_cascading src      = sm_context_find_far(test_env, sm_new_string(5, "tests"));
-  if (src.found == false) {
+  sm_cx     *test_env = (sm_cx *)pr.parsed_object;
+  sm_object *sr       = sm_cx_get(test_env, "tests", 5);
+  if (sr == NULL) {
     printf("Top level context must contain a key 'tests' associated to a nested array.");
     printf("Aborting.\n");
     return NULL;
   }
-  sm_object *found = sm_context_get(src.context, src.index);
-  if (found->my_type != SM_EXPR_TYPE) {
+  // sm_object *found = sm_cx_get(src.context,);
+  if (sr->my_type != SM_EXPR_TYPE) {
     printf("Value under 'test' should be an array.\n");
     return NULL;
   }
-  return (sm_context *)test_env;
+  return (sm_cx *)test_env;
 }
 
 // Return 0 if there are no problems
@@ -120,7 +120,7 @@ int check_specific_test(sm_expr *test_list, int test) {
   return 0;
 }
 
-int perform_specific_test(sm_context *test_env, sm_expr *test_list, int chapter, int subchapter,
+int perform_specific_test(sm_cx *test_env, sm_expr *test_list, int chapter, int subchapter,
                           int test) {
   if (check_specific_test(test_list, test) != 0) {
     printf("Something was wrong with the format of the test.\n");
@@ -185,13 +185,13 @@ int perform_test_subchapter(unsigned int chapter, unsigned int subchapter, int t
       return -1;
     }
     // exits the program if there is a problem
-    sm_context *test_env = check_parsed_object(pr);
+    sm_cx *test_env = check_parsed_object(pr);
     if (test_env == NULL) {
       printf("Something was wrong with the format of the file.\n");
       return -1;
     }
-    sm_search_result_cascading src       = sm_context_find_far(test_env, sm_new_string(5, "tests"));
-    sm_expr                   *test_list = (sm_expr *)sm_context_get(src.context, src.index);
+    sm_expr *test_list = (sm_expr *)sm_cx_get(test_env, "tests", 5);
+
     if (test == -1) {
       global_num_tests(test_list->size);
       for (unsigned int i = 0; i < test_list->size; i++) {

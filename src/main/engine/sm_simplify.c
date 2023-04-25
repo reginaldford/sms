@@ -395,7 +395,7 @@ sm_expr *apply_constants14(sm_expr *e) {
 }
 
 // return the first element (starting at pos) of this type or -1
-unsigned int find_next_not(sm_expr *e, unsigned int pos, unsigned short int t) {
+unsigned int find_child_not(sm_expr *e, unsigned int pos, unsigned short int t) {
   for (unsigned int i = pos + 1; i < e->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(e, i);
     if (current_obj->my_type != t) {
@@ -434,10 +434,10 @@ sm_expr *apply_constants15(sm_expr *e) {
         sm_expr_append(new_expr, (sm_object *)sm_new_double(calculation));
       }
       // then add the rest
-      unsigned int next_not = -1;
+      unsigned int child_not = -1;
       for (unsigned int last_i = num_count; last_i < e->size; last_i++) {
-        next_not = find_next_not(e, next_not, SM_DOUBLE_TYPE);
-        sm_expr_append(new_expr, sm_expr_get_arg(e, next_not));
+        child_not = find_child_not(e, child_not, SM_DOUBLE_TYPE);
+        sm_expr_append(new_expr, sm_expr_get_arg(e, child_not));
       }
       return new_expr;
     }
