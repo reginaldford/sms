@@ -13,5 +13,5 @@ jobs:
 
     steps:
     - name: make check
-      run: sudo apt install -y bison glex gcc make && make check
+      run: sudo apt install -y bison flex gcc make && make check
 
