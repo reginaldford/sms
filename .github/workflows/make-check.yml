@@ -1,4 +1,4 @@
-name: C/CPP template
+name: Run make check
 
 on:
   push:
