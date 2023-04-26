@@ -13,5 +13,6 @@ jobs:
 
     steps:
     - name: make check
+      run: sudo apt install bison glex gcc make
       run: make check
 
