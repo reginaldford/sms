@@ -1,3 +1,10 @@
+![GitHub top language](https://img.shields.io/github/languages/top/reginaldford/sms) 
+![GitHub language count](https://img.shields.io/github/languages/count/reginaldford/sms)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
+![GitHub all releases](https://img.shields.io/github/downloads/reginaldford/sms/total)
+![GitHub contributors](https://img.shields.io/github/contributors/reginaldford/sms?color=green)
+![img](https://img.shields.io/badge/Maturity-Alpha-orange)
+
 # Introduction:
 SMS (Symbolic Math System) is a terminal based calculator. SMS has built-in functions for arithmetic operations, programmatic flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub.
 
