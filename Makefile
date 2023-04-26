@@ -103,3 +103,8 @@ dev:
 	$(MAKE) $(SRC_BISON_FLEX)/y.tab.c
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME) bin/$(BIN_NAME_DBG) bin/$(BIN_NAME_TEST) bin/$(BIN_NAME_KT)
+
+check: clean dev	
+	./bin/$(BIN_NAME_KT) &&\
+	./bin/$(BIN_NAME_TEST) test_zone/outline.sms &&\
+	echo Kernel Tests and SMS Tests Passed.
