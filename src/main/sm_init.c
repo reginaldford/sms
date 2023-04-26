@@ -4,7 +4,7 @@
 
 void sm_init(sm_env *env) {
   // Register the signal handler
-  sm_register_signals_not_real_function(); //testing auto testing workflow in github
+  sm_register_signals(); // testing auto testing workflow in github
 
   // Initialize the current memory heap
   double mem_mbytes = 50;
