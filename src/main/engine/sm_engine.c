@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 
 // The engine should return an error if this returns false
-// and the child function will complain about type mismatch,
+// and the next function will complain about type mismatch,
 // going up the callstack, until we hit a try or not
 // the checker is the type number of the function which is checking
 bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_type,
@@ -167,7 +167,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       gettimeofday(&t, NULL);
       sm_expr *result = sm_new_expr_n(SM_ARRAY_EXPR, 2, 2);
       sm_expr_set_arg(result, 0, (sm_object *)sm_new_double(t.tv_sec));
-      sm_expr_set_arg(result, 1, (sm_object *)sm_new_double(t.tv_usec));
       sm_expr_set_arg(result, 1, (sm_object *)sm_new_double(t.tv_usec));
       return (sm_object *)result;
       break;
@@ -340,7 +339,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       double val       = number->value;
       int    floor_val = val > 0 ? val + 0.5 : val - 0.5;
       srand((int)floor_val);
-      return (sm_object*)sm_new_symbol(sm_new_string(5,"true"));;
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "true"));
+      ;
     }
     case SM_FILE_WRITE_EXPR: {
       // obtain the file name

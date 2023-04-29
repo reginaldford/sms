@@ -45,16 +45,13 @@ unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_ERROR_TYPE:
     return sm_error_sprint((sm_error *)obj1, buffer, fake);
   default: {
-    if (!fake) {
-      if (obj1->my_type != 0)
-        snprintf(buffer, 3 + log(ABS(obj1->my_type)) / log(10), "?(%i)", obj1->my_type);
-    } else
-      snprintf(buffer, 4, "?(%i)", obj1->my_type);
-    return 3 + sm_double_len((double)obj1->my_type);
+    int len = obj1->my_type == 0 ? 4 : 3 + log(obj1->my_type) / log(10);
+    if (!fake)
+      snprintf(buffer, len, "?(%i)", obj1->my_type);
+    return len;
   }
   }
 }
-
 // Return the size of the object in bytes
 int sm_sizeof(sm_object *obj1) {
   // printf("type: %i\n",obj1->my_type);
@@ -85,6 +82,8 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(sm_local);
   case SM_SPACE_TYPE:
     return ((sm_space *)obj1)->size;
+  case SM_LINK_TYPE:
+    return sizeof(struct sm_link);
   case SM_ERROR_TYPE:
     return sizeof(sm_error);
 
@@ -95,6 +94,9 @@ int sm_sizeof(sm_object *obj1) {
   }
 }
 
+// Recursive equality checking.
+// In general, If two objects have the same toString, this should return true.
+// But this is much faster than toStr(obj1)==toStr(obj2)
 bool sm_object_eq(sm_object *self, sm_object *other) {
   if (self->my_type != other->my_type)
     return false;
@@ -126,7 +128,7 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
   case SM_PRIMITIVE_TYPE:
     return (void *)self == (void *)other;
   default:
-    return false;
+    return self == other;
   }
 }
 

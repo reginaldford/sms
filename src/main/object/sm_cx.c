@@ -4,13 +4,10 @@
 
 // Create a new context, an array of key_values sorted by key
 sm_cx *sm_new_cx(sm_cx *parent) {
-  sm_cx *new_cx           = (sm_cx *)sm_malloc(sizeof(sm_cx));
-  new_cx->my_type         = SM_CX_TYPE;
-  new_cx->parent          = parent;
-  new_cx->content.my_type = SM_CX_NODE_TYPE;
-  new_cx->content.value   = NULL;
-  for (int i = 0; i < 64; i++)
-    new_cx->content.child[i] = NULL;
+  sm_cx *new_cx   = (sm_cx *)sm_malloc(sizeof(sm_cx));
+  new_cx->my_type = SM_CX_TYPE;
+  new_cx->parent  = parent;
+  new_cx->content = NULL;
   return new_cx;
 }
 
@@ -19,9 +16,8 @@ sm_cx_node *sm_new_cx_node(sm_object *value) {
   sm_cx_node *new_node = sm_malloc(sizeof(sm_cx_node));
   new_node->my_type    = SM_CX_NODE_TYPE;
   new_node->value      = value;
-  for (int i = 0; i < 64; i++) {
-    new_node->child[i] = NULL;
-  }
+  new_node->map        = 0LL;
+  new_node->children   = NULL;
   return new_node;
 }
 
@@ -48,7 +44,8 @@ int sm_cx_node_index(char c) {
   return -1;
 }
 
-// inverse of index
+// Inverse of sm_cx_node_index
+// Expects 0-63, else, returns NULL
 char sm_cx_node_unindex(int i) {
   if (i == 0)
     return '\'';
@@ -63,26 +60,38 @@ char sm_cx_node_unindex(int i) {
   return '\0';
 }
 
-
+// Returns the node addressed by needle
+// Returns NULL if this node does not exist
 sm_cx_node *sm_cx_node_get_leaf(sm_cx_node *self, char *needle, int len) {
   sm_cx_node *curr_node = self;
-  int         index;
+  if (self && self->children == NULL)
+    return NULL;
   // Traverse the trie to find the node corresponding to the key
+  int index;
+  int child_index;
   for (int i = 0; i < len; i++) {
-    index     = sm_cx_node_index(needle[i]);
-    curr_node = curr_node->child[index];
+    index       = sm_cx_node_index(needle[i]);
+    if(curr_node==NULL) return NULL;
+    child_index = sm_cx_node_child_index(curr_node->map, index);
+    if (sm_cx_node_map_get(curr_node->map, index) == false)
+      return NULL;
+    struct sm_link *next_link = sm_link_nth(curr_node->children, child_index);
+    if (next_link == NULL)
+      return NULL;
+    curr_node = (sm_cx_node *)next_link->value;
     if (curr_node == NULL)
-      return NULL; // Key doesn't exist in the tree
+      return NULL;
   }
   // Return the leaf node associated with the key
   return curr_node;
 }
 
-//
+// Searches for an existing value and sets it to the given value and returns True.
+// Returns false if the value cannot be found. Traverses parent ptrs to find the value.
 bool sm_cx_set(sm_cx *self, char *needle, int len, sm_object *value) {
   sm_cx *cx = self;
   while (cx != NULL) {
-    sm_cx_node *node = &(cx->content);
+    sm_cx_node *node = cx->content;
     sm_cx_node *leaf = sm_cx_node_get_leaf(node, needle, len);
     if (leaf != NULL) {
       leaf->value = value;
@@ -93,15 +102,14 @@ bool sm_cx_set(sm_cx *self, char *needle, int len, sm_object *value) {
   return false;
 }
 
-//
+// Get this value from the current context.
+// Return Null if there is no such key.
 sm_object *sm_cx_get(sm_cx *self, char *needle, int len) {
-  sm_cx *cx = self;
-  while (cx != NULL) {
-    sm_cx_node *node = &(cx->content);
+  sm_cx_node *node = self->content;
+  if (node != NULL) {
     sm_cx_node *leaf = sm_cx_node_get_leaf(node, needle, len);
     if (leaf != NULL)
       return leaf->value;
-    cx = cx->parent;
   }
   return NULL;
 }
@@ -121,9 +129,11 @@ sm_object *sm_cx_node_get(sm_cx_node *self, char *needle, int len) {
 sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len) {
   sm_cx *curr_cx = self;
   while (curr_cx != NULL) {
-    sm_cx_node *leaf = sm_cx_node_get_leaf(&curr_cx->content, needle, len);
-    if (leaf != NULL)
-      return leaf->value;
+    if (curr_cx->content != NULL) {
+      sm_cx_node *leaf = sm_cx_node_get_leaf(curr_cx->content, needle, len);
+      if (leaf != NULL)
+        return leaf->value;
+    }
     curr_cx = curr_cx->parent;
   }
   return NULL;
@@ -134,7 +144,7 @@ sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len) {
 sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int len) {
   sm_cx *current_loc = self;
   while (current_loc) {
-    sm_object *result = sm_cx_node_get(&current_loc->content, needle, len);
+    sm_object *result = sm_cx_node_get(current_loc->content, needle, len);
     if (result)
       return current_loc;
     current_loc = current_loc->parent;
@@ -144,12 +154,25 @@ sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int len) {
 
 // Add a key_value with this key and value
 bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
-  sm_cx_node *cur_node = &self->content;
+  sm_cx_node *cur_node;
+  if (self->content == NULL)
+    self->content = sm_new_cx_node(NULL);
+  cur_node = self->content;
   for (int i = 0; i < len; i++) {
-    int index = sm_cx_node_index(needle[i]);
-    if (cur_node->child[index] == NULL)
-      cur_node->child[index] = sm_new_cx_node(NULL);
-    cur_node = cur_node->child[index];
+    int             index       = sm_cx_node_index(needle[i]);
+    int             child_index = sm_cx_node_child_index(cur_node->map, index);
+    struct sm_link *next_link;
+    if (sm_cx_node_map_get(cur_node->map, index) == false) {
+      sm_cx_node_map_set(&cur_node->map, index, true);
+      next_link = sm_new_link((sm_object *)sm_new_cx_node(NULL), NULL);
+      if (child_index == 0) {
+        next_link->next    = cur_node->children;
+        cur_node->children = next_link;
+      } else
+        sm_link_insert(cur_node->children, next_link, child_index);
+    } else
+      next_link = sm_link_nth(cur_node->children, child_index);
+    cur_node = (sm_cx_node *)next_link->value;
   }
   // Leaf node already exists with this key
   if (cur_node->value != NULL)
@@ -158,78 +181,129 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
   return true;
 }
 
-int sm_cx_node_last_index(sm_cx_node *node) {
-  for (int i = 64; i >= 0; i--)
-    if (node->child[i] == node)
-      return i;
-  return -1;
-}
-
-// Report whether all elements of the
-bool sm_cx_node_is_empty(sm_cx_node *node) {
-  for (int i = 0; i < 64; i++)
-    if (node->child[i] != NULL)
-      return false;
-  return true;
-}
+// Report of the node has not value and no children
+bool sm_cx_node_is_empty(sm_cx_node *node) { return node->value == NULL && node->map == 0LL; }
 
 // Remove the node addressed by needle and return true.
 // Return false if the node is not found.
 bool sm_cx_rm(sm_cx *self, char *needle, int len) {
-  sm_cx_node *curr = &(self->content);
-  for (int i = 0; i < len; i++) {
-    if (curr == NULL)
-      return false;
-    curr = curr->child[sm_cx_node_index(needle[i])];
-  }
-  if (curr == NULL)
+  sm_cx_node *cur_node = self->content;
+  if (cur_node == NULL || cur_node->map == 0LL)
     return false;
-  curr = NULL;
+  struct sm_link *cur_link  = cur_node->children;
+  struct sm_link *last_link = cur_link;
+
+  // Traverse the tree to find the node for the given key
+  int index;
+  int child_index;
+
+  for (int i = 0; i < len; i++) {
+    index       = sm_cx_node_index(needle[i]);
+    child_index = sm_cx_node_child_index(cur_node->map, index);
+    if (sm_cx_node_map_get(cur_node->map, index) == false) {
+      // Node for this character does not exist
+      return false;
+    }
+    last_link = cur_link;
+    cur_link  = sm_link_nth(cur_node->children, child_index);
+    cur_node  = (sm_cx_node *)cur_link->value;
+  }
+  // If the value for the final node is NULL, return false
+  if (cur_node->value == NULL) {
+    return false;
+  }
+  // Remove the value from the final node
+  cur_node->value = NULL;
+  // update the map
+  if (last_link != cur_link)
+    sm_cx_node_map_set(&((sm_cx_node *)last_link->value)->map, index, false);
+  // If the final node has no children and no value, remove its link from the linked list
+  if (sm_cx_node_is_empty(cur_node)) {
+    if (last_link != cur_link) {
+      last_link->next = last_link->next->next;
+    } else {
+    }
+  }
   return true;
 }
 
+// Prints all of the key-value pairs in this node recursively
+// Uses the stack to recall path to current node, for full key name
 int sm_cx_node_sprint(sm_cx_node *node, char *buffer, bool fake, sm_stack *char_stack) {
   int cursor = 0;
   if (node->value != NULL) {
+    // var name
     for (unsigned int i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
       sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
       if (!fake)
         buffer[i] = sm_cx_node_unindex(num_obj->value);
     }
     cursor = sm_stack_size(char_stack);
-
+    // equals sign
     if (!fake)
       buffer[cursor] = '=';
     cursor++;
-
+    // rhs value
     cursor += sm_object_sprint(node->value, &(buffer[cursor]), fake);
+    // semicolon
     if (!fake)
       buffer[cursor] = ';';
     cursor++;
   }
+  // If there are not more children, we are done
   if (sm_cx_node_is_empty(node)) {
     return cursor;
   }
-  for (int i = 0; i < 64; i++) {
-    if (node->child[i] != NULL) {
+  int items_to_do = sm_cx_node_map_size(node->map);
+  for (int i = 0; items_to_do > 0 && i < 64; i++) {
+    if (sm_cx_node_map_get(node->map, i) == true) {
+      int         child_index = sm_cx_node_child_index(node->map, i);
+      sm_cx_node *child_here  = (sm_cx_node *)sm_link_nth(node->children, child_index)->value;
       sm_stack_push(char_stack, sm_new_double(i));
-      cursor += sm_cx_node_sprint(node->child[i], &(buffer[cursor]), fake, char_stack);
+      cursor += sm_cx_node_sprint(child_here, &(buffer[cursor]), fake, char_stack);
       sm_stack_pop(char_stack);
+      items_to_do--;
     }
   }
   return cursor;
 }
 
-// For now
+// Print the contents of this cx to buffer and return the length
+// If fake is true, just return the hypotehtical string length
 unsigned int sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
-  sm_stack *new_stack = sm_new_stack(32);
   if (!fake)
     buffer[0] = '{';
   int cursor = 1;
-  cursor += sm_cx_node_sprint(&(self->content), &(buffer[cursor]), fake, new_stack);
+  if (self->content != NULL) {
+    sm_stack *letter_stack = sm_new_stack(32);
+    cursor += sm_cx_node_sprint(self->content, &(buffer[cursor]), fake, letter_stack);
+    free(letter_stack);
+  }
   if (!fake)
     buffer[cursor] = '}';
   cursor++;
-  free(new_stack);
   return cursor;
+}
+
+// Returns the number of children
+int sm_cx_node_map_size(unsigned long long map) { return __builtin_popcountll(map); }
+
+// Sets a bit of map to 1 or 0 depending on the provided boolean
+void sm_cx_node_map_set(unsigned long long *map, int index, bool on) {
+  if (on) {
+    *map |= (1LL << index);
+  } else {
+    *map &= ~(1LL << index);
+  }
+}
+
+// Return whether a bit is 1
+bool sm_cx_node_map_get(unsigned long long map, int i) {
+  unsigned long long mask = 1ULL << i;
+  return (map & mask) != 0;
+}
+
+// Returns the correlating child index to this bit in the map
+int sm_cx_node_child_index(unsigned long long map, int bit_index) {
+  return __builtin_popcountll(map & ((1LL << bit_index) - 1));
 }

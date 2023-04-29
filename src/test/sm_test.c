@@ -5,6 +5,7 @@
 #include "sm_test_outline.h"
 #include <ctype.h>
 
+extern int yylineno;
 #define DISPLAY_WIDTH 65
 
 // Global for the test outline structure
@@ -179,6 +180,7 @@ int perform_test_subchapter(unsigned int chapter, unsigned int subchapter, int t
     }
     printf("Parsing: %s... \n", buf);
     freopen(buf, "r", stdin);
+    yylineno           = 0;
     sm_parse_result pr = sm_parse_more();
     if (pr.return_val != 0) {
       printf("Error parsing the subchapter. Parser returned %i\n", pr.return_val);

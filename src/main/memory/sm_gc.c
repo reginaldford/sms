@@ -11,7 +11,7 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
   return new_obj;
 }
 
-// If obj is an sm_pointer, the object was alreay moved to the new heap
+// If obj is an sm_pointer, the object was already moved to the new heap
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
   unsigned short int obj_type = obj->my_type;
@@ -33,15 +33,20 @@ void sm_inflate_heap() {
     // scan_cursor is not referred to for the rest of the loop
     scan_cursor += sm_sizeof(current_obj);
     switch (current_obj->my_type) {
+    case SM_LINK_TYPE: {
+      struct sm_link *link = (struct sm_link *)current_obj;
+      // Meet the value
+      link->value = sm_meet_object((sm_object *)link->value);
+      // Meet the next
+      if (link->next != NULL)
+        link->next = (struct sm_link *)sm_meet_object((sm_object *)link->next);
+      break;
+    }
     case SM_CX_TYPE: {
-      sm_cx      *cx  = (sm_cx *)current_obj;
-      sm_cx_node *cxn = &cx->content;
-      // Meet the content ptrs
-      for (int i = 0; i < 64; i++) {
-        void *child = cxn->child[i];
-        if (child != NULL)
-          cxn->child[i] = (sm_cx_node *)sm_meet_object((sm_object *)child);
-      }
+      sm_cx *cx = (sm_cx *)current_obj;
+      // Meet the top cx node
+      if (cx->content != NULL)
+        cx->content = (sm_cx_node *)sm_meet_object((sm_object *)cx->content);
       // Meet the parent
       if (cx->parent != NULL)
         cx->parent = (sm_cx *)sm_meet_object((sm_object *)cx->parent);
@@ -52,12 +57,9 @@ void sm_inflate_heap() {
       // Meet the value
       if (cxn->value != NULL)
         cxn->value = sm_meet_object((sm_object *)cxn->value);
-      // Meet the child ptrs
-      for (int i = 0; i < 64; i++) {
-        void *child = cxn->child[i];
-        if (child != NULL)
-          cxn->child[i] = (sm_cx_node *)sm_meet_object((sm_object *)child);
-      }
+      // Meet the children
+      if (cxn->children != NULL)
+        cxn->children = (struct sm_link *)sm_meet_object((sm_object *)cxn->children);
       break;
     }
     case SM_EXPR_TYPE: {
@@ -138,5 +140,6 @@ void sm_garbage_collect() {
     // For tracking purposes
     sm_gc_count(1);
   }
-  printf("%i bytes used after gc.\n", sm_global_current_heap(NULL)->used);
+  // This will be a global variable
+  // printf("\n%i bytes used after gc.\n", sm_global_current_heap(NULL)->used);
 }

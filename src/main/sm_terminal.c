@@ -3,6 +3,8 @@
 #include "sms.h"
 extern int yylineno;
 void       sm_terminal_prompt() {
-  printf("\n%i> ", yylineno);
-  fflush(stdout);
+        if (yylineno == 0)
+    printf("\n");
+  printf("%i> ", yylineno);
+        fflush(stdout);
 }

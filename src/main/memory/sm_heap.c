@@ -2,7 +2,7 @@
 
 #include "../sms.h"
 
-// For rounding up object size to the child multiple of 4 bytes.
+// For rounding up object size to the next multiple of 4 bytes.
 int sm_round_size(int size) { return ((size) + 3) & ~3; }
 
 // Create a new heap of some capacity
