@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -m 150 -q
+#!/usr/local/bin/sms -m 175 -q
 #Use this to benchmark something
 
 let first_time=[];

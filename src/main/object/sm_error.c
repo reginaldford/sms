@@ -12,7 +12,8 @@ sm_error *sm_new_error(sm_string *message, sm_string *source, unsigned int line)
 }
 
 int sm_error_sprint(sm_error *self, char *buffer, bool fake) {
-  int length = 10 + 6 + 2 + self->source->size + sm_double_len(self->line) + self->message->size;
+  int line_num_len = self->line == 0 ? 1 : log(self->line) / log(10);
+  int length       = 10 + 6 + 2 + self->source->size + line_num_len + self->message->size;
   if (!fake) {
     snprintf(buffer, length, "Error at: %s line %i: %s\n", &self->source->content, self->line,
              &self->message->content);

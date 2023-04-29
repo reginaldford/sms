@@ -26,8 +26,9 @@ enum sm_object_type {
   SM_FUN_TYPE,       // 10
   SM_FUN_PARAM_TYPE, // 11
   SM_LOCAL_TYPE,     // 12
-  SM_ERROR_TYPE,     // 13
-  SM_UNKNOWN_TYPE    // 14
+  SM_LINK_TYPE,      // 13
+  SM_ERROR_TYPE,     // 14
+  SM_UNKNOWN_TYPE    // 15
 };
 
 // Useful macros
@@ -52,6 +53,7 @@ enum sm_object_type {
 #include "object/sm_local.h"
 #include "object/sm_symbol.h"
 #include "object/sm_expr.h"
+#include "object/sm_link.h"
 #include "object/sm_cx.h"
 #include "object/sm_meta.h"
 #include "object/sm_error.h"

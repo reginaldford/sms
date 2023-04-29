@@ -118,8 +118,8 @@ arrToCsv   {return ARR_TOCSV;}
 blkToFile  {return BLK_TOFILE;}
 
 newArr      {return NEW_ARR;}
-arr+        {return ARR_CAT;}
-arr*        {return ARR_REPEAT;}
+arrCat      {return ARR_CAT;}
+arrRpt      {return ARR_REPEAT;}
 part        {return PART;}
 size        {return SIZE;}
 map         {return MAP;}
@@ -159,13 +159,13 @@ memAlloc   {return MALLOC_OBJ;}
 memFree    {return FREE_OBJ;}
 
 cpy         {return COPY;}
-deepCpy    {return DEEP_COPY;}
+deepCpy     {return DEEP_COPY;}
 
 symName     {return SYM_NAME;}
 
 newStr      {return NEW_STR;}
-"str+"      {return STR_CAT;}
-"str*"      {return STR_REPEAT;}
+"str\+"     {return STR_CAT;}
+"strRpt"    {return STR_REPEAT;}
 strEscape   {return STR_ESCAPE;}
 strUnescape {return STR_UNESCAPE;}
 strSize     {return STR_SIZE;}
