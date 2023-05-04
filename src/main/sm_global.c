@@ -10,14 +10,14 @@ This allows us to use a breakpoint or printf to detect reads/writes to the globa
 */
 
 // the global context
-sm_cx *sm_globalcx(sm_cx *replacement) {
-  static sm_cx *globalcx = NULL;
+sm_cx *sm_global_cx(sm_cx *replacement) {
+  static sm_cx *global_cx = NULL;
   if (replacement != NULL) {
-    sm_cx *temp = globalcx;
-    globalcx    = replacement;
+    sm_cx *temp = global_cx;
+    global_cx   = replacement;
     return temp;
   }
-  return globalcx;
+  return global_cx;
 }
 
 // Current heap. Objects here are live

@@ -3,6 +3,6 @@
 
 # Print the time with constant width
 while(true,(
-  putln(str+Part(dateStr(),11,8));
+  putln(strPart(dateStr(),11,8));
   sleep(1000);
 ));

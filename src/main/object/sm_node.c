@@ -1,0 +1,243 @@
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
+
+#include "../sms.h"
+
+// Create a new sm_node with the given size
+sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
+                     struct sm_node *children) {
+  sm_node *node  = sm_malloc(sizeof(sm_node));
+  node->my_type  = SM_NODE_TYPE;
+  node->value    = value;
+  node->next     = next;
+  node->map      = map;
+  node->children = children;
+  return node;
+}
+
+// Return the sm_node child index correlating to this character
+// Char   ASCII   Group_Size
+// '   is 39      1
+// 0-9 is 48-57   10
+// A-Z is 65-90   26
+// _   is 95      1
+// a-z is 98-122  26
+// Total: 64
+int sm_node_map_index(char c) {
+  int code = (int)c;
+  if (code == 39)
+    return 0;
+  if (code >= 48 && code <= 57)
+    return code - 48 + 1;
+  if (code >= 65 && code <= 90)
+    return code - 65 + 11;
+  if (code == 95)
+    return code - 95 + 37;
+  if (code >= 97 && code <= 122)
+    return code - 97 + 38;
+  return -1;
+}
+
+// Inverse of sm_map_index
+// Expects 0-63, else, returns NULL
+char sm_node_bit_unindex(int i) {
+  if (i == 0)
+    return '\'';
+  if (i >= 1 && i <= 10)
+    return i - 1 + '0';
+  if (i >= 11 && i <= 36)
+    return i - 11 + 'A';
+  if (i == 37)
+    return '_';
+  if (i >= 38 && i <= 63)
+    return i - 38 + 'a';
+  return '\0';
+}
+
+// Return the child node, specified by index
+sm_node *sm_node_nth(sm_node *self, int index) {
+  sm_node *current = self;
+  while (index > 0 && current != NULL) {
+    current = current->next;
+    index--;
+  }
+  if (index > 0)
+    return NULL;
+  return current;
+}
+
+// Identifies a node by its pointer, removes it and returns true
+// Returns false if the node is not found
+struct sm_node *sm_node_rm(struct sm_node *root, struct sm_node *nodeToRemove) {
+  struct sm_node *prev    = NULL;
+  struct sm_node *current = root;
+  while (current != NULL && current != nodeToRemove) {
+    prev    = current;
+    current = current->next;
+  }
+  if (current == NULL) {
+    // node not found in list
+    return root;
+  } else if (prev == NULL) {
+    // node to remove is the first node in the list
+    root = current->next;
+  } else {
+    // node to remove is not the first node in the list
+    prev->next = current->next;
+  }
+  return root;
+}
+
+// Insert this node at position specified by where, else return false
+bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
+  struct sm_node *cur = root;
+  int             i   = 0;
+  while (cur && cur->next && i < where - 1) {
+    cur = cur->next;
+    i++;
+  }
+  if (i < where - 1)
+    return false;
+  new_node->next = cur->next;
+  cur->next      = new_node;
+  return true;
+}
+
+// Returns the number of set bits to the left of map_index'th bit in map
+// Put in 64 for the number of 1 bits in the long long
+int left_count(unsigned long long map, int map_index) {
+  return __builtin_popcountll(map & ((1LL << map_index) - 1));
+}
+
+// Return the node of the trie addressed by needle, or return NULL
+sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
+  sm_node *curr_node   = self;
+  int      map_index   = 0;
+  int      child_index = 0;
+  int      char_index  = 0;
+  for (; char_index < len && curr_node != NULL; char_index++) {
+    map_index = sm_node_map_index(needle[char_index]);
+    if (sm_node_map_get(curr_node->map, map_index) == false)
+      return NULL;
+    child_index = left_count(curr_node->map, map_index);
+    curr_node   = sm_node_nth(curr_node->children, child_index);
+    if (curr_node == NULL)
+      return NULL;
+  }
+  if (char_index == len)
+    return curr_node;
+  return NULL;
+}
+
+// Return the parent node of the node addressed by needle, or return NULL
+sm_node *sm_node_parent_node(sm_node *self, char *needle, int len) {
+  sm_node *curr_node   = self;
+  sm_node *last_node   = NULL;
+  int      map_index   = 0;
+  int      child_index = 0;
+  int      char_index  = 0;
+  for (; char_index < len && curr_node != NULL; char_index++) {
+    map_index = sm_node_map_index(needle[char_index]);
+    if (sm_node_map_get(curr_node->map, map_index) == false)
+      return NULL;
+    child_index = left_count(curr_node->map, map_index);
+    last_node   = curr_node;
+    curr_node   = sm_node_nth(curr_node->children, child_index);
+    if (curr_node == NULL)
+      return NULL;
+  }
+  if (char_index == len)
+    return last_node;
+  return NULL;
+}
+
+// Get this value from the current context.
+// Return Null if there is no such key.
+sm_object *sm_node_get(sm_node *self, char *needle, int len) {
+  sm_node *node = self;
+  if (node != NULL) {
+    sm_node *leaf = sm_node_subnode(node, needle, len);
+    if (leaf != NULL)
+      return leaf->value;
+  }
+  return NULL;
+}
+
+// Get container of this value from the current context.
+// Return Null if there is no such key.
+sm_node *sm_node_get_container(sm_node *self, char *needle, int len) {
+  sm_node *node = self;
+  if (node != NULL) {
+    sm_node *leaf = sm_node_subnode(node, needle, len);
+    if (leaf != NULL)
+      return leaf;
+  }
+  return NULL;
+}
+
+// Report of the node has not value and no children
+bool sm_node_is_empty(sm_node *node) { return node->value == NULL && node->map == 0LL; }
+
+
+// Prints all of the key-value pairs in this node recursively
+// Uses the stack to recall path to current node, for full key name
+int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack) {
+  int cursor = 0;
+  if (node->value != NULL) {
+    // var name
+    for (unsigned int i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
+      sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
+      if (!fake)
+        buffer[i] = sm_node_bit_unindex(num_obj->value);
+    }
+    cursor = sm_stack_size(char_stack);
+    // equals sign
+    if (!fake)
+      buffer[cursor] = '=';
+    cursor++;
+    // rhs value
+    cursor += sm_object_sprint(node->value, &(buffer[cursor]), fake);
+    // semicolon
+    if (!fake)
+      buffer[cursor] = ';';
+    cursor++;
+  }
+  // If there are not more children, we are done
+  if (sm_node_is_empty(node)) {
+    return cursor;
+  }
+  int items_to_do = sm_node_map_size(node->map);
+  for (int i = 0; items_to_do > 0 && i < 64; i++) {
+    if (sm_node_map_get(node->map, i) == true) {
+      int      child_index = sm_node_child_index(node->map, i);
+      sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
+      sm_stack_push(char_stack, sm_new_double(i));
+      cursor += sm_node_sprint(child_here, &(buffer[cursor]), fake, char_stack);
+      sm_stack_pop(char_stack);
+      items_to_do--;
+    }
+  }
+  return cursor;
+}
+
+// Returns the number of children
+int sm_node_map_size(unsigned long long map) { return __builtin_popcountll(map); }
+
+// Sets a bit of map to 1 or 0 depending on the provided boolean
+void sm_node_map_set(unsigned long long *map, int index, bool on) {
+  if (on) {
+    *map |= (1LL << index);
+  } else {
+    *map &= ~(1LL << index);
+  }
+}
+
+// Return whether a bit is 1
+bool sm_node_map_get(unsigned long long map, int i) {
+  unsigned long long mask = 1ULL << i;
+  return (map & mask) != 0;
+}
+
+// Returns the correlating child index to this bit in the map
+int sm_node_child_index(unsigned long long map, int map_index) {
+  return __builtin_popcountll(map & ((1LL << map_index) - 1));
+}

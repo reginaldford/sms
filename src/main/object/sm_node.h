@@ -1,0 +1,25 @@
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
+
+// These nodes branch from sm_cx
+typedef struct sm_node {
+  short int          my_type;  // SM_NODE_TYPE
+  struct sm_object  *value;    // NULL if nothing
+  struct sm_node    *next;     // Like changing this letter
+  unsigned long long map;      // 1's for existing children
+  struct sm_node    *children; // Like moving cursor over
+} sm_node;
+
+sm_node   *sm_new_node(sm_object *value, struct sm_node *next, long long map,
+                       struct sm_node *children);
+sm_object *sm_node_get(sm_node *self, char *needle, int len);
+sm_node   *sm_node_get_leaf(sm_node *root, char *needle, int len);
+void       sm_node_set(sm_node *node, int which, sm_object *value);
+bool       sm_node_is_empty(sm_node *node);
+int        sm_node_map_index(char c);
+char       sm_node_bit_unindex(int i);
+bool       sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where);
+sm_node   *sm_node_nth(sm_node *self, int index);
+sm_node   *sm_node_subnode(sm_node *self, char *needle, int len);
+sm_node   *sm_node_get_container(sm_node *self, char *needle, int len);
+int        sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack);
+sm_node   *sm_node_parent_node(sm_node *self, char *needle, int len);

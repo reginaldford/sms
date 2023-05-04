@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-sm_cx             *sm_globalcx(sm_cx *replacement);
+sm_cx             *sm_global_cx(sm_cx *replacement);
 sm_heap           *sm_global_current_heap(sm_heap *replacement);
 sm_heap           *sm_global_other_heap(sm_heap *replacement);
 int                sm_gc_count(int increase);

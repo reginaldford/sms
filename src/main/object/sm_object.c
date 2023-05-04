@@ -68,8 +68,8 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(sm_symbol);
   case SM_CX_TYPE:
     return sizeof(sm_cx);
-  case SM_CX_NODE_TYPE:
-    return sizeof(sm_cx_node);
+  case SM_NODE_TYPE:
+    return sizeof(sm_node);
   case SM_POINTER_TYPE:
     return sizeof(sm_pointer);
   case SM_META_TYPE:

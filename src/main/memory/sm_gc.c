@@ -44,22 +44,25 @@ void sm_inflate_heap() {
     }
     case SM_CX_TYPE: {
       sm_cx *cx = (sm_cx *)current_obj;
-      // Meet the top cx node
-      if (cx->content != NULL)
-        cx->content = (sm_cx_node *)sm_meet_object((sm_object *)cx->content);
       // Meet the parent
       if (cx->parent != NULL)
         cx->parent = (sm_cx *)sm_meet_object((sm_object *)cx->parent);
+      // Meet the top cx node
+      if (cx->content != NULL)
+        cx->content = (sm_node *)sm_meet_object((sm_object *)cx->content);
       break;
     }
-    case SM_CX_NODE_TYPE: {
-      sm_cx_node *cxn = (sm_cx_node *)current_obj;
+    case SM_NODE_TYPE: {
+      sm_node *node = (sm_node *)current_obj;
       // Meet the value
-      if (cxn->value != NULL)
-        cxn->value = sm_meet_object((sm_object *)cxn->value);
+      if (node->value != NULL)
+        node->value = sm_meet_object((sm_object *)node->value);
+      // Meet the next node
+      if (node->next != NULL)
+        node->next = (struct sm_node *)sm_meet_object((sm_object *)node->next);
       // Meet the children
-      if (cxn->children != NULL)
-        cxn->children = (struct sm_link *)sm_meet_object((sm_object *)cxn->children);
+      if (node->children != NULL)
+        node->children = (struct sm_node *)sm_meet_object((sm_object *)node->children);
       break;
     }
     case SM_EXPR_TYPE: {
@@ -141,5 +144,5 @@ void sm_garbage_collect() {
     sm_gc_count(1);
   }
   // This will be a global variable
-  // printf("\n%i bytes used after gc.\n", sm_global_current_heap(NULL)->used);
+  printf("\n%i bytes used after gc.\n", sm_global_current_heap(NULL)->used);
 }
