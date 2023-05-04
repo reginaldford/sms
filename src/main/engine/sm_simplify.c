@@ -394,7 +394,7 @@ sm_expr *apply_constants14(sm_expr *e) {
     return e;
 }
 
-// return the first element (starting at pos) of this type or -1
+// Return the first element (starting at pos) NOT of this type or -1
 unsigned int find_next_not(sm_expr *e, unsigned int pos, unsigned short int t) {
   for (unsigned int i = pos + 1; i < e->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(e, i);

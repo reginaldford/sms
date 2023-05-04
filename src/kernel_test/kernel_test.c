@@ -9,6 +9,7 @@
 #include "chapter_0.h"
 #include "chapter_1.h"
 #include "chapter_2.h"
+#include "chapter_3.h"
 
 #define CHAPTER(f)                                                                                 \
   if (chosen_chapter == -1 || chosen_chapter == current_chapter) {                                 \
@@ -54,6 +55,7 @@ int main(int num_args, char **argv) {
   CHAPTER(chapter_0(chosen_test));
   CHAPTER(chapter_1(chosen_test));
   CHAPTER(chapter_2(chosen_test));
+  CHAPTER(chapter_3(chosen_test));
 
   if (num_fails == 0) {
     printf("\nAll tests passed!\n");

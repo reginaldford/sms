@@ -10,6 +10,8 @@ let two_digits=(x)=>(
   )
 );
 
+let am_pm_str = (hr) => if(hr>11,"PM","AM");
+
 # Print the time with constant width
 let d = date();
 
@@ -23,6 +25,7 @@ while(true,(
   put(":");
   put(two_digits(d[1]));
   put(":");
-  putln(two_digits(d[0]));
+  put(two_digits(d[0]));
+  putln(" " str+ am_pm_str(d[2]));
   sleep(1000);
 ));

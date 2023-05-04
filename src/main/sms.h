@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdint.h>
 
 // These are the major object types of SMS
 // Keep syncronized with function sm_object_type_str
@@ -19,7 +20,7 @@ enum sm_object_type {
   SM_STRING_TYPE,    // 3
   SM_SYMBOL_TYPE,    // 4
   SM_CX_TYPE,        // 5
-  SM_CX_NODE_TYPE,   // 6
+  SM_NODE_TYPE,      // 6
   SM_POINTER_TYPE,   // 7
   SM_META_TYPE,      // 8
   SM_SPACE_TYPE,     // 9
@@ -54,6 +55,7 @@ enum sm_object_type {
 #include "object/sm_symbol.h"
 #include "object/sm_expr.h"
 #include "object/sm_link.h"
+#include "object/sm_node.h"
 #include "object/sm_cx.h"
 #include "object/sm_meta.h"
 #include "object/sm_error.h"
