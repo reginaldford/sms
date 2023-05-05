@@ -9,7 +9,7 @@ extern int yylineno;
 // Prints intro
 void print_intro() {
   printf("Symbolic Math System\n");
-  printf("Version 0.155\n");
+  printf("Version 0.156\n");
 }
 
 // Initialize the heap, etc, if necessary
@@ -93,7 +93,7 @@ int main(int num_args, char *argv[]) {
   env.quiet_mode    = false;
 
   opterr = 0; // Disable error messages for unknown options
-  char opt;
+  int opt;
   while ((opt = getopt(num_args, argv, "qhm:e:s:i:")) != -1) {
     switch (opt) {
     case 'h':
