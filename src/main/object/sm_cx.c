@@ -100,6 +100,8 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
 // which has a map size more than 1.
 // If there is no map size more than 1 in the path, then the root node is returned.
 bool sm_cx_rm(sm_cx *self, char *needle, int len) {
+  // First, determine that the node exists
+  // While tracking the node_path for later
   sm_node *node_path[len];
   sm_node *curr_node   = self->content;
   int      map_index   = 0;
@@ -119,9 +121,10 @@ bool sm_cx_rm(sm_cx *self, char *needle, int len) {
     return false;
   // Last element of node_path.
   node_path[len - 1] = curr_node;
-  // curr_node is the addressed node
+  // Delete the value at the addressed node
   curr_node->value = NULL;
-  // For all but the first letter
+  // The rest is garbage collection
+  // For nodes addressed by subsets of needle from beginning to all but the first letter
   for (int i = len - 1; i > 0; i--) {
     curr_node                        = node_path[i];
     struct sm_node *curr_node_parent = node_path[i - 1];
@@ -133,7 +136,7 @@ bool sm_cx_rm(sm_cx *self, char *needle, int len) {
     } else
       break;
   }
-  // For the first letter
+  // For the first node
   curr_node                        = node_path[0];
   struct sm_node *curr_node_parent = self->content;
   if (curr_node->map == 0LL && curr_node->value == NULL) {
