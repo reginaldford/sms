@@ -69,7 +69,6 @@ bool sm_link_insert(struct sm_link *root, struct sm_link *new_node, int where) {
   return true;
 }
 
-
 bool sm_link_rm_nth(struct sm_link *root, int n) {
   struct sm_link *cur = root;
   int             i   = 0;
