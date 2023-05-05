@@ -65,8 +65,8 @@ sm_node *sm_node_nth(sm_node *self, int index) {
   return current;
 }
 
-// Identifies a node by its pointer, removes it and returns true
-// Returns false if the node is not found
+// Identifies a node by its pointer, removes it and returns the new root
+// Returns NULL if the node is not found
 struct sm_node *sm_node_rm(struct sm_node *root, struct sm_node *nodeToRemove) {
   struct sm_node *prev    = NULL;
   struct sm_node *current = root;
@@ -104,8 +104,11 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
 
 // Returns the number of set bits to the left of map_index'th bit in map
 // Put in 64 for the number of 1 bits in the long long
-int left_count(unsigned long long map, int map_index) {
-  return __builtin_popcountll(map & ((1LL << map_index) - 1));
+int sm_node_map_left_count(unsigned long long map, int bit_index) {
+  if (bit_index < 0) {
+    return -1;
+  }
+  return __builtin_popcountll(map & ((1LL << bit_index) - 1));
 }
 
 // Return the node of the trie addressed by needle, or return NULL
@@ -118,7 +121,7 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
     map_index = sm_node_map_index(needle[char_index]);
     if (sm_node_map_get(curr_node->map, map_index) == false)
       return NULL;
-    child_index = left_count(curr_node->map, map_index);
+    child_index = sm_node_map_left_count(curr_node->map, map_index);
     curr_node   = sm_node_nth(curr_node->children, child_index);
     if (curr_node == NULL)
       return NULL;
@@ -139,7 +142,7 @@ sm_node *sm_node_parent_node(sm_node *self, char *needle, int len) {
     map_index = sm_node_map_index(needle[char_index]);
     if (sm_node_map_get(curr_node->map, map_index) == false)
       return NULL;
-    child_index = left_count(curr_node->map, map_index);
+    child_index = sm_node_map_left_count(curr_node->map, map_index);
     last_node   = curr_node;
     curr_node   = sm_node_nth(curr_node->children, child_index);
     if (curr_node == NULL)
@@ -219,10 +222,10 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack)
   return cursor;
 }
 
-// Returns the number of children
+// Return the number of children
 int sm_node_map_size(unsigned long long map) { return __builtin_popcountll(map); }
 
-// Sets a bit of map to 1 or 0 depending on the provided boolean
+// Set a bit of map to 1 or 0 depending on the provided boolean
 void sm_node_map_set(unsigned long long *map, int index, bool on) {
   if (on) {
     *map |= (1LL << index);
@@ -237,7 +240,21 @@ bool sm_node_map_get(unsigned long long map, int i) {
   return (map & mask) != 0;
 }
 
-// Returns the correlating child index to this bit in the map
+// Return the correlating child index to this bit in the map
 int sm_node_child_index(unsigned long long map, int map_index) {
   return __builtin_popcountll(map & ((1LL << map_index) - 1));
+}
+
+bool sm_node_rm_nth(struct sm_node *root, int n) {
+  struct sm_node *cur = root;
+  int             i   = 0;
+  while (cur->next && i < n - 1) {
+    cur = cur->next;
+    i++;
+  }
+  if (i < n - 1 || cur->next == NULL) {
+    return false; // Not enough nodes in the list
+  }
+  cur->next = cur->next->next;
+  return true;
 }
