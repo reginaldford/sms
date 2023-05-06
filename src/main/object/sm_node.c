@@ -278,3 +278,35 @@ int sm_node_size(sm_node *node) {
   }
   return size;
 }
+
+// Returns the keys under this node(recursive)
+sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) {
+  if (node == NULL)
+    return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+  char buffer[32];
+  if (node->value != NULL) {
+    // var name
+    for (unsigned int i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
+      sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
+      buffer[i]          = sm_node_bit_unindex(num_obj->value);
+    }
+    int len    = sm_stack_size(char_stack);
+    collection = sm_expr_append(collection, (sm_object *)sm_new_symbol(sm_new_string(len, buffer)));
+  }
+  // If there are not more children, we are done
+  if (sm_node_is_empty(node)) {
+    return collection;
+  }
+  int items_to_do = sm_node_map_size(node->map);
+  for (int i = 0; items_to_do > 0 && i < 64; i++) {
+    if (sm_node_map_get(node->map, i) == true) {
+      int      child_index = sm_node_child_index(node->map, i);
+      sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
+      sm_stack_push(char_stack, sm_new_double(i));
+      collection = sm_node_keys(child_here, char_stack, collection);
+      sm_stack_pop(char_stack);
+      items_to_do--;
+    }
+  }
+  return collection;
+}
