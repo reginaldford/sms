@@ -326,7 +326,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_CX_SIZE_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_CONTAINING_EXPR)) {
+      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SIZE_EXPR)) {
         int size = sm_cx_size(cx);
         return (sm_object *)sm_new_double(size);
       }
