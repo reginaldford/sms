@@ -116,7 +116,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> MAP
 %token <expr> PARENT
 %token <expr> EVAL
-%token <expr> EVAL_IN_CX
+%token <expr> EVAL_IN
 %token <expr> EVAL_FAST
 %token <expr> EVAL_FAST_IN_CX
 %token <expr> FAILS
@@ -200,6 +200,7 @@ void _lex_cstr(char * cstr,int len);
 
 
 %token <expr> NEW_CX
+%token <expr> CX_DOT
 %token <expr> CX_KEYS
 %token <expr> CX_VALUES
 %token <expr> CX_LET
@@ -272,17 +273,6 @@ COMMAND : EXPR ';' {
   sm_global_parser_output((sm_object *)($1));
   YYACCEPT;
 }
-| RM SYM ';' {
-  bool success = (sm_expr *)sm_cx_rm(*(sm_global_lex_stack(NULL)->top), (&((sm_symbol
-  *)$2)->name->content),(((sm_symbol*)$2)->name->size));
-  if (success == true) {
-    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(4, "true")));
-    YYACCEPT;
-  } else {
-    sm_global_parser_output((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
-    YYACCEPT;
-  }
-}
 | error ';' { YYABORT; }
 | DONE      { YYACCEPT;}
 
@@ -291,6 +281,7 @@ COMMAND : EXPR ';' {
 EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | EXIT '(' EXPR ')'  { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3);  }
 | LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4);}
+| RM SYM {$$ = sm_new_expr(SM_RM_EXPR, (sm_object *)$2);}
 | SYM{}
 | EXPR '+' EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object *)$1, (sm_object *)$3); }
 | EXPR '-' EXPR { $$ = sm_new_expr_2(SM_MINUS_EXPR, (sm_object *)$1, (sm_object *)$3); }
@@ -353,7 +344,7 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | DO_WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_DO_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}
-| EVAL_IN_CX '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| EVAL_IN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | EVAL_FAST '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_FAST_EXPR,(sm_object*)$3);}
 | EVAL_FAST_IN_CX '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_FAST_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | FAILS '(' EXPR ')' {$$ = sm_new_expr(SM_FAILS_EXPR,(sm_object*)$3);}
@@ -362,6 +353,13 @@ EXPR : SELF { $$ = (sm_expr *)*(sm_global_lex_stack(NULL)->top); }
 | PUT '(' EXPR ')' {$$ = sm_new_expr(SM_PUT_EXPR,(sm_object*)$3);}
 | PUTLN '(' EXPR ')' {$$ = sm_new_expr(SM_PUTLN_EXPR,(sm_object*)$3);}
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);}
+| CX_DOT '(' EXPR ',' EXPR ')' {$$=sm_new_expr_2(SM_CX_DOT_EXPR, (sm_object *)$3,(sm_object*)$5);}
+| CX_CONTAINING '(' EXPR ',' EXPR ')' {$$=sm_new_expr_2(SM_CX_CONTAINING_EXPR, (sm_object *)$3,(sm_object*)$5);}
+| CX_CLEAR '(' EXPR ')' {$$=sm_new_expr(SM_CX_CLEAR_EXPR, (sm_object *)$3);}
+| CX_LET '(' EXPR ','  EXPR  ',' EXPR ')'  { $$ = sm_new_expr_3(SM_CX_LET_EXPR,(sm_object*)$3,(sm_object*)$5, (sm_object*)$7);}
+| CX_SET '(' EXPR ','  EXPR  ',' EXPR ')'  { $$ = sm_new_expr_3(SM_CX_SET_EXPR,(sm_object*)$3,(sm_object*)$5, (sm_object*)$7);}
+| CX_RM '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_CX_RM_EXPR, (sm_object *)$3,(sm_object*)$5);}
+| CX_SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_CX_SIZE_EXPR, (sm_object *)$3);}
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3);}
 | FILE_RUN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_READ_EXPR,(sm_object*)$3,(sm_object*)$5);}
@@ -544,8 +542,7 @@ CONTEXT : CONTEXT_LIST '}' {
 }
 | '{' '}' {
   sm_cx *parent_cx = *(sm_global_lex_stack(NULL)->top);
-  sm_cx *new_cx    = sm_new_cx(parent_cx);
-  $$ = new_cx;
+  $$    = sm_new_cx(parent_cx);
 }
 
 CONTEXT_LIST : '{' ASSIGNMENT ';' ASSIGNMENT {

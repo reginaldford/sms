@@ -26,6 +26,7 @@ void sm_init(sm_env *env) {
   sm_cx_let(parent_cx, "PI", 2, (sm_object *)sm_new_double(3.14159265358979323846));
   sm_cx_let(parent_cx, "true", 4, (sm_object *)sm_new_symbol(sm_new_string(4, "true")));
   sm_cx_let(parent_cx, "false", 5, (sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+  sm_cx_let(parent_cx, "_symbols", 8, (sm_object *)sm_new_cx(NULL));
 
   // Initialize the global context
   sm_stack_push(sm_global_lex_stack(NULL), sm_new_cx(parent_cx));
