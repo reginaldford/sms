@@ -89,9 +89,6 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
       next_node = sm_node_nth(current_node->children, child_index);
     current_node = (sm_node *)next_node;
   }
-  // Leaf node already exists with this key
-  if (current_node->value != NULL)
-    return false;
   current_node->value = (sm_object *)val;
   return true;
 }
@@ -167,4 +164,14 @@ unsigned int sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
     buffer[cursor] = '}';
   cursor++;
   return cursor;
+}
+
+// Clear the contents of the cx
+void sm_cx_clear(sm_cx *self) { self->content = NULL; }
+
+// Clear the contents of the cx
+unsigned int sm_cx_size(sm_cx *self) {
+  if (self->content != NULL)
+    return sm_node_size(self->content);
+  return 0;
 }

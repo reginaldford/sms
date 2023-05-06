@@ -27,3 +27,4 @@ struct sm_node *sm_node_rm(struct sm_node *root, struct sm_node *nodeToRemove);
 sm_node        *sm_node_unique_root(struct sm_node *root, char *needle, int len);
 int             sm_node_map_left_count(unsigned long long map, int map_index);
 bool            sm_node_rm_nth(struct sm_node *root, int n);
+int             sm_node_size(sm_node *node);

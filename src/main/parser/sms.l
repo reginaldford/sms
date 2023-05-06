@@ -59,7 +59,7 @@ if           {return IF;}
 while        {return WHILE;}
 doWhile      {return DO_WHILE;}
 eval         {return EVAL;}
-evalInCX     {return EVAL_IN_CX;}
+evalIn       {return EVAL_IN;}
 evalFast     {return EVAL_FAST;}
 evalFastInCX {return EVAL_FAST_IN_CX;}
 fails        {return FAILS;}
@@ -88,6 +88,7 @@ parent       {return PARENT;}
 rm           {return RM;}
 
 newCx        {return NEW_CX;}
+cxDot        {return CX_DOT;}
 cxLet        {return CX_LET;}
 cxContaining {return CX_CONTAINING;}
 cxSet        {return CX_SET;}

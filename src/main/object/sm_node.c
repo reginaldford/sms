@@ -258,3 +258,23 @@ bool sm_node_rm_nth(struct sm_node *root, int n) {
   cur->next = cur->next->next;
   return true;
 }
+
+// Returns the number of values under this node (recursive)
+int sm_node_size(sm_node *node) {
+  int size = 0;
+  if (node->value != NULL)
+    size++;
+  // If there are not more children, we are done
+  if (sm_node_is_empty(node))
+    return size;
+  int items_to_do = sm_node_map_size(node->map);
+  for (int i = 0; items_to_do > 0 && i < 64; i++) {
+    if (sm_node_map_get(node->map, i) == true) {
+      int      child_index = sm_node_child_index(node->map, i);
+      sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
+      size += sm_node_size(child_here);
+      items_to_do--;
+    }
+  }
+  return size;
+}
