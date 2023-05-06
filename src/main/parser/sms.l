@@ -94,7 +94,7 @@ cxContaining {return CX_CONTAINING;}
 cxSet        {return CX_SET;}
 cxRm         {return CX_RM;}
 cxClear      {return CX_CLEAR;}
-cxkeys       {return CX_KEYS;}
+cxKeys       {return CX_KEYS;}
 cxValues     {return CX_VALUES;}
 cxSize       {return CX_SIZE;}
 cxImport     {return CX_IMPORT;}
