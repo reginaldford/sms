@@ -116,7 +116,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> MAP
 %token <expr> PARENT
 %token <expr> EVAL
-%token <expr> EVAL_IN
+%token <expr> CX_EVAL
 %token <expr> EVAL_FAST
 %token <expr> EVAL_FAST_IN_CX
 %token <expr> FAILS
@@ -344,7 +344,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | DO_WHILE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_DO_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}
-| EVAL_IN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| CX_EVAL '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_CX_EVAL_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | EVAL_FAST '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_FAST_EXPR,(sm_object*)$3);}
 | EVAL_FAST_IN_CX '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_FAST_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | FAILS '(' EXPR ')' {$$ = sm_new_expr(SM_FAILS_EXPR,(sm_object*)$3);}

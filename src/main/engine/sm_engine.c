@@ -674,15 +674,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *evaluated     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return sm_engine_eval(evaluated, where_to_eval, sf);
     }
-    case SM_EVAL_IN_CX_EXPR: {
+    case SM_CX_EVAL_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1      = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_cx     *where_to_eval;
-      if (expect_type(obj1, 1, SM_CX_TYPE, SM_EVAL_IN_CX_EXPR))
+      if (expect_type(evaluated, 0, SM_CX_TYPE, SM_CX_EVAL_EXPR))
         where_to_eval = (sm_cx *)evaluated;
       else
         return (sm_object *)sm_new_double(0);
-      return sm_engine_eval(evaluated, where_to_eval, sf);
+      return sm_engine_eval(obj1, where_to_eval, sf);
     }
     case SM_PUT_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
