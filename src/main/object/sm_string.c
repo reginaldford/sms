@@ -12,7 +12,7 @@ char *sm_strncpy(char *dest, const char *src, unsigned int n) {
   return dest;
 }
 
-// Expecting a null terminated string
+// Create a new string, automatically null terminated
 sm_string *sm_new_string(unsigned int size, char *str) {
   // We add a null character that is not included in the size
   struct sm_string *newstr = sm_new_string_manual(size);
@@ -20,7 +20,7 @@ sm_string *sm_new_string(unsigned int size, char *str) {
   return newstr;
 }
 
-// For you to fill in yourself
+// Return a new empty string (does not nullify contents)
 sm_string *sm_new_string_manual(unsigned int size) {
   struct sm_string *newstr = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size));
   newstr->my_type          = SM_STRING_TYPE;
