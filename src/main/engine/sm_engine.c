@@ -345,10 +345,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_CX_RM_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_RM_EXPR)) {
         if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_RM_EXPR)) {
-          bool success = sm_cx_rm(current_cx, &sym->name->content, sym->name->size);
+          bool success = sm_cx_rm(cx, &sym->name->content, sym->name->size);
           if (success == true)
             return ((sm_object *)sm_new_symbol(sm_new_string(4, "true")));
           else
