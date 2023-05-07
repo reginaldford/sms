@@ -59,7 +59,7 @@ if           {return IF;}
 while        {return WHILE;}
 doWhile      {return DO_WHILE;}
 eval         {return EVAL;}
-evalIn       {return EVAL_IN;}
+cxEval       {return CX_EVAL;}
 evalFast     {return EVAL_FAST;}
 evalFastInCX {return EVAL_FAST_IN_CX;}
 fails        {return FAILS;}
