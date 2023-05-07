@@ -110,6 +110,11 @@ void sm_inflate_heap() {
       local->name     = (sm_string *)sm_meet_object((sm_object *)local->name);
       break;
     }
+    case SM_SELF_TYPE: {
+      sm_self *self = (sm_self *)current_obj;
+      self->context = (sm_cx *)sm_meet_object((sm_object *)self->context);
+      break;
+    }
     default:
       break;
     }

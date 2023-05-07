@@ -808,7 +808,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_PARENT_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_cx     *base_cx;
-      if (expect_type(base_obj, 0, SM_CX_TYPE, SM_DOT_EXPR))
+      if (expect_type(base_obj, 0, SM_CX_TYPE, SM_PARENT_EXPR))
         base_cx = (sm_cx *)base_obj;
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -1317,6 +1317,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   }   // End of expr case
   case SM_META_TYPE: {
     return ((sm_meta *)input)->address;
+  }
+  case SM_SELF_TYPE: {
+    return (sm_object *)((sm_self *)input)->context;
   }
   case SM_PRIMITIVE_TYPE: {
     printf("Primitives are not developed yet\n");

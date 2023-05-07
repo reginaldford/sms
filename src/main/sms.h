@@ -29,7 +29,8 @@ enum sm_object_type {
   SM_LOCAL_TYPE,     // 12
   SM_LINK_TYPE,      // 13
   SM_ERROR_TYPE,     // 14
-  SM_UNKNOWN_TYPE    // 15
+  SM_SELF_TYPE,      // 15
+  SM_UNKNOWN_TYPE    // 16
 };
 
 // Useful macros
@@ -43,21 +44,22 @@ enum sm_object_type {
 
 #include "sm_env.h"
 #include "sm_signal.h"
+#include "sm_init.h"
+#include "memory/sm_heap.h"
 #include "object/sm_string.h"
 #include "object/sm_object.h"
-#include "parser/sm_parse_result.h"
-#include "sm_init.h"
+#include "object/sm_expr.h"
 #include "sm_stack.h"
-#include "memory/sm_heap.h"
+#include "object/sm_node.h"
+#include "object/sm_cx.h"
+#include "parser/sm_parse_result.h"
 #include "object/sm_double.h"
 #include "object/sm_fun.h"
 #include "object/sm_local.h"
 #include "object/sm_symbol.h"
-#include "object/sm_expr.h"
 #include "object/sm_link.h"
-#include "object/sm_node.h"
-#include "object/sm_cx.h"
 #include "object/sm_meta.h"
+#include "object/sm_self.h"
 #include "object/sm_error.h"
 #include "memory/sm_pointer.h"
 #include "memory/sm_space.h"
@@ -65,6 +67,6 @@ enum sm_object_type {
 #include "sm_global.h"
 #include "sm_terminal.h"
 #include "engine/str.h"
-#include "engine/sm_engine.h"
 #include "engine/sm_diff.h"
 #include "engine/sm_simplify.h"
+#include "engine/sm_engine.h"
