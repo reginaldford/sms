@@ -99,30 +99,29 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
 bool sm_cx_rm(sm_cx *self, char *needle, int len) {
   // First, determine that the node exists
   // While tracking the node_path for later
-  sm_node *node_path[len];
+  sm_node *node_path[len + 1]; // we include the root node which has no letter associated
   sm_node *curr_node   = self->content;
   int      map_index   = 0;
   int      child_index = 0;
   int      char_index  = 0;
+  node_path[0]         = curr_node;
   for (; char_index < len && curr_node != NULL; char_index++) {
     map_index = sm_node_map_index(needle[char_index]);
     if (sm_node_map_get(curr_node->map, map_index) == false)
       return false;
-    child_index           = sm_node_map_left_count(curr_node->map, map_index);
-    node_path[char_index] = curr_node;
-    curr_node             = sm_node_nth(curr_node->children, child_index);
+    child_index               = sm_node_map_left_count(curr_node->map, map_index);
+    curr_node                 = sm_node_nth(curr_node->children, child_index);
+    node_path[char_index + 1] = curr_node;
     if (curr_node == NULL)
       return false;
   }
   if (char_index < len)
     return false;
-  // Last element of node_path.
-  node_path[len - 1] = curr_node;
   // Delete the value at the addressed node
   curr_node->value = NULL;
   // The rest is garbage collection
-  // For nodes addressed by subsets of needle from beginning to all but the first letter
-  for (int i = len - 1; i > 0; i--) {
+  // For nodes addressed by subsets of needle from beginning to all other letters
+  for (int i = len; i > 0; i--) {
     curr_node                        = node_path[i];
     struct sm_node *curr_node_parent = node_path[i - 1];
     if (curr_node->map == 0LL && curr_node->value == NULL) {
@@ -132,15 +131,6 @@ bool sm_cx_rm(sm_cx *self, char *needle, int len) {
       curr_node_parent->children = sm_node_rm(curr_node_parent->children, curr_node);
     } else
       break;
-  }
-  // For the first node
-  curr_node                        = node_path[0];
-  struct sm_node *curr_node_parent = self->content;
-  if (curr_node->map == 0LL && curr_node->value == NULL) {
-    map_index   = sm_node_map_index(needle[0]);
-    child_index = sm_node_map_left_count(curr_node_parent->map, map_index);
-    sm_node_map_set(&curr_node_parent->map, map_index, false);
-    curr_node_parent->children = sm_node_rm(curr_node_parent->children, curr_node);
   }
   // If the root node's map is empty, nullify this cx's content
   if (self->content->map == 0LL) {

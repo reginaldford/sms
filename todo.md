@@ -5,6 +5,8 @@
 - The right side will be a refcount, so we can delete symbols with 0 references at gc.
 - After gc, update globals for true, false etc.
 - then, we can optimize symbol equivilance tests to ptr equivilance tests.
+- note that == should be true if the toStr(obj1)==toStr(obj2) but 'is' keyword will check for ptr equality.
+- so loops will use things like while(x is true) or while( n < size is not(true));
 
 # reflexivity
 - get op symbol from an expr
@@ -19,13 +21,6 @@
 # argument access
 - _args in rooftop
 
-# context update linked list
-- contexts will have a field for new_version
-- if newer_version is null, this is the new version, else, points to a newer version.
-
-# matrices
-- matrices and basic operations.
-- convert to array
 
 # types, typed arrays
 - str[ ...] makes a single string , concatenating the strings
@@ -41,7 +36,8 @@ with an array of integers for their start locations.
 - type casting # only state desired type, like toStr=(str), so deprecate toStr
 - num array is 1d
 
-#matrices
+# matrices
+- convert to array
 - m is 2d:
 k = m[ 1, 2, 3;
        2, 3, 4;

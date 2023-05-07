@@ -204,20 +204,21 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack)
       buffer[cursor] = ';';
     cursor++;
   }
-  // If there are not more children, we are done
-  if (sm_node_is_empty(node)) {
-    return cursor;
-  }
   int items_to_do = sm_node_map_size(node->map);
-  for (int i = 0; items_to_do > 0 && i < 64; i++) {
-    if (sm_node_map_get(node->map, i) == true) {
-      int      child_index = sm_node_child_index(node->map, i);
-      sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
-      sm_stack_push(char_stack, sm_new_double(i));
-      cursor += sm_node_sprint(child_here, &(buffer[cursor]), fake, char_stack);
-      sm_stack_pop(char_stack);
-      items_to_do--;
-    }
+  for (int i = 0; items_to_do > 0 && i < 8; i++) {
+    char current_byte = ((char *)&(node->map))[i];
+    if (current_byte != '\0')
+      for (int j = 0; items_to_do > 0 && j < 8; j++) {
+        int current_bit = 8 * i + j;
+        if (sm_node_map_get(node->map, current_bit) == true) {
+          int      child_index = sm_node_child_index(node->map, current_bit);
+          sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
+          sm_stack_push(char_stack, sm_new_double(current_bit));
+          cursor += sm_node_sprint(child_here, &(buffer[cursor]), fake, char_stack);
+          sm_stack_pop(char_stack);
+          items_to_do--;
+        }
+      }
   }
   return cursor;
 }
@@ -264,17 +265,19 @@ int sm_node_size(sm_node *node) {
   int size = 0;
   if (node->value != NULL)
     size++;
-  // If there are not more children, we are done
-  if (sm_node_is_empty(node))
-    return size;
   int items_to_do = sm_node_map_size(node->map);
-  for (int i = 0; items_to_do > 0 && i < 64; i++) {
-    if (sm_node_map_get(node->map, i) == true) {
-      int      child_index = sm_node_child_index(node->map, i);
-      sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
-      size += sm_node_size(child_here);
-      items_to_do--;
-    }
+  for (int i = 0; items_to_do > 0 && i < 8; i++) {
+    char current_byte = ((char *)&(node->map))[i];
+    if (current_byte != '\0')
+      for (int j = 0; items_to_do > 0 && j < 8; j++) {
+        int current_bit = 8 * i + j;
+        if (sm_node_map_get(node->map, current_bit) == true) {
+          int      child_index = sm_node_child_index(node->map, current_bit);
+          sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
+          size += sm_node_size(child_here);
+          items_to_do--;
+        }
+      }
   }
   return size;
 }
