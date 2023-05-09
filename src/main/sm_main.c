@@ -34,7 +34,7 @@ void clean_exit(sm_env *env, int code) {
 // Run user command line
 void start_repl() {
   // Reset the line counter
-  yylineno = 0;
+  yylineno = 1;
   // Read, Evaluate, Print Loop
   while (true) {
     // Prompt
@@ -63,7 +63,7 @@ void run_file(char *file_path, sm_env *env) {
   sm_parse_result pr;
   sm_object      *last_parsed_obj = NULL;
   file_path                       = env->script_fp;
-  yylineno                        = 0; // resetting the line count
+  yylineno                        = 1; // resetting the line count
   pr                              = sm_parse_file(file_path);
   do {
     if (pr.return_val != 0) {
