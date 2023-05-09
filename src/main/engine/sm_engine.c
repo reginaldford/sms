@@ -883,6 +883,26 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
+    case SM_ASSIGN_DOT_EXPR: {
+      sm_object *obj0  = sm_expr_get_arg(sme, 0);
+      sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type(obj0, 0, SM_EXPR_TYPE, SM_ASSIGN_DOT_EXPR)) {
+        sm_expr *dot_expr = (sm_expr *)obj0;
+        if (dot_expr->op != SM_DOT_EXPR) {
+          char *error_msg = "Error: Incorrectly formatted AST.";
+          int   len       = strlen(error_msg);
+          printf("%s\n", error_msg);
+          return (sm_object *)sm_new_error(sm_new_string(len, error_msg), sm_new_string(0, ""), 0);
+        }
+        sm_cx     *predot  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(dot_expr, 0), current_cx, sf);
+        sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(dot_expr, 1);
+        if (expect_type((sm_object *)predot, 0, SM_CX_TYPE, SM_ASSIGN_DOT_EXPR)) {
+          if (sm_cx_let(predot, &postdot->name->content, postdot->name->size, value))
+            return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+        }
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
     case SM_ASSIGN_LOCAL_EXPR: {
       sm_object *obj0  = sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
@@ -908,29 +928,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
             return (sm_object *)sm_new_error(sm_new_string(19, "Index out of range"),
                                              sm_new_string(1, "?"), 0);
           }
-          sm_expr *new_arr = sm_expr_set_arg(arr, index->value, obj2);
-          return (sm_object *)new_arr;
-        } else
-          return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-      }
-      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-    }
-    case SM_ASSIGN_DOT_EXPR: {
-      // expecting a[4]=value=> =index_expr(a,4,value);
-      sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type(obj0, 0, SM_EXPR_TYPE, SM_ASSIGN_INDEX_EXPR)) {
-        sm_expr *arr = (sm_expr *)obj0;
-        if (expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_ASSIGN_INDEX_EXPR)) {
-          sm_double *index = (sm_double *)obj1;
-          if (index->value >= arr->size || index->value < -0) {
-            printf("Error: Index out of range: %i\n", (int)index->value);
-            return (sm_object *)sm_new_error(sm_new_string(19, "Index out of range"),
-                                             sm_new_string(1, "?"), 0);
-          }
-          sm_expr *new_arr = sm_expr_set_arg(arr, index->value, obj2);
-          return (sm_object *)new_arr;
+          sm_expr_set_arg(arr, index->value, obj2);
+          return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
         } else
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       }

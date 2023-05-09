@@ -198,7 +198,6 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> AND
 %token <expr> XOR
 
-
 %token <expr> NEW_CX
 %token <expr> CX_DOT
 %token <expr> CX_KEYS
@@ -268,15 +267,12 @@ void _lex_cstr(char * cstr,int len);
 %left DOT
 %%
 
-
 COMMAND : EXPR ';' {
   sm_global_parser_output((sm_object *)($1));
   YYACCEPT;
 }
 | error ';' { YYABORT; }
 | DONE      { YYACCEPT;}
-
-
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->top)); }
 | EXIT '(' EXPR ')'  { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3);  }
@@ -335,7 +331,6 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | TEST_LT_EQ{}
 | TEST_GT_EQ{}
 | SEQUENCE {}
-| SYM DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | SYM '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
@@ -430,13 +425,14 @@ PARAM_LIST_OPEN : '(' SYM ',' {
   $$ = sm_expr_append($1, (sm_object *)new_param);
 }
 
+DOT_ASSIGNMENT : EXPR '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
+| SYM '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
+| EXPR '=' EXPR { $$ = sm_new_expr_2(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3)); }
+
 ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(SM_ASSIGN_EXPR, (sm_object *)($1), (sm_object *)($3)); }
 
 INDEX_ASSIGNMENT : EXPR '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_INDEX_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
 | SYM '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_INDEX_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
-
-DOT_ASSIGNMENT : EXPR '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
-| SYM '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
 
 SEQUENCE : SEQUENCE_LIST ')' {}
 | SEQUENCE_LIST ';' ')' {}
