@@ -356,6 +356,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | CX_RM '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_CX_RM_EXPR, (sm_object *)$3,(sm_object*)$5);}
 | CX_SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_CX_SIZE_EXPR, (sm_object *)$3);}
 | CX_KEYS '(' EXPR ')' {$$ = sm_new_expr(SM_CX_KEYS_EXPR, (sm_object *)$3);}
+| CX_VALUES '(' EXPR ')' {$$ = sm_new_expr(SM_CX_VALUES_EXPR, (sm_object *)$3);}
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3);}
 | FILE_RUN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_READ_EXPR,(sm_object*)$3,(sm_object*)$5);}
