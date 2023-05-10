@@ -13,10 +13,8 @@ let two_digits=(x)=>(
 let am_pm_str = (hr) => if(hr>11,"PM","AM");
 
 # Print the time with constant width
-let d = date();
-
 while(true,(
-  d = date();
+  let d = date();
   # Convert military time to 12-hr
 	put(two_digits(
 		if(d[2]>12,

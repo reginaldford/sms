@@ -110,7 +110,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         i++;
       }
       closedir(dir);
-
       sm_expr *names_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i);
       sm_expr *types_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i);
       for (unsigned int names_i = 0; names_i < i; names_i++) {
@@ -187,6 +186,22 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_str_find(haystack, needle);
       break;
     }
+    case SM_STR_SPLIT_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_string *haystack;
+      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_SPLIT_EXPR))
+        haystack = (sm_string *)obj0;
+      else
+        return (sm_object *)sm_new_double(0);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_string *needle;
+      if (expect_type(obj1, 1, SM_STRING_TYPE, SM_STR_SPLIT_EXPR))
+        needle = (sm_string *)obj1;
+      else
+        return (sm_object *)sm_new_double(0);
+      return (sm_object *)sm_str_split(haystack, needle);
+      break;
+    }
     case SM_STR_PART_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str0;
@@ -194,7 +209,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         str0 = (sm_string *)obj0;
       else
         return (sm_object *)sm_new_string(0, "");
-
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_double *start;
       if (expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_STR_PART_EXPR))
@@ -207,19 +221,16 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         desired_len = (sm_double *)obj2;
       else
         return (sm_object *)sm_new_string(0, "");
-
       if (start->value < 0 || start->value >= str0->size) {
         printf("Error: Calling %s with out of range start value: %i.\n",
                sm_global_fn_name(SM_STR_PART_EXPR), (int)start->value);
         return (sm_object *)sm_new_string(0, "");
       }
-
       if (desired_len->value > str0->size - start->value) {
         printf("Error: Calling %s with out of range length value: %i.\n",
                sm_global_fn_name(SM_STR_PART_EXPR), (int)desired_len->value);
         return (sm_object *)sm_new_string(0, "");
       }
-
       sm_string *new_str = sm_new_string_manual((int)desired_len->value);
       char      *content = &(new_str->content);
       sm_strncpy(content, &(str0->content) + (int)start->value, (int)desired_len->value);
