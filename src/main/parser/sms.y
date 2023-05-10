@@ -212,7 +212,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> CX_RM
 
 %token <expr> NEW_FN
-%token <fun> ARROW
+%token <fun>  ARROW
 %token <expr> FN_XPR
 %token <expr> FN_PARAMS
 %token <expr> FN_PARENT
