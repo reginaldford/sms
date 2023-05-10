@@ -380,6 +380,17 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
     }
+    case SM_CX_VALUES_EXPR: {
+      sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_VALUES_EXPR)) {
+        sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
+        if (success != NULL)
+          return (sm_object *)success;
+        else
+          return ((sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str0;

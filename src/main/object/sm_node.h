@@ -29,3 +29,4 @@ int             sm_node_map_left_count(unsigned long long map, int map_index);
 bool            sm_node_rm_nth(struct sm_node *root, int n);
 int             sm_node_size(sm_node *node);
 sm_expr        *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection);
+sm_expr        *sm_node_values(sm_node *node, sm_expr *collection);

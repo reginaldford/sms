@@ -313,3 +313,27 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
   }
   return collection;
 }
+
+// Returns the keys under this node(recursive)
+sm_expr *sm_node_values(sm_node *node, sm_expr *collection) {
+  if (node == NULL)
+    return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+  if (node->value != NULL) {
+    // var name
+    collection = sm_expr_append(collection, node->value);
+  }
+  // If there are not more children, we are done
+  if (sm_node_is_empty(node)) {
+    return collection;
+  }
+  int items_to_do = sm_node_map_size(node->map);
+  for (int i = 0; items_to_do > 0 && i < 64; i++) {
+    if (sm_node_map_get(node->map, i) == true) {
+      int      child_index = sm_node_child_index(node->map, i);
+      sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
+      collection           = sm_node_values(child_here, collection);
+      items_to_do--;
+    }
+  }
+  return collection;
+}
