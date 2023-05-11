@@ -382,10 +382,13 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | DATE '(' ')' { $$ = sm_new_expr_n(SM_DATE_EXPR,0,0);}
 | TIME '(' ')' { $$ = sm_new_expr_n(SM_TIME_EXPR,0,0);}
 | SLEEP '(' EXPR ')' { $$ = sm_new_expr(SM_SLEEP_EXPR,(sm_object*)$3);}
+| EXEC '(' EXPR ')' { $$ = sm_new_expr(SM_EXEC_EXPR,(sm_object*)$3);}
+| FORK '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_FORK_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | LS '(' ')' { $$ = sm_new_expr_n(SM_LS_EXPR,0,0);}
 | CD '(' EXPR ')' { $$ = sm_new_expr(SM_CD_EXPR,(sm_object*)$3);}
 | PWD '(' ')' { $$ = sm_new_expr_n(SM_PWD_EXPR,0,0);}
 | RUNTIME_META '(' EXPR ')' { $$ = sm_new_expr(SM_RUNTIME_META_EXPR, (sm_object*)$3);}
+| GC '(' ')' { $$ = sm_new_expr_n(SM_GC_EXPR, 0,0); }
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local

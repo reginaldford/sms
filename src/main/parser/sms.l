@@ -193,8 +193,8 @@ date       {return DATE;}
 time       {return TIME;}
 sleep      {return SLEEP;}
 
-execFile      {return EXEC;}
-forkFile      {return FORK;}
+osFork        {return FORK;}
+osExec        {return EXEC;}
 
 pwd          	 {return PWD;}
 ls           	 {return LS;}
