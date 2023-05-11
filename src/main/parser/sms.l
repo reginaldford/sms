@@ -194,6 +194,7 @@ time       {return TIME;}
 sleep      {return SLEEP;}
 
 osFork        {return FORK;}
+osWait        {return WAIT;}
 osExec        {return EXEC;}
 
 pwd          	 {return PWD;}
