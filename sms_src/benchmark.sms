@@ -1,21 +1,21 @@
-#!/usr/local/bin/sms -m 175 -q
+#!/usr/local/bin/sms -m 1300 
 #Use this to benchmark something
 
-let first_time=[];
-let new_time=[];
+let t1=[];
+let t2=[];
 let time_elapsed=0;
-let answer=0;
+let a=0;
 
-let benchmark = (expr) =>   (
-  put("Benchmarking: " str+ toStr(expr) str+ "\n");
-  first_time = time();
-  answer=eval(expr);
-  new_time = time();
-	putln(toStr(answer));
+let benchmark = (e) =>   (
+  put("Benchmarking: " str+ toStr(e) str+ "\n");
+  t1 = time();
+  a=eval(e);
+  t2 = time();
+	putln(toStr(a));
   putln("Total time:");
-  time_elapsed = 1000 * (new_time[0] - first_time[0]) +  0.001 * (new_time[1] - first_time[1]);
+  time_elapsed = 1000 * (t2[0] - t1[0]) +  0.001 * (t2[1] - t1[1]);
   putln(toStr(time_elapsed) str+ " milliseconds")
 );
 
-let fib = (n) => if( n <= 1 , n ,fib(n - 1) + fib(n - 2));
-benchmark(:fib(27));
+let f = (n) => if( n <= 1 , n ,f(n - 1) + f(n - 2));
+benchmark(:f(27));

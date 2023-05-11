@@ -56,6 +56,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)result;
       break;
     }
+    case SM_GC_EXPR: {
+      // This fails because it changes all of the pointers before the function returns.
+      // sm_garbage_collect();
+      printf("gc command is not implemented yet!\n");
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      break;
+    }
     case SM_SLEEP_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       int        tms;
@@ -76,6 +83,47 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         ret = nanosleep(&ts, &ts);
       } while (ret);
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      break;
+    }
+    case SM_FORK_EXPR: {
+      sm_object *obj0 = sm_expr_get_arg(sme, 0);
+      sm_object *obj1 = sm_expr_get_arg(sme, 1);
+      sm_expr   *parent_expr;
+      sm_expr   *child_expr;
+
+      if (expect_type(obj0, 0, SM_EXPR_TYPE, SM_FORK_EXPR))
+        parent_expr = (sm_expr *)obj0;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
+      if (expect_type(obj1, 1, SM_EXPR_TYPE, SM_FORK_EXPR))
+        child_expr = (sm_expr *)obj1;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
+      pid_t pid = fork();
+
+      if (pid == -1) {
+        perror("fork");
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      }
+      if (pid == 0) {
+        // child process
+        return sm_engine_eval((sm_object *)child_expr, current_cx, sf);
+      }
+      // parent process
+      return sm_engine_eval((sm_object *)parent_expr, current_cx, sf);
+      break;
+    }
+    case SM_EXEC_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_string *path;
+      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_EXEC_EXPR))
+        path = (sm_string *)obj0;
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      int result = system(&path->content);
+      return (sm_object *)sm_new_double(result);
       break;
     }
     case SM_LS_EXPR: {
@@ -294,6 +342,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_LET_EXPR)) {
         if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_LET_EXPR)) {
           if (sm_cx_let(cx, &sym->name->content, sym->name->size, value))
+            return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+        }
+      }
+      return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+    case SM_CX_SET_EXPR: {
+      sm_cx     *cx    = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_symbol *sym   = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SET_EXPR)) {
+        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_SET_EXPR)) {
+          if (sm_cx_set(cx, &sym->name->content, sym->name->size, value))
             return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
         }
       }
