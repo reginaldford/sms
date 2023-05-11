@@ -247,6 +247,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> SLEEP
 %token <expr> EXEC
 %token <expr> FORK
+%token <expr> WAIT
 %token <expr> ARGS
 %token <expr> GETOPTIONS
 %token <expr> SETOPTIONS
@@ -371,6 +372,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);}
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);}
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3);}
+| EXPR AND EXPR   { $$ = sm_new_expr_2(SM_AND_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | STR_ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_STR_ESCAPE_EXPR,(sm_object*)$3);}
 | STR_SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_STR_SIZE_EXPR,(sm_object*)$3);}
 | STR_FIND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_FIND_EXPR,(sm_object*)$3,(sm_object*)$5);}
@@ -383,7 +385,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | TIME '(' ')' { $$ = sm_new_expr_n(SM_TIME_EXPR,0,0);}
 | SLEEP '(' EXPR ')' { $$ = sm_new_expr(SM_SLEEP_EXPR,(sm_object*)$3);}
 | EXEC '(' EXPR ')' { $$ = sm_new_expr(SM_EXEC_EXPR,(sm_object*)$3);}
-| FORK '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_FORK_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| FORK '(' ')' { $$ = sm_new_expr_n(SM_FORK_EXPR,0,0);}
+| WAIT '(' ')' { $$ = sm_new_expr_n(SM_WAIT_EXPR,0,0);}
 | LS '(' ')' { $$ = sm_new_expr_n(SM_LS_EXPR,0,0);}
 | CD '(' EXPR ')' { $$ = sm_new_expr(SM_CD_EXPR,(sm_object*)$3);}
 | PWD '(' ')' { $$ = sm_new_expr_n(SM_PWD_EXPR,0,0);}

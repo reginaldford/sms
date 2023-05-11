@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 // The engine should return an error if this returns false
 // and the next function will complain about type mismatch,
@@ -86,34 +87,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_FORK_EXPR: {
-      sm_object *obj0 = sm_expr_get_arg(sme, 0);
-      sm_object *obj1 = sm_expr_get_arg(sme, 1);
-      sm_expr   *parent_expr;
-      sm_expr   *child_expr;
-
-      if (expect_type(obj0, 0, SM_EXPR_TYPE, SM_FORK_EXPR))
-        parent_expr = (sm_expr *)obj0;
-      else
-        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-
-      if (expect_type(obj1, 1, SM_EXPR_TYPE, SM_FORK_EXPR))
-        child_expr = (sm_expr *)obj1;
-      else
-        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-
       pid_t pid = fork();
-
-      if (pid == -1) {
-        perror("fork");
-        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-      }
-      if (pid == 0) {
-        // child process
-        return sm_engine_eval((sm_object *)child_expr, current_cx, sf);
-      }
-      // parent process
-      return sm_engine_eval((sm_object *)parent_expr, current_cx, sf);
-      break;
+      return (sm_object *)sm_new_double(pid);
+    }
+    case SM_WAIT_EXPR: {
+      int status;
+      int child_pid = wait(&status);
+      return (sm_object *)sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)sm_new_double(child_pid),
+                                        (sm_object *)sm_new_double(status));
     }
     case SM_EXEC_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -480,6 +461,24 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         }
       }
       return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+    case SM_AND_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type == SM_SYMBOL_TYPE) {
+        if (!is_true(obj0)) {
+          return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+        }
+      } else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj1->my_type == SM_SYMBOL_TYPE) {
+        if (!is_true(obj1)) {
+          return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+        }
+      } else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+      return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
     }
     case SM_NOT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
