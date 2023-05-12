@@ -288,7 +288,7 @@ On Linux/Unix systems, You may be able to build and install in one step:
 
 `sudo make install`
 
-This command builds the executable and copies it to /usr/bin/sms
+This command builds the executable and copies it to /usr/local/bin/sms
 
 
 # Language Features, Specs and Design:
@@ -303,7 +303,7 @@ This command builds the executable and copies it to /usr/bin/sms
 - [x] Turing completeness.
 - [x] Recursive function calls.
 - [x] Local variables are implemented as array indices, making them fast.
-- [x] 'Huge' expressions can be parsed and processed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters into a single array or string, or: 3) You are using `-m 1000000` to provide the maximum heap size (1 terrabyte), and have used all of the memory while parsing.
+- [x] 'Huge' expressions can be parsed and processed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters into a single array or string, or: 3) You are using `-m 4000000` to provide the maximum heap size (4 terrabytes), and have used all of the memory while parsing.
 - [x] `diff` command for automatic differentiation. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
 - [x] `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
 - [x] Example scripts are located in `sms_src` directory.
