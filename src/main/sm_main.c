@@ -9,7 +9,7 @@ extern int yylineno;
 // Prints intro
 void print_intro() {
   printf("Symbolic Math System\n");
-  printf("Version 0.156\n");
+  printf("Version 0.160\n");
 }
 
 // Initialize the heap, etc, if necessary
@@ -120,20 +120,28 @@ int main(int num_args, char *argv[]) {
       }
       env.mem_flag = true;
       const char *valid_values =
-        "Value must be in the range 0.01 to 1000000 inclusively (in Megabytes)";
+        "Value must be in the range 0.01 to 4000000 inclusively (in Megabytes)";
       long unsigned int i = 0;
       for (; i < strlen(optarg); i++) {
         env.mem_str[i] = optarg[i];
       }
       env.mem_mbytes = atof(env.mem_str);
-      if (env.mem_mbytes < 0.01 || env.mem_mbytes > 1000 * 1000) {
+      if (env.mem_mbytes < 0.01 || env.mem_mbytes > 1000 * 4000) {
         printf("Invalid memory heap size: %s\n", env.mem_str);
         printf("%s\n", valid_values);
         printf("Try -h for help.\n");
         clean_exit(&env, 1);
       }
       if (env.quiet_mode == false)
-        printf("Custom Heap Size: %f MB\n", env.mem_mbytes);
+        printf("Custom Heap Size: ");
+      if (env.mem_mbytes < 1)
+        printf("%.16g KB\n", env.mem_mbytes * 1E3);
+      else if (env.mem_mbytes < 1000)
+        printf("%.16g MB\n", env.mem_mbytes);
+      else if (env.mem_mbytes >= 1000 && env.mem_mbytes < 1E6)
+        printf("%.16g GB\n", env.mem_mbytes / 1E3);
+      else if (env.mem_mbytes >= 1E6)
+        printf("%.16g TB\n", env.mem_mbytes / 1E6);
       break;
     }
     case 'e': {
