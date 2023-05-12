@@ -11,7 +11,7 @@
 
 
 # Introduction:
-SMS (Symbolic Math System) is a terminal based calculator. SMS has built-in functions for arithmetic operations, programmatic flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
+SMS (Symbolic Math System) is an unusually powerful terminal based calculator. SMS has built-in functions for arithmetic operations, programmatic flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
 
 # Longer Introduction:
 
@@ -30,16 +30,15 @@ The following is 'hello world' in SMS:
 
 `putln("Hello world!");`
 
-SMS versions have 2 significant figures (like 0.160) during a milestone point. At these points, only unit tests are developed and documentation (like this readme) is updated, and a release is created.
+SMS versions have 2 significant figures (like 0.160) during a milestone point. During these versions, development focuses on documentation, unit tests, and bugs.
 
-SMS versions with 3 significant figures (like 0.161) are in development, so they may lack documentation for new features, and might have unannounced changes to existing features.
-
-Line comments start with `#` which causes the remainder of the line to be ignored.
+SMS versions with 3 significant figures (like 0.161) are in feature development, so they may lack documentation for new features, and might have unannounced changes to existing features, are are generally less stable than the milestone versions. This readme is only syncronized with the last milestone version.
 
 
 # Cheat Sheet
 
 Click on the chapter names below to expand the cheat sheet for that chapter.
+Line comments start with `#`.
 
 <details>
   <summary>Math</summary>
@@ -297,13 +296,13 @@ This command builds the executable and copies it to /usr/local/bin/sms
 - [x] Lexical scope.
 - [x] Command line flags to run scripts or initialize into a loaded REPL.
 - [x] Useful example.sms file with common conversion functions and constants.
-- [x] Custom memory heap size can be set from 100 kilobytes to 1 terrabyte.
+- [x] Custom memory heap size can be set from 10 kilobytes to 4 terrabytes.
 - [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
 - [x] Safe and fast internal string manipulations, with no character counting and no intermediate buffers for expression printing.
 - [x] Turing completeness.
 - [x] Recursive function calls.
-- [x] Local variables are implemented as array indices, making them fast.
-- [x] 'Huge' expressions can be parsed and processed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters into a single array or string, or: 3) You are using `-m 4000000` to provide the maximum heap size (4 terrabytes), and have used all of the memory while parsing.
+- [x] Local variables are implemented as array indices, making them reletively fast.
+- [x] 'Huge' expressions can be parsed and processed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters into a single array or string, or: 3) You are using `-m 4000000` to provide the maximum heap size (4 terrabytes), and have used all of the memory while parsing. Also, contexts have no max capacity and contexts do not need to be moved in memory to grow to any size.
 - [x] `diff` command for automatic differentiation. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
 - [x] `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
 - [x] Example scripts are located in `sms_src` directory.
