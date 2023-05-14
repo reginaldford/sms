@@ -1,3 +1,6 @@
+# functions and callstack
+- Ability to return early from a function
+- Stack variables
 
 # singleton symbol set
 - global cx , scratchpad terminology. _scratchpad is a global
@@ -113,6 +116,10 @@ k_2,3
     if you use !malloc(:expr) , you can build a large object outside of the heap, and the gc will clear malloc'd objects accordingly
 
 # heap loading/saving
+- Saving a heap to a file
+- loading the file as a live heap
+- loading a heap as an inspectable object
+- Heap conversion, editing, and exporting tool
 
 # dynamic heap size
 - allow min, max, max_emptiness, growth factor options
@@ -121,10 +128,6 @@ k_2,3
 
 # parse time functions
 - !fname(a1,a2..); #that's all there is to it.
-
-# forking
-- external calls
-- external calls to self with args for threadID
 
 # dimensions lib
 - let ft = : 12`in ; # ratio setting example
