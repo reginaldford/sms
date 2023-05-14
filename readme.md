@@ -43,49 +43,51 @@ Line comments start with `#`.
 <details>
   <summary>Math</summary>
 
-    1. a + b ; # add two numbers
+    1. a + b ; # Add two numbers
 
     2. +( a, b, c) ; # 2 or more numbers can be added with prefix notation
 
-    3. a * b ; # mulitply two numbers
+    3. a * b ; # Mulitply two numbers
 
-    4. *( a, b, ..); # multiply 2 or more numbers
+    4. *( a, b, ..); # Multiply 2 or more numbers
 
-    5. a - b ; # subtract two numbers
+    5. a - b ; # Subtract two numbers
 
-    6. -(a,b...) ; #substract remaining numbers from the first
+    6. -(a,b...) ; # Substract remaining numbers from the first
 
-    7. a / b ; #divide a by b
+    7. a / b ; # Divide a by b
 
-    8. /(a,b,...) #divide a by b, then divide by remaining numbers
+    8. /(a,b,...) # Divide a by b, then divide by remaining numbers
 
-    9. a ^ b; # raise a to the power of b
+    9. a ^ b; # Raise a to the power of b
 
-    10. sin(x); cos(x); tan(x); # trig functions
+    10. sin(x); cos(x); tan(x); # Trig functions
 
-    11. sinh(x); cosh(x); tanh(x); # hyperbolic trig functions
+    11. sinh(x); cosh(x); tanh(x); # Hyperbolic trig functions
 
-    12. sec(x); csc(x); cot(x); # inverse trig funtions
+    12. sec(x); csc(x); cot(x); # Inverse trig funtions
 
-    13. sech(x); csch(x); coth(x); # inverse hyperbolic trig functions
+    13. sech(x); csch(x); coth(x); # Inverse hyperbolic trig functions
 
-    14. abs(x); #return the absolute value of x
+    14. abs(x); # Return the absolute value of x
 
-    15. exp(x); #Euler's number, raised to the power of x
+    15. exp(x); # Euler's number, raised to the power of x
 
-    16. ln(x); #natural log of x
+    16. ln(x); # Natural log of x
 
-    17. sqrt(x); #square root of x
+    16. log(b,x); # Log, base b of x
 
-    18. random(); #generate a random number from 0 to 1
+    17. sqrt(x); # Square root of x
 
-    19. round(); #nearest integer
+    18. random(); # Generate a random number from 0 to 1
 
-    20. seed(number); #seed the random generator based on an integer
+    19. round(); # Nearest integer
 
-    21. diff(:sin(x),:x); #return the derivative of sin(x) with respect to x
+    20. seed(number); # Seed the random generator based on an integer
 
-    22. simp(:expr); # attempt to simplify the given expression
+    21. diff(:sin(x),:x); # Return the derivative of sin(x) with respect to x
+
+    22. simp(:expr); # Attempt to simplify the given expression
 
 </details>
 
@@ -109,9 +111,9 @@ Line comments start with `#`.
 
     1. twice = (x) => 2 * x; # make a function that doubles numbers
 
-    2. quad = (x,a,b,c) => a*x^2+b*x+c; #a quadratic function in x
+    2. quad = (x,a,b,c) => a*x^2+b*x+c; # a quadratic function in x
 
-    3. ( command1 ; command2 ; ... ) # this unites multiple commands into 1 command. Does not make a new scope
+    3. ( command1 ; command2 ; ... ); # called a "then" expression, groups a sequence of commands
 
     4. if(condition, command); # execute command if true, else return false
 
@@ -131,7 +133,7 @@ Line comments start with `#`.
 
     12. exit(n); # quit SMS and return this integer to the OS as the command return value
 
-    13. :sin(x); #capture any expression with the unary meta operator. Use parens to capture more. 
+    13. :sin(x); # capture any expression with the unary meta operator. Use parens to capture more. 
 
 </details>
 <details>
@@ -143,37 +145,45 @@ Line comments start with `#`.
 
     3. var = value; # searches for var in this context, then up the parent path, and if found, sets to value, else a new variable is created in the current context.
 
-    4. context = { var1 = value1; var2 = value2 }; # builds a context with 2 variables and saves it under the variable 'context'
+    4. let context = { var1 = value1; var2 = value2 }; # builds a context with 2 variables and saves it under the variable 'context'
 
-    5. context.var1; # retreive the value of a specific variable from the context
+    5. context.var1; # Retreive the value of a specific variable from the context
 
-    6. parent(context); # return the parent scope of the provided context
+    5. context.var1 = value; # Set the value of a specific variable from the context
 
-    7. cxLet(cx,:x,value); # a way to create a new variable in a context or just set it to a new value
+    6. parent(context); # Return the parent scope of the provided context
 
-    8. cxSet(cx,:x,value); # a way to set cx.x=value for a context cx or return false
+    7. cxLet(cx,:x,value); # A way to create a new variable in a context or just set it to a new value
 
-    9. cxSize(cx); # return the number of entries in this context
+    8. cxSet(cx,:x,value); # A way to set cx.x=value for a context cx or return false
 
-    10. cxValues(cx); # return an array with the values of the context
+    9. cxSize(cx); # Return the number of entries in this context
 
-    11. cxKeys(cx); # return an array with the keys of the context
+    10. cxValues(cx); # Return an array with the values of the context
 
-    12. cxRm(cx, :var); # remove this entry from the context
+    11. cxKeys(cx); # Return an array with the keys of the context
+
+    12. cxDot(cx,:symbol); # Return this variable from this context
+
+    13. cxContaining(cx,:key); # Returns the context which contains :key, by looking at cx and its ancetry
+
+    14. cxRm(cx, :var); # Remove this entry from the context
 </details>
 
 <details>
   <summary>Arrays</summary>
 
-    1. [ expr1, expr2 ] # create an array by evaluating expressions
+    1. [ expr1, expr2 ] # Create an array by evaluating expressions
 
-    2. :[ expr1 , expr2 ] # create an array of unevaluated expressions
+    2. :[ expr1 , expr2 ] # Create an array of unevaluated expressions
 
-    3. array[ i ] # return the i'th  element of the array, where i=0 is the first element
+    3. array[ i ] # Return the i'th  element of the array, where i=0 is the first element
 
-    4. size( array ) # return the number of elements in the array
+    4. array[ i ] = value # Set the ith value of the array. Returns true upon success only
 
-    5. size( expr ) # returns the number of arguments in the expression
+    4. size( array ) # Return the number of elements in the array
+
+    5. size( expr ) # Return the number of arguments in the expression
 
 </details>
 
@@ -182,25 +192,25 @@ Line comments start with `#`.
 
     1. let s = "example\nstring"; # s is now a string with a newline escape code (\n)
 
-    2. strFind(s,to_find);       # returns the first location of to_find
+    2. strFind(s,to_find); # Return the first location of to_find
 
-    3. strSize(s);  # returns the length of string s
+    3. strSize(s); # Return the length of string s
 
-    4. strEscape(s); # converts any escape codes into their correlating character
+    4. strEscape(s); # Convert any escape codes into their correlating character
 
-    5. str+(s1,s2); # returns a string that is the concatenation of s1 with s2 in order
+    5. str+(s1,s2); # Return a string that is the concatenation of s1 with s2 in order
 
-    6. strPart(s1,start,len) # returns a part of the string, starting at index start, and with length len
+    6. strPart(s1,start,len) # Return a part of the string, starting at index start, and with length len
 
-    7. toStr(object0); # return the string representation of object0
+    7. toStr(object0); # Return the string representation of object0
 
-    8. input(); # allow the user to enter a string of text, which becomes the return value
+    8. input(); # Allow the user to enter a string of text, which becomes the return value
 
-    9. put(s1); #print the string s1
+    9. put(s1); # Print the string s1
 
-    10. putln(s1); #print the string s1 and go to the next line
+    10. putln(s1); # Print the string s1 and go to the next line
 
-    11. strSplit(haystack,needle); # return an array of strings which are the parts of haystack, split up by instances of needle
+    11. strSplit(haystack,needle); # Return an array of strings which are the parts of haystack, split up by instances of needle
 
 </details>
 
@@ -225,15 +235,15 @@ Line comments start with `#`.
   <summary>Date and Time</summary>
 
     1. date() # returns the date and time in the form of an array of 9 numbers, listed with their array index:
-    #date()[0]: seconds (0-60)
-    #date()[1]: minutes (0-59)
-    #date()[2]: hours (0-23)
-    #date()[3]: Day of month (1-31)
-    #date()[4]: months since January (0-11)
-    #date()[5]: Years since 1900
-    #date()[6]: Days since Sunday (0-6)
-    #date()[7]: Days since January 1 (0-365)
-    #date()[8]: Dayslights Savings flag (positive if daylight savings is in effect, 0 if not, negative if this is unknown)
+    # date()[0]: seconds (0-60)
+    # date()[1]: minutes (0-59)
+    # date()[2]: hours (0-23)
+    # date()[3]: Day of month (1-31)
+    # date()[4]: months since January (0-11)
+    # date()[5]: Years since 1900
+    # date()[6]: Days since Sunday (0-6)
+    # date()[7]: Days since January 1 (0-365)
+    # date()[8]: Dayslights Savings flag (positive if daylight savings is in effect, 0 if not, negative if this is unknown)
 
     2. time() # returns an array with 2 values: the number of seconds since January 1, 1970, then the number of microseconds since the last whole second.
 
@@ -294,17 +304,17 @@ This command builds the executable and copies it to /usr/local/bin/sms
 - [x] Mathematical evaluation. Commands like `a=4*sin(PI/8);` will evaluate to a double precision decimal number.
 - [x] Copying garbage collector. Allows for the entire program memory to compact itself into a small contiguous block after each command.
 - [x] Lexical scope.
-- [x] Command line flags to run scripts or initialize into a loaded REPL.
-- [x] Useful example.sms file with common conversion functions and constants.
+- [x] SMS command flags allow for running scripts, changing memory heap size, immediate expression evaluation at the command line and more.
+- [x] Useful example sms scripts are located in the sms_src directory.
 - [x] Custom memory heap size can be set from 10 kilobytes to 4 terrabytes.
-- [x] User contexts, which allow for the user to create a new context with values of all types including more contexts.
+- [x] User contexts (objects), which allow for the user to create a new context with values of all types including more contexts.
 - [x] Safe and fast internal string manipulations, with no character counting and no intermediate buffers for expression printing.
 - [x] Turing completeness.
 - [x] Recursive function calls.
-- [x] Local variables are implemented as array indices, making them reletively fast.
-- [x] 'Huge' expressions can be parsed and processed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters into a single array or string, or: 3) You are using `-m 4000000` to provide the maximum heap size (4 terrabytes), and have used all of the memory while parsing. Also, contexts have no max capacity and contexts do not need to be moved in memory to grow to any size.
-- [x] `diff` command for automatic differentiation. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`. (This feature is in the repo, not in the latest release);
-- [x] `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input. (This feature is in the repo, not in the latest release);
+- [x] Local variables are implemented as array indices, making them relatively fast.
+- [x] Large expressions can be parsed and processed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters into a single array or string, or: 3) You are using `-m 4000000` to provide the maximum heap size (4 terrabytes), and have used all of the memory while parsing. Also, contexts have a max capacity of 64^32 entries and contexts do not need to be moved in memory to grow to any size.
+- [x] `diff` command for automatic differentiation. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`.
+- [x] `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input.
 - [x] Example scripts are located in `sms_src` directory.
 - [x] Process forking support. Use the osFork() command to build multiprocessing SMS programs. Also, use osExec to run other programs.
 - [x] Variable mapping uses mapped tries. Variable lookup times are reasonably fast and remain constant for any size context.
@@ -315,7 +325,6 @@ This command builds the executable and copies it to /usr/local/bin/sms
 - [ ] Support for booting from a serialized memory heap.
 - [ ] 'Last moment' garbage collection.
 - [ ] Tail call optimization.
-- [ ] Package system.
 - [ ] Modern terminal support
 - [ ] Try/Catch error syntax.
 - [ ] Dynamic heap size, with min, max, and max_emptiness specs.

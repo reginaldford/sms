@@ -132,16 +132,17 @@ int main(int num_args, char *argv[]) {
         printf("Try -h for help.\n");
         clean_exit(&env, 1);
       }
-      if (env.quiet_mode == false)
+      if (env.quiet_mode == false) {
         printf("Custom Heap Size: ");
-      if (env.mem_mbytes < 1)
-        printf("%.16g KB\n", env.mem_mbytes * 1E3);
-      else if (env.mem_mbytes < 1000)
-        printf("%.16g MB\n", env.mem_mbytes);
-      else if (env.mem_mbytes >= 1000 && env.mem_mbytes < 1E6)
-        printf("%.16g GB\n", env.mem_mbytes / 1E3);
-      else if (env.mem_mbytes >= 1E6)
-        printf("%.16g TB\n", env.mem_mbytes / 1E6);
+        if (env.mem_mbytes < 1)
+          printf("%.16g KB\n", env.mem_mbytes * 1E3);
+        else if (env.mem_mbytes < 1E4)
+          printf("%.16g MB\n", env.mem_mbytes);
+        else if (env.mem_mbytes >= 1E4 && env.mem_mbytes < 1E6)
+          printf("%.16g GB\n", env.mem_mbytes / 1E3);
+        else if (env.mem_mbytes >= 1E6)
+          printf("%.16g TB\n", env.mem_mbytes / 1E6);
+      }
       break;
     }
     case 'e': {

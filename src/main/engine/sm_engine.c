@@ -93,6 +93,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_WAIT_EXPR: {
       int status;
       int child_pid = wait(&status);
+      status        = WEXITSTATUS(status);
+      if (child_pid == -1)
+        status = 1;
       return (sm_object *)sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)sm_new_double(child_pid),
                                         (sm_object *)sm_new_double(status));
     }
@@ -1020,7 +1023,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       double sum = 0;
       for (unsigned int i = 0; i < sme->size; i++) {
         sm_object *current_obj = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, sme->op))
+        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_PLUS_EXPR))
           sum += ((sm_double *)current_obj)->value;
         else
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -1033,7 +1036,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       double sum   = ((sm_double *)a)->value;
       for (unsigned int i = 1; i < sme->size; i++) {
         sm_object *current_obj = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, sme->op))
+        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_MINUS_EXPR))
           sum -= ((sm_double *)current_obj)->value;
         else
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -1045,7 +1048,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf))->value;
       for (unsigned int i = 1; i < sme->size; i++) {
         sm_object *current_obj = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, sme->op))
+        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_TIMES_EXPR))
           product *= ((sm_double *)current_obj)->value;
         else
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -1107,33 +1110,34 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_new_double(tan(num0->value));
     }
     case SM_ASIN_EXPR: {
-      // arcsin(x) = 2 * ln((1 + x^2 / (1 + sqrt(1 - x^2))^2) / sqrt(1 + x^4))
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *num0;
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_SIN_EXPR)) {
-        num0 = (sm_double *)arg0;
+        num0     = (sm_double *)arg0;
+        double x = num0->value;
+        return (sm_object *)sm_new_double(asin(x));
       } else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
-      printf("asin is not implemented yet.\n");
-      return (sm_object *)sm_new_double((num0->value));
     }
     case SM_ACOS_EXPR: {
-      // acos(x) = pi/2 - ln((1 + ix / sqrt(1 - x^2)) / (1 - ix / sqrt(1 - x^2))) / 2i
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *num0;
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COS_EXPR)) {
-        num0 = (sm_double *)arg0;
+        num0     = (sm_double *)arg0;
+        double x = num0->value;
+        return (sm_object *)sm_new_double(acos(x));
       } else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       printf("acos is not implemented yet.\n");
       return (sm_object *)sm_new_double((num0->value));
     }
     case SM_ATAN_EXPR: {
-      // arctan(x) = ln((1 + ix) / (1 - ix)) / 2i
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *num0;
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TAN_EXPR)) {
-        num0 = (sm_double *)arg0;
+        num0     = (sm_double *)arg0;
+        double x = num0->value;
+        return (sm_object *)sm_new_double(atan(x));
       } else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
       printf("atan is not implemented yet.\n");
