@@ -1,7 +1,7 @@
 
 # singleton symbol set
 - global cx , scratchpad terminology. _scratchpad is a global
-- Make _all_symbols global to keep uniqueness for symbols
+- Make the _all_ symbols global to keep uniqueness for symbols
 - The right side will be a refcount, so we can delete symbols with 0 references at gc.
 - After gc, update globals for true, false etc.
 - then, we can optimize symbol equivilance tests to ptr equivilance tests.
@@ -147,9 +147,9 @@ k_2,3
 - sdl2 bindings
 
 # bison/flex independance plan
-- writing a parser in sms THAT READS the sms.l/sms.y files
-- parsing the parser
-- keeping the bison/flex files for definition, until memory cross-compilation is done
+- Build an internal parser generator
+- describe the same grammar defined in sms.y
+- save the resulting memory image as a starting point
 
 #compilation and cross compilation
 - The engine will call a single function for every case, and SMS will have an array of pointers to each engine case function.
