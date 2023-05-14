@@ -1,0 +1,33 @@
+# lvert is a length unit conversion tool written in SMS
+# Run this with sms -i
+# Example usage: lvert(5+7/12, :ft, :cm)
+# The above example will convert 5 feet 7 inches into centimeters
+
+(
+  let lratios = {
+    m = {
+      km = 0.001;
+      m = 1;
+      cm = 100;
+      mm = 1000;
+      nm = 1E9;
+      in = 39.370078740157476;
+      ft = 3.2808398950131235;
+      yd = 1.0936132983377078;
+      mi = 0.000621371192237334;
+      nmi = 0.0005399568034557235;
+    };
+  };
+  let lvert = (x,u1,u2) => 
+    if(not(cxGet(lratios.m,u1)) or not(cxGet(lratios.m,u2)),
+      putln("Supported units: " str+ toStr(cxKeys(lratios.m))),
+      (
+        let lhs = cxKeys(lratios);
+        let rhs = cxValues(lratios);
+        let normalized = x / cxGet(lratios.m,u1);
+        let value = normalized * cxGet(lratios.m,u2);
+        putln(toStr(x) str+ toStr(u1) str+ "= " str+
+          toStr(value) str+ " " str+ toStr(u2));
+      )
+    );
+);
