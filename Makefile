@@ -36,7 +36,7 @@ THREADS					:= 8	#match the number of threads on your machine
 
 # Parallel processing for dev case
 all:
-	$(MAKE) dev
+	$(MAKE) bin/$(BIN_NAME)
 
 # sms executable
 bin/$(BIN_NAME): $(OBJS0) $(OBJS1) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
