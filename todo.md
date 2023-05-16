@@ -24,7 +24,6 @@
 # argument access
 - _args in rooftop
 
-
 # types, typed arrays
 - str[ ...] makes a single string , concatenating the strings
 with an array of integers for their start locations.
@@ -42,9 +41,9 @@ with an array of integers for their start locations.
 # matrices
 - convert to array
 - m is 2d:
-k = m[ 1, 2, 3;
-       2, 3, 4;
-       3, 4, 5];
+k = m[1, 2, 3;
+      2, 3, 4;
+      3, 4, 5];
 - elements of a matrix are accessed with underscore:
 k_2,3
 - another choice is a tuple of num arrays.
@@ -130,11 +129,10 @@ k_2,3
 - !fname(a1,a2..); #that's all there is to it.
 
 # dimensions lib
-- let ft = : 12`in ; # ratio setting example
+- let ft = : 12`in ;` # ratio setting example
 - let in = : / ( ft ,  12 ) ; # ratio setting example
 - let a = 3`ft `+ 6`ft       # = 9`ft #example. so 3e2%e is
 - a `to :in ; # => 108`in
-- ` md backticks are not being used correctly here, for sure
 
 # extensibility
 - custom objects
