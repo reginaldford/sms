@@ -1,0 +1,30 @@
+# tvert is a length unit conversion tool written in SMS
+# Run this with sms -i
+# Example usage: tvert(5+7/12, :ft, :cm)
+# The above example will convert 5 feet 7 inches into centimeters
+
+(
+  let tratios = {
+    s = {
+      s = 1;
+      mn = 0.01666666666666667;
+      hr = 0.0002777777777777778;
+      dy = 1.157407407407407e-05;
+      wk = 1.653439153439154e-06;
+      mo = 3805175.03805175;
+      yr = 3.168876461541279e-08;
+    };
+  };
+  let tvert = (x,u1,u2) => 
+    if(not(cxGet(tratios.s,u1)) or not(cxGet(tratios.s,u2)),
+      putln("Supported units: " str+ toStr(cxKeys(tratios.s))),
+      (
+        let lhs = cxKeys(tratios);
+        let rhs = cxValues(tratios);
+        let normalized = x / cxGet(tratios.s,u1);
+        let value = normalized * cxGet(tratios.s,u2);
+        putln(toStr(x) str+ toStr(u1) str+ " = " str+
+          toStr(value) str+ toStr(u2));
+      )
+    );
+);

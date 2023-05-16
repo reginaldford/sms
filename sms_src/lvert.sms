@@ -6,8 +6,8 @@
 (
   let lratios = {
     m = {
-      km = 0.001;
       m = 1;
+      km = 0.001;
       cm = 100;
       mm = 1000;
       nm = 1E9;
@@ -26,8 +26,8 @@
         let rhs = cxValues(lratios);
         let normalized = x / cxGet(lratios.m,u1);
         let value = normalized * cxGet(lratios.m,u2);
-        putln(toStr(x) str+ toStr(u1) str+ "= " str+
-          toStr(value) str+ " " str+ toStr(u2));
+        putln(toStr(x) str+ toStr(u1) str+ " = " str+
+          toStr(value) str+ toStr(u2));
       )
     );
 );

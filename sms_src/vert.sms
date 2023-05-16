@@ -1,0 +1,4 @@
+#!/usr/local/bin/sms -i
+eval(fileParse("mvert.sms"));
+eval(fileParse("lvert.sms"));
+eval(fileParse("tvert.sms"));
