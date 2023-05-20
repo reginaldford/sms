@@ -28,8 +28,6 @@ bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_
 
 // Global true symbol
 #define IS_TRUE(x) (x == (sm_object *)sm_global_true(NULL))
-// Global false symbol
-#define IS_FALSE(x) (x == (sm_object *)sm_global_false(NULL))
 
 // Recursive engine
 sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
@@ -471,18 +469,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_AND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (IS_FALSE(obj0))
+      if (!IS_TRUE(obj0))
         return (sm_object *)sm_global_false(NULL);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (IS_FALSE(obj1))
+      if (!IS_TRUE(obj1))
         return (sm_object *)sm_global_false(NULL);
       return (sm_object *)sm_global_true(NULL);
     }
     case SM_NOT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (IS_TRUE(obj0) == false)
+      if (!IS_TRUE(obj0))
         return (sm_object *)sm_global_true(NULL);
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sm_global_false(NULL);
     }
     case SM_ROUND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
