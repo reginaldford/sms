@@ -31,6 +31,17 @@ sm_heap *sm_global_current_heap(sm_heap *replacement) {
   return current_heap;
 }
 
+// global symbol table
+sm_cx *sm_global_symbol_cx(sm_cx *replacement) {
+  static sm_cx *current_cx = NULL;
+  if (replacement != NULL) {
+    sm_cx *temp = current_cx;
+    current_cx  = replacement;
+    return temp;
+  }
+  return current_cx;
+}
+
 // 'other' heap, also known as 'to' heap
 sm_heap *sm_global_other_heap(sm_heap *replacement) {
   static sm_heap *other_heap = NULL;
@@ -171,6 +182,7 @@ char *sm_global_fn_name(unsigned short int which) {
                              "parse",
                              "meta",
                              "==",
+                             "is",
                              "<",
                              ">",
                              "<=",
@@ -273,12 +285,12 @@ char *sm_global_fn_name(unsigned short int which) {
 // corresponding string length of the string that would come from the sm_global_fn_name(which)
 unsigned int sm_global_fn_name_len(unsigned short int which) {
   static long unsigned int response_len[] = {
-    4,  4, 5, 4, 2, 2, 3, 3,  1, 0, 1, 1, 1, 2,  1, 1, 1, 1, 1,  1, 3,  3, 3, 4, 4, 4, 4,
-    4,  4, 5, 5, 5, 3, 3, 3,  4, 4, 4, 4, 4, 4,  5, 5, 5, 2, 3,  3, 4,  3, 4, 4, 3, 2, 2,
-    3,  6, 5, 7, 4, 6, 8, 12, 5, 5, 4, 2, 1, 1,  2, 2, 0, 0, 0,  5, 3,  5, 5, 5, 5, 5, 5,
-    12, 5, 4, 7, 6, 8, 6, 8,  5, 9, 8, 7, 8, 10, 8, 9, 6, 6, 6,  9, 10, 8, 8, 6, 6, 6, 4,
-    4,  6, 4, 5, 3, 2, 3, 3,  7, 6, 6, 6, 7, 8,  4, 8, 7, 9, 11, 9, 6,  6, 8, 6, 5, 8, 6,
-    6,  8, 7, 9, 9, 9, 8, 6,  6, 8, 7, 0, 0, 8,  4, 7, 4, 4, 5,  6, 6,  6, 3, 1};
+    4, 4,  5, 4, 2, 2, 3, 3,  1, 0, 1, 1, 1, 2, 1,  1, 1, 1, 1, 1,  3, 3,  3, 4, 4, 4, 4,
+    4, 4,  5, 5, 5, 3, 3, 3,  4, 4, 4, 4, 4, 4, 5,  5, 5, 2, 3, 3,  4, 3,  4, 4, 3, 2, 2,
+    3, 6,  5, 7, 4, 6, 8, 12, 5, 5, 4, 2, 2, 1, 1,  2, 2, 0, 0, 0,  5, 3,  5, 5, 5, 5, 5,
+    5, 12, 5, 4, 7, 6, 8, 6,  8, 5, 9, 8, 7, 8, 10, 8, 9, 6, 6, 6,  9, 10, 8, 8, 6, 6, 6,
+    4, 4,  6, 4, 5, 3, 2, 3,  3, 7, 6, 6, 6, 7, 8,  4, 8, 7, 9, 11, 9, 6,  6, 8, 6, 5, 8,
+    6, 6,  8, 7, 9, 9, 9, 8,  6, 6, 8, 7, 0, 0, 8,  4, 7, 4, 4, 5,  6, 6,  6, 3, 1};
   if (which >= sm_global_num_fns()) {
     return 1; // "?"
   }
@@ -286,7 +298,7 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
 }
 
 unsigned int sm_global_num_fns() {
-  static const unsigned short int num_fns = 158;
+  static const unsigned short int num_fns = 160;
   return num_fns;
 }
 
@@ -332,5 +344,18 @@ sm_env *sm_global_environment(sm_env *replacement) {
     return temp;
   } else {
     return options;
+  }
+}
+
+
+// Options from the command line arguments
+sm_symbol *sm_global_true(sm_symbol *replacement) {
+  static sm_symbol *true_sym;
+  if (replacement != NULL) {
+    sm_symbol *temp = true_sym;
+    true_sym        = replacement;
+    return temp;
+  } else {
+    return true_sym;
   }
 }

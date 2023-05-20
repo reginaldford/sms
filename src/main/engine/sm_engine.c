@@ -26,17 +26,8 @@ bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_
   return true;
 }
 
-// Future symbol system will optimize this function
-// so that any two symbols with the same name will be the same symbol
-bool is_true(sm_object *obj) {
-  if (obj->my_type == SM_SYMBOL_TYPE) {
-    sm_symbol *sym = (sm_symbol *)obj;
-    if (sym->name->size == 4 && strncmp(&(sym->name->content), "true", 4) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
+// Global true symbol
+bool is_true(sm_object *obj) { return obj == (sm_object *)sm_global_true(NULL); }
 
 // Recursive engine
 sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
@@ -334,8 +325,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_CX_GET_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_LET_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_LET_EXPR)) {
+      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_GET_EXPR)) {
+        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_EXPR)) {
           sm_object *result = sm_cx_get(cx, &sym->name->content, sym->name->size);
           if (result)
             return result;
@@ -1359,6 +1350,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
 
       if (sm_object_eq(obj1, obj2))
+        return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
+      else
+        return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
+    }
+    case SM_IS_EXPR: {
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (obj1 == obj2)
         return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
       else
         return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));

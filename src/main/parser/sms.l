@@ -70,6 +70,7 @@ parse        {return PARSE;}
 !=           {return NOTEQ;}
 "<="         {return LT_EQ;}
 ">="         {return GT_EQ;}
+"is"         {return IS;}
 
 not          {return NOT;}
 or           {return OR;}

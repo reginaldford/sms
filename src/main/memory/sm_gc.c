@@ -138,12 +138,16 @@ void sm_garbage_collect() {
     // Reset the space array
     sm_global_space_array(NULL)->size = 0;
 
-    // Copy root (the global context)
-    *(sm_global_lex_stack(NULL)->top) =
-      (sm_cx *)sm_move_to_new_heap((sm_object *)*(sm_global_lex_stack(NULL)->top));
+    // Copy root (global context)
+    *sm_global_lex_stack(NULL)->top =
+      (sm_cx *)sm_move_to_new_heap((sm_object *)*sm_global_lex_stack(NULL)->top);
+
+    // Copy root (true symbol)
+    sm_global_true((sm_symbol *)sm_move_to_new_heap((sm_object *)sm_global_true(NULL)));
 
     // Inflate
     sm_inflate_heap();
+
 
     // For tracking purposes
     sm_gc_count(1);

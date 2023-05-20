@@ -67,6 +67,7 @@ void _lex_cstr(char * cstr,int len);
 %token EXIT
 %token HELP
 
+%token IS
 %token DOT
 %token <num> NUM
 %token <expr> PIPE
@@ -334,6 +335,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | FUN{}
 | IF_STATEMENT{}
 | EQ{}
+| EXPR IS EXPR { $$ = sm_new_expr_2(SM_IS_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | TEST_LT{}
 | TEST_GT{}
 | TEST_LT_EQ{}
@@ -481,7 +483,6 @@ TEST_GT_EQ: GT_EQ '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(SM_GT_EQ_EXPR, (sm_object *)($3), (sm_object *)($5));
 }
 | EXPR GT_EQ EXPR { $$ = sm_new_expr_2(SM_GT_EQ_EXPR,(sm_object*)$1,(sm_object*)$3);};
-
 
 EQ : EQEQ '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(SM_EQEQ_EXPR, (sm_object *)($3), (sm_object *)($5));
