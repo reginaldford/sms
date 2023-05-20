@@ -16,3 +16,5 @@ sm_object         *sm_global_parser_output(sm_object *replacement);
 sm_env            *sm_global_environment(sm_env *replacement);
 char              *sm_global_type_name(unsigned short int which);
 unsigned short int sm_global_type_name_len(unsigned short int which);
+sm_cx             *sm_global_symbol_cx(sm_cx *replacement);
+sm_symbol         *sm_global_true(sm_symbol *replacement);

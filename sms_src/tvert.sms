@@ -1,7 +1,7 @@
-# tvert is a length unit conversion tool written in SMS
+# tvert is a time unit conversion tool written in SMS
 # Run this with sms -i
-# Example usage: tvert(5+7/12, :ft, :cm)
-# The above example will convert 5 feet 7 inches into centimeters
+# Example usage: tvert(35+3/12, :yr, :dy)
+# The above example will convert 35 years and 3 months to days.
 
 (
   let tratios = {

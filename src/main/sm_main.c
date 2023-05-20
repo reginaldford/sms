@@ -133,15 +133,16 @@ int main(int num_args, char *argv[]) {
         clean_exit(&env, 1);
       }
       if (env.quiet_mode == false) {
+        const int KB = 1024;
         printf("Custom Heap Size: ");
         if (env.mem_mbytes < 1)
-          printf("%.16g KB\n", env.mem_mbytes * 1E3);
-        else if (env.mem_mbytes < 1E4)
-          printf("%.16g MB\n", env.mem_mbytes);
-        else if (env.mem_mbytes >= 1E4 && env.mem_mbytes < 1E6)
-          printf("%.16g GB\n", env.mem_mbytes / 1E3);
-        else if (env.mem_mbytes >= 1E6)
-          printf("%.16g TB\n", env.mem_mbytes / 1E6);
+          printf("%.4g KB\n", env.mem_mbytes * KB);
+        else if (env.mem_mbytes < (KB))
+          printf("%.4g MB\n", env.mem_mbytes);
+        else if (env.mem_mbytes >= (KB) && env.mem_mbytes < (KB * KB))
+          printf("%.4g GB\n", env.mem_mbytes / KB);
+        else if (env.mem_mbytes >= (KB * KB))
+          printf("%.4g TB\n", env.mem_mbytes / (KB * KB));
       }
       break;
     }

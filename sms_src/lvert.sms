@@ -18,16 +18,18 @@
       nmi = 0.0005399568034557235;
     };
   };
-  let lvert = (x,u1,u2) => 
+  let lvert = (x,u1,u2) =>
+  ( 
+    let lhs = cxKeys(lratios);
+    let rhs = cxValues(lratios);
     if(not(cxGet(lratios.m,u1)) or not(cxGet(lratios.m,u2)),
       putln("Supported units: " str+ toStr(cxKeys(lratios.m))),
       (
-        let lhs = cxKeys(lratios);
-        let rhs = cxValues(lratios);
         let normalized = x / cxGet(lratios.m,u1);
         let value = normalized * cxGet(lratios.m,u2);
         putln(toStr(x) str+ toStr(u1) str+ " = " str+
           toStr(value) str+ toStr(u2));
       )
     );
+  )
 );
