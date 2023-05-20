@@ -112,23 +112,22 @@ int sm_node_map_left_count(unsigned long long map, int bit_index) {
 }
 
 // Return the node of the trie addressed by needle, or return NULL
-sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
-  sm_node *curr_node   = self;
-  int      map_index   = 0;
-  int      child_index = 0;
-  int      char_index  = 0;
-  for (; char_index < len && curr_node != NULL; char_index++) {
-    map_index = sm_node_map_index(needle[char_index]);
-    if (sm_node_map_get(curr_node->map, map_index) == false)
+sm_node* sm_node_subnode(sm_node* self, char* needle, int len) {
+  sm_node* curr_node = self;
+  int char_index = 0;
+  while (char_index < len && curr_node != NULL) {
+    int map_index = sm_node_map_index(needle[char_index]);
+    unsigned long long map = curr_node->map;
+    unsigned long long bit = 1ULL << map_index;
+    if ((map & bit) == 0) {
       return NULL;
-    child_index = sm_node_map_left_count(curr_node->map, map_index);
-    curr_node   = sm_node_nth(curr_node->children, child_index);
-    if (curr_node == NULL)
-      return NULL;
+    }
+    int child_index = sm_node_map_left_count(map, map_index);
+    sm_node* child_here = (sm_node*)sm_node_nth(curr_node->children, child_index);
+    curr_node = child_here;
+    char_index++;
   }
-  if (char_index == len)
-    return curr_node;
-  return NULL;
+  return (char_index == len) ? curr_node : NULL;
 }
 
 // Return the parent node of the node addressed by needle, or return NULL
@@ -265,54 +264,65 @@ int sm_node_size(sm_node *node) {
   int size = 0;
   if (node->value != NULL)
     size++;
-  int items_to_do = sm_node_map_size(node->map);
-  for (int i = 0; items_to_do > 0 && i < 8; i++) {
-    char current_byte = ((char *)&(node->map))[i];
-    if (current_byte != '\0')
-      for (int j = 0; items_to_do > 0 && j < 8; j++) {
-        int current_bit = 8 * i + j;
-        if (sm_node_map_get(node->map, current_bit) == true) {
-          int      child_index = sm_node_child_index(node->map, current_bit);
-          sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
-          size += sm_node_size(child_here);
-          items_to_do--;
-        }
-      }
+  unsigned long long map = node->map; // Get the bitmap
+  while (map != 0) {
+    unsigned long long bit = map & -map;    // Using two's complement trick
+    int bit_index   = __builtin_ctzll(bit); // Using built-in ctzll (count trailing zeros) function
+    int child_index = sm_node_child_index(node->map, bit_index);
+    sm_node *child_here = (sm_node *)sm_node_nth(node->children, child_index);
+    size += sm_node_size(child_here);
+    map ^= bit; // Clear the bit
   }
+
   return size;
 }
+
 
 // Returns the keys under this node(recursive)
 sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) {
   if (node == NULL)
     return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
-  char buffer[32];
+
   if (node->value != NULL) {
-    // var name
+    // Build the key string
+    int  len = sm_stack_size(char_stack);
+    char buffer[len + 1]; // Increase the buffer size to accommodate the null terminator
+    buffer[len] = '\0';   // Add the null terminator at the end
+
     for (unsigned int i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
       sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
       buffer[i]          = sm_node_bit_unindex(num_obj->value);
     }
-    int len    = sm_stack_size(char_stack);
+
+    // Add the key to the collection
     collection = sm_expr_append(collection, (sm_object *)sm_new_symbol(sm_new_string(len, buffer)));
   }
-  // If there are not more children, we are done
+
+  // If there are no more children, we are done
   if (sm_node_is_empty(node)) {
     return collection;
   }
-  int items_to_do = sm_node_map_size(node->map);
-  for (int i = 0; items_to_do > 0 && i < 64; i++) {
-    if (sm_node_map_get(node->map, i) == true) {
-      int      child_index = sm_node_child_index(node->map, i);
-      sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
-      sm_stack_push(char_stack, sm_new_double(i));
-      collection = sm_node_keys(child_here, char_stack, collection);
-      sm_stack_pop(char_stack);
-      items_to_do--;
-    }
+
+  unsigned long long map = node->map; // Get the bitmap
+
+  while (map != 0) {
+    unsigned long long bit = map & -map; // Get the rightmost set bit using two's complement trick
+    int                bit_index = __builtin_ctzll(
+      bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
+
+    int      child_index = sm_node_child_index(node->map, bit_index);
+    sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
+
+    sm_stack_push(char_stack, sm_new_double(bit_index));
+    collection = sm_node_keys(child_here, char_stack, collection);
+    sm_stack_pop(char_stack);
+
+    map ^= bit; // Clear the current bit
   }
+
   return collection;
 }
+
 
 // Returns the keys under this node(recursive)
 sm_expr *sm_node_values(sm_node *node, sm_expr *collection) {

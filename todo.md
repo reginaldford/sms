@@ -1,25 +1,22 @@
+# memoized functions
+- allow for:
+  - `let x = memoize((input) => (
+      # your code here;
+    ));`
+
 # functions and callstack
 - Ability to return early from a function
 - Stack variables
-
-# singleton symbol set
-- global cx , scratchpad terminology. _scratchpad is a global
-- Make the _all_ symbols global to keep uniqueness for symbols
-- The right side will be a refcount, so we can delete symbols with 0 references at gc.
-- After gc, update globals for true, false etc.
-- then, we can optimize symbol equivilance tests to ptr equivilance tests.
-- note that == should be true if the toStr(obj1)==toStr(obj2) but 'is' keyword will check for ptr equality.
-- so loops will use things like while(x is true) or while( n < size is not(true));
 
 # reflexivity
 - get op symbol from an expr
 - set op symbol for an expr
 
-# context return values
-- a return command will change the whole surrounding context into the return value.
-
 # break statement
 - to end a while
+
+# switch cases
+- evaluate the nth element of an array
 
 # argument access
 - _args in rooftop
@@ -148,9 +145,9 @@ k_2,3
 - sdl2 bindings
 
 # bison/flex independance plan
-- Build an internal parser generator
-- describe the same grammar defined in sms.y
-- save the resulting memory image as a starting point
+- write a parser in sms
+- parse the parser
+- save the image
 
 #compilation and cross compilation
 - The engine will call a single function for every case, and SMS will have an array of pointers to each engine case function.
