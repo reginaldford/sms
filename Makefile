@@ -37,7 +37,9 @@ BIN_NAME_PROF   := sms_prof
 THREADS         := 8 #match the number of threads on your machine
 
 # sms executable
-# Only first bc that makes this target default
+main:
+	$(MAKE) -j$(THREADS) bin/$(BIN_NAME)
+
 bin/$(BIN_NAME): $(OBJS0) $(OBJS1) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
 	$(CC) -lm $(OBJS1) $(OBJS0) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
 
@@ -101,7 +103,7 @@ clean:
 		bin/sms*
 
 # Install the binary to a unix-like system
-install: bin/$(BIN_NAME)
+install: main
 	cp -fv bin/$(BIN_NAME) $(INSTALL_DIR)/$(BIN_NAME)
 	chmod +x $(INSTALL_DIR)/$(BIN_NAME)
 
