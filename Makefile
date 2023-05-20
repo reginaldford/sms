@@ -55,7 +55,7 @@ all:
 
 # sms_dbg executable
 bin/$(BIN_NAME_DBG): $(OBJS5) $(OBJS4) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
-	$(CC_DBG) -lm $(OBJS4) $(OBJS5) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
+	$(CC_DEBUG) -lm $(CFLAGS_DEBUG) $(OBJS4) $(OBJS5) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
 
 # sms_test executable
 bin/$(BIN_NAME_TEST): $(OBJS5) $(OBJS4) $(OBJS2)

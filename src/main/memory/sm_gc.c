@@ -145,9 +145,11 @@ void sm_garbage_collect() {
     // Copy root (true symbol)
     sm_global_true((sm_symbol *)sm_move_to_new_heap((sm_object *)sm_global_true(NULL)));
 
+    // Copy root (false symbol)
+    sm_global_false((sm_symbol *)sm_move_to_new_heap((sm_object *)sm_global_false(NULL)));
+
     // Inflate
     sm_inflate_heap();
-
 
     // For tracking purposes
     sm_gc_count(1);

@@ -27,7 +27,9 @@ bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_
 }
 
 // Global true symbol
-bool is_true(sm_object *obj) { return obj == (sm_object *)sm_global_true(NULL); }
+#define IS_TRUE(x) (x == (sm_object *)sm_global_true(NULL))
+// Global false symbol
+#define IS_FALSE(x) (x == (sm_object *)sm_global_false(NULL))
 
 // Recursive engine
 sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
@@ -457,12 +459,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type == SM_SYMBOL_TYPE) {
-        if (is_true(obj0)) {
+        if (IS_TRUE(obj0)) {
           return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
         }
       }
       if (obj1->my_type == SM_SYMBOL_TYPE) {
-        if (is_true(obj1)) {
+        if (IS_TRUE(obj1)) {
           return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
         }
       }
@@ -471,7 +473,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_AND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type == SM_SYMBOL_TYPE) {
-        if (!is_true(obj0)) {
+        if (!IS_TRUE(obj0)) {
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
         }
       } else
@@ -479,7 +481,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
 
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj1->my_type == SM_SYMBOL_TYPE) {
-        if (!is_true(obj1)) {
+        if (!IS_TRUE(obj1)) {
           return (sm_object *)sm_new_symbol(sm_new_string(5, "false"));
         }
       } else
@@ -489,7 +491,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_NOT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type == SM_SYMBOL_TYPE) {
-        if (is_true(obj0) == false) {
+        if (IS_TRUE(obj0) == false) {
           return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
         }
       }
@@ -805,7 +807,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_WHILE_EXPR: {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 0);
       sm_object *expression = sm_expr_get_arg(sme, 1);
-      while (is_true(sm_engine_eval((sm_object *)condition, current_cx, sf))) {
+      while (IS_TRUE(sm_engine_eval((sm_object *)condition, current_cx, sf))) {
         // TODO: check for break/return here
         // if(eval==break || eval==return) break
         sm_engine_eval(expression, current_cx, sf);
@@ -818,7 +820,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *expression = sm_expr_get_arg(sme, 0);
       do {
         sm_engine_eval(expression, current_cx, sf);
-      } while (is_true(sm_engine_eval((sm_object *)condition, current_cx, sf)));
+      } while (IS_TRUE(sm_engine_eval((sm_object *)condition, current_cx, sf)));
       return (sm_object *)sm_new_symbol(sm_new_string(4, "true"));
       break;
     }
@@ -1281,7 +1283,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_IF_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (is_true(condition_result)) {
+      if (IS_TRUE(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
       return (sm_object *)(sm_object *)sm_new_symbol(sm_new_string(5, "false"));
@@ -1291,7 +1293,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (condition_result->my_type != SM_SYMBOL_TYPE) {
         return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       }
-      if (is_true(condition_result)) {
+      if (IS_TRUE(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);

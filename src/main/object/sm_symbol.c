@@ -3,22 +3,21 @@
 #include "../sms.h"
 
 // Just create a symbol
-sm_symbol *sm_new_symbol2(sm_string *sym_name) {
+sm_symbol *sm_new_symbol_manual(sm_string *sym_name) {
   sm_symbol *sym = (sm_symbol *)sm_malloc(sizeof(sm_symbol));
   sym->my_type   = SM_SYMBOL_TYPE;
   sym->name      = sym_name;
   return sym;
 }
 
-// Returns a new symbol after assuring it's in the gsc
+// Returns a new symbol
 sm_symbol *sm_new_symbol(sm_string *sym_name) {
-  if (sm_global_true(NULL)) {
-    if (strncmp(&sym_name->content, "true", 4) == 0)
-      return sm_global_true(NULL);
-    else
-      return sm_new_symbol2(sym_name);
-  } else
-    return sm_new_symbol2(sym_name);
+  if (strncmp(&sym_name->content, "true", 4) == 0)
+    return sm_global_true(NULL);
+  else if (strncmp(&sym_name->content, "false", 5) == 0)
+    return sm_global_false(NULL);
+  else
+    return sm_new_symbol_manual(sym_name);
 }
 
 sm_string *sm_symbol_to_string(sm_symbol *self) {
