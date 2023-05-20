@@ -27,11 +27,16 @@ void sm_init(sm_env *env) {
   // Build the global context's parent
   sm_cx *parent_cx = sm_new_cx(NULL);
   sm_cx_let(parent_cx, "PI", 2, (sm_object *)sm_new_double(3.14159265358979323846));
-  sm_symbol *true_sym = sm_new_symbol(sm_new_string(4, "true"));
+
+  // true singleton
+  sm_symbol *true_sym = sm_new_symbol_manual(sm_new_string(4, "true"));
   sm_cx_let(parent_cx, "true", 4, (sm_object *)true_sym);
   sm_global_true(true_sym);
 
-  sm_cx_let(parent_cx, "false", 5, (sm_object *)sm_new_symbol(sm_new_string(5, "false")));
+  // false singleton
+  sm_symbol *false_sym = sm_new_symbol_manual(sm_new_string(5, "false"));
+  sm_cx_let(parent_cx, "false", 5, (sm_object *)false_sym);
+  sm_global_false(false_sym);
 
   // Initialize the global context
   sm_stack_push(sm_global_lex_stack(NULL), sm_new_cx(parent_cx));

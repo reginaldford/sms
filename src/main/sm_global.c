@@ -347,7 +347,6 @@ sm_env *sm_global_environment(sm_env *replacement) {
   }
 }
 
-
 // Options from the command line arguments
 sm_symbol *sm_global_true(sm_symbol *replacement) {
   static sm_symbol *true_sym;
@@ -357,5 +356,17 @@ sm_symbol *sm_global_true(sm_symbol *replacement) {
     return temp;
   } else {
     return true_sym;
+  }
+}
+
+// Options from the command line arguments
+sm_symbol *sm_global_false(sm_symbol *replacement) {
+  static sm_symbol *false_sym;
+  if (replacement != NULL) {
+    sm_symbol *temp = false_sym;
+    false_sym       = replacement;
+    return temp;
+  } else {
+    return false_sym;
   }
 }
