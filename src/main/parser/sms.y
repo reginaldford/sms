@@ -261,11 +261,11 @@ void _lex_cstr(char * cstr,int len);
 
 %left ';'
 %left '='
+%nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS
 %left '+' '-'
 %left '*' '/'
 %left '^'
 %left '.'
-%nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS
 %left IF WHILE DOWHILE
 %left OR AND NOT
 %left DOT
