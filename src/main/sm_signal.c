@@ -43,12 +43,7 @@ void sm_signal_handler(int signal_number) {
     printf("\n<Received signal: %s. Exiting with code: %i>\n", signal_name, exit_code);
   sm_mem_cleanup();
   fflush(stdout);
-
-  // If the process was terminated by a signal, set the exit code to 128 + signal number
-  if (WIFSIGNALED(exit_code))
-    exit(128 + WTERMSIG(exit_code));
-  else
-    exit(exit_code);
+  exit(exit_code);
 }
 
 void sm_register_signals() {
