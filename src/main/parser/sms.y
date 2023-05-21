@@ -261,13 +261,18 @@ void _lex_cstr(char * cstr,int len);
 
 %left ';'
 %left '='
-%left IF
-%nonassoc '<' '>' EQEQ
 %left '+' '-'
 %left '*' '/'
 %left '^'
-%left ':'
+%left '.'
+%nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS
+%left IF WHILE DOWHILE
+%left OR AND NOT
 %left DOT
+%left STR_CAT
+%left '(' ')'
+%right ':'
+
 %%
 
 COMMAND : EXPR ';' {
@@ -278,7 +283,7 @@ COMMAND : EXPR ';' {
 | DONE      { YYACCEPT;}
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->top)); }
-| EXIT '(' EXPR ')'  { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3);  }
+| EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3);  }
 | LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4);}
 | RM SYM {$$ = sm_new_expr(SM_RM_EXPR, (sm_object *)$2);}
 | SYM{}
