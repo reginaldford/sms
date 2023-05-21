@@ -259,19 +259,19 @@ void _lex_cstr(char * cstr,int len);
 
 %token DONE
 
-%left ';'
-%left '='
 %nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS
+%left ':'
+%nonassoc SYM
+%left  '='
+%nonassoc ','
+%left IF WHILE DOWHILE
+%left OR AND NOT
+%left DOT
 %left '+' '-'
 %left '*' '/'
 %left '^'
 %left '.'
-%left IF WHILE DOWHILE
-%left OR AND NOT
-%left DOT
-%left STR_CAT
-%left '(' ')'
-%right ':'
+%left ';'
 
 %%
 

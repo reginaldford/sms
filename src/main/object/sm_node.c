@@ -112,19 +112,19 @@ int sm_node_map_left_count(unsigned long long map, int bit_index) {
 }
 
 // Return the node of the trie addressed by needle, or return NULL
-sm_node* sm_node_subnode(sm_node* self, char* needle, int len) {
-  sm_node* curr_node = self;
-  int char_index = 0;
+sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
+  sm_node *curr_node  = self;
+  int      char_index = 0;
   while (char_index < len && curr_node != NULL) {
-    int map_index = sm_node_map_index(needle[char_index]);
-    unsigned long long map = curr_node->map;
-    unsigned long long bit = 1ULL << map_index;
+    int                map_index = sm_node_map_index(needle[char_index]);
+    unsigned long long map       = curr_node->map;
+    unsigned long long bit       = 1ULL << map_index;
     if ((map & bit) == 0) {
       return NULL;
     }
-    int child_index = sm_node_map_left_count(map, map_index);
-    sm_node* child_here = (sm_node*)sm_node_nth(curr_node->children, child_index);
-    curr_node = child_here;
+    int      child_index = sm_node_map_left_count(map, map_index);
+    sm_node *child_here  = (sm_node *)sm_node_nth(curr_node->children, child_index);
+    curr_node            = child_here;
     char_index++;
   }
   return (char_index == len) ? curr_node : NULL;
