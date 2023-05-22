@@ -25,6 +25,7 @@ bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_
 
 // Global true symbol
 #define IS_TRUE(x) (x == (sm_object *)sm_global_true(NULL))
+#define IS_FALSE(x) (x == (sm_object *)sm_global_false(NULL))
 
 // Recursive engine
 sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
@@ -455,29 +456,29 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type == SM_SYMBOL_TYPE) {
-        if (IS_TRUE(obj0)) {
+        if (!IS_FALSE(obj0)) {
           return (sm_object *)sm_global_true(NULL);
         }
       }
-      if (IS_TRUE(obj1)) {
+      if (!IS_FALSE(obj1)) {
         return (sm_object *)sm_global_true(NULL);
       }
       return (sm_object *)sm_global_false(NULL);
     }
     case SM_AND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (!IS_TRUE(obj0))
+      if (IS_FALSE(obj0))
         return (sm_object *)sm_global_false(NULL);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (!IS_TRUE(obj1))
+      if (IS_FALSE(obj1))
         return (sm_object *)sm_global_false(NULL);
       return (sm_object *)sm_global_true(NULL);
     }
     case SM_NOT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (!IS_TRUE(obj0))
-        return (sm_object *)sm_global_true(NULL);
-      return (sm_object *)sm_global_false(NULL);
+      if (!IS_FALSE(obj0))
+        return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sm_global_true(NULL);
     }
     case SM_ROUND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -789,7 +790,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_WHILE_EXPR: {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 0);
       sm_object *expression = sm_expr_get_arg(sme, 1);
-      while (IS_TRUE(sm_engine_eval((sm_object *)condition, current_cx, sf))) {
+      while (!IS_FALSE(sm_engine_eval((sm_object *)condition, current_cx, sf))) {
         // TODO: check for break/return here
         // if(eval==break || eval==return) break
         sm_engine_eval(expression, current_cx, sf);
@@ -802,7 +803,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *expression = sm_expr_get_arg(sme, 0);
       do {
         sm_engine_eval(expression, current_cx, sf);
-      } while (IS_TRUE(sm_engine_eval((sm_object *)condition, current_cx, sf)));
+      } while (!IS_FALSE(sm_engine_eval((sm_object *)condition, current_cx, sf)));
       return (sm_object *)sm_global_true(NULL);
       break;
     }
@@ -1265,7 +1266,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_IF_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (IS_TRUE(condition_result)) {
+      if (!IS_FALSE(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
       return (sm_object *)sm_global_false(NULL);
@@ -1275,7 +1276,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (condition_result->my_type != SM_SYMBOL_TYPE) {
         return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       }
-      if (IS_TRUE(condition_result)) {
+      if (IS_FALSE(condition_result) == false) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
