@@ -20,6 +20,10 @@
     {
       name= "string";
       num_subchapters = 1;
+    },
+    {
+      name= "cx";
+      num_subchapters = 1;
     }
   ];
 };

@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -m 1300 
+#!/usr/local/bin/sms -m 1400 
 #Use this to benchmark something
 
 let t1=[];
@@ -19,4 +19,4 @@ let benchmark = (e) =>   (
 );
 
 let f = (n) => if( n <= 1 , n ,f(n - 1) + f(n - 2));
-benchmark(:f(27));
+benchmark(:f(28));

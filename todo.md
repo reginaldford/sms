@@ -1,12 +1,20 @@
-# memoized functions
-- allow for:
-  - `let x = memoize((input) => (
-      # your code here;
-    ));`
-
 # functions and callstack
 - Ability to return early from a function
 - Stack variables
+
+# array ops
+- arr+ !! etc for parallel tuple add
+- numArr+ etc for parallel vec add
+- byteArr+ etc for parallel vec add
+- cat is for concatenating
+- part is for partition
+- repeat is for repeating
+- reverse is for repeating
+- select takes a boolean map function
+  - select( (x)=>x<5, arr); # is generic part function!
+    - returns the same kind of array
+  - selectAssoc( (x)=>x<5, arr1, arr2, arr3..); # selects the same from arr2, etc.
+    - returns arrArr
 
 # reflexivity
 - get op symbol from an expr
@@ -20,6 +28,67 @@
 
 # argument access
 - _args in rooftop
+
+# memoized functions
+- allow for:
+  - `let x = memoize((input) => (
+      # your code here;
+    ));`
+
+# heap loading/saving
+- Saving a heap to a file
+- loading the file as a live heap
+- loading a heap as an inspectable object
+- Heap conversion, editing, and exporting tool
+
+# parse time functions
+- !fname(a1,a2..); #that's all there is to it.
+
+# prettyPrinting
+- matrices: short mode shows m@x,y, smart mode will truncate if matrices have the same height
+- options for max width
+- beyond this , system uses [ x , x .... x , x ] #symmetric printouts
+- full mode will show whole matrices, but return line if they are more than a certain amount
+- long strings will show as str@<len>
+- long arrays will show as arr@<len>
+- large contexts will show as cx@<len>
+- large byte array: byteArr@<len>
+- large numArray: numArr@<len>
+- toStr does full mode, no prettyprinting
+- toStrPretty takes an optional cx of options?
+- color mode eventually.
+
+# internal power series engine
+- to cover missing trig functions
+- offer functions to carry out the ps method
+- build the aux var funcs, reusing internal parts
+
+# last moment gc
+- requires explicit stack. use sm_stack.c
+- implement tail call opt
+- option to move objects outside of heap. malloc(obj)
+  - bigSpace = malloc(byteArr@34);
+  - bigSpace = !malloc(newByteArr(34,0x33)); # build in outterspace in parser time
+  - for large objects, they can be in malloc space
+  - gc will not move these objects.
+  - if you process the object, it will come back to heap. use malloc(:newStr(...,...)); which will change the allocator for the evaluation of the expression.
+    if you use !malloc(:expr) , you can build a large object outside of the heap, and the gc will clear malloc'd objects accordingly
+
+# dynamic heap size
+- allow min, max, max_emptiness, growth factor options
+- no gc means static heap size bc heap size changes after gc to
+  satisfy max_emptiness by growing heap by growth factor.
+
+# typed heaps
+- object locations are s.t. type info is in leading bits of object's location as a ptr
+- so we have n objects, which need log(2,n) bits to address.
+- Heap sizes are set at 2^n bytes from a known ptr,
+- size of heap starts at 2^8 = 256 bytes.
+- size of the heap doubles if necessary (with realloc)
+- speed critical apps can set the size of each heap
+- each heap would have their own gc
+- each heap can have destination gc, which is set to itself for now
+- later, we can have 3-gen typed heaps. That's (num*types)*3 heaps.
 
 # types, typed arrays
 - str[ ...] makes a single string , concatenating the strings
@@ -67,63 +136,21 @@ k_2,3
 - mToByteArr
 - mToByteArrArr
 
-# array ops
-- arr+ !! etc for parallel tuple add
-- numArr+ etc for parallel vec add
-- byteArr+ etc for parallel vec add
-- cat is for concatenating
-- part is for partition
-- repeat is for repeating
-- reverse is for repeating
-- select takes a boolean map function
-  - select( (x)=>x<5, arr); # is generic part function!
-    - returns the same kind of array
-  - selectAssoc( (x)=>x<5, arr1, arr2, arr3..); # selects the same from arr2, etc.
-    - returns arrArr
+# multimedia libs
+- tgaMaker library
+- cimgui lib bindings
+- sdl2 bindings
 
-# prettyPrinting
-- matrices: short mode shows m@x,y, smart mode will truncate if matrices have the same height
-- options for max width
-- beyond this , system uses [ x , x .... x , x ] #symmetric printouts
-- full mode will show whole matrices, but return line if they are more than a certain amount
-- long strings will show as str@<len>
-- long arrays will show as arr@<len>
-- large contexts will show as cx@<len>
-- large byte array: byteArr@<len>
-- large numArray: numArr@<len>
-- toStr does full mode, no prettyprinting
-- toStrPretty takes an optional cx of options?
-- color mode eventually.
+# bison/flex independance plan
+- write an sms parser in sms
+- parse the parser
+- save the image
+- will be part of compilation/bootstrap plan
 
-# internal power series engine
-- to cover missing trig functions
-- offer functions to carry out the ps method
-- build the aux var funcs, reusing internal parts
-
-# last moment gc
-- requires explicit stack. use sm_stack.c
-- implement tail call opt
-- option to move objects outside of heap. malloc(obj)
-  - bigSpace = malloc(byteArr@34);
-  - bigSpace = !malloc(newByteArr(34,0x33)); # build in outterspace in parser time
-  - for large objects, they can be in malloc space
-  - gc will not move these objects.
-  - if you process the object, it will come back to heap. use malloc(:newStr(...,...)); which will change the allocator for the evaluation of the expression.
-    if you use !malloc(:expr) , you can build a large object outside of the heap, and the gc will clear malloc'd objects accordingly
-
-# heap loading/saving
-- Saving a heap to a file
-- loading the file as a live heap
-- loading a heap as an inspectable object
-- Heap conversion, editing, and exporting tool
-
-# dynamic heap size
-- allow min, max, max_emptiness, growth factor options
-- no gc means static heap size bc heap size changes after gc to
-  satisfy max_emptiness by growing heap by growth factor.
-
-# parse time functions
-- !fname(a1,a2..); #that's all there is to it.
+#compilation and cross compilation
+- aiming for llvm IR
+- emit llvm ir into memory, and compile
+- compile( (x)=>x^2 ); # we get compiled( ... )
 
 # dimensions lib
 - let ft = : 12`in ;` # ratio setting example
@@ -139,19 +166,3 @@ k_2,3
 - c abi / ffi
 - cgi wrapper
 
-# multimedia libs
-- tgaMaker library
-- cimgui lib bindings
-- sdl2 bindings
-
-# bison/flex independance plan
-- write a parser in sms
-- parse the parser
-- save the image
-
-#compilation and cross compilation
-- The engine will call a single function for every case, and SMS will have an array of pointers to each engine case function.
-then , primitive calls would specify the function to call by its array index, and they would be pre-computed becuase primitives do not change.
-- Some functions will need to be created to manage the memory heap, such as changing a primtive number, etc.
-- Once memory cross-compiling is done, we can leave bison and make sms work on any supported arch from any other supported arch.
-- This work will be encapsulated in the cross-compilation library. At this point

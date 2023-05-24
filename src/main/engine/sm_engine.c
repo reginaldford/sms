@@ -115,7 +115,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       unsigned int       i = 0;
 
       char cwd[1024];
-      if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      if (getcwd(cwd, sizeof(cwd))) {
       } else {
         printf("Error: Current working directory is invalid: %s .\n", cwd);
         return (sm_object *)sm_new_double(0);
@@ -126,7 +126,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         printf("Error: Current working directory is invalid: %s .\n", cwd);
         return (sm_object *)sm_new_double(0);
       }
-      while ((entry = readdir(dir)) != NULL && i < MAX_ENTRIES) {
+      while ((entry = readdir(dir)) && i < MAX_ENTRIES) {
         unsigned int path_length = strlen(cwd) + strlen(entry->d_name) + 1;
         char         full_path[path_length + 1];
         snprintf(full_path, path_length + 1, "%s/%s", cwd, entry->d_name);
@@ -153,7 +153,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_PWD_EXPR: {
       char cwd[1024];
-      if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      if (getcwd(cwd, sizeof(cwd))) {
       } else {
         printf("Error: Current working directory is invalid: %s .\n", cwd);
         return (sm_object *)sm_new_double(0);
@@ -355,8 +355,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_DOT_EXPR)) {
         if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_DOT_EXPR)) {
-          sm_object *retrieved = sm_cx_get(cx, &sym->name->content, sym->name->size);
-          if (retrieved != NULL)
+          sm_object *retrieved = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
+          if (retrieved)
             return retrieved;
           else
             return (sm_object *)sms_false;
@@ -378,7 +378,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_CONTAINING_EXPR)) {
         if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_CONTAINING_EXPR)) {
           sm_cx *retrieved = sm_cx_get_container(cx, &sym->name->content, sym->name->size);
-          if (retrieved != NULL)
+          if (retrieved)
             return (sm_object *)retrieved;
           else
             return (sm_object *)sms_false;
@@ -424,7 +424,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_KEYS_EXPR)) {
         sm_expr *success =
           sm_node_keys(cx->content, sm_new_stack(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
-        if (success != NULL)
+        if (success)
           return (sm_object *)success;
         else
           return (sm_object *)sms_false;
@@ -435,7 +435,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_VALUES_EXPR)) {
         sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
-        if (success != NULL)
+        if (success)
           return (sm_object *)success;
         else
           return (sm_object *)sms_false;
@@ -1415,7 +1415,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     sm_symbol *sym      = (sm_symbol *)input;
     sm_string *var_name = sym->name;
     sm_object *sr       = sm_cx_get_far(current_cx, &(var_name->content), var_name->size);
-    if (sr != NULL)
+    if(sr)
       return sr;
     else {
       // should return error object
