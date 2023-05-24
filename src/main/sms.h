@@ -11,6 +11,7 @@
 #include <time.h>
 #include <stdint.h>
 
+
 // These are the major object types of SMS
 // Keep syncronized with function sm_object_type_str
 enum sm_object_type {
@@ -42,10 +43,10 @@ enum sm_object_type {
   printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
   fflush(stdout);
 
+#include "memory/sm_heap.h"
 #include "sm_env.h"
 #include "sm_signal.h"
 #include "sm_init.h"
-#include "memory/sm_heap.h"
 #include "object/sm_string.h"
 #include "object/sm_object.h"
 #include "object/sm_expr.h"

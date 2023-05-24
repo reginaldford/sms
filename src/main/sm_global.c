@@ -2,56 +2,19 @@
 
 #include "sms.h"
 
-/* GLOBALS
-Globals in this project use functions f(x):
+// Global object pointers
+sm_heap   *sms_heap;
+sm_heap   *sms_other_heap;
+sm_symbol *sms_true;
+sm_symbol *sms_false;
+
+
+/* GLOBALS as functions
+The following globals use functions f(x):
 - If x is NULL, the static field is returned.
 - If x is not NULL, the old field value is returned and x replaces the field.
 This allows us to use a breakpoint or printf to detect reads/writes to the global.
 */
-
-// the global context
-sm_cx *sm_global_cx(sm_cx *replacement) {
-  static sm_cx *global_cx = NULL;
-  if (replacement != NULL) {
-    sm_cx *temp = global_cx;
-    global_cx   = replacement;
-    return temp;
-  }
-  return global_cx;
-}
-
-// Current heap. Objects here are live
-sm_heap *sm_global_current_heap(sm_heap *replacement) {
-  static sm_heap *current_heap = NULL;
-  if (replacement != NULL) {
-    sm_heap *temp = current_heap;
-    current_heap  = replacement;
-    return temp;
-  }
-  return current_heap;
-}
-
-// global symbol table
-sm_cx *sm_global_symbol_cx(sm_cx *replacement) {
-  static sm_cx *current_cx = NULL;
-  if (replacement != NULL) {
-    sm_cx *temp = current_cx;
-    current_cx  = replacement;
-    return temp;
-  }
-  return current_cx;
-}
-
-// 'other' heap, also known as 'to' heap
-sm_heap *sm_global_other_heap(sm_heap *replacement) {
-  static sm_heap *other_heap = NULL;
-  if (replacement != NULL) {
-    sm_heap *temp = other_heap;
-    other_heap    = replacement;
-    return temp;
-  }
-  return other_heap;
-}
 
 // tracking number of garbage collections
 // instead of NULL, use 0
@@ -302,27 +265,6 @@ unsigned int sm_global_num_fns() {
   return num_fns;
 }
 
-// list of parent objects
-// stored outside of heap and used for gc
-sm_expr *sm_global_parents(sm_expr *replacement) {
-  const int       initial_capacity = 100;
-  static sm_expr *parents          = NULL;
-  if (replacement != NULL) {
-    sm_expr *previous = parents;
-    parents           = replacement;
-    return previous;
-  }
-  if (parents == NULL) {
-    sm_expr *parents  = (sm_expr *)malloc(sizeof(sm_expr) + sizeof(void *) * initial_capacity);
-    parents->my_type  = SM_EXPR_TYPE;
-    parents->op       = SM_SIBLINGS_EXPR;
-    parents->size     = 0;
-    parents->capacity = initial_capacity;
-    return parents;
-  }
-  return parents;
-}
-
 // This makes the bison parser globally accessible
 sm_object *sm_global_parser_output(sm_object *replacement) {
   static sm_object *parser_output;
@@ -344,29 +286,5 @@ sm_env *sm_global_environment(sm_env *replacement) {
     return temp;
   } else {
     return options;
-  }
-}
-
-// Options from the command line arguments
-sm_symbol *sm_global_true(sm_symbol *replacement) {
-  static sm_symbol *true_sym;
-  if (replacement != NULL) {
-    sm_symbol *temp = true_sym;
-    true_sym        = replacement;
-    return temp;
-  } else {
-    return true_sym;
-  }
-}
-
-// Options from the command line arguments
-sm_symbol *sm_global_false(sm_symbol *replacement) {
-  static sm_symbol *false_sym;
-  if (replacement != NULL) {
-    sm_symbol *temp = false_sym;
-    false_sym       = replacement;
-    return temp;
-  } else {
-    return false_sym;
   }
 }

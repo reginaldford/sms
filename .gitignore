@@ -3,6 +3,8 @@ sms
 sms_dbg
 sms_test
 sms_kernel_test
+sms_prof
+sms_unified
 lex.yy.c
 y.tab.c
 y.tab.h

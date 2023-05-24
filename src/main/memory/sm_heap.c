@@ -2,6 +2,11 @@
 
 #include "../sms.h"
 
+extern sm_heap   *sms_heap;
+extern sm_heap   *sms_other_heap;
+extern sm_symbol *sms_true;
+extern sm_symbol *sms_false;
+
 // For rounding up object size to the next multiple of 4 bytes.
 int sm_round_size(int size) { return ((size) + 3) & ~3; }
 
@@ -107,9 +112,9 @@ void *sm_malloc(unsigned int size) {
   // if (space_search != NULL) {
   // return space_search;
   // } else {
-  unsigned int bytes_used = sm_global_current_heap(NULL)->used;
-  sm_global_current_heap(NULL)->used += size;
-  return (void *)(((char *)sm_global_current_heap(NULL)->storage) + bytes_used);
+  unsigned int bytes_used = sms_heap->used;
+  sms_heap->used += size;
+  return (void *)(((char *)sms_heap->storage) + bytes_used);
   // }
 }
 
@@ -144,24 +149,23 @@ void sm_dump_and_count() {
   static int index     = 1;
   int        index_len = log(index) / log(10);
   snprintf(fname, 12 + index_len, "current_%i.mem", index);
-  sm_mem_dump(sm_global_current_heap(NULL), fname);
+  sm_mem_dump(sms_heap, fname);
   snprintf(fname, 10 + index_len, "other_%i.mem", index);
-  sm_mem_dump(sm_global_current_heap(NULL), fname);
+  sm_mem_dump(sms_heap, fname);
 }
 
 // Free the heaps, preparing for closing or restarting
 void sm_mem_cleanup() {
-  if (sm_global_current_heap(NULL) != NULL)
-    free(sm_global_current_heap(NULL));
-  if (sm_global_other_heap(NULL) != NULL)
-    free(sm_global_other_heap(NULL));
+  if (sms_heap != NULL)
+    free(sms_heap);
+  if (sms_other_heap != NULL)
+    free(sms_other_heap);
 }
 
 // Print every object in current heap
 void sm_sprint_dump() {
-  char *scan_cursor = (char *)sm_global_current_heap(NULL)->storage;
-  while (scan_cursor <
-         ((char *)sm_global_current_heap(NULL)->storage) + sm_global_current_heap(NULL)->used) {
+  char *scan_cursor = (char *)sms_heap->storage;
+  while (scan_cursor < ((char *)sms_heap->storage) + sms_heap->used) {
     sm_object   *current_obj = (sm_object *)scan_cursor;
     unsigned int len         = sm_object_sprint(current_obj, NULL, true);
     char         buf[len];

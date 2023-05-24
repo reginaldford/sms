@@ -259,9 +259,9 @@ void _lex_cstr(char * cstr,int len);
 
 %token DONE
 
+%nonassoc SYM
 %nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS
 %left ':'
-%nonassoc SYM
 %left  '='
 %nonassoc ','
 %left IF WHILE DOWHILE

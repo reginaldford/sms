@@ -13,9 +13,9 @@ sm_symbol *sm_new_symbol_manual(sm_string *sym_name) {
 // Returns a new symbol
 sm_symbol *sm_new_symbol(sm_string *sym_name) {
   if (strncmp(&sym_name->content, "true", 4) == 0)
-    return sm_global_true(NULL);
+    return sms_true;
   else if (strncmp(&sym_name->content, "false", 5) == 0)
-    return sm_global_false(NULL);
+    return sms_false;
   else
     return sm_new_symbol_manual(sym_name);
 }
