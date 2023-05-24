@@ -123,11 +123,10 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
       return NULL;
     }
     int      child_index = sm_node_map_left_count(map, map_index);
-    sm_node *child_here  = (sm_node *)sm_node_nth(curr_node->children, child_index);
-    curr_node            = child_here;
+    curr_node  = (sm_node *)sm_node_nth(curr_node->children, child_index);
     char_index++;
   }
-  return (char_index == len) ? curr_node : NULL;
+  return curr_node;
 }
 
 // Return the parent node of the node addressed by needle, or return NULL

@@ -16,7 +16,7 @@ function benchmark(func, param) {
   console.log(`Execution time: ${executionTime}ms`);
 }
 
-const n = 27;
+const n = 28;
 
 console.log('Benchmarking Recursive Fib:');
 benchmark(fibonacciRecursive, n);

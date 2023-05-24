@@ -535,11 +535,9 @@ ARRAY_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)
 | ARRAY_LIST ',' EXPR { $$ = sm_expr_append($1, (sm_object *)$3); }
 
 CONTEXT : CONTEXT_LIST '}' {
-  $1->parent = *(sm_global_lex_stack(NULL)->top);
   sm_stack_pop(sm_global_lex_stack(NULL));
 }
 | CONTEXT_LIST ';' '}' {
-  $1->parent = *(sm_global_lex_stack(NULL)->top);
   sm_stack_pop(sm_global_lex_stack(NULL));
 }
 | '{' ASSIGNMENT ';' '}' {
