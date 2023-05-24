@@ -26,9 +26,8 @@ sm_object *sm_meet_object(sm_object *obj) {
 void sm_inflate_heap() {
   // Inflate new space. 'meet' every ptr
   // Meeting will copy to new heap if necessary
-  char *scan_cursor = (char *)sm_global_current_heap(NULL)->storage;
-  while (scan_cursor <
-         ((char *)sm_global_current_heap(NULL)->storage) + sm_global_current_heap(NULL)->used) {
+  char *scan_cursor = (char *)sms_heap->storage;
+  while (scan_cursor < ((char *)sms_heap->storage) + sms_heap->used) {
     sm_object *current_obj = (sm_object *)scan_cursor;
     // scan_cursor is not referred to for the rest of the loop
     scan_cursor += sm_sizeof(current_obj);
@@ -123,17 +122,18 @@ void sm_inflate_heap() {
 
 // Copying GC
 void sm_garbage_collect() {
-  if (sm_global_current_heap(NULL)->used != 0) {
+  if (sms_heap->used != 0) {
     // Build "to" heap if necessary, same size as current
-    if (sm_global_other_heap(NULL) == NULL)
-      sm_global_other_heap(sm_new_heap(sm_global_current_heap(NULL)->capacity));
+    if (sms_other_heap == NULL)
+      sms_other_heap = sm_new_heap(sms_heap->capacity);
 
     // Swap heaps now
-    sm_heap *other_heap = sm_global_current_heap(sm_global_other_heap(NULL));
-    sm_global_other_heap(other_heap);
+    sm_heap *temp  = sms_other_heap;
+    sms_other_heap = sms_heap;
+    sms_heap       = temp;
 
     // Consider this heap empty now
-    sm_global_current_heap(NULL)->used = 0;
+    sms_heap->used = 0;
 
     // Reset the space array
     sm_global_space_array(NULL)->size = 0;
@@ -142,11 +142,9 @@ void sm_garbage_collect() {
     *sm_global_lex_stack(NULL)->top =
       (sm_cx *)sm_move_to_new_heap((sm_object *)*sm_global_lex_stack(NULL)->top);
 
-    // Copy root (true symbol)
-    sm_global_true((sm_symbol *)sm_move_to_new_heap((sm_object *)sm_global_true(NULL)));
-
-    // Copy root (false symbol)
-    sm_global_false((sm_symbol *)sm_move_to_new_heap((sm_object *)sm_global_false(NULL)));
+    // Copy root (true and false singletons)
+    sms_true  = (sm_symbol *)sm_move_to_new_heap((sm_object *)sms_true);
+    sms_false = (sm_symbol *)sm_move_to_new_heap((sm_object *)sms_false);
 
     // Inflate
     sm_inflate_heap();
@@ -155,5 +153,5 @@ void sm_garbage_collect() {
     sm_gc_count(1);
   }
   // This will be a global variable
-  printf("\n%i bytes used after gc.\n", sm_global_current_heap(NULL)->used);
+  printf("\n%i bytes used after gc.\n", sms_heap->used);
 }

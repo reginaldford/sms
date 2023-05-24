@@ -22,11 +22,7 @@ int chapter_3(int test) {
 
   sm_object *a = sm_cx_get(test_cx, "a", 1);
 
-
-  sm_global_cx(test_cx);
-
   sm_garbage_collect();
-
 
   sm_cx_rm(test_cx, "b", 1);
 

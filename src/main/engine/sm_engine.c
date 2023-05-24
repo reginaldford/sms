@@ -6,6 +6,11 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+extern sm_heap   *sms_heap;
+extern sm_heap   *sms_other_heap;
+extern sm_symbol *sms_true;
+extern sm_symbol *sms_false;
+
 // The engine should return an error if this returns false
 // and the next function will complain about type mismatch,
 // going up the callstack, until we hit a try or not
@@ -24,8 +29,8 @@ bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_
 }
 
 // Global true symbol
-#define IS_TRUE(x) (x == (sm_object *)sm_global_true(NULL))
-#define IS_FALSE(x) (x == (sm_object *)sm_global_false(NULL))
+#define IS_TRUE (x)((void *)x == (void *)sms_true)
+#define IS_FALSE(x) ((void *)x == (void *)sms_false)
 
 // Recursive engine
 sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
@@ -50,7 +55,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       // This fails because it changes all of the pointers before the function returns.
       // sm_garbage_collect();
       printf("gc command is not implemented yet!\n");
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
       break;
     }
     case SM_SLEEP_EXPR: {
@@ -72,7 +77,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       do {
         ret = nanosleep(&ts, &ts);
       } while (ret);
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
       break;
     }
     case SM_FORK_EXPR: {
@@ -94,7 +99,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(obj0, 0, SM_STRING_TYPE, SM_EXEC_EXPR))
         path = (sm_string *)obj0;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
 
       int result = system(&path->content);
       return (sm_object *)sm_new_double(result);
@@ -137,9 +142,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       for (unsigned int names_i = 0; names_i < i; names_i++) {
         sm_expr_set_arg(names_arr, names_i, (sm_object *)entry_names[names_i]);
         if (entry_types[names_i] != 0)
-          sm_expr_set_arg(types_arr, names_i, (sm_object *)sm_global_true(NULL));
+          sm_expr_set_arg(types_arr, names_i, (sm_object *)sms_true);
         else
-          sm_expr_set_arg(types_arr, names_i, (sm_object *)sm_global_false(NULL));
+          sm_expr_set_arg(types_arr, names_i, (sm_object *)sms_false);
       }
       sm_expr *result =
         sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)names_arr, (sm_object *)types_arr);
@@ -166,9 +171,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
 
       char *path_cstr = &path->content;
       if (chdir(path_cstr) == 0)
-        return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_true;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
 
       break;
     }
@@ -305,9 +310,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_LET_EXPR)) {
         if (sm_cx_let(current_cx, &sym->name->content, sym->name->size, value))
-          return (sm_object *)sm_global_true(NULL);
+          return (sm_object *)sms_true;
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_LET_EXPR: {
       sm_cx     *cx    = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -316,10 +321,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_LET_EXPR)) {
         if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_LET_EXPR)) {
           if (sm_cx_let(cx, &sym->name->content, sym->name->size, value))
-            return (sm_object *)sm_global_true(NULL);
+            return (sm_object *)sms_true;
         }
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_GET_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -331,7 +336,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
             return result;
         }
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_SET_EXPR: {
       sm_cx     *cx    = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -340,10 +345,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SET_EXPR)) {
         if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_SET_EXPR)) {
           if (sm_cx_set(cx, &sym->name->content, sym->name->size, value))
-            return (sm_object *)sm_global_true(NULL);
+            return (sm_object *)sms_true;
         }
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_DOT_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -354,18 +359,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           if (retrieved != NULL)
             return retrieved;
           else
-            return (sm_object *)sm_global_false(NULL);
+            return (sm_object *)sms_false;
         }
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_CLEAR_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_CLEAR_EXPR)) {
         sm_cx_clear(cx);
-        return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_true;
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_CONTAINING_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -376,10 +381,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           if (retrieved != NULL)
             return (sm_object *)retrieved;
           else
-            return (sm_object *)sm_global_false(NULL);
+            return (sm_object *)sms_false;
         }
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_SIZE_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -387,18 +392,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         int size = sm_cx_size(cx);
         return (sm_object *)sm_new_double(size);
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_RM_EXPR: {
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_RM_EXPR)) {
         bool success = sm_cx_rm(current_cx, &sym->name->content, sym->name->size);
         if (success == true)
-          return (sm_object *)sm_global_true(NULL);
+          return (sm_object *)sms_true;
         else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_RM_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -407,12 +412,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_RM_EXPR)) {
           bool success = sm_cx_rm(cx, &sym->name->content, sym->name->size);
           if (success == true)
-            return (sm_object *)sm_global_true(NULL);
+            return (sm_object *)sms_true;
           else
-            return (sm_object *)sm_global_false(NULL);
+            return (sm_object *)sms_false;
         }
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_KEYS_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -422,9 +427,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (success != NULL)
           return (sm_object *)success;
         else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_CX_VALUES_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -433,9 +438,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (success != NULL)
           return (sm_object *)success;
         else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -457,28 +462,28 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type == SM_SYMBOL_TYPE) {
         if (!IS_FALSE(obj0)) {
-          return (sm_object *)sm_global_true(NULL);
+          return (sm_object *)sms_true;
         }
       }
       if (!IS_FALSE(obj1)) {
-        return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_true;
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_AND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (IS_FALSE(obj0))
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (IS_FALSE(obj1))
-        return (sm_object *)sm_global_false(NULL);
-      return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_false;
+      return (sm_object *)sms_true;
     }
     case SM_NOT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!IS_FALSE(obj0))
-        return (sm_object *)sm_global_false(NULL);
-      return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_false;
+      return (sm_object *)sms_true;
     }
     case SM_ROUND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -504,7 +509,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       double val       = number->value;
       int    floor_val = val > 0 ? val + 0.5 : val - 0.5;
       srand((int)floor_val);
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
       ;
     }
     case SM_FILE_WRITE_EXPR: {
@@ -514,7 +519,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated_fname, 0, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
         fname_str = (sm_string *)evaluated_fname;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
 
       // obtain the content to write
@@ -523,18 +528,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated_content, 1, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
         content_str = (sm_string *)evaluated_content;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char *content_cstr = &(content_str->content);
 
       FILE *fptr = fopen(fname_cstr, "w");
       // check that file can be opened for writing
       if (fptr == NULL) {
         printf("fileWriteStr failed to open: %s\n", fname_cstr);
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
       fprintf(fptr, "%s", content_cstr);
       fclose(fptr);
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
     }
     case SM_FILE_APPEND_EXPR: {
       // obtain the file name
@@ -543,7 +548,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated_fname, 0, SM_STRING_TYPE, SM_FILE_APPEND_EXPR))
         fname_str = (sm_string *)evaluated_fname;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
 
       // obtain the content to write
@@ -552,18 +557,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated_content, 1, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
         content_str = (sm_string *)evaluated_content;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char *content_cstr = &(content_str->content);
 
       FILE *fptr = fopen(fname_cstr, "a");
       // check that file can be opened for writing
       if (fptr == NULL) {
         printf("fileAppendStr failed to open for appending: %s\n", fname_cstr);
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
       fputs(content_cstr, fptr);
       fclose(fptr);
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
     }
     case SM_FILE_READ_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -571,7 +576,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_READ_EXPR))
         fname_str = (sm_string *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
       if (access(fname_cstr, F_OK) != 0) {
         printf("fileReadStr failed because the file, %s ,does not exist.\n", fname_cstr);
@@ -593,7 +598,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_PART_EXPR))
         fname_str = (sm_string *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
 
       evaluated = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
@@ -601,14 +606,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 1, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
         start_pos = (sm_double *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
 
       evaluated = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       sm_double *length;
       if (expect_type(evaluated, 2, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
         length = (sm_double *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
 
 
       if (access(fname_cstr, F_OK) != 0) {
@@ -637,15 +642,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_EXISTS_EXPR))
         fname_str = (sm_string *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
 
       FILE *file = fopen(fname_cstr, "r");
       if (file == NULL) {
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
       fclose(file);
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
     }
 
     case SM_FILE_RM_EXPR: {
@@ -654,16 +659,16 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_RM_EXPR))
         fname_str = (sm_string *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
 
       int result = remove(fname_cstr);
       if (result != 0) {
         printf("fileRm failed: Could not rm file: %s\n", fname_cstr);
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
 
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
     }
     case SM_FILE_STAT_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -671,7 +676,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_STAT_EXPR))
         fname_str = (sm_string *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       char       *fname_cstr = &(fname_str->content);
       struct stat filestat;
       sm_expr    *output;
@@ -696,7 +701,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_expr_set_arg(output, 15, (sm_object *)sm_new_double(filestat.st_ctim.tv_nsec));
       } else {
         printf("Failed to get file information.\n");
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
       return (sm_object *)output;
     }
@@ -712,7 +717,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_parse_result pr   = sm_parse_file(cstr);
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i.\n", pr.return_val);
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       } else {
         sm_parse_done();
         return pr.parsed_object;
@@ -725,7 +730,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PARSE_EXPR))
         str = (sm_string *)evaluated;
       else {
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
       char *cstr         = &(str->content);
       cstr[str->size]    = ';'; // Temporarily replacing the NULL char
@@ -733,7 +738,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       cstr[str->size]    = '\0'; // Place the null char back
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i.\n", pr.return_val);
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       } else
         return pr.parsed_object;
     }
@@ -762,13 +767,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUT_EXPR))
         str = (sm_string *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       str = (sm_string *)evaluated;
       for (unsigned int i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
       putchar('\0');
       fflush(stdout);
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
       break;
     }
     case SM_PUTLN_EXPR: {
@@ -777,14 +782,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUTLN_EXPR))
         str = (sm_string *)evaluated;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       str = (sm_string *)evaluated;
       for (unsigned int i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
       putchar('\n');
       putchar('\0');
       fflush(stdout);
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
       break;
     }
     case SM_WHILE_EXPR: {
@@ -795,7 +800,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         // if(eval==break || eval==return) break
         sm_engine_eval(expression, current_cx, sf);
       }
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
       break;
     }
     case SM_DO_WHILE_EXPR: {
@@ -804,7 +809,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       do {
         sm_engine_eval(expression, current_cx, sf);
       } while (!IS_FALSE(sm_engine_eval((sm_object *)condition, current_cx, sf)));
-      return (sm_object *)sm_global_true(NULL);
+      return (sm_object *)sms_true;
       break;
     }
     case SM_SIZE_EXPR: {
@@ -823,13 +828,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(obj0, 0, SM_FUN_TYPE, SM_MAP_EXPR))
         fun = (sm_fun *)obj0;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_expr   *arr;
       if (expect_type(obj1, 1, SM_EXPR_TYPE, SM_MAP_EXPR))
         arr = (sm_expr *)obj1;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size);
       for (unsigned int i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
@@ -844,7 +849,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(base_obj, 0, SM_EXPR_TYPE, SM_INDEX_EXPR))
         arr = (sm_expr *)base_obj;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       sm_object *index_obj = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_double *index_double;
       if (expect_type(index_obj, 1, SM_DOUBLE_TYPE, SM_INDEX_EXPR))
@@ -854,7 +859,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       unsigned int index = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
         printf("Error: Index out of range: %i . Array size is %i\n", index, arr->size);
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
       return sm_expr_get_arg(arr, index);
     }
@@ -866,13 +871,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(base_obj, 0, SM_CX_TYPE, SM_DOT_EXPR))
         base_cx = (sm_cx *)base_obj;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       sm_object *sr = sm_cx_get_far(base_cx, &field_name->content, field_name->size);
       if (sr == NULL) {
         sm_string *base_str = sm_object_to_string(base_obj);
         printf("Error: Could not find variable: %s within %s\n", &(field_name->content),
                &(base_str->content));
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
       // return sm_cx_entries(sr.context)[sr.index].value;
       return (sm_object *)sr;
@@ -883,9 +888,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(base_obj, 0, SM_CX_TYPE, SM_PARENT_EXPR))
         base_cx = (sm_cx *)base_obj;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       if (base_cx->parent == NULL) {
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
       return (sm_object *)base_cx->parent;
     }
@@ -896,7 +901,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(evaluated1, 0, SM_SYMBOL_TYPE, SM_DIFF_EXPR))
         sym1 = (sm_symbol *)evaluated1;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       sm_object *result = sm_diff(evaluated0, sym1);
       result            = sm_simplify(result);
       return result;
@@ -933,7 +938,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           // sm_expr_set_arg(sme,0,found);
           return sm_engine_eval(found_fun->content, found_fun->parent, new_args);
         } else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       } else
         return obj0;
       break;
@@ -951,9 +956,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(obj0, 0, SM_SYMBOL_TYPE, SM_ASSIGN_EXPR)) {
         sym = (sm_symbol *)obj0;
         if (sm_cx_set(current_cx, &sym->name->content, sym->name->size, value))
-          return (sm_object *)sm_global_true(NULL);
+          return (sm_object *)sms_true;
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_ASSIGN_DOT_EXPR: {
       sm_object *obj0  = sm_expr_get_arg(sme, 0);
@@ -970,10 +975,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(dot_expr, 1);
         if (expect_type((sm_object *)predot, 0, SM_CX_TYPE, SM_ASSIGN_DOT_EXPR)) {
           if (sm_cx_let(predot, &postdot->name->content, postdot->name->size, value))
-            return (sm_object *)sm_global_true(NULL);
+            return (sm_object *)sms_true;
         }
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_ASSIGN_LOCAL_EXPR: {
       sm_object *obj0  = sm_expr_get_arg(sme, 0);
@@ -982,8 +987,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_local *lcl = (sm_local *)obj0;
         sm_expr_set_arg(sf, lcl->index, value);
       } else
-        return (sm_object *)sm_global_false(NULL);
-      return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_false;
+      return (sm_object *)sms_true;
       break;
     }
     case SM_ASSIGN_INDEX_EXPR: {
@@ -1001,11 +1006,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
                                              sm_new_string(1, "?"), 0);
           }
           sm_expr_set_arg(arr, index->value, obj2);
-          return (sm_object *)sm_global_true(NULL);
+          return (sm_object *)sms_true;
         } else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_PLUS_EXPR: {
       double sum = 0;
@@ -1014,7 +1019,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_PLUS_EXPR))
           sum += ((sm_double *)current_obj)->value;
         else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       }
       return (sm_object *)sm_new_double(sum);
     }
@@ -1027,7 +1032,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_MINUS_EXPR))
           sum -= ((sm_double *)current_obj)->value;
         else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       }
       return (sm_object *)sm_new_double(sum);
     }
@@ -1039,7 +1044,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_TIMES_EXPR))
           product *= ((sm_double *)current_obj)->value;
         else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       }
       return (sm_object *)sm_new_double(product);
     }
@@ -1051,7 +1056,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_DIVIDE_EXPR))
           quotient /= ((sm_double *)current_obj)->value;
         else
-          return (sm_object *)sm_global_false(NULL);
+          return (sm_object *)sms_false;
       }
       return (sm_object *)sm_new_double(quotient);
     }
@@ -1062,12 +1067,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_POW_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       sm_double *num1;
       if (expect_type(arg1, 1, SM_DOUBLE_TYPE, SM_POW_EXPR)) {
         num1 = (sm_double *)arg1;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(pow(num0->value, num1->value));
     }
     case SM_SIN_EXPR: {
@@ -1076,7 +1081,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_SIN_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(sin(num0->value));
     }
     case SM_COS_EXPR: {
@@ -1085,7 +1090,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COS_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(cos(num0->value));
     }
     case SM_TAN_EXPR: {
@@ -1094,7 +1099,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TAN_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(tan(num0->value));
     }
     case SM_ASIN_EXPR: {
@@ -1105,7 +1110,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         double x = num0->value;
         return (sm_object *)sm_new_double(asin(x));
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
     }
     case SM_ACOS_EXPR: {
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1115,7 +1120,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         double x = num0->value;
         return (sm_object *)sm_new_double(acos(x));
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       printf("acos is not implemented yet.\n");
       return (sm_object *)sm_new_double((num0->value));
     }
@@ -1127,7 +1132,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         double x = num0->value;
         return (sm_object *)sm_new_double(atan(x));
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       printf("atan is not implemented yet.\n");
       return (sm_object *)sm_new_double((num0->value));
     }
@@ -1138,7 +1143,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_SEC_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(1.0 / cos(num0->value));
     }
     case SM_CSC_EXPR: {
@@ -1147,7 +1152,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_CSC_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(1.0 / sin(num0->value));
     }
     case SM_COT_EXPR: {
@@ -1156,7 +1161,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COT_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(1.0 / tan(num0->value));
     }
     case SM_SINH_EXPR: {
@@ -1165,7 +1170,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_SINH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(sinh(num0->value));
     }
     case SM_COSH_EXPR: {
@@ -1174,7 +1179,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COSH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(cosh(num0->value));
     }
     case SM_TANH_EXPR: {
@@ -1183,7 +1188,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(tanh(num0->value));
     }
     case SM_SECH_EXPR: {
@@ -1192,7 +1197,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(1.0 / cosh(num0->value));
     }
     case SM_CSCH_EXPR: {
@@ -1201,7 +1206,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(1.0 / sinh(num0->value));
     }
     case SM_COTH_EXPR: {
@@ -1210,7 +1215,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(1.0 / tanh(num0->value));
     }
     case SM_LN_EXPR: {
@@ -1219,7 +1224,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(log(num0->value));
     }
     case SM_LOG_EXPR: {
@@ -1229,12 +1234,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_LOG_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       sm_double *num1;
       if (expect_type(arg1, 1, SM_DOUBLE_TYPE, SM_LOG_EXPR)) {
         num1 = (sm_double *)arg1;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(log(num1->value) / log(num0->value));
     }
     case SM_EXP_EXPR: {
@@ -1243,7 +1248,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(exp(num0->value));
     }
     case SM_SQRT_EXPR: {
@@ -1252,7 +1257,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(sqrt(num0->value));
     }
     case SM_ABS_EXPR: {
@@ -1261,7 +1266,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR)) {
         num0 = (sm_double *)arg0;
       } else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_double(num0->value < 0 ? -1 * num0->value : num0->value);
     }
     case SM_IF_EXPR: {
@@ -1269,7 +1274,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!IS_FALSE(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_IF_ELSE_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1305,11 +1310,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           double v1 = ((sm_double *)obj1)->value;
           double v2 = ((sm_double *)obj2)->value;
           if (v1 < v2)
-            return (sm_object *)sm_global_true(NULL);
+            return (sm_object *)sms_true;
           else
-            return (sm_object *)sm_global_false(NULL);
+            return (sm_object *)sms_false;
         }
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
       }
     }
     case SM_GT_EXPR: {
@@ -1320,32 +1325,32 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           double v1 = ((sm_double *)obj1)->value;
           double v2 = ((sm_double *)obj2)->value;
           if (v1 > v2)
-            return (sm_object *)sm_global_true(NULL);
+            return (sm_object *)sms_true;
           else
-            return (sm_object *)sm_global_false(NULL);
+            return (sm_object *)sms_false;
         }
       }
-      return (sm_object *)sm_global_false(NULL);
+      return (sm_object *)sms_false;
     }
     case SM_EQEQ_EXPR: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj1 == obj2) {
-        return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_true;
       }
 
       if (sm_object_eq(obj1, obj2))
-        return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_true;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
     }
     case SM_IS_EXPR: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj1 == obj2)
-        return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_true;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
     }
     case SM_GT_EQ_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1363,9 +1368,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       double val0 = ((sm_double *)obj0)->value;
       double val1 = ((sm_double *)obj1)->value;
       if (val0 >= val1)
-        return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_true;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
     }
     case SM_LT_EQ_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1383,9 +1388,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       double val0 = ((sm_double *)obj0)->value;
       double val1 = ((sm_double *)obj1)->value;
       if (val0 <= val1)
-        return (sm_object *)sm_global_true(NULL);
+        return (sm_object *)sms_true;
       else
-        return (sm_object *)sm_global_false(NULL);
+        return (sm_object *)sms_false;
     }
     case SM_RUNTIME_META_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
