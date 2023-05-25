@@ -159,9 +159,9 @@ Line comments start with `#`.
 
     8. cxSet(cx,:x,value); # A way to set cx.x=value for a context cx or return false
 
-    9. cxGet(cx,:x,value); # A way to create a new variable in a context or just set it to a new value
+    9. cxGet(cx,:x); # Get a value associated with the given key, or return false
 
-    10. cxGetFar(cx,:x,value); # A way to create a new variable in a context or just set it to a new value
+    10. cxGetFar(cx,:x,value); # Get the value, searching to higher scopes in the search
 
     11. cxSize(cx); # Return the number of entries in this context
 

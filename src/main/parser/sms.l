@@ -279,14 +279,17 @@ _mem_checkFile {return MEM_CHECKFILE;}
 %%
 
 
-void _lex_file(char * fpath){
+FILE* _lex_file(char * fpath){
   FILE *f = fopen(fpath,"rb");
+  if(!f) return NULL;
   YY_BUFFER_STATE bs = yy_create_buffer(f,YY_BUF_SIZE);
   yypush_buffer_state(bs);
+  return f;
 }
 
-void _done_lexing_file(){
+void _done_lexing_file(FILE* f){
   yypop_buffer_state();
+  fclose(f);
 }
 
 void _lex_cstr(char * cstr,int len){

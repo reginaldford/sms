@@ -20,9 +20,8 @@ test_outline *parse_test_outline(char *filepath) {
   }
   sm_strncpy(result_outline->test_zone_path, filepath, strlen(filepath));
   sm_init(NULL);
-  freopen(filepath, "r", stdin);
   printf("Parsing test outline file: %s ...\n", filepath);
-  sm_parse_result pr = sm_parse_more();
+  sm_parse_result pr = sm_parse_file(filepath);
   if (pr.return_val != 0) {
     printf("There was an issue parsing %s \n", filepath);
     graceful_exit(result_outline, -1);

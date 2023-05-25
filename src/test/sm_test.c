@@ -180,9 +180,8 @@ int perform_test_subchapter(unsigned int chapter, unsigned int subchapter, int t
       }
     }
     printf("Parsing: %s... \n", buf);
-    freopen(buf, "r", stdin);
     yylineno           = 1;
-    sm_parse_result pr = sm_parse_more();
+    sm_parse_result pr = sm_parse_file(buf);
     if (pr.return_val != 0) {
       printf("Error parsing the subchapter. Parser returned %i\n", pr.return_val);
       return -1;

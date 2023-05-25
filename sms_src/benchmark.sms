@@ -1,22 +1,23 @@
 #!/usr/local/bin/sms -m 1400 
 #Use this to benchmark something
+(
+  let t1=[];
+  let t2=[];
+  let time_elapsed=0;
+  let a=0;
 
-let t1=[];
-let t2=[];
-let time_elapsed=0;
-let a=0;
+  let benchmark = (e) =>   (
+    putln("Benchmarking: " str+ toStr(e));
 
-let benchmark = (e) =>   (
-  putln("Benchmarking: " str+ toStr(e));
+    t1 = time();
+    putln(toStr(eval(e)));
+    t2 = time();
 
-  t1 = time();
-  putln(toStr(eval(e)));
-  t2 = time();
+    putln("Total time:");
+    time_elapsed = 1000 * (t2[0] - t1[0]) +  0.001 * (t2[1] - t1[1]);
+    putln(toStr(time_elapsed) str+ " milliseconds")
+  );
 
-  putln("Total time:");
-  time_elapsed = 1000 * (t2[0] - t1[0]) +  0.001 * (t2[1] - t1[1]);
-  putln(toStr(time_elapsed) str+ " milliseconds")
+  let f = (n) => if( n <= 1 , n ,f(n - 1) + f(n - 2));
+  benchmark(:f(28));
 );
-
-let f = (n) => if( n <= 1 , n ,f(n - 1) + f(n - 2));
-benchmark(:f(28));

@@ -61,22 +61,15 @@ void start_repl() {
 // If init is false, run file at env.script_fp
 void run_file(char *file_path, sm_env *env) {
   sm_parse_result pr;
-  sm_object      *last_parsed_obj = NULL;
-  file_path                       = env->script_fp;
-  yylineno                        = 1; // resetting the line count
-  pr                              = sm_parse_file(file_path);
-  do {
-    if (pr.return_val != 0) {
-      printf("Error parsing the file. Parser returned %i\n", pr.return_val);
-      clean_exit(env, 1);
-    }
-    if (pr.parsed_object != NULL) {
-      sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-      last_parsed_obj = pr.parsed_object;
-    }
-    pr = sm_parse_more();
-  } while (pr.parsed_object != last_parsed_obj);
-  sm_parse_done();
+  yylineno = 1; // resetting the line count
+  pr       = sm_parse_file(file_path);
+  if (pr.return_val != 0) {
+    printf("Error parsing the file. Parser returned %i\n", pr.return_val);
+    clean_exit(env, 1);
+  }
+  if (pr.parsed_object != NULL) {
+    sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+  }
 }
 
 // Main function uses getopt from unistd.h
