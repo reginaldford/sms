@@ -164,5 +164,6 @@ k_2,3
   - custom type name
   - memory block unwrapping
 - c abi / ffi
+- python bindings
 - cgi wrapper
 
