@@ -6,7 +6,7 @@ let adjectives = [
   "awesome", "nice", "cool", "amazing",
   "wonderful", "hard working","great",
   "exciting","skilled","smart","fresh",
-  "sexy","bangin'"
+  "special","something else", "on fire", "doing it!"
 ];
 
 while(true,(

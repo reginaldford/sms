@@ -122,8 +122,8 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
     if ((map & bit) == 0) {
       return NULL;
     }
-    int      child_index = sm_node_map_left_count(map, map_index);
-    curr_node  = (sm_node *)sm_node_nth(curr_node->children, child_index);
+    int child_index = sm_node_map_left_count(map, map_index);
+    curr_node       = (sm_node *)sm_node_nth(curr_node->children, child_index);
     char_index++;
   }
   return curr_node;

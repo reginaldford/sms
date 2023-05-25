@@ -5,7 +5,26 @@
     [cxDot(cx1,:ex1), "info","cxDot expression"],
     [cxDot(cx2,:ex3), false,"nonexistent cxDot field"],
     [cxKeys(cx1),[ ex1, ex2 ], "cxKeys"],
-    [cxValues(cx1),[ "info", "info2" ], "cxKeys"],
-    [cxGet(cx1),[ "info", "info2" ], "cxKeys"]
+    [cxValues(cx1),[ "info", "info2" ], "cxValues"],
+    [cxGet(cx1,:ex2),"info2", "cxGet"],
+    [cxGet(cx1,:true),false, "cxGet true should fail"],
+    [cxGetFar(cx1,:true),true, "cxGetFar true should succeed"],
+    [cxGetFar(cx1,:PI),3.141592653589793, "cxGetFar PI"],
+    [cxSize(cx1),2, "cxSize is 2"],
+    [cxClear(cx1),true, "cxClear"],
+    [cxSize(cx1),0, "cxSize is 0"],
+    [cxKeys(cx1),[], "cxKeys is []"],
+    [cxValues(cx1),[], "cxValues is []"],
+    [cxLet(cx1,:a,4),true, "cxLet a 4"],
+    [cxGet(cx1,:a),4, "cxGet a"],
+    [cxGetFar(cx1,:a),4, "cxGetFar a"],
+    [cxRm(cx1,:a),true, "cxRm a"],
+    [cxGet(cx1,:a),false, "cxGet a"],
+    [cxGetFar(cx1,:a),false, "cxGetFar a"],
+    [cxRm(parent(self),:false),true, "cxRm False"],
+    [cxGetFar(self,:false),false, "cxGetFar False"],
+    [cxLet(parent(self),:false,:false),true, "cxLet :false :false"],
+    [cxGetFar(self,:false),false, "cxLet :false :false"],
+    [cxGetFar(self,:false) is false,true, "Same false instance."]
   ];
 };
