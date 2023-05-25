@@ -12,8 +12,8 @@ extern int yylex();
 extern int yylineno;
 void       yyerror(const char *msg);
 
-void _lex_file(char *fpath);
-void _done_lexing_file();
+FILE* _lex_file(char *fpath);
+void _done_lexing_file(FILE* f);
 void _lex_cstr(char * cstr,int len);
 
 %}
@@ -586,19 +586,17 @@ CONTEXT_LIST : '{' ASSIGNMENT ';' ASSIGNMENT {
 %%
 
 
-bool lex_file(char *fpath){
-  FILE *f = fopen(fpath,"rb");
+FILE* lex_file(char *fpath){
   if(access(fpath,F_OK)!=0){
     printf("File not found: %s\n",fpath);
     return false;
   }
-
-_lex_file(fpath);
-  return true;
+  FILE * f = _lex_file(fpath);
+  return f;
 }
 
-void done_lexing_file(){
-  _done_lexing_file();
+void done_lexing_file(FILE* f){
+  _done_lexing_file(f);
 }
 
 void lex_cstr(char * cstr,int len){
