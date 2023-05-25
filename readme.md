@@ -104,6 +104,8 @@ Line comments start with `#`.
 
     5. a <= b # returns true if a is less than or equal to b, else ,returns false
 
+    6. true is true # the is keyword returns true if both objects are the same instance
+
 </details>
 
 <details>
@@ -157,17 +159,21 @@ Line comments start with `#`.
 
     8. cxSet(cx,:x,value); # A way to set cx.x=value for a context cx or return false
 
-    9. cxSize(cx); # Return the number of entries in this context
+    9. cxGet(cx,:x,value); # A way to create a new variable in a context or just set it to a new value
 
-    10. cxValues(cx); # Return an array with the values of the context
+    10. cxGetFar(cx,:x,value); # A way to create a new variable in a context or just set it to a new value
 
-    11. cxKeys(cx); # Return an array with the keys of the context
+    11. cxSize(cx); # Return the number of entries in this context
 
-    12. cxDot(cx,:symbol); # Return this variable from this context
+    12. cxValues(cx); # Return an array with the values of the context
 
-    13. cxContaining(cx,:key); # Returns the context which contains :key, by looking at cx and its ancetry
+    13. cxKeys(cx); # Return an array with the keys of the context
 
-    14. cxRm(cx, :var); # Remove this entry from the context
+    14. cxDot(cx,:symbol); # Return this variable from this context
+
+    15. cxContaining(cx,:key); # Returns the context which contains :key, by looking at cx and its ancetry
+
+    16. cxRm(cx, :var); # Remove this entry from the context
 </details>
 
 <details>
