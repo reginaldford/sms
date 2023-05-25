@@ -92,6 +92,7 @@ newCx        {return NEW_CX;}
 cxDot        {return CX_DOT;}
 cxLet        {return CX_LET;}
 cxGet        {return CX_GET;}
+cxGetFar     {return CX_GET_FAR;}
 cxContaining {return CX_CONTAINING;}
 cxSet        {return CX_SET;}
 cxRm         {return CX_RM;}
