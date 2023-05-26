@@ -1,3 +1,4 @@
+#!/usr/local/bin/sms -i
 # tvert is a time unit conversion tool written in SMS
 # Run this with sms -i
 # Example usage: tvert(35+3/12, :yr, :dy)

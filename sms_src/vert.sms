@@ -1,25 +1,27 @@
 #!/usr/local/bin/sms -i
 
 # Import the tools for each dimension
-eval(fileParse("mvert.sms"));
-eval(fileParse("lvert.sms"));
-eval(fileParse("tvert.sms"));
+(
+  eval(fileParse("mvert.sms"));
+  eval(fileParse("lvert.sms"));
+  eval(fileParse("tvert.sms"));
 
-# This function is the generic tool which finds
-# a dimension that contains both units u1 and u2
-let vert = (x,u1,u2) =>
-( 
-  # mass
-  if(cxGet(mratios.kg,u1) and cxGet(mratios.kg,u2),
-    mvert(x,u1,u2)
+  # This function is the generic tool which finds
+  # a dimension that contains both units u1 and u2
+  let vert = (x,u1,u2) =>
+  ( 
+    # mass
+    if(cxGet(mratios.kg,u1) and cxGet(mratios.kg,u2),
+      mvert(x,u1,u2)
+    );
+    # length
+    if(cxGet(lratios.m,u1) and cxGet(lratios.m,u2),
+      lvert(x,u1,u2)
+    );
+    # time
+    if(cxGet(tratios.s,u1) and cxGet(tratios.s,u2),
+      tvert(x,u1,u2)
+    );
+    true;
   );
-  # length
-  if(cxGet(lratios.m,u1) and cxGet(lratios.m,u2),
-    lvert(x,u1,u2)
-  );
-  # time
-  if(cxGet(tratios.s,u1) and cxGet(tratios.s,u2),
-    tvert(x,u1,u2)
-  );
-  true;
 );

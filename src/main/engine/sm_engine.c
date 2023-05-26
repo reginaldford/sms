@@ -731,7 +731,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         printf("Error: Parser failed and returned %i.\n", pr.return_val);
         return (sm_object *)sms_false;
       } else {
-        sm_parse_done();
         return pr.parsed_object;
       }
       break;

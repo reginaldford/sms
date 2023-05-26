@@ -1,3 +1,4 @@
+#!/usr/local/bin/sms -i
 # mvert is a mass unit conversion tool written in SMS
 # Run this with sms -i
 # Example usage: mvert(12, :lbs, :kg)
