@@ -157,5 +157,6 @@ void sm_garbage_collect() {
     sm_gc_count(1);
   }
   // This will be a global variable
-  printf("\n%i bytes used after gc.\n", sms_heap->used);
+  if(sm_global_environment(NULL)->quiet_mode == false)
+    printf("\n%i bytes used after gc.\n", sms_heap->used);
 }
