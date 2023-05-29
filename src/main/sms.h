@@ -31,7 +31,8 @@ enum sm_object_type {
   SM_LINK_TYPE,      // 13
   SM_ERROR_TYPE,     // 14
   SM_SELF_TYPE,      // 15
-  SM_UNKNOWN_TYPE    // 16
+  SM_RETURN_TYPE,    // 16
+  SM_UNKNOWN_TYPE    // 17
 };
 
 // Useful macros
@@ -70,4 +71,5 @@ enum sm_object_type {
 #include "engine/str.h"
 #include "engine/sm_diff.h"
 #include "engine/sm_simplify.h"
+#include "object/sm_return.h"
 #include "engine/sm_engine.h"

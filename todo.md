@@ -1,3 +1,15 @@
+# eager eval for cx
+- contexts need eager eval
+
+# data structures
+- `let myType = struct({
+    age = 5;       # no decimal means int. 64 bits for now
+    height=171.5;  # 64 bit float
+    name = "none"; # varlen types use ptrs
+  });`
+- yields `struct(myType)`
+- let x = <myType>{ ... nondefaults and additions ... }
+
 # vert.sms
 - vvert.sms for volume conversions
 - dvert.sms for data conversions
@@ -6,6 +18,14 @@
 # functions and callstack
 - Ability to return early from a function
 - Stack variables
+- Higher order functions use this syntax:
+  `
+  let diff = ( :x ) => eval(x); #x is only evaluated once
+  `
+# optional eager eval
+- let add=(:x,:y)=> eval(x)+eval(y);
+- allows for literal passing without meta operator
+
 
 # array ops
 - arr+ !! etc for parallel tuple add
@@ -21,7 +41,7 @@
   - selectAssoc( (x)=>x<5, arr1, arr2, arr3..); # selects the same from arr2, etc.
     - returns arrArr
 
-# reflexivity
+# reflectivity
 - get op symbol from an expr
 - set op symbol for an expr
 

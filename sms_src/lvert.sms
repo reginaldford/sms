@@ -3,7 +3,6 @@
 # Run this with sms -i
 # Example usage: lvert(5+7/12, :ft, :cm)
 # The above example will convert 5 feet 7 inches into centimeters
-
 (
   let lratios = {
     m = {
@@ -30,6 +29,7 @@
         let value = normalized * cxGet(lratios.m,u2);
         putln(toStr(x) str+ toStr(u1) str+ " = " str+
           toStr(value) str+ toStr(u2));
+        return(value);
       )
     );
   )

@@ -1,27 +1,33 @@
-#!/usr/local/bin/sms -i
-
-# Import the tools for each dimension
+#!/usr/local/bin/sms -qi
 (
+  # Import the tools for each dimension
   eval(fileParse("mvert.sms"));
   eval(fileParse("lvert.sms"));
   eval(fileParse("tvert.sms"));
-
   # This function is the generic tool which finds
   # a dimension that contains both units u1 and u2
   let vert = (x,u1,u2) =>
   ( 
-    # mass
+    # Mass
     if(cxGet(mratios.kg,u1) and cxGet(mratios.kg,u2),
-      mvert(x,u1,u2)
+      return(mvert(x,u1,u2))
     );
-    # length
+    # Length
     if(cxGet(lratios.m,u1) and cxGet(lratios.m,u2),
-      lvert(x,u1,u2)
+      return(lvert(x,u1,u2))
     );
-    # time
+    # Time
     if(cxGet(tratios.s,u1) and cxGet(tratios.s,u2),
-      tvert(x,u1,u2)
+      return(tvert(x,u1,u2))
     );
-    true;
+    # We must've supplied something invalid
+    putln("The following units are allowed:");
+    putln("Mass Units:");
+    putln(toStr(cxKeys(mratios.kg)) str+ "\n");
+    putln("Length Units:");
+    putln(toStr(cxKeys(lratios.m)) str+ "\n");
+    putln("Time Units:");
+    putln(toStr(cxKeys(tratios.s)) str+ "\n");
+    putln("Conversions must remain in the same dimension.");
   );
 );
