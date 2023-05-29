@@ -14,7 +14,7 @@ sm_meta *sm_new_meta(sm_object *address, sm_cx *context) {
 // New string with description of this meta
 sm_string *sm_meta_to_string(sm_meta *meta) {
   const unsigned int final_len = sm_meta_sprint(meta, NULL, true);
-  sm_string         *new_str   = sm_new_string(final_len, "");
+  sm_string         *new_str   = sm_new_string_manual(final_len);
   sm_meta_sprint(meta, &(new_str->content), false);
   (&new_str->content)[final_len] = '\0';
   return new_str;

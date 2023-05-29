@@ -114,6 +114,11 @@ void sm_inflate_heap() {
       self->context = (sm_cx *)sm_meet_object((sm_object *)self->context);
       break;
     }
+    case SM_RETURN_TYPE: {
+      sm_return *return_obj = (sm_return *)current_obj;
+      return_obj->address   = sm_meet_object((sm_object *)return_obj->address);
+      break;
+    }
     default:
       break;
     }

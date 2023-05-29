@@ -3,7 +3,6 @@
 # Run this with sms -i
 # Example usage: mvert(12, :lbs, :kg)
 # The above example will convert 12 pounds to kilograms
-
 (
   let mratios = {
     kg = {
@@ -24,6 +23,7 @@
         let value = normalized * cxGet(mratios.kg,u2);
         putln(toStr(x) str+ toStr(u1) str+ " = " str+
           toStr(value) str+ toStr(u2));
+        return(value);
       )
     );
 );

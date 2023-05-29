@@ -58,6 +58,7 @@ int          {return INT;}
 if           {return IF;}
 while        {return WHILE;}
 doWhile      {return DO_WHILE;}
+"return"     {return RETURN;}
 eval         {return EVAL;}
 cxEval       {return CX_EVAL;}
 evalFast     {return EVAL_FAST;}

@@ -44,10 +44,12 @@ unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
     return sm_local_sprint((sm_local *)obj1, buffer, fake);
   case SM_ERROR_TYPE:
     return sm_error_sprint((sm_error *)obj1, buffer, fake);
+  case SM_RETURN_TYPE:
+    return sm_return_sprint((sm_return *)obj1, buffer, fake);
   case SM_SELF_TYPE:
     return sm_self_sprint((sm_self *)obj1, buffer, fake);
   default: {
-    int len = obj1->my_type == 0 ? 4 : 3 + log(obj1->my_type) / log(10);
+    int len = 5 + log(obj1->my_type) / log(10);
     if (!fake)
       snprintf(buffer, len, "?(%i)", obj1->my_type);
     return len;
@@ -90,6 +92,8 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(struct sm_self);
   case SM_ERROR_TYPE:
     return sizeof(sm_error);
+  case SM_RETURN_TYPE:
+    return sizeof(sm_return);
 
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);

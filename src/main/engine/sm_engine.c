@@ -806,10 +806,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_WHILE_EXPR: {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 0);
       sm_object *expression = sm_expr_get_arg(sme, 1);
+      sm_object *result     = (sm_object *)sms_true;
       while (!IS_FALSE(sm_engine_eval((sm_object *)condition, current_cx, sf))) {
-        // TODO: check for break/return here
-        // if(eval==break || eval==return) break
-        sm_engine_eval(expression, current_cx, sf);
+        result = sm_engine_eval(expression, current_cx, sf);
+        if (result->my_type == SM_RETURN_TYPE)
+          return result;
       }
       return (sm_object *)sms_true;
       break;
@@ -817,11 +818,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_DO_WHILE_EXPR: {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
       sm_object *expression = sm_expr_get_arg(sme, 0);
+      sm_object *result     = (sm_object *)sms_true;
       do {
-        sm_engine_eval(expression, current_cx, sf);
+        result = sm_engine_eval(expression, current_cx, sf);
+        if (result->my_type == SM_RETURN_TYPE)
+          return result;
       } while (!IS_FALSE(sm_engine_eval((sm_object *)condition, current_cx, sf)));
       return (sm_object *)sms_true;
       break;
+    }
+    case SM_RETURN_EXPR: {
+      sm_object *to_return = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_return(to_return);
     }
     case SM_SIZE_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -926,37 +934,25 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr        *new_args = (sm_expr *)sm_engine_eval((sm_object *)args, current_cx, sf);
       sm_object      *obj0     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, new_args);
       if (obj0->my_type == SM_FUN_TYPE) {
-        sm_fun *fun = (sm_fun *)obj0;
-        return sm_engine_eval(fun->content, fun->parent, new_args);
-      } else if (obj0->my_type == SM_SYMBOL_TYPE) {
-        sm_symbol *fun_sym = (sm_symbol *)obj0;
-        sm_object *found =
-          sm_cx_get_far(current_cx, &(fun_sym->name->content), fun_sym->name->size);
-        if (found == NULL) {
-          printf("Error: Function not found: %s\n", &(fun_sym->name->content));
-          sm_string *err_msg =
-            sm_new_string(27 + fun_sym->name->size, "Error: Function not found: ");
-          sm_strncpy((&err_msg->content) + 27, &fun_sym->name->content, fun_sym->name->size);
-          return (sm_object *)sm_new_error(err_msg, sm_new_string(1, "."), 0);
-        }
-        sm_fun *found_fun;
-        if (expect_type(found, 0, SM_FUN_TYPE, SM_FUN_CALL_EXPR)) {
-          found_fun = (sm_fun *)found;
-          // TODO: Speed up idea ! problem is , this changes the toStr of this function call
-          // so to use this speedup, we need to store 3 things in a function call:
-          // 1: expression of the fn 2: the evaluated expression or false 3: the args
-          // that way, we can keep the found function without changing the representation
-          // sm_expr_set_arg(sme,0,found);
-          return sm_engine_eval(found_fun->content, found_fun->parent, new_args);
-        } else
-          return (sm_object *)sms_false;
+        sm_fun    *fun    = (sm_fun *)obj0;
+        sm_object *result = sm_engine_eval(fun->content, fun->parent, new_args);
+        if (result->my_type == SM_RETURN_TYPE)
+          return ((sm_return *)result)->address;
+        else
+          return result;
       } else
         return obj0;
       break;
     }
     case SM_THEN_EXPR: {
-      for (unsigned int i = 0; i + 1 < sme->size; i++)
-        sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
+      unsigned int i      = 0;
+      sm_object   *result = (sm_object *)sms_true;
+      while (i + 1 < sme->size) {
+        result = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
+        if (result->my_type == SM_RETURN_TYPE)
+          return result;
+        i++;
+      }
       return sm_engine_eval(sm_expr_get_arg(sme, sme->size - 1), current_cx, sf);
       break;
     }
