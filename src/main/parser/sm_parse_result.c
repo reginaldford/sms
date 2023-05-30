@@ -7,9 +7,7 @@ void  scan_str(const char *cstr, int len);
 void  end_scan_str(void);
 FILE *lex_file(char *filepath);
 void  lex_cstr(char *cstr, int len);
-
-// Parse from stdin
-sm_parse_result sm_parse_stdin() { return sm_parse_file("/dev/stdin"); }
+void  _done_lexing_file(FILE *f);
 
 // Parse a string with known length
 sm_parse_result sm_parse_cstr(char *cstr, int len) {
@@ -26,5 +24,6 @@ sm_parse_result sm_parse_file(char *fname) {
     return (sm_parse_result){.return_val = -1, .parsed_object = (sm_object *)sm_new_double(0)};
   }
   int result = yyparse();
+  _done_lexing_file(success);
   return (sm_parse_result){.return_val = result, .parsed_object = sm_global_parser_output(NULL)};
 }

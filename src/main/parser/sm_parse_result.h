@@ -5,6 +5,5 @@ typedef struct sm_parse_result {
   sm_object *parsed_object;
 } sm_parse_result;
 
-sm_parse_result sm_parse_stdin();
 sm_parse_result sm_parse_cstr(char *cstr, int len);
 sm_parse_result sm_parse_file(char *fname);
