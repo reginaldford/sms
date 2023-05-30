@@ -38,9 +38,8 @@ void start_repl() {
   // Read, Evaluate, Print Loop
   while (true) {
     // Prompt
-    sm_terminal_prompt();
+    sm_parse_result pr = sm_terminal_prompt();
     // Read
-    sm_parse_result pr = sm_parse_stdin();
     if (pr.return_val == 0 && pr.parsed_object != NULL) {
       // Evaluate
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
@@ -53,6 +52,8 @@ void start_repl() {
       yylineno++;
     } else {
       printf("Error: parser returned %i\n", pr.return_val);
+      if (!pr.parsed_object)
+        printf(", but nothing was parsed.\n");
     }
   }
 }

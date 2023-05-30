@@ -148,12 +148,12 @@ void sm_garbage_collect() {
       (sm_cx *)sm_move_to_new_heap((sm_object *)*sm_global_lex_stack(NULL)->top);
 
     // Copy root (true and false singletons)
-    sms_true  = (sm_symbol *)sm_move_to_new_heap((sm_object *)sms_true);
-    sms_false = (sm_symbol *)sm_move_to_new_heap((sm_object *)sms_false);
+    sms_true  = (sm_symbol *)sm_meet_object((sm_object *)sms_true);
+    sms_false = (sm_symbol *)sm_meet_object((sm_object *)sms_false);
 
     // Parser output is a root
     if (sm_global_parser_output(NULL))
-      sm_global_parser_output(sm_move_to_new_heap(((sm_object *)sm_global_parser_output(NULL))));
+      sm_global_parser_output(sm_meet_object(((sm_object *)sm_global_parser_output(NULL))));
 
     // Inflate
     sm_inflate_heap();
