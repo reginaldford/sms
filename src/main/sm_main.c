@@ -53,7 +53,7 @@ void start_repl() {
     } else {
       printf("Error: parser returned %i\n", pr.return_val);
       if (!pr.parsed_object)
-        printf(", but nothing was parsed.\n");
+        printf("Nothing was parsed.\n");
     }
   }
 }

@@ -281,7 +281,7 @@ COMMAND : EXPR ';' {
   sm_global_parser_output((sm_object *)($1));
   YYACCEPT;
 }
-| error ';' { YYABORT; }
+| error  { YYABORT; return 4; }
 | DONE      { YYACCEPT;}
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->top)); }
