@@ -1,4 +1,5 @@
-#!/usr/bin/node
+#!/usr/local/bin/node
+const n = 30;
 
 function fibonacciRecursive(n) {
   if (n <= 1) {
@@ -16,7 +17,6 @@ function benchmark(func, param) {
   console.log(`Execution time: ${executionTime}ms`);
 }
 
-const n = 28;
 
 console.log('Benchmarking Recursive Fib:');
 benchmark(fibonacciRecursive, n);

@@ -72,7 +72,7 @@ void process_character(char c) {
       escape_buffer[eb_cursor] = '\0';
       eb_cursor                = 0;
       current_state            = normal;
-    } else if (c == 91) { // tends to come before the last escape character
+    } else if (c == 91) { // starts a longer escape
       current_state = extended1;
     } else { // unsupported escape, reset state
       eb_cursor     = 0;
@@ -110,7 +110,9 @@ sm_parse_result sm_terminal_prompt() {
   tcsetattr(STDIN_FILENO, TCSANOW, &old_attr);
   input_buffer[input_len] = '\0';
   putc('\n', stdout);
+
   sm_parse_result pr = sm_parse_cstr(input_buffer, input_len);
-  input_len          = 0;
+
+  input_len = 0;
   return pr;
 }

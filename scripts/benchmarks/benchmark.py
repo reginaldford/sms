@@ -2,6 +2,8 @@
 #!/usr/local/bin/python
 import time
 
+num_to_fib=30;
+
 def fibonacci_recursive(n):
     if n <= 1:
         return n
@@ -9,10 +11,10 @@ def fibonacci_recursive(n):
 
 def benchmark_fibonacci_recursive():
     start_time = time.time()
-    result = fibonacci_recursive(28)
+    result = fibonacci_recursive(num_to_fib);
     end_time = time.time()
     execution_time = (end_time - start_time) * 1000  # Convert to milliseconds
-    print("Recursive Fibonacci(27) =", result)
+    print("Recursive Fibonacci(",num_to_fib,") =", result)
     print("Execution time:", execution_time, "milliseconds")
 
 benchmark_fibonacci_recursive()
