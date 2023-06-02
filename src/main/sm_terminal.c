@@ -12,13 +12,15 @@ extern int yylineno;
 
 typedef enum { normal, escaped, extended1, extended2 } sm_terminal_state;
 
+#define MAX_BUFFER_LEN 1024
 int               cursor_pos    = 0;
 int               input_len     = 0;
-sm_terminal_state current_state = normal;
-char              input_buffer[512];
-char              escape_buffer[16];
-int               eb_cursor = 0;
+sm_terminal_state current_state = normal;       // State machine parsing
+char              input_buffer[MAX_BUFFER_LEN]; // Might have to use OS malloc to improve
+char              escape_buffer[16];            // For escape codes
+int               eb_cursor = 0;                // Escape buffer cursor
 
+// State machine based on sm_terminal_state enum
 void process_character(char c) {
   switch (current_state) {
   case normal:
@@ -82,6 +84,17 @@ void process_character(char c) {
   }
 }
 
+char last_non_whitespace(char *cstr, int len) {
+  for (int i = len - 1; i >= 0; i--) {
+    if (!isspace(cstr[i]))
+      return cstr[i];
+  }
+  return ' '; // As long as it is not a semicolon,
+  // this is not a complete command.
+}
+
+// Prints the terminal prompt, and allows the user to input a command
+// Parses the input when enter is pressed and the last token is a ;
 sm_parse_result sm_terminal_prompt() {
   struct termios old_attr, new_attr;
 
@@ -99,20 +112,20 @@ sm_parse_result sm_terminal_prompt() {
   printf("%s", prompt_buffer);
   fflush(stdout);
 
-  // Read input character by character
   char c;
   // read returns # of bytes read or -1
-  while (read(STDIN_FILENO, &c, 1) > 0 && c != 10) {
+  // We read 1 byte at a time
+  while (read(STDIN_FILENO, &c, 1) > 0) {
     process_character(c);
+    if (c == 10) {
+      if (last_non_whitespace(input_buffer, input_len) == ';') {
+        tcsetattr(STDIN_FILENO, TCSANOW, &old_attr); // Restore the original terminal attributes
+        input_buffer[input_len] = '\0';              // cstr termination
+        sm_parse_result pr      = sm_parse_cstr(input_buffer, input_len); //
+        input_len               = 0;
+        return pr;
+      }
+    }
   }
-
-  // Restore the original terminal attributes
-  tcsetattr(STDIN_FILENO, TCSANOW, &old_attr);
-  input_buffer[input_len] = '\0';
-  putc('\n', stdout);
-
-  sm_parse_result pr = sm_parse_cstr(input_buffer, input_len);
-
-  input_len = 0;
-  return pr;
+  return (sm_parse_result){.return_val = -1, .parsed_object = NULL};
 }
