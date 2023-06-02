@@ -17,7 +17,7 @@ digit [0-9]
 
 %%
 
-[ \t\f\v\n]  { ; }
+[ \t\f\v\n\\]  { ; }
 exit         {return EXIT;}
 help         {return HELP;}
 
