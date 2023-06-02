@@ -118,7 +118,7 @@ sm_parse_result sm_terminal_prompt() {
   while (read(STDIN_FILENO, &c, 1) > 0) {
     process_character(c);
     if (c == 10) {
-      if (last_non_whitespace(input_buffer, input_len) == ';') {
+      if (last_non_whitespace(input_buffer, input_len) != '\\') { // use \ to extend your line
         tcsetattr(STDIN_FILENO, TCSANOW, &old_attr); // Restore the original terminal attributes
         input_buffer[input_len] = '\0';              // cstr termination
         sm_parse_result pr      = sm_parse_cstr(input_buffer, input_len); //
