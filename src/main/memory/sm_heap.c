@@ -56,9 +56,7 @@ sm_search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size
   if (comparison < 0) {
     return (sm_search_result){.found = false, .index = guess_point + 1};
   } else // comparison > 0
-  {
     return (sm_search_result){.found = false, .index = guess_point};
-  }
 }
 
 // Sort the space array that is unsorted by the 1 space at off_index

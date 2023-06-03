@@ -45,7 +45,7 @@ void start_repl() {
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       // Print
       sm_string *result_str = sm_object_to_string(result);
-      printf("%s\n", &(result_str->content));
+      printf("%s", &(result_str->content));
       // Cleanup
       sm_garbage_collect();
       // Count this as a line
@@ -53,7 +53,7 @@ void start_repl() {
     } else {
       printf("Error: parser returned %i\n", pr.return_val);
       if (!pr.parsed_object)
-        printf("Nothing was parsed.\n");
+        printf("Nothing was parsed.");
     }
   }
 }
