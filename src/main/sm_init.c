@@ -6,7 +6,7 @@ extern sm_heap *sms_heap;
 
 void sm_init(sm_env *env) {
   // Register the signal handler
-  sm_register_signals(); // testing auto testing workflow in github
+  sm_register_signals();
 
   // Initialize the current memory heap
   double mem_mbytes = 50;

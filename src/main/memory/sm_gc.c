@@ -162,6 +162,31 @@ void sm_garbage_collect() {
     sm_gc_count(1);
   }
   // This will be a global variable
-  if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false)
-    printf("\n%i bytes used after gc.\n", sms_heap->used);
+  if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
+    const unsigned int KB = 1024;
+    putc('\n', stdout);
+    putc('(', stdout);
+    if (sms_heap->used < KB)
+      printf("%.3gB", (double)sms_heap->used);
+    else if (sms_heap->used < KB * KB)
+      printf("%.3gKB", (double)sms_heap->used / KB);
+    else if (sms_heap->used < (KB * KB * KB))
+      printf("%.3gMB", (double)sms_heap->used / (KB * KB));
+    else if (sms_heap->used >= (KB * KB * KB * KB) && sms_heap->used < (KB * KB))
+      printf("%.3gGB", (double)sms_heap->used / (KB * KB * KB));
+    else if (sms_heap->used >= (KB * KB * KB * KB * KB))
+      printf("%.3gTB", (double)sms_heap->used / (KB * KB * KB * KB));
+    printf(" / ");
+    if (sms_heap->capacity < KB)
+      printf("%.3gB", (double)sms_heap->capacity);
+    else if (sms_heap->capacity < KB * KB)
+      printf("%.3gKB", (double)sms_heap->capacity / KB);
+    else if (sms_heap->capacity < (KB * KB * KB))
+      printf("%.3gMB", (double)sms_heap->capacity / (KB * KB));
+    else if (sms_heap->capacity >= (KB * KB * KB * KB) && sms_heap->capacity < (KB * KB))
+      printf("%.3gGB", (double)sms_heap->capacity / (KB * KB * KB));
+    else if (sms_heap->capacity >= (KB * KB * KB * KB * KB))
+      printf("%.3gTB", (double)sms_heap->capacity / (KB * KB * KB * KB));
+    putc(')', stdout);
+  }
 }
