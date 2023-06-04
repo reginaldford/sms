@@ -1,6 +1,10 @@
 # eager eval for cx
 - contexts need eager eval
 
+# unary func notation
+- let a = x => x^2;
+- a x ;
+
 # data structures
 - `let myType = struct({
     age = 5;       # no decimal means int. 64 bits for now

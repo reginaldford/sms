@@ -8,7 +8,8 @@ extern int yylineno;
 
 // Prints intro
 void print_intro() {
-  printf("Symbolic Math System\n");
+  printf("%s%sSymbolic Math System%s\n", sm_terminal_bg_color(SM_TERM_BLACK),
+         sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
   printf("Version 0.161\n");
 }
 
@@ -45,7 +46,8 @@ void start_repl() {
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       // Print
       sm_string *result_str = sm_object_to_string(result);
-      printf("%s", &(result_str->content));
+      printf("%s%s%s", sm_terminal_fg_color(SM_TERM_B_WHITE), &(result_str->content),
+             sm_terminal_reset());
       // Cleanup
       sm_garbage_collect();
       // Count this as a line

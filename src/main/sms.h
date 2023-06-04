@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdint.h>
-
+#include <termios.h>
 
 // These are the major object types of SMS
 // Keep syncronized with function sm_object_type_str
@@ -67,7 +67,8 @@ enum sm_object_type {
 #include "memory/sm_space.h"
 #include "memory/sm_gc.h"
 #include "sm_global.h"
-#include "sm_terminal.h"
+#include "terminal/sm_terminal_input.h"
+#include "terminal/sm_terminal_output.h"
 #include "engine/str.h"
 #include "engine/sm_diff.h"
 #include "engine/sm_simplify.h"
