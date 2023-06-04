@@ -19,6 +19,7 @@ SRC_PARSER      := src/main/parser
 SRC_OBJECT      := src/main/object
 SRC_ENGINE      := src/main/engine
 SRC_MEM         := src/main/memory
+SRC_TERMINAL    := src/main/terminal
 SRCS_MAIN       := $(filter-out $(SRC_MAIN)/sm_main.c, $(shell find $(SRC_MAIN) -name '*.c'))
 SRCS_TEST       := $(shell find $(SRC_TEST) -name '*.c')
 SRCS_KT         := $(shell find $(SRC_KERN_TEST) -name '*.c')
@@ -106,6 +107,7 @@ clean:
 		$(BUILD_DIR)/$(SRC_OBJECT)/*.o\
 		$(BUILD_DIR)/$(SRC_ENGINE)/*.o\
 		$(BUILD_DIR)/$(SRC_MEM)/*.o\
+		$(BUILD_DIR)/$(SRC_TERMINAL)/*.o\
 		bin/sms*
 
 # Install the binary to a unix-like system

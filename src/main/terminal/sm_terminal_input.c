@@ -1,31 +1,43 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "sms.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <termios.h>
+#include "../sms.h"
+
+/* Relies on comformity to POSIX and vt100/ANSI color code output.
+The terminal input is handled by switching the terminal to non-canonical mode. In this mode,
+character printing is manual (even when the user types). A state machine in this file will sort the
+different incoming escape codes due to standard unix-like behavior on a vt100-like terminal emulator
+when the user presses certain key combinations or keys. The state machine parses the input in real
+time, and calls the functions for escape codes, extended escape codes, and extra-extended escape
+codes which each have their own file.*/
+
+// arrow keys, alt+letters
+#include "process_esc.h"
+// ctrl+letter
+#include "process_ext1.h"
+// alt+arrow, ctrl+arrow, ctrl+alt+arrow, ctrl+shift+arrow
+#include "process_ext2.h"
 
 // yylineno is a global from the bison-generated parser
 // storing the current line number
 extern int yylineno;
 
-typedef enum { normal, escaped, extended1, extended2 } sm_terminal_state;
+// levels of input state
+typedef enum { normal, esc, extended1, extended2 } sm_terminal_state;
 
+// we will make this infinite later, via OS malloc
 #define MAX_BUFFER_LEN 1024
 int               cursor_pos    = 0;
 int               input_len     = 0;
 sm_terminal_state current_state = normal;       // State machine parsing
 char              input_buffer[MAX_BUFFER_LEN]; // Might have to use OS malloc to improve
-char              escape_buffer[16];            // For escape codes
+char              esc_buffer[16];               // For esc codes
 int               eb_cursor = 0;                // Escape buffer cursor
-
 // State machine based on sm_terminal_state enum
 void process_character(char c) {
   switch (current_state) {
   case normal:
-    if (c == 27) { // escape code
-      current_state = escaped;
+    if (c == 27) { // begins escape code
+      current_state = esc;
       eb_cursor     = 0;
     } else if (c != 127 && c != 8) { // not backspace
       putc(c, stdout);
@@ -40,43 +52,48 @@ void process_character(char c) {
       input_len--;
     }
     break;
-  case extended1: // c is last char or this is an extended escape
-    escape_buffer[eb_cursor++] = c;
+  case extended1: // c is last char or this is an extended esc
+    esc_buffer[eb_cursor++] = c;
     if (c == 49) {
       current_state = extended2;
     } else {
-      escape_buffer[eb_cursor++] = '\0';
-      current_state              = normal;
-      eb_cursor                  = 0;
+      esc_buffer[eb_cursor++] = '\0';
+      current_state           = normal;
+      eb_cursor               = 0;
+      process_ext1(esc_buffer);
     }
     break;
   case extended2:
     if (eb_cursor >= 4) { // extended sequence is 5 total characters
-      escape_buffer[eb_cursor++] = c;
-      escape_buffer[eb_cursor++] = '\0';
-      eb_cursor                  = 0;
-      current_state              = normal;
+      esc_buffer[eb_cursor++] = c;
+      esc_buffer[eb_cursor++] = '\0';
+      eb_cursor               = 0;
+      current_state           = normal;
+      process_ext2(esc_buffer);
     } else {
-      escape_buffer[eb_cursor++] = c;
+      esc_buffer[eb_cursor++] = c;
     }
     break;
-  case escaped:
-    escape_buffer[eb_cursor++] = c;
+  case esc:
+    esc_buffer[eb_cursor++] = c;
     if (c >= 48 && c <= 57) { // 0-9
-      escape_buffer[eb_cursor] = '\0';
-      eb_cursor                = 0;
-      current_state            = normal;
+      esc_buffer[eb_cursor] = '\0';
+      eb_cursor             = 0;
+      process_esc(input_buffer);
+      current_state = normal;
     } else if (c >= 97 && c <= 122) { // lowercase letters
-      escape_buffer[eb_cursor] = '\0';
-      eb_cursor                = 0;
-      current_state            = normal;
+      esc_buffer[eb_cursor] = '\0';
+      eb_cursor             = 0;
+      process_esc(input_buffer);
+      current_state = normal;
     } else if (c >= 65 && c <= 90) { // uppercase letters
-      escape_buffer[eb_cursor] = '\0';
-      eb_cursor                = 0;
-      current_state            = normal;
-    } else if (c == 91) { // starts a longer escape
+      esc_buffer[eb_cursor] = '\0';
+      eb_cursor             = 0;
+      process_esc(input_buffer);
+      current_state = normal;
+    } else if (c == 91) { // starts a longer esc
       current_state = extended1;
-    } else { // unsupported escape, reset state
+    } else { // unsupported esc, reset state
       eb_cursor     = 0;
       current_state = normal;
     }
@@ -84,13 +101,14 @@ void process_character(char c) {
   }
 }
 
+// Returns the last non-whitespace character of the user input.
+// If we reach the beginning in the search, we just return ' '.
 char last_non_whitespace(char *cstr, int len) {
   for (int i = len - 1; i >= 0; i--) {
     if (!isspace(cstr[i]))
       return cstr[i];
   }
-  return ' '; // As long as it is not a semicolon,
-  // this is not a complete command.
+  return ' ';
 }
 
 // Prints the terminal prompt, and allows the user to input a command
@@ -107,9 +125,12 @@ sm_parse_result sm_terminal_prompt() {
   tcsetattr(STDIN_FILENO, TCSANOW, &new_attr);
 
   // Print the prompt
-  char prompt_buffer[16];
-  snprintf(prompt_buffer, 16, "\n%i> ", yylineno);
-  printf("%s", prompt_buffer);
+  putc('\n', stdout);
+  printf("%s", sm_terminal_fg_color(SM_TERM_B_GREEN));
+  printf("%i", yylineno);
+  putc('>', stdout);
+  printf("%s", sm_terminal_reset());
+  putc(' ', stdout);
   fflush(stdout);
 
   char c;
