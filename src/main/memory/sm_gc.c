@@ -165,7 +165,7 @@ void sm_garbage_collect() {
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
     const unsigned int KB = 1024;
     putc('\n', stdout);
-    printf("%s", sm_terminal_fg_color(SM_TERM_BLUE));
+    printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
     putc('(', stdout);
     if (sms_heap->used < KB)
       printf("%.4gB", (double)sms_heap->used);
