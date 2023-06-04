@@ -8,9 +8,9 @@ extern int yylineno;
 
 // Prints intro
 void print_intro() {
-  printf("%s%sSymbolic Math System%s\n", sm_terminal_bg_color(SM_TERM_BLACK),
-         sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
-  printf("Version 0.161\n");
+  printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
+         sm_terminal_fg_color(SM_TERM_B_BLUE));
+  printf("%sVersion 0.161%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
