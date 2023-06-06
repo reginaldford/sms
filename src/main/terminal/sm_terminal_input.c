@@ -114,15 +114,12 @@ char last_non_whitespace(char *cstr, int len) {
 // Prints the terminal prompt, and allows the user to input a command
 // Parses the input when enter is pressed and the last token is a ;
 sm_parse_result sm_terminal_prompt() {
-  struct termios old_attr, new_attr;
-
-  // Save current terminal attributes
-  tcgetattr(STDIN_FILENO, &old_attr);
-  new_attr = old_attr;
+  struct termios term_attr;
 
   // Set the terminal to non-canonical mode
-  new_attr.c_lflag &= ~(ICANON | ECHO);
-  tcsetattr(STDIN_FILENO, TCSANOW, &new_attr);
+  tcgetattr(STDIN_FILENO, &term_attr);
+  term_attr.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &term_attr);
 
   // Print the prompt
   putc('\n', stdout);
@@ -140,8 +137,13 @@ sm_parse_result sm_terminal_prompt() {
     process_character(c);
     if (c == 10) {
       if (last_non_whitespace(input_buffer, input_len) != '\\') { // use \ to extend your line
-        tcsetattr(STDIN_FILENO, TCSANOW, &old_attr); // Restore the original terminal attributes
-        input_buffer[input_len] = '\0';              // cstr termination
+                                                                  // restore terminal attributes
+        int            stdin_fd = fileno(stdin);
+        struct termios term_attr;
+        tcgetattr(stdin_fd, &term_attr);
+        term_attr.c_lflag |= ICANON;
+        tcsetattr(stdin_fd, TCSANOW, &term_attr);
+        input_buffer[input_len] = '\0';                                   // cstr termination
         sm_parse_result pr      = sm_parse_cstr(input_buffer, input_len); //
         input_len               = 0;
         return pr;

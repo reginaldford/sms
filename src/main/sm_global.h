@@ -23,3 +23,4 @@ sm_object         *sm_global_parser_output(sm_object *replacement);
 sm_env            *sm_global_environment(sm_env *replacement);
 char              *sm_global_type_name(unsigned short int which);
 unsigned short int sm_global_type_name_len(unsigned short int which);
+struct termios    *sm_global_term_attrs();

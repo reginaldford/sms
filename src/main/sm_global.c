@@ -8,7 +8,6 @@ sm_heap   *sms_other_heap;
 sm_symbol *sms_true;
 sm_symbol *sms_false;
 
-
 /* GLOBALS as functions
 The following globals use functions f(x):
 - If x is NULL, the static field is returned.
@@ -241,9 +240,8 @@ char *sm_global_fn_name(unsigned short int which) {
                              "osExec",
                              "_gc",
                              "?"};
-  if (which >= num_functions) {
+  if (which >= num_functions)
     return response[num_functions];
-  }
   return response[which];
 }
 
@@ -256,9 +254,8 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
     5, 5, 8, 12, 5, 4, 7, 6, 8,  6, 8, 5, 9, 8, 7, 8, 10, 8, 9, 6, 6, 6,  9, 10, 8, 8, 6,
     6, 6, 4, 4,  6, 4, 5, 3, 2,  3, 3, 7, 6, 6, 6, 7, 8,  4, 8, 7, 9, 11, 9, 6,  6, 8, 6,
     5, 8, 6, 6,  8, 7, 9, 9, 9,  8, 6, 6, 8, 7, 0, 0, 8,  4, 7, 4, 4, 5,  6, 6,  6, 3, 1};
-  if (which >= sm_global_num_fns()) {
+  if (which >= sm_global_num_fns())
     return 1; // "?"
-  }
   return response_len[which];
 }
 
@@ -274,9 +271,8 @@ sm_object *sm_global_parser_output(sm_object *replacement) {
     sm_object *temp = parser_output;
     parser_output   = replacement;
     return temp;
-  } else {
+  } else
     return parser_output;
-  }
 }
 
 // Options from the command line arguments
@@ -286,7 +282,6 @@ sm_env *sm_global_environment(sm_env *replacement) {
     sm_env *temp = options;
     options      = replacement;
     return temp;
-  } else {
+  } else
     return options;
-  }
 }
