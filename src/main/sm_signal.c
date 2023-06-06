@@ -3,8 +3,8 @@
 #include "sms.h"
 
 void sm_signal_handler(int signal_number) {
-  char *signal_name = "";
-  int   exit_code;
+  char              *signal_name = "";
+  unsigned short int exit_code;
   switch (signal_number) {
   case SIGQUIT:
     signal_name = "SIGQUIT";
@@ -42,6 +42,12 @@ void sm_signal_handler(int signal_number) {
   if (sm_global_environment(NULL)->quiet_mode == false)
     printf("\n<Received signal: %s. Exiting with code: %i>\n", signal_name, exit_code);
   sm_mem_cleanup();
+  // Reset the terminal attributes to their default values
+  int            stdin_fd = fileno(stdin);
+  struct termios term_attr;
+  tcgetattr(stdin_fd, &term_attr);
+  term_attr.c_lflag |= ICANON | ECHO;
+  tcsetattr(stdin_fd, TCSANOW, &term_attr);
   fflush(stdout);
   exit(exit_code);
 }
@@ -67,9 +73,17 @@ void sm_register_signals() {
 
 // Exit SMS with this exit code
 void sm_signal_exit(int exit_code) {
+  if (sm_global_environment(NULL)->quiet_mode == false) {
+    printf("%s<Exiting with code: %i>%s\n", sm_terminal_fg_color(SM_TERM_YELLOW), exit_code,
+           sm_terminal_reset());
+  }
   sm_mem_cleanup();
-  if (sm_global_environment(NULL)->quiet_mode == false)
-    printf("<Exiting with code: %i>\n", exit_code);
+  // Reset the terminal attributes to their default values
+  int            stdin_fd = fileno(stdin);
+  struct termios term_attr;
+  tcgetattr(stdin_fd, &term_attr);
+  term_attr.c_lflag |= ICANON | ECHO;
+  tcsetattr(stdin_fd, TCSANOW, &term_attr);
   fflush(stdout);
   exit(exit_code);
 }
