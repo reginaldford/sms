@@ -17,8 +17,7 @@ codes which each have their own file.*/
 // alt+arrow, ctrl+arrow, ctrl+alt+arrow, ctrl+shift+arrow
 #include "process_ext2.h"
 
-// yylineno is a global from the bison-generated parser
-// storing the current line number
+// bison generated parser's global line number :-(
 extern int yylineno;
 
 // levels of input state
@@ -32,6 +31,12 @@ sm_terminal_state current_state = normal;       // State machine parsing
 char              input_buffer[MAX_BUFFER_LEN]; // Might have to use OS malloc to improve
 char              esc_buffer[16];               // For esc codes
 int               eb_cursor = 0;                // Escape buffer cursor
+
+// canonical (backup) input:
+// There is a branch for the non-canonical form in the repo,
+// Which needs work!
+
+
 // State machine based on sm_terminal_state enum
 void process_character(char c) {
   switch (current_state) {
@@ -111,9 +116,10 @@ char last_non_whitespace(char *cstr, int len) {
   return ' ';
 }
 
+// "smartput"
 // Prints the terminal prompt, and allows the user to input a command
 // Parses the input when enter is pressed and the last token is a ;
-sm_parse_result sm_terminal_prompt() {
+sm_parse_result sm_terminal_smartput() {
   struct termios term_attr;
 
   // Set the terminal to non-canonical mode
@@ -121,14 +127,7 @@ sm_parse_result sm_terminal_prompt() {
   term_attr.c_lflag &= ~(ICANON | ECHO);
   tcsetattr(STDIN_FILENO, TCSANOW, &term_attr);
 
-  // Print the prompt
-  putc('\n', stdout);
-  printf("%s", sm_terminal_fg_color(SM_TERM_B_GREEN));
-  printf("%i", yylineno);
-  putc('>', stdout);
-  printf("%s", sm_terminal_reset());
-  putc(' ', stdout);
-  fflush(stdout);
+  sm_terminal_print_prompt();
 
   char c;
   // read returns # of bytes read or -1
