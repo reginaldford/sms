@@ -281,10 +281,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
 
 
 FILE* _lex_file(char * fpath){
-  FILE * f;
-  if(strncmp(fpath,"/dev/stdin",10)==0)
-    f=stdin;
-  else f = fopen(fpath,"rb");
+  FILE * f = fopen(fpath,"rb");
   if(!f) return NULL;
   YY_BUFFER_STATE bs = yy_create_buffer(f,YY_BUF_SIZE);
   yypush_buffer_state(bs);

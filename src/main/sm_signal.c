@@ -40,7 +40,8 @@ void sm_signal_handler(int signal_number) {
     break;
   }
   if (sm_global_environment(NULL)->quiet_mode == false)
-    printf("\n<Received signal: %s. Exiting with code: %i>\n", signal_name, exit_code);
+    printf("\n%s<Received signal: %s. Exiting with code: %i>\n",
+           sm_terminal_fg_color(SM_TERM_YELLOW), signal_name, exit_code);
   sm_mem_cleanup();
   // Reset the terminal attributes to their default values
   int            stdin_fd = fileno(stdin);
@@ -74,7 +75,8 @@ void sm_register_signals() {
 // Exit SMS with this exit code
 void sm_signal_exit(int exit_code) {
   if (sm_global_environment(NULL)->quiet_mode == false) {
-    printf("%s<Exiting with code: %i>%s\n", sm_terminal_fg_color(SM_TERM_YELLOW), exit_code,
+    sm_terminal_color exit_color = exit_code ? SM_TERM_YELLOW : SM_TERM_WHITE;
+    printf("%s<Exiting with code: %i>%s\n", sm_terminal_fg_color(exit_color), exit_code,
            sm_terminal_reset());
   }
   sm_mem_cleanup();

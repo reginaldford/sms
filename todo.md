@@ -1,3 +1,13 @@
+# active terminal support
+- This code is being developed in the feature/smartput branch
+- if non-canonical input is supported, we use smartput()
+- non-canonical form allows keyboard shortcuts
+  - ctrl+left, ctrl+right to jump 1 token left,right
+  - up and down to scroll through previous commands
+  - home, end to go to beginning/end
+  - alt+left, alt+right to go to beginning/end
+  - tab completion
+
 # eager eval for cx
 - contexts need eager eval
 

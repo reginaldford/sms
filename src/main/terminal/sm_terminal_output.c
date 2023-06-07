@@ -2,7 +2,22 @@
 
 #include "../sms.h"
 
-bool has_color() {
+// bison generated parser's global line number :-(
+extern int yylineno;
+
+// Print the prompt
+void sm_terminal_print_prompt() {
+  putc('\n', stdout);
+  printf("%s", sm_terminal_fg_color(SM_TERM_B_GREEN));
+  printf("%i", yylineno);
+  putc('>', stdout);
+  printf("%s", sm_terminal_reset());
+  putc(' ', stdout);
+  fflush(stdout);
+}
+
+
+bool sm_terminal_has_color() {
   char *term = getenv("TERM");
   // If the word color is in there, we will assume
   // that the ANSI 16 colors are available
@@ -36,7 +51,7 @@ char *sm_terminal_fg_color(sm_terminal_color color) {
          "\x1b[37;1m"  // SM_TERM_B_WHITE
   };
 
-  if (!has_color())
+  if (!sm_terminal_has_color())
     return nothing_cstr;
 
   if (color >= SM_TERM_BLACK && color <= SM_TERM_B_WHITE)
