@@ -39,8 +39,7 @@ void start_repl() {
   // Read, Evaluate, Print Loop
   while (true) {
     // Prompt
-    sm_terminal_print_prompt();
-    sm_parse_result pr = sm_parse_file("/dev/stdin");
+    sm_parse_result pr = sm_terminal_smartput();
     // Read
     if (pr.return_val == 0 && pr.parsed_object != NULL) {
       // Evaluate
