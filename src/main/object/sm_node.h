@@ -36,3 +36,4 @@ int             sm_node_map_size(unsigned long long map);
 void            sm_node_map_set(unsigned long long *map, int index, bool on);
 bool            sm_node_map_get(unsigned long long map, int i);
 int             sm_node_child_index(unsigned long long map, int map_index);
+int sm_node_import(sm_node *nodeFrom, sm_node *nodeTo, char *buffer, sm_stack *char_stack);

@@ -62,8 +62,8 @@ sm_stack *sm_global_lex_stack(sm_stack *replacement) {
 // Return the name of this type.
 // Must be synchronized with enum sm_object_type
 char *sm_global_type_name(unsigned short int which) {
-  static char *response[] = {"num",  "xpr",   "prm", "str",   "sym", "cxt", "ptr",
-                             "meta", "space", "fun", "param", "lcl", "err", "?"};
+  static char *response[] = {"num",   "xpr", "prm",   "str", "sym", "cx",  "node", "ptr",    "meta",
+                             "space", "fun", "param", "lcl", "l",   "err", "self", "return", "?"};
   return response[which];
 }
 
