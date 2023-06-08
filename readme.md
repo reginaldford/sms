@@ -11,7 +11,7 @@
 
 
 # Introduction:
-SMS (Symbolic Math System) is an unusually powerful terminal based calculator. SMS has built-in functions for arithmetic operations, programmatic flow control, trigonometry, algebra, and calculus. SMS aims to become a simple programming language that focuses on mathematics and speed. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
+SMS (Symbolic Math System) is a powerful terminal based calculator for POSIX friendly operating systems. SMS has built-in functions for arithmetic operations,trigonometry, algebra, calculus, file access and more. SMS aims to become a simple generl purpose programming language that focuses on mathematics and speed (like Julia). SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
 
 # Longer Introduction:
 
@@ -30,9 +30,9 @@ The following is 'hello world' in SMS:
 
 `putln("Hello world!");`
 
-SMS versions have 2 significant figures (like 0.160) during a milestone point. During these versions, development focuses on documentation, unit tests, and bugs.
+SMS versions have 2 significant figures (like 0.170) during a milestone point. During these versions, development focuses on documentation, unit tests, and bugs.
 
-SMS versions with 3 significant figures (like 0.161) are in feature development, so they may lack documentation for new features, and might have unannounced changes to existing features, are are generally less stable than the milestone versions. This readme is only syncronized with the last milestone version.
+SMS versions with 3 significant figures (like 0.171) are in feature development, so they may lack documentation for new features, and might have unannounced changes to existing features, are are generally less stable than the milestone versions. This readme is only syncronized with the last milestone version.
 
 
 # Cheat Sheet
@@ -174,6 +174,8 @@ Line comments start with `#`.
     15. cxContaining(cx,:key); # Returns the context which contains :key, by looking at cx and its ancetry
 
     16. cxRm(cx, :var); # Remove this entry from the context
+
+    17. cxImport(cx1, cx2); # import the key/value pairs from cx1 into cx2. Overwrites existing key values
 </details>
 
 <details>
