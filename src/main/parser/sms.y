@@ -115,7 +115,6 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> WHILE
 %token <expr> DO_WHILE
 %token <expr> RETURN
-%token <expr> MAP
 %token <expr> PARENT
 %token <expr> EVAL
 %token <expr> CX_EVAL
@@ -126,9 +125,15 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> RUNTIME_META
 
 %token <expr> NEW_ARR
+%token <expr> MAP
+%token <expr> REDUCE
 %token <expr> SIZE
 %token <expr> ARR_PLUS
 %token <expr> PART
+%token <expr> ARR_TOCSV
+%token <expr> ARR_REPEAT
+%token <expr> ARR_CAT
+
 
 %token <expr> STR_SIZE
 %token <expr> STR_CAT
@@ -146,23 +151,23 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> STR_TONUMS
 %token <expr> STR_CMP
 %token <expr> STR_REPEAT
-%token <expr> STR_TOBLK
+%token <expr> STR_TOMEM
 %token <expr> NEW_STR
 %token <expr> TO_STR
 %token <expr> TO_STRFMT
 
-%token <expr> NEW_BLK
-%token <expr> BLK_MAP
-%token <expr> BLK_UNITE
-%token <expr> BLK_PART
-%token <expr> BLK_TONUMS
-%token <expr> NUMS_TOBLK
-%token <expr> BLK_TOFILE
-%token <expr> BLK_PRINT
-%token <expr> BLK_SET
-%token <expr> BLK_GET
-%token <expr> BLK_TOSTR
-%token <expr> BLK_SIZE
+%token <expr> NEW_MEM
+%token <expr> MEM_MAP
+%token <expr> MEM_UNITE
+%token <expr> MEM_PART
+%token <expr> MEM_TONUMS
+%token <expr> NUMS_TOMEM
+%token <expr> MEM_TOFILE
+%token <expr> MEM_PRINT
+%token <expr> MEM_SET
+%token <expr> MEM_GET
+%token <expr> MEM_TOSTR
+%token <expr> MEM_SIZE
 
 %token <expr> PUT
 %token <expr> PUTLN
@@ -176,7 +181,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> FILE_EXISTS
 %token <expr> FILE_STAT
 %token <expr> FILE_APPEND
-%token <expr> FILE_TOBLK
+%token <expr> FILE_TOMEM
 %token <expr> FILE_CP
 %token <expr> FILE_MV
 %token <expr> FILE_RM
@@ -211,6 +216,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> CX_CLEAR
 %token <expr> CX_IMPORT
 %token <expr> CX_MAP
+%token <expr> CX_REDUCE
 %token <expr> CX_CONTAINING
 %token <expr> CX_SIZE
 %token <expr> CX_RM
@@ -229,10 +235,6 @@ void _lex_cstr(char * cstr,int len);
 
 %token <expr> NUMS_TOSTR
 %token <expr> NEW_NUMS
-
-%token <expr> ARR_TOCSV
-%token <expr> ARR_REPEAT
-%token <expr> ARR_CAT
 
 %token <expr> MALLOC_OBJ
 %token <expr> FREE_OBJ
@@ -369,6 +371,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | CX_DOT '(' EXPR ',' EXPR ')' {$$=sm_new_expr_2(SM_CX_DOT_EXPR, (sm_object *)$3,(sm_object*)$5);}
 | CX_CONTAINING '(' EXPR ',' EXPR ')' {$$=sm_new_expr_2(SM_CX_CONTAINING_EXPR, (sm_object *)$3,(sm_object*)$5);}
 | CX_CLEAR '(' EXPR ')' {$$=sm_new_expr(SM_CX_CLEAR_EXPR, (sm_object *)$3);}
+| CX_IMPORT '(' EXPR ',' EXPR ')' {$$=sm_new_expr_2(SM_CX_IMPORT_EXPR, (sm_object *)$3, (sm_object*) $5);}
 | CX_LET '(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_CX_LET_EXPR,(sm_object*)$3,(sm_object*)$5, (sm_object*)$7);}
 | CX_SET '(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_CX_SET_EXPR,(sm_object*)$3,(sm_object*)$5, (sm_object*)$7);}
 | CX_GET '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_CX_GET_EXPR,(sm_object*)$3,(sm_object*)$5);}

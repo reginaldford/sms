@@ -101,14 +101,15 @@ cxClear      {return CX_CLEAR;}
 cxKeys       {return CX_KEYS;}
 cxValues     {return CX_VALUES;}
 cxSize       {return CX_SIZE;}
-cxImport     {return CX_IMPORT;}
+cxImport     {return CX_IMPORT;/*not done*/}
 cxMap        {return CX_MAP;}
+cxReduce     {return CX_REDUCE;/*not done*/}
 
 fileParse    {return FILE_PARSE;}
 fileRun      {return FILE_RUN;}
 fileRead     {return FILE_READ;}
 filePart     {return FILE_PART;}
-fileToblk    {return FILE_TOBLK;}
+fileTomem    {return FILE_TOMEM;}
 fileExists   {return FILE_EXISTS;}
 fileStat     {return FILE_STAT;}
 fileCp       {return FILE_CP;}
@@ -120,7 +121,7 @@ fileAppend   {return FILE_APPEND;}
 
 csvToArr   {return CSV_TOARR;}
 arrToCsv   {return ARR_TOCSV;}
-blkToFile  {return BLK_TOFILE;}
+memToFile  {return MEM_TOFILE;}
 
 newArr      {return NEW_ARR;}
 arrCat      {return ARR_CAT;}
@@ -128,6 +129,7 @@ arrRpt      {return ARR_REPEAT;}
 part        {return PART;}
 size        {return SIZE;}
 map         {return MAP;}
+reduce      {return REDUCE;}
 
 random      {return RANDOM;}
 seed        {return SEED;}
@@ -149,16 +151,16 @@ xprOp      {return XPR_OP;}
 xprSetop   {return XPR_SETOP;}
 xprOpstr   {return XPR_OPSTR;}
 
-newBlk     {return NEW_BLK;}
-blkSet     {return BLK_SET;}
-blkSize    {return BLK_SIZE;}
-blkGet     {return BLK_GET;}
-blkUnite   {return BLK_UNITE;}
-blkPart    {return BLK_PART;}
-blkPrint   {return BLK_PRINT;}
-blkTonums  {return BLK_TONUMS;}
-blkMap     {return BLK_MAP;}
-blkTostr   {return BLK_TOSTR;}
+newMem     {return NEW_MEM;}
+memSet     {return MEM_SET;}
+memSize    {return MEM_SIZE;}
+memGet     {return MEM_GET;}
+memUnite   {return MEM_UNITE;}
+memPart    {return MEM_PART;}
+memPrint   {return MEM_PRINT;}
+memTonums  {return MEM_TONUMS;}
+memMap     {return MEM_MAP;}
+memTostr   {return MEM_TOSTR;}
 
 memAlloc   {return MALLOC_OBJ;}
 memFree    {return FREE_OBJ;}
@@ -183,10 +185,10 @@ strPart     {return STR_PART;}
 strCmp      {return STR_CMP;}
 strToNums   {return STR_TONUMS;}
 strMap      {return STR_MAP;}
-strToBlk    {return STR_TOBLK;}
+strToMem    {return STR_TOMEM;}
 
 newNums    {return NEW_NUMS;}
-numsToBlk  {return NUMS_TOBLK;}
+numsToMem  {return NUMS_TOMEM;}
 numsToStr  {return NUMS_TOSTR;}
 numsToCsv  {return NUMS_TOSTR;}
 

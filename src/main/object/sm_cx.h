@@ -18,3 +18,4 @@ unsigned int sm_cx_sprint(sm_cx *self, char *buffer, bool fake);
 sm_node     *sm_new_cx_node(sm_object *value);
 unsigned int sm_cx_size(sm_cx *self);
 void         sm_cx_clear(sm_cx *self);
+void         sm_cx_import(sm_cx *cxFrom, sm_cx *cxTo);
