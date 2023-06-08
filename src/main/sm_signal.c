@@ -42,6 +42,7 @@ void sm_signal_handler(int signal_number) {
   if (sm_global_environment(NULL)->quiet_mode == false)
     printf("\n%s<Received signal: %s. Exiting with code: %i>\n",
            sm_terminal_fg_color(SM_TERM_YELLOW), signal_name, exit_code);
+  printf("%s", sm_terminal_reset());
   sm_mem_cleanup();
   // Reset the terminal attributes to their default values
   int            stdin_fd = fileno(stdin);
