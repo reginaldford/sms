@@ -100,8 +100,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         path = (sm_string *)obj0;
       else
         return (sm_object *)sms_false;
-
-      int result = system(&path->content);
+      // The system command leaves 8 bits for extra information
+      // We do not need it, so we shift away the 8 bits
+      int result = system(&path->content) >> 8;
       return (sm_object *)sm_new_double(result);
       break;
     }
