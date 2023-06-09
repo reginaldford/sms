@@ -18,9 +18,12 @@ void sm_terminal_print_prompt() {
 
 
 bool sm_terminal_has_color() {
-  char *term = getenv("TERM");
+  // Only call getenv once
+  static char *term = NULL;
+  if (!term)
+    term = getenv("TERM");
   // If the word color is in there, we will assume
-  // that the ANSI 16 colors are available
+  // that the ANSI 16 color escapes are available
   if (term != NULL && strstr(term, "color") != NULL)
     return true;
   // Terminal does not support 16 colors
