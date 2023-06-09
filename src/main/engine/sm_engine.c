@@ -106,6 +106,34 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_new_double(result);
       break;
     }
+    case SM_OS_GETENV_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_string *key;
+      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_OS_GETENV_EXPR))
+        key = (sm_string *)obj0;
+      else
+        return (sm_object *)sms_false;
+      char *result = getenv(&key->content);
+      return (sm_object *)sm_new_string(strlen(result), result);
+      break;
+    }
+    case SM_OS_SETENV_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_string *key;
+      sm_string *value;
+      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_OS_SETENV_EXPR))
+        key = (sm_string *)obj0;
+      else
+        return (sm_object *)sms_false;
+      if (expect_type(obj1, 1, SM_STRING_TYPE, SM_OS_SETENV_EXPR))
+        value = (sm_string *)obj1;
+      else
+        return (sm_object *)sms_false;
+      int result = setenv(&key->content, &value->content, 1);
+      return (sm_object *)sm_new_double(result);
+      break;
+    }
     case SM_LS_EXPR: {
       DIR               *dir;
       struct dirent     *entry;

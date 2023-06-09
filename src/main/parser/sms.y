@@ -252,6 +252,8 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> TIME
 %token <expr> SLEEP
 %token <expr> EXEC
+%token <expr> OS_GETENV
+%token <expr> OS_SETENV
 %token <expr> FORK
 %token <expr> WAIT
 %token <expr> ARGS
@@ -407,6 +409,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | TIME '(' ')' { $$ = sm_new_expr_n(SM_TIME_EXPR,0,0);}
 | SLEEP '(' EXPR ')' { $$ = sm_new_expr(SM_SLEEP_EXPR,(sm_object*)$3);}
 | EXEC '(' EXPR ')' { $$ = sm_new_expr(SM_EXEC_EXPR,(sm_object*)$3);}
+| OS_GETENV '(' EXPR ')' { $$ = sm_new_expr(SM_OS_GETENV_EXPR,(sm_object*)$3);}
+| OS_SETENV '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_OS_SETENV_EXPR,(sm_object*)$3,(sm_object*)$5);}
 | FORK '(' ')' { $$ = sm_new_expr_n(SM_FORK_EXPR,0,0);}
 | WAIT '(' ')' { $$ = sm_new_expr_n(SM_WAIT_EXPR,0,0);}
 | LS '(' ')' { $$ = sm_new_expr_n(SM_LS_EXPR,0,0);}
