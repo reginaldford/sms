@@ -114,6 +114,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       else
         return (sm_object *)sms_false;
       char *result = getenv(&key->content);
+      if (!result)
+        return (sm_object *)sms_false;
       return (sm_object *)sm_new_string(strlen(result), result);
       break;
     }
