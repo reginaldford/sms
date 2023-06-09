@@ -11,7 +11,7 @@
 
 
 # Introduction:
-SMS (Symbolic Math System) is a powerful terminal based calculator for POSIX friendly operating systems. SMS has built-in functions for arithmetic operations,trigonometry, algebra, calculus, file access and more. SMS aims to become a simple generl purpose programming language that focuses on mathematics and speed (like Julia). SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
+SMS (Symbolic Math System) is a powerful terminal based calculator for POSIX friendly operating systems. SMS has built-in functions for arithmetic operations,trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language that focuses on mathematics and speed (like Julia, but simpler). SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
 
 # Longer Introduction:
 
@@ -111,31 +111,33 @@ Line comments start with `#`.
 <details>
   <summary>Flow Control</summary>
 
-    1. twice = (x) => 2 * x; # make a function that doubles numbers
+    1. return(x) ; # return this value from a function
 
-    2. quad = (x,a,b,c) => a*x^2+b*x+c; # a quadratic function in x
+    2. twice = (x) => 2 * x; # make a function that doubles numbers
 
-    3. ( command1 ; command2 ; ... ); # called a "then" expression, groups a sequence of commands
+    3. quad = (x,a,b,c) => a*x^2+b*x+c; # a quadratic function in x
 
-    4. if(condition, command); # execute command if true, else return false
+    4. ( command1 ; command2 ; ... ); # called a "then" expression, groups a sequence of commands
 
-    5. if(condition, command1, command2); # if condition evaluates to true, executes command1, else executes command2
+    5. if(condition, command); # execute command if true, else return false
 
-    6. while(condition, statement) # continually repeat statement until condition is false
+    6. if(condition, command1, command2); # if condition evaluates to true, executes command1, else executes command2
 
-    7. doWhile(statement, condition) # Repeating statement until condition is false (checking condition after running statement)
+    7. while(condition, statement) # continually repeat statement until condition is false
 
-    8. map( function, expression ) # return a new array where each element is the result of applying function to the correlating element of the given expression
+    8. doWhile(statement, condition) # Repeating statement until condition is false (checking condition after running statement)
 
-    9. not( boolean ) # if boolean is false, returns true, otherwise, returns false
+    9. map( function, expression ) # return a new array where each element is the result of applying function to the correlating element of the given expression
 
-    10. EXPR or EXPR # returns true of either expression is true, else false
+    10. not( boolean ) # if boolean is false, returns true, otherwise, returns false
 
-    11. EXPR and EXPR # returns true of both expressions are true, else false
+    11. EXPR or EXPR # returns true of either expression is true, else false
 
-    12. exit(n); # quit SMS and return this integer to the OS as the command return value
+    12. EXPR and EXPR # returns true of both expressions are true, else false
 
-    13. :sin(x); # capture any expression with the unary meta operator. Use parens to capture more. 
+    13. exit(n); # quit SMS and return this integer to the OS as the command return value
+
+    14. :sin(x); # capture any expression with the unary meta operator. Use parens to capture more. 
 
 </details>
 <details>
@@ -189,9 +191,9 @@ Line comments start with `#`.
 
     4. array[ i ] = value # Set the ith value of the array. Returns true upon success only
 
-    4. size( array ) # Return the number of elements in the array
+    5. size( array ) # Return the number of elements in the array
 
-    5. size( expr ) # Return the number of arguments in the expression
+    6. size( expr ) # Return the number of arguments in the expression
 
 </details>
 
