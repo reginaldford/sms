@@ -802,9 +802,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_object_to_string(evaluated);
     }
     case SM_EVAL_EXPR: {
-      sm_cx     *where_to_eval = current_cx;
       sm_object *evaluated     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return sm_engine_eval(evaluated, where_to_eval, sf);
+      return sm_engine_eval(evaluated, current_cx, sf);
     }
     case SM_CX_EVAL_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
