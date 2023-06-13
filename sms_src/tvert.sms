@@ -4,7 +4,7 @@
 # Example usage: tvert(35+3/12, :yr, :dy)
 # The above example will convert 35 years and 3 months to days.
 (
-  let tratios = {
+  cxLet(self,:tratios, {
     s = {
       s = 1;
       mn = 0.01666666666666667;
@@ -14,8 +14,8 @@
       mo = 3.802647464006801e-07;
       yr = 3.168876461541279e-08;
     };
-  };
-  let tvert = (x,u1,u2) => 
+  });
+  cxLet(self,:tvert,(x,u1,u2) => 
     if(not(cxGet(tratios.s,u1)) or not(cxGet(tratios.s,u2)),
       putln("Supported units: " str+ toStr(cxKeys(tratios.s))),
       (
@@ -27,5 +27,5 @@
           toStr(value) str+ toStr(u2));
         return(value);
       )
-    );
+  ));
 );

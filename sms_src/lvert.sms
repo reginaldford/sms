@@ -4,7 +4,7 @@
 # Example usage: lvert(5+7/12, :ft, :cm)
 # The above example will convert 5 feet 7 inches into centimeters
 (
-  let lratios = {
+  cxLet(self,:lratios,{
     m = {
       m = 1;
       km = 0.001;
@@ -17,9 +17,9 @@
       mi = 0.000621371192237334;
       nmi = 0.0005399568034557235;
     };
-  };
-  let lvert = (x,u1,u2) =>
-  ( 
+  });
+  cxLet(self,:lvert,(x,u1,u2) =>
+  (
     let lhs = cxKeys(lratios);
     let rhs = cxValues(lratios);
     if(not(cxGet(lratios.m,u1)) or not(cxGet(lratios.m,u2)),
@@ -30,7 +30,6 @@
         putln(toStr(x) str+ toStr(u1) str+ " = " str+
           toStr(value) str+ toStr(u2));
         return(value);
-      )
-    );
-  )
+    ));
+  ));
 );

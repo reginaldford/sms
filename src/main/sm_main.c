@@ -10,7 +10,7 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.170%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.172%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
@@ -61,8 +61,7 @@ void start_repl() {
   }
 }
 
-// If init is true , run file at env.init_fp then exit
-// If init is false, run file at env.script_fp
+// Run the file
 void run_file(char *file_path, sm_env *env) {
   sm_parse_result pr;
   yylineno = 1; // resetting the line count

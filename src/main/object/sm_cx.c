@@ -89,6 +89,8 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
       next_node = sm_node_nth(current_node->children, child_index);
     current_node = (sm_node *)next_node;
   }
+  if (current_node->value)
+    return false;
   current_node->value = (sm_object *)val;
   return true;
 }
@@ -176,5 +178,40 @@ void sm_cx_import(sm_cx *cxFrom, sm_cx *cxTo) {
     sm_string *keyStr  = keySym->name;
     char      *cKeyStr = &keyStr->content;
     sm_cx_let(cxTo, cKeyStr, keyStr->size, sm_expr_get_arg(values, i));
+  }
+}
+
+// If the object has a parent/parent_cx ptr, change it to the provided cx
+// Recurses through expressions
+void sm_cx_contextualize(sm_object *input, sm_cx *cx) {
+  switch (input->my_type) {
+  case SM_CX_TYPE: {
+    sm_cx *input_cx  = (sm_cx *)input;
+    input_cx->parent = cx;
+    break;
+  }
+  case SM_META_TYPE: {
+    sm_meta *input_meta = (sm_meta *)input;
+    input_meta->scope   = cx;
+    break;
+  }
+  case SM_FUN_TYPE: {
+    sm_fun *input_fun = (sm_fun *)input;
+    input_fun->parent = cx;
+    break;
+  }
+  case SM_SELF_TYPE: {
+    sm_self *input_self = (sm_self *)input;
+    input_self->context = cx;
+    break;
+  }
+  case SM_EXPR_TYPE: {
+    sm_expr *input_expr = (sm_expr *)input;
+    if (input_expr->op == SM_BLOCK_EXPR)
+      sm_expr_set_arg(input_expr, 0, (sm_object *)cx);
+    else
+      for (unsigned int i = 0; i < input_expr->size; i++)
+        sm_cx_contextualize(sm_expr_get_arg(input_expr, i), cx);
+  }
   }
 }

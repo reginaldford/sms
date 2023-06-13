@@ -21,7 +21,7 @@
     [cxRm(cx1,:a),true, "cxRm a"],
     [cxGet(cx1,:a),false, "cxGet a"],
     [cxGetFar(cx1,:a),false, "cxGetFar a"],
-    [cxRm(parent(self),:false),true, "cxRm False"],
+    [cxRm(parent(parent(self)),:false),true, "cxRm False"],
     [cxGetFar(self,:false),false, "cxGetFar False"],
     [cxLet(parent(self),:false,:false),true, "cxLet :false :false"],
     [cxGetFar(self,:false),false, "cxLet :false :false"],

@@ -10,6 +10,7 @@ extern sm_heap   *sms_heap;
 extern sm_heap   *sms_other_heap;
 extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
+extern sm_stack  *sms_callstack;
 
 // The engine should return an error if this returns false
 // and the next function will complain about type mismatch,
@@ -977,8 +978,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr        *new_args = (sm_expr *)sm_engine_eval((sm_object *)args, current_cx, sf);
       sm_object      *obj0     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, new_args);
       if (obj0->my_type == SM_FUN_TYPE) {
-        sm_fun    *fun    = (sm_fun *)obj0;
-        sm_object *result = sm_engine_eval(fun->content, fun->parent, new_args);
+        sm_fun *fun = (sm_fun *)obj0;
+        // YOU ARE HERE the parser should build the empty cx for SM_BLOCK expressions
+        // so the function's parent should be this empty cx, keeping lexical scope intact
+        // and the function's parent should be settable
+        // sm_object *result = sm_engine_eval(fun->content, fun->parent, new_args);
+        sm_object *result = sm_engine_eval(fun->content, current_cx, new_args);
         if (result->my_type == SM_RETURN_TYPE)
           return ((sm_return *)result)->address;
         else
@@ -987,16 +992,17 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return obj0;
       break;
     }
-    case SM_THEN_EXPR: {
-      unsigned int i      = 0;
-      sm_object   *result = (sm_object *)sms_true;
+    case SM_BLOCK_EXPR: {
+      unsigned int i        = 1;
+      sm_object   *result   = (sm_object *)sms_true;
+      sm_cx       *inner_cx = (sm_cx *)sm_expr_get_arg(sme, 0);
       while (i + 1 < sme->size) {
-        result = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
+        result = sm_engine_eval(sm_expr_get_arg(sme, i), inner_cx, sf);
         if (result->my_type == SM_RETURN_TYPE)
           return result;
         i++;
       }
-      return sm_engine_eval(sm_expr_get_arg(sme, sme->size - 1), current_cx, sf);
+      return sm_engine_eval(sm_expr_get_arg(sme, sme->size - 1), inner_cx, sf);
       break;
     }
     case SM_ASSIGN_EXPR: {

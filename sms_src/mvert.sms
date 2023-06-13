@@ -4,7 +4,7 @@
 # Example usage: mvert(12, :lbs, :kg)
 # The above example will convert 12 pounds to kilograms
 (
-  let mratios = {
+  cxLet(self,:mratios,{
     kg = {
       kg = 1;
       lbs=2.2046226218487758;
@@ -12,8 +12,8 @@
       oz = 35.273961949580413;
       t = 1e-3;
     };
-  };
-  let mvert = (x,u1,u2) => 
+  });
+  cxLet(self,:mvert, (x,u1,u2) => 
     if(not(cxGet(mratios.kg,u1)) or not(cxGet(mratios.kg,u2)),
       putln("Supported units: " str+ toStr(cxKeys(mratios.kg))),
       (
@@ -25,5 +25,5 @@
           toStr(value) str+ toStr(u2));
         return(value);
       )
-    );
+  ));
 );

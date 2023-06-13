@@ -126,6 +126,8 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
     curr_node       = (sm_node *)sm_node_nth(curr_node->children, child_index);
     char_index++;
   }
+  if (curr_node && !curr_node->value)
+    return false;
   return curr_node;
 }
 

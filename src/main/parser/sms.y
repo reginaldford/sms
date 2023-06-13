@@ -54,8 +54,8 @@ void _lex_cstr(char * cstr,int len);
 %type <expr> TEST_GT
 %type <expr> TEST_LT_EQ
 %type <expr> TEST_GT_EQ
-%type <expr> SEQUENCE
-%type <expr> SEQUENCE_LIST
+%type <expr> BLOCK
+%type <expr> OPEN_BLOCK
 %type <expr> COMMAND
 
 %token SELF
@@ -302,12 +302,12 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | '-' EXPR {
   if (((sm_object *)$2)->my_type == SM_DOUBLE_TYPE) {
     ((sm_double *)$2)->value *= -1;
-    $$ = (sm_expr *)$2;
+    $$ = $2;
   } else {
     $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(-1), (sm_object *)$2);
   }
 }
-| '(' EXPR ')' { $$ = (sm_expr *)$2; }
+| '(' EXPR ')' { $$ = $2; }
 | STRING{}
 | SIN '(' EXPR ')' { $$ = sm_new_expr(SM_SIN_EXPR, (sm_object *)$3); }
 | COS '(' EXPR ')' { $$ = sm_new_expr(SM_COS_EXPR, (sm_object *)$3); }
@@ -351,7 +351,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | TEST_GT{}
 | TEST_LT_EQ{}
 | TEST_GT_EQ{}
-| SEQUENCE {}
+| BLOCK {}
 | EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | SYM '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
@@ -467,11 +467,22 @@ ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(SM_ASSIGN_EXPR, (sm_object *)($1)
 INDEX_ASSIGNMENT : EXPR '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_INDEX_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
 | SYM '[' EXPR ']' '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_INDEX_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($6)); }
 
-SEQUENCE : SEQUENCE_LIST ')' {}
-| SEQUENCE_LIST ';' ')' {}
+BLOCK : OPEN_BLOCK ')' {
+  sm_stack_pop(sm_global_lex_stack(NULL));
+}
+| OPEN_BLOCK ';' ')' {
+  sm_stack_pop(sm_global_lex_stack(NULL));
+}
 
-SEQUENCE_LIST : '(' EXPR ';' EXPR { $$ = sm_new_expr_2(SM_THEN_EXPR, (sm_object *)$2, (sm_object *)$4); }
-| SEQUENCE_LIST ';' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
+OPEN_BLOCK : '(' EXPR ';' EXPR {
+  sm_cx *new_cx    = sm_new_cx(*(sm_global_lex_stack(NULL)->top));
+  sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL), new_cx));
+  // 2 Expressions were already linked to the wrong cx
+  sm_cx_contextualize((sm_object*)$2,new_cx);
+  sm_cx_contextualize((sm_object*)$4,new_cx);
+  $$ = sm_new_expr_3(SM_BLOCK_EXPR,(sm_object*)new_cx, (sm_object *)$2, (sm_object *)$4); 
+}
+| OPEN_BLOCK ';' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
 
 EXPR_LIST : '+' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object *)$3, (sm_object *)$5); }
 | '-' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_MINUS_EXPR, (sm_object *)$3, (sm_object *)$5); }
@@ -579,6 +590,8 @@ CONTEXT_LIST : '{' ASSIGNMENT ';' ASSIGNMENT {
   sm_string        *name2  = ((sm_symbol *)sm_expr_get_arg($4, 0))->name;
   sm_object        *value  = (sm_object *)sm_expr_get_arg($2, 1);
   sm_object        *value2 = (sm_object *)sm_expr_get_arg($4, 1);
+  sm_cx_contextualize(value,new_cx);
+  sm_cx_contextualize(value2,new_cx);
   sm_cx_let(new_cx,&name->content,name->size,value);
   sm_cx_let(new_cx,&name2->content,name2->size,value2);
   sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL), new_cx));
