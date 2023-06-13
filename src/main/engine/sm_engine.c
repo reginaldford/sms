@@ -802,7 +802,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_object_to_string(evaluated);
     }
     case SM_EVAL_EXPR: {
-      sm_object *evaluated     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return sm_engine_eval(evaluated, current_cx, sf);
     }
     case SM_CX_EVAL_EXPR: {
@@ -977,11 +977,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr        *new_args = (sm_expr *)sm_engine_eval((sm_object *)args, current_cx, sf);
       sm_object      *obj0     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, new_args);
       if (obj0->my_type == SM_FUN_TYPE) {
-        sm_fun *fun = (sm_fun *)obj0;
-        // YOU ARE HERE the parser should build the empty cx for SM_BLOCK expressions
-        // so the function's parent should be this empty cx, keeping lexical scope intact
-        // and the function's parent should be settable
-        // sm_object *result = sm_engine_eval(fun->content, fun->parent, new_args);
+        sm_fun    *fun    = (sm_fun *)obj0;
         sm_object *result = sm_engine_eval(fun->content, current_cx, new_args);
         if (result->my_type == SM_RETURN_TYPE)
           return ((sm_return *)result)->address;
