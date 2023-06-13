@@ -87,7 +87,7 @@ struct sm_node *sm_node_rm(struct sm_node *root, struct sm_node *nodeToRemove) {
   return root;
 }
 
-// Insert this node at position specified by where, else return false
+// Insert this node at position specified by int where, else return false
 bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
   struct sm_node *cur = root;
   int             i   = 0;
@@ -102,7 +102,7 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
   return true;
 }
 
-// Returns the number of set bits to the left of map_index'th bit in map
+// Return the number of set bits to the left of map_index'th bit in map
 // Put in 64 for the number of 1 bits in the long long
 int sm_node_map_left_count(unsigned long long map, int bit_index) {
   if (bit_index < 0) {
@@ -181,7 +181,7 @@ sm_node *sm_node_get_container(sm_node *self, char *needle, int len) {
 bool sm_node_is_empty(sm_node *node) { return node->value == NULL && node->map == 0LL; }
 
 
-// Prints all of the key-value pairs in this node recursively
+// Print all of the key-value pairs in this node recursively
 // Uses the stack to recall path to current node, for full key name
 int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack) {
   int cursor = 0;
@@ -309,7 +309,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
   while (map != 0) {
     unsigned long long bit = map & -map; // Get the rightmost set bit using two's complement trick
     int                bit_index = __builtin_ctzll(
-                     bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
+      bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
 
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
