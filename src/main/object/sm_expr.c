@@ -106,7 +106,7 @@ unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum SM_EXPR_T
   unsigned int buffer_pos = 0;
   for (unsigned int i = 0; i + 1 < expr->size; i++) {
     buffer_pos += sm_object_sprint(sm_expr_get_arg(expr, i), &(buffer[buffer_pos]), fake);
-    if (op != SM_THEN_EXPR) {
+    if (op != SM_BLOCK_EXPR) {
       if (!fake)
         buffer[buffer_pos] = ',';
       buffer_pos++;

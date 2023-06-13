@@ -1,10 +1,9 @@
 #!/usr/local/bin/sms -q
 # This program asks the user for how many seconds to wait
 # and then, the program counts that many seconds
-
-put("How many seconds to set on the timer? ");
-	let time_to_wait_str = input();
 (
+  put("How many seconds to set on the timer? ");
+  let time_to_wait_str = input();
 	let time_to_wait=eval(parse(time_to_wait_str));
 	let n = 1;
 	putln("Timer set to " str+ toStr(time_to_wait) str+ " seconds.");
@@ -13,6 +12,7 @@ put("How many seconds to set on the timer? ");
 	  sleep(500);
 	  put(", ");
 	  sleep(500);
-	  n=n+1;));
+	  n=n+1;)
+  );
 	putln("DONE!");
 );
