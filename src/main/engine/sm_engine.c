@@ -928,10 +928,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
 
       // reducing the expression
       sm_object *result = initial;
+      // Evaluating with a reusable stack frame: ( result , current_ob )
+      sm_expr *reusable = sm_new_expr_2(SM_PARAM_LIST_EXPR, result, NULL);
       for (unsigned int i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
-        sm_expr   *new_sf      = sm_new_expr_2(SM_PARAM_LIST_EXPR, result, current_obj);
-        result                 = sm_engine_eval(fun->content, fun->parent, new_sf);
+        sm_expr_set_arg(reusable, 1, current_obj);
+        result = sm_engine_eval(fun->content, fun->parent, reusable);
+        sm_expr_set_arg(reusable, 0, result);
       }
       return result;
     }
