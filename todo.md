@@ -1,3 +1,7 @@
+# expression chapter
+- get op symbol from an xp
+- set op symbol for an xp
+
 # active terminal support
 - This code is being developed in the feature/smartput branch
 - if non-canonical input is supported, we use smartput()
@@ -55,9 +59,6 @@
   - selectAssoc( (x)=>x<5, arr1, arr2, arr3..); # selects the same from arr2, etc.
     - returns arrArr
 
-# reflectivity
-- get op symbol from an expr
-- set op symbol for an expr
 
 # break statement
 - to end a while

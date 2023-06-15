@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+// Globals from sm_global.c
 extern sm_heap   *sms_heap;
 extern sm_heap   *sms_other_heap;
 extern sm_symbol *sms_true;
@@ -904,6 +905,35 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_expr_set_arg(output, i, sm_engine_eval(fun->content, fun->parent, new_sf));
       }
       return (sm_object *)output;
+    }
+    case SM_REDUCE_EXPR: {
+      // expecting a binary function
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_fun    *fun;
+      if (expect_type(obj0, 0, SM_FUN_TYPE, SM_REDUCE_EXPR))
+        fun = (sm_fun *)obj0;
+      else
+        return (sm_object *)sms_false;
+
+      // evaluating the expression to reduce
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_expr   *arr;
+      if (expect_type(obj1, 1, SM_EXPR_TYPE, SM_REDUCE_EXPR))
+        arr = (sm_expr *)obj1;
+      else
+        return (sm_object *)sms_false;
+
+      // initial value for reduction
+      sm_object *initial = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+
+      // reducing the expression
+      sm_object *result = initial;
+      for (unsigned int i = 0; i < arr->size; i++) {
+        sm_object *current_obj = sm_expr_get_arg(arr, i);
+        sm_expr   *new_sf      = sm_new_expr_2(SM_PARAM_LIST_EXPR, result, current_obj);
+        result                 = sm_engine_eval(fun->content, fun->parent, new_sf);
+      }
+      return result;
     }
     case SM_INDEX_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);

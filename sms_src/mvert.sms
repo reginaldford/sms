@@ -4,29 +4,27 @@
 # Example usage: mvert(12, :lbs, :kg)
 # The above example will convert 12 pounds to kilograms
 (
-  let env = {
-    mratios = {
-      kg = {
-        kg = 1;
-        lbs=2.2046226218487758;
-        g = 1e3;
-        oz = 35.273961949580413;
-        t = 1e-3;
-      };
+  let mratios = {
+    kg = {
+      kg = 1;
+      lbs=2.2046226218487758;
+      g = 1e3;
+      oz = 35.273961949580413;
+      t = 1e-3;
     };
-    mvert = (x,u1,u2) => 
-      if(not(cxGet(mratios.kg,u1)) or not(cxGet(mratios.kg,u2)),
-        putln("Supported units: " str+ toStr(cxKeys(mratios.kg))),
-        (
-          let lhs = cxKeys(mratios);
-          let rhs = cxValues(mratios);
-          let normalized = x / cxGet(mratios.kg,u1);
-          let value = normalized * cxGet(mratios.kg,u2);
-          putln(toStr(x) str+ toStr(u1) str+ " = " str+
-            toStr(value) str+ toStr(u2));
-          return(value);
-        )
-    );
   };
-  cxImport(env,parent(self));
+  let mvert = (x,u1,u2) => 
+    if(not(cxGet(mratios.kg,u1)) or not(cxGet(mratios.kg,u2)),
+      putln("Supported units: " str+ toStr(cxKeys(mratios.kg))),
+      (
+        let lhs = cxKeys(mratios);
+        let rhs = cxValues(mratios);
+        let normalized = x / cxGet(mratios.kg,u1);
+        let value = normalized * cxGet(mratios.kg,u2);
+        putln(toStr(x) str+ toStr(u1) str+ " = " str+
+          toStr(value) str+ toStr(u2));
+        return(value);
+      )
+  );
+  cxImport(self,parent(parent(self)));
 );
