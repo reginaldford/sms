@@ -1,30 +1,34 @@
 #!/usr/local/bin/sms -qi
-let vert=(x,u1,u2)=>(
-  # Import the tools for each dimension
-  eval(fileParse("mvert.sms"));
-  eval(fileParse("lvert.sms"));
-  eval(fileParse("tvert.sms"));
-  # This function is the generic tool which finds
-  # a dimension that contains both units u1 and u2
-  # Mass
-  if(cxGet(mratios.kg,u1) and cxGet(mratios.kg,u2),
-    return(mvert(x,u1,u2))
-  );
-  # Length
-  if(cxGet(lratios.m,u1) and cxGet(lratios.m,u2),
-    return(lvert(x,u1,u2))
-  );
-  # Time
-  if(cxGet(tratios.s,u1) and cxGet(tratios.s,u2),
-    return(tvert(x,u1,u2))
-  );
-  # We must've supplied something invalid
-  putln("The following units are allowed:");
-  putln("Mass Units:");
-  putln(toStr(cxKeys(mratios.kg)) str+ "\n");
-  putln("Length Units:");
-  putln(toStr(cxKeys(lratios.m)) str+ "\n");
-  putln("Time Units:");
-  putln(toStr(cxKeys(tratios.s)) str+ "\n");
-  putln("Conversions must remain in the same dimension.");
+
+cxLet(parent(self),:vert,(x,u1,u2)=>(
+    if(not(let first_run = true), first_run=false);
+
+    # Import the tools for each dimension
+    if(first_run,eval(fileParse("mvert.sms")));
+    if(first_run,eval(fileParse("lvert.sms")));
+    if(first_run,eval(fileParse("tvert.sms")));
+    # This function is the generic tool which finds
+    # a dimension that contains both units u1 and u2
+    # Mass
+    if(cxGet(mratios.kg,u1) and cxGet(mratios.kg,u2),
+      return(mvert(x,u1,u2))
+    );
+    # Length
+    if(cxGet(lratios.m,u1) and cxGet(lratios.m,u2),
+      return(lvert(x,u1,u2))
+    );
+    # Time
+    if(cxGet(tratios.s,u1) and cxGet(tratios.s,u2),
+      return(env.tvert(x,u1,u2))
+    );
+    # We must've supplied something invalid
+    putln("The following units are allowed:");
+    putln("Mass Units:");
+    putln(toStr(cxKeys(mratios.kg)) str+ "\n");
+    putln("Length Units:");
+    putln(toStr(cxKeys(lratios.m)) str+ "\n");
+    putln("Time Units:");
+    putln(toStr(cxKeys(tratios.s)) str+ "\n");
+    putln("Conversions must remain in the same dimension.");
+  )
 );
