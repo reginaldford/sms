@@ -371,6 +371,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       return (sm_object *)sms_false;
     }
+    case SM_CX_HAS_EXPR: {
+      sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_HAS_EXPR)) {
+        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_HAS_EXPR)) {
+          sm_object *result = sm_cx_get(cx, &sym->name->content, sym->name->size);
+          if (result)
+            return (sm_object *)sms_true;
+        }
+      }
+      return (sm_object *)sms_false;
+    }
     case SM_CX_GET_FAR_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
@@ -379,6 +391,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           sm_object *result = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
           if (result)
             return result;
+        }
+      }
+      return (sm_object *)sms_false;
+    }
+    case SM_CX_HAS_FAR_EXPR: {
+      sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_GET_FAR_EXPR)) {
+        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR)) {
+          sm_object *result = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
+          if (result)
+            return (sm_object *)sms_true;
         }
       }
       return (sm_object *)sms_false;
