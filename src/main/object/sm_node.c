@@ -309,7 +309,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
   while (map != 0) {
     unsigned long long bit = map & -map; // Get the rightmost set bit using two's complement trick
     int                bit_index = __builtin_ctzll(
-                     bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
+      bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
 
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);

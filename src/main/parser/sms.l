@@ -58,20 +58,20 @@ int          {return INT;}
 if           {return IF;}
 while        {return WHILE;}
 doWhile      {return DO_WHILE;}
-"return"     {return RETURN;}
+return       {return RETURN;}
 eval         {return EVAL;}
 cxEval       {return CX_EVAL;}
 evalFast     {return EVAL_FAST;}
 evalFastInCX {return EVAL_FAST_IN_CX;}
 fails        {return FAILS;}
 parse        {return PARSE;}
-"toStr"      {return TO_STR;}
-"toStrFmt"   {return TO_STRFMT;}
+toStr        {return TO_STR;}
+toStrFmt     {return TO_STRFMT;}
 ==           {return EQEQ;}
 !=           {return NOTEQ;}
 "<="         {return LT_EQ;}
 ">="         {return GT_EQ;}
-"is"         {return IS;}
+is           {return IS;}
 
 not          {return NOT;}
 or           {return OR;}
@@ -93,7 +93,9 @@ newCx        {return NEW_CX;}
 cxDot        {return CX_DOT;}
 cxLet        {return CX_LET;}
 cxGet        {return CX_GET;}
+cxHas        {return CX_HAS;}
 cxGetFar     {return CX_GET_FAR;}
+cxHasFar     {return CX_HAS_FAR;}
 cxContaining {return CX_CONTAINING;}
 cxSet        {return CX_SET;}
 cxRm         {return CX_RM;}
@@ -101,7 +103,7 @@ cxClear      {return CX_CLEAR;}
 cxKeys       {return CX_KEYS;}
 cxValues     {return CX_VALUES;}
 cxSize       {return CX_SIZE;}
-cxImport     {return CX_IMPORT;/*not done*/}
+cxImport     {return CX_IMPORT;}
 cxMap        {return CX_MAP;}
 cxReduce     {return CX_REDUCE;/*not done*/}
 
@@ -172,7 +174,7 @@ symName     {return SYM_NAME;}
 
 newStr      {return NEW_STR;}
 "str\+"     {return STR_CAT;}
-"strRpt"    {return STR_REPEAT;}
+strRpt      {return STR_REPEAT;}
 strEscape   {return STR_ESCAPE;}
 strUnescape {return STR_UNESCAPE;}
 strSize     {return STR_SIZE;}
@@ -192,7 +194,7 @@ numsToMem  {return NUMS_TOMEM;}
 numsToStr  {return NUMS_TOSTR;}
 numsToCsv  {return NUMS_TOSTR;}
 
-meta        {return RUNTIME_META;}
+meta       {return RUNTIME_META;}
 
 dateStr    {return DATE_STR;}
 date       {return DATE;}
@@ -208,6 +210,7 @@ osSetEnv      {return OS_SETENV;}
 pwd          	 {return PWD;}
 ls           	 {return LS;}
 cd           	 {return CD;}
+
 _thisProcess   {return THISPROCESS;}
 _args          {return ARGS;}
 _getOptions    {return GETOPTIONS;}
