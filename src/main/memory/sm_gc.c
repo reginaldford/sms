@@ -2,6 +2,12 @@
 
 #include "../sms.h"
 
+// Copy the object
+sm_object *sm_copy(sm_object *obj) {
+  sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
+  return new_obj;
+}
+
 // Copy the object to the new heap
 // Leave an sm_pointer in the old space
 sm_object *sm_move_to_new_heap(sm_object *obj) {

@@ -194,9 +194,11 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack)
     }
     cursor = sm_stack_size(char_stack);
     // equals sign
-    if (!fake)
-      buffer[cursor] = '=';
-    cursor++;
+    if (!fake) {
+      buffer[cursor]     = '-';
+      buffer[cursor + 1] = '>';
+    }
+    cursor += 2;
     // rhs value
     cursor += sm_object_sprint(node->value, &(buffer[cursor]), fake);
     // semicolon

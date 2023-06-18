@@ -11,6 +11,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <termios.h>
+#include <x86intrin.h>
 
 // These are the major object types of SMS
 // Keep syncronized with function sm_object_type_str

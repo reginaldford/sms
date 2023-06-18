@@ -67,6 +67,8 @@ fails        {return FAILS;}
 parse        {return PARSE;}
 toStr        {return TO_STR;}
 toStrFmt     {return TO_STRFMT;}
+
+"->"         {return ASSOCIATE;}
 ==           {return EQEQ;}
 !=           {return NOTEQ;}
 "<="         {return LT_EQ;}

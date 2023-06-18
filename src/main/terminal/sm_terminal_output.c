@@ -36,22 +36,22 @@ char *sm_terminal_fg_color(sm_terminal_color color) {
   // in a non-color terminal
   static char *nothing_cstr = " \b";
   static char *codes[]      = {
-         "\x1b[30m",   // SM_TERM_BLACK
-         "\x1b[31m",   // SM_TERM_RED
-         "\x1b[32m",   // SM_TERM_GREEN
-         "\x1b[33m",   // SM_TERM_YELLOW
-         "\x1b[34m",   // SM_TERM_BLUE
-         "\x1b[35m",   // SM_TERM_MAGENTA
-         "\x1b[36m",   // SM_TERM_CYAN
-         "\x1b[37m",   // SM_TERM_WHITE
-         "\x1b[30;1m", // SM_TERM_B_BLACK
-         "\x1b[31;1m", // SM_TERM_B_RED
-         "\x1b[32;1m", // SM_TERM_B_GREEN
-         "\x1b[33;1m", // SM_TERM_B_YELLOW
-         "\x1b[34;1m", // SM_TERM_B_BLUE
-         "\x1b[35;1m", // SM_TERM_B_MAGENTA
-         "\x1b[36;1m", // SM_TERM_B_CYAN
-         "\x1b[37;1m"  // SM_TERM_B_WHITE
+    "\x1b[30m",   // SM_TERM_BLACK
+    "\x1b[31m",   // SM_TERM_RED
+    "\x1b[32m",   // SM_TERM_GREEN
+    "\x1b[33m",   // SM_TERM_YELLOW
+    "\x1b[34m",   // SM_TERM_BLUE
+    "\x1b[35m",   // SM_TERM_MAGENTA
+    "\x1b[36m",   // SM_TERM_CYAN
+    "\x1b[37m",   // SM_TERM_WHITE
+    "\x1b[30;1m", // SM_TERM_B_BLACK
+    "\x1b[31;1m", // SM_TERM_B_RED
+    "\x1b[32;1m", // SM_TERM_B_GREEN
+    "\x1b[33;1m", // SM_TERM_B_YELLOW
+    "\x1b[34;1m", // SM_TERM_B_BLUE
+    "\x1b[35;1m", // SM_TERM_B_MAGENTA
+    "\x1b[36;1m", // SM_TERM_B_CYAN
+    "\x1b[37;1m"  // SM_TERM_B_WHITE
   };
 
   if (!sm_terminal_has_color())

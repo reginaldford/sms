@@ -1,11 +1,11 @@
 #!/usr/local/bin/sms -m 1800 
 #Use this to benchmark something
-(
+{
   cxLet(self,:t1,[]);
   cxLet(self,:t2,[]);
   cxLet(self,:time_elapsed,0);
   cxLet(self,:a,0);
-  cxLet(self,:benchmark,(e) => (
+  cxLet(self,:benchmark,(e) => {
     putln("Benchmarking: " str+ toStr(e));
 
     t1 = time();
@@ -15,8 +15,8 @@
     putln("Total time:");
     time_elapsed = 1000 * (t2[0] - t1[0]) +  0.001 * (t2[1] - t1[1]);
     putln(toStr(time_elapsed) str+ " milliseconds")
-  ));
+  });
 
   cxLet(self,:f,(n) => if( n <= 1 , n ,f(n - 1) + f(n - 2)));
   benchmark(:f(30));
-);
+};
