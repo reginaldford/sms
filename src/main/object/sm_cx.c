@@ -89,10 +89,8 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
       next_node = sm_node_nth(current_node->children, child_index);
     current_node = (sm_node *)next_node;
   }
-  if (current_node->value)
-    return false;
   current_node->value = (sm_object *)val;
-  return true;
+  return val;
 }
 
 // We return the last node in the path to the node addressed by needle

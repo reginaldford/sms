@@ -1,23 +1,23 @@
 #!/usr/local/bin/sms -q
 # Simply puts the time every second
 # Just another way to do the same thing
-(
+{
   # Helper function to convert 24hr to 12hr
-  let to_12hr = (str)=>(
+  let to_12hr = (str)=>{
     let n=parse(str);
     if(n>12,
       toStr(n-12),
       toStr(n));
-  );
+  };
 
   # Helper function to compute AM or PM from hour string
-  let am_pm = (str) => (
+  let am_pm = (str) => {
     let n = parse(str);
     if(n>12, "PM", "AM");
-  );
+  };
 
   # Print the time with constant width
-  while(true,(
+  while(true,{
     let arr = strSplit(dateStr()," ");
     let index = 0;
     arr = strSplit(arr[6],":");
@@ -28,5 +28,5 @@
     put(arr[4]);
     putln(" " str+ am_pm(arr[0]));
     sleep(1000);
-  ));
-);
+  });
+};

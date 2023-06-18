@@ -343,7 +343,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_LET_EXPR)) {
         if (sm_cx_let(current_cx, &sym->name->content, sym->name->size, value))
-          return (sm_object *)sms_true;
+          return (sm_object *)value;
       }
       return (sm_object *)sms_false;
     }

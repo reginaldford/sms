@@ -1,12 +1,13 @@
 #!/usr/local/bin/sms -qi
-
-cxLet(parent(self),:vert,(x,u1,u2)=>{
-    # Import the tools for each dimension
-    eval(fileParse("mvert.sms"));
-    eval(fileParse("lvert.sms"));
-    eval(fileParse("tvert.sms"));
-    # This function is the generic tool which finds
-    # a dimension that contains both units u1 and u2
+(
+  # Import the tools for each dimension
+  eval(fileParse("mvert.sms"));
+  eval(fileParse("lvert.sms"));
+  eval(fileParse("tvert.sms"));
+  # This function is the generic tool which finds
+  # a dimension that contains both units u1 and u2
+  cxLet(self,:vert,(x,u1,u2) =>
+  ( 
     # Mass
     if(cxGet(mratios.kg,u1) and cxGet(mratios.kg,u2),
       return(mvert(x,u1,u2))
@@ -28,5 +29,5 @@ cxLet(parent(self),:vert,(x,u1,u2)=>{
     putln("Time Units:");
     putln(toStr(cxKeys(tratios.s)) str+ "\n");
     putln("Conversions must remain in the same dimension.");
-  }
+  ));
 );
