@@ -11,9 +11,9 @@
 
 
 # Introduction:
-SMS (Symbolic Math System) is a powerful terminal based calculator for POSIX friendly operating systems. SMS has built-in functions for arithmetic operations,trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language that focuses on mathematics and speed (like Julia, but simpler). SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
+SMS (Symbolic Math System) is a math-oriented scripting language for POSIX friendly operating systems. SMS has built-in functions for arithmetic, trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language with a focus on mathematics (like Julia, but simpler). SMS is not compiled. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
 
-# Longer Introduction:
+# Details
 
 In addition to providing a command line, SMS can interpret files.
 Run `sms -h` for command line options.
@@ -117,7 +117,7 @@ Line comments start with `#`.
 
     3. quad = (x,a,b,c) => a*x^2+b*x+c; # a quadratic function in x
 
-    4. ( command1 ; command2 ; ... ); # called a "then" expression, groups a sequence of commands
+    4. { command1 ; command2 ; ... }; # A block of commands acts as 1 command
 
     5. if(condition, command); # execute command if true, else return false
 
@@ -315,7 +315,6 @@ This command builds the executable and copies it to /usr/local/bin/sms
 - [x] Copying garbage collector. Allows for the entire program memory to compact itself into a small contiguous block after each command.
 - [x] Lexical scope.
 - [x] SMS command flags allow for running scripts, changing memory heap size, immediate expression evaluation at the command line and more.
-- [x] Useful example sms scripts are located in the sms_src directory.
 - [x] Custom memory heap size can be set from 10 kilobytes to 4 terrabytes.
 - [x] User contexts (objects), which allow for the user to create a new context with values of all types including more contexts.
 - [x] Safe and fast internal string manipulations, with no character counting and no intermediate buffers for expression printing.
@@ -345,3 +344,8 @@ This command builds the executable and copies it to /usr/local/bin/sms
 - [ ] Simple Webserver and networking tools.
 - [ ] A community!
 
+# Contribute:
+- SMS could use a matrix chapter. This would be a set of parsing productions, primitive functions, and printing operations for matrices.
+- SMS could use an llvm-ir emitter
+- SMS could use a networking chapter
+- 
