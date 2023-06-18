@@ -1,10 +1,12 @@
 #!/usr/local/bin/sms -qi
 
 cxLet(parent(self),:vert,(x,u1,u2)=>{
-    # Import the tools for each dimension
-    eval(fileParse("mvert.sms"));
-    eval(fileParse("lvert.sms"));
-    eval(fileParse("tvert.sms"));
+    # Import the tools for each dimension if necessary
+    if(not(cxHasFar(self,:mvert)),{
+      cxEval(parent(self),fileParse("mvert.sms"));
+      cxEval(parent(self),fileParse("lvert.sms"));
+      cxEval(parent(self),fileParse("tvert.sms"));
+    });
     # This function is the generic tool which finds
     # a dimension that contains both units u1 and u2
     # Mass

@@ -1,16 +1,17 @@
 #!/usr/local/bin/sms
+{
+  let userName = "User";
 
-let userName = "User";
+  let adjectives = [
+    "awesome", "nice", "cool", "amazing",
+    "wonderful", "hard working","great",
+    "exciting","skilled","smart","fresh",
+    "special","something else", "on fire", "doing it!"
+  ];
 
-let adjectives = [
-  "awesome", "nice", "cool", "amazing",
-  "wonderful", "hard working","great",
-  "exciting","skilled","smart","fresh",
-  "special","something else", "on fire", "doing it!"
-];
-
-while(true,(
-  let selection = round(random()*(size(adjectives)-1));
-  putln("Hey, " str+ userName str+ ", You're " str+ adjectives[selection]);
-  sleep(2000);
-));
+  while(true,{
+    let selection = round(random()*(size(adjectives)-1));
+    putln("Hey, " str+ userName str+ ", You're " str+ adjectives[selection]);
+    sleep(2000);
+  });
+};
