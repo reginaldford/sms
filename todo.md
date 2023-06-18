@@ -1,3 +1,7 @@
+! fix vert.sms on multiple usages in 1 session
+# single var anonymous func sugar
+- x => x^2;
+
 # expression chapter
 - get op symbol from an xp
 - set op symbol for an xp

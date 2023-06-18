@@ -144,11 +144,11 @@ unsigned int sm_prefix_sprint(sm_expr *expr, char *buffer, bool fake) {
     sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
   unsigned int cursor = sm_global_fn_name_len(expr->op);
   if (!fake)
-    buffer[cursor] = '(';
+    buffer[cursor] = expr->op == SM_BLOCK_EXPR ? '{' : '(';
   cursor++;
   cursor += sm_expr_contents_sprint(expr, &(buffer[cursor]), expr->op, fake);
   if (!fake)
-    buffer[cursor] = ')';
+    buffer[cursor] = expr->op == SM_BLOCK_EXPR ? '}' : ')';
   cursor++;
   return cursor;
 }
