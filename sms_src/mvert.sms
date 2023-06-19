@@ -14,17 +14,16 @@
     };
   };
   let mvert = (x,u1,u2) => 
-    if(not(cxGet(mratios.kg,u1)) or not(cxGet(mratios.kg,u2)),
-      putln("Supported units: " str+ toStr(cxKeys(mratios.kg))),
-      {
-        let lhs = cxKeys(mratios);
-        let rhs = cxValues(mratios);
-        let normalized = x / cxGet(mratios.kg,u1);
-        let value = normalized * cxGet(mratios.kg,u2);
-        putln(toStr(x) str+ toStr(u1) str+ " = " str+
-          toStr(value) str+ toStr(u2));
-        return(value);
-      }
-    );
+    if(not(cxGet(mratios.kg,u1)) or not(cxGet(mratios.kg,u2)))
+      putln("Supported units: " str+ toStr(cxKeys(mratios.kg)))
+    else {
+      let lhs = cxKeys(mratios);
+      let rhs = cxValues(mratios);
+      let normalized = x / cxGet(mratios.kg,u1);
+      let value = normalized * cxGet(mratios.kg,u2);
+      putln(toStr(x) str+ toStr(u1) str+ " = " str+
+      toStr(value) str+ toStr(u2));
+      return(value);
+    };
   cxImport(self,parent(parent(self)));
 };

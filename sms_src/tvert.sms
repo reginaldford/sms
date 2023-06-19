@@ -16,17 +16,17 @@
     };
   };
   let tvert = (x,u1,u2) => 
-    if(not(cxGet(tratios.s,u1)) or not(cxGet(tratios.s,u2)),
-      putln("Supported units: " str+ toStr(cxKeys(tratios.s))),
-      {
-        let lhs = cxKeys(tratios);
-        let rhs = cxValues(tratios);
-        let normalized = x / cxGet(tratios.s,u1);
-        let value = normalized * cxGet(tratios.s,u2);
-        putln(toStr(x) str+ toStr(u1) str+ " = " str+
-          toStr(value) str+ toStr(u2));
-        return(value);
-      }
-    );
+    if(not(cxGet(tratios.s,u1)) or not(cxGet(tratios.s,u2)))
+      putln("Supported units: " str+ toStr(cxKeys(tratios.s)))
+    else
+    {
+      let lhs = cxKeys(tratios);
+      let rhs = cxValues(tratios);
+      let normalized = x / cxGet(tratios.s,u1);
+      let value = normalized * cxGet(tratios.s,u2);
+      putln(toStr(x) str+ toStr(u1) str+ " = " str+
+        toStr(value) str+ toStr(u2));
+      return(value);
+    };
   cxImport(self,parent(parent(self)));
 };

@@ -8,32 +8,31 @@
   let n2=31;
 
   # Recursive definition of fib
-  let fib = (n) => if( n < 2 , 1 ,fib(n - 1) + fib(n - 2));
+  let fib = (n) => if( n < 2  ) 1  else fib(n - 1) + fib(n - 2);
 
   # The program splits into 2 programs here
   let pid1 = osFork();
   let pid2 = false;
 
-  if( pid1 == 0, 
-    putln("Child 1: answer: " str+ toStr(fib(n1))),
-    { pid2 = osFork();
-      if(pid2 == 0, putln("Child 2: answer: " str+ toStr(fib(n2))));
-    }
-  );
+  if( pid1 == 0 )
+    putln("Child 1: answer: " str+ toStr(fib(n1)))
+  else {
+    pid2 = osFork();
+    if(pid2 == 0)
+      putln("Child 2: answer: " str+ toStr(fib(n2)));
+  };
 
-  if( not( pid1 == 0) and not(pid2==0),
-    { putln("Parent: Child 1 has pid " str+ toStr(pid1));
-      putln("Parent: Child 2 has pid " str+ toStr(pid2));
-      let done1 = osWait();
-      putln("Parent: Program with pid " str+ toStr(done1[0]) str+
-        " Completed with Return Code: " str+ toStr(done1[1]));
-    }
-  );
+  if( not( pid1 == 0) and not(pid2==0) )
+  { putln("Parent: Child 1 has pid " str+ toStr(pid1));
+    putln("Parent: Child 2 has pid " str+ toStr(pid2));
+    let done1 = osWait();
+    putln("Parent: Program with pid " str+ toStr(done1[0]) str+
+      " Completed with Return Code: " str+ toStr(done1[1]));
+  };
 
-  if(  not( pid1 == 0) and not(pid2==0) ,
-    { let done2 = osWait();
-      putln("Parent: Program with pid " str+ toStr(done2[0]) str+
-        " Completed with Return Code: " str+ toStr(done2[1]));
-    }
-  );
+  if(  not( pid1 == 0) and not(pid2==0) )
+  { let done2 = osWait();
+    putln("Parent: Program with pid " str+ toStr(done2[0]) str+
+      " Completed with Return Code: " str+ toStr(done2[1]));
+  };
 };

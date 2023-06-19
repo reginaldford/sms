@@ -5,15 +5,16 @@
   # Helper function to convert 24hr to 12hr
   let to_12hr = (str)=>{
     let n=parse(str);
-    if(n>12,
-      toStr(n-12),
-      toStr(n));
+    if(n>12)
+      toStr(n-12)
+    else
+      toStr(n);
   };
 
   # Helper function to compute AM or PM from hour string
   let am_pm = (str) => {
     let n = parse(str);
-    if(n>12, "PM", "AM");
+    if(n>12) "PM" else "AM" ;
   };
 
   # Print the time with constant width
