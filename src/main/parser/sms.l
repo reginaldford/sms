@@ -56,6 +56,7 @@ simp         {return SIMP;}
 int          {return INT;}
 
 if           {return IF;}
+else         {return ELSE;}
 while        {return WHILE;}
 doWhile      {return DO_WHILE;}
 return       {return RETURN;}

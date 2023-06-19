@@ -1,17 +1,17 @@
 #!/usr/local/bin/sms -q
 # Allows the user to guess a hidden random value until they guess correctly
-# Currently needs to be written with a then-block, but this is a temperary workaround
 {
+  seed(time()[1]);
   let answer = round(100*random());
   let user_guess = -1;
   while(not(user_guess==answer), {
     put("Guess the number: ");
     user_guess = parse(input());
-    if(user_guess>answer,
-      put("You guessed too high.\n"));
-    if(user_guess<answer,
-      put("You guessed too low.\n"))
+    if(user_guess>answer)
+      put("You guessed too high.\n")
+    else if(user_guess<answer)
+      put("You guessed too low.\n");
   });
   put("Congratulations! You WON!\n");
-  putln("The answer is: " str+ toStr(answer))
+  putln("The answer is: " str+ toStr(answer));
 };

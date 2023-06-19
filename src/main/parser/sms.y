@@ -114,6 +114,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> INT
 
 %token IF
+%token ELSE
 %token <expr> WHILE
 %token <expr> DO_WHILE
 %token <expr> RETURN
@@ -523,10 +524,10 @@ EQ : EQEQ '(' EXPR ',' EXPR ')' {
 }
 | EXPR EQEQ EXPR { $$ = sm_new_expr_2(SM_EQEQ_EXPR, (sm_object *)($1), (sm_object *)($3)); }
 
-IF_STATEMENT : IF '(' EXPR ',' EXPR ')' {
+IF_STATEMENT : IF '(' EXPR ')' EXPR  {
   $$ = sm_new_expr_2(SM_IF_EXPR, (sm_object *)($3), (sm_object *)($5));
 }
-| IF '(' EXPR ',' EXPR ',' EXPR ')' {
+| IF '(' EXPR ')' EXPR ELSE EXPR {
   $$ = sm_new_expr_3(SM_IF_ELSE_EXPR, (sm_object *)($3), (sm_object *)($5), (sm_object *)($7));
 }
 

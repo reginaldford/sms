@@ -5,11 +5,12 @@
   let list = ls();
   let i=0;
   while(i<size(list[0]),{
-    putln(list[0][i] str+
-      " is a " str+
-      if(list[1][i],
-        "directory",
-        "file") str+ ".");
+    putln(list[0][i] str+ " is a "
+      str+
+        if(list[1][i])
+          "directory"
+        else
+          "file" str+ ".");
     i=i+1
   });
 };

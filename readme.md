@@ -332,6 +332,7 @@ This command builds the executable and copies it to /usr/local/bin/sms
 
 # Plans:
 - [ ] Support for booting from a serialized memory heap.
+- [ ] Support for matices. Inversion, solving, eigenvalues, etc.
 - [ ] 'Last moment' garbage collection.
 - [ ] Tail call optimization.
 - [ ] Modern terminal support
@@ -344,8 +345,6 @@ This command builds the executable and copies it to /usr/local/bin/sms
 - [ ] Simple Webserver and networking tools.
 - [ ] A community!
 
-# Contribute:
-- SMS could use a matrix chapter. This would be a set of parsing productions, primitive functions, and printing operations for matrices.
-- SMS could use an llvm-ir emitter
-- SMS could use a networking chapter
-- 
+# Great Ways to Contribute:
+- If you would like to contribute to this project and to the open source community, you can talk with me or even just clone the repo and come to me with a pull request, for which I can merge your work into a branch etc. It will be lovely when the contributor count is higher than 1. Any of the unchecked things in the plans above is an area welcome for contributions.
+

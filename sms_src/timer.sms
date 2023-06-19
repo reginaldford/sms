@@ -7,7 +7,7 @@
 	let time_to_wait=eval(parse(time_to_wait_str));
 	let n = 1;
 	putln("Timer set to " str+ toStr(time_to_wait) str+ " seconds.");
-	while(n <= time_to_wait,{
+	while(n <= time_to_wait, {
 	  put(toStr(n));
 	  sleep(500);
 	  put(", ");

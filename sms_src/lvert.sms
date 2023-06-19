@@ -22,15 +22,16 @@
   {
     let lhs = cxKeys(lratios);
     let rhs = cxValues(lratios);
-    if(not(cxGet(lratios.m,u1)) or not(cxGet(lratios.m,u2)),
-      putln("Supported units: " str+ toStr(cxKeys(lratios.m))),
-      {
-        let normalized = x / cxGet(lratios.m,u1);
-        let value = normalized * cxGet(lratios.m,u2);
-        putln(toStr(x) str+ toStr(u1) str+ " = " str+
-          toStr(value) str+ toStr(u2));
-        return(value);
-      });
+    if(not(cxGet(lratios.m,u1)) or not(cxGet(lratios.m,u2)))
+      putln("Supported units: " str+ toStr(cxKeys(lratios.m)))
+    else
+    {
+      let normalized = x / cxGet(lratios.m,u1);
+      let value = normalized * cxGet(lratios.m,u2);
+      putln(toStr(x) str+ toStr(u1) str+ " = " str+
+        toStr(value) str+ toStr(u2));
+      return(value);
+    };
   };
   cxImport(self,parent(parent(self)));
 };
