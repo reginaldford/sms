@@ -442,6 +442,12 @@ FUN_INTRO : PARAM_LIST ARROW {
   }
   $$ = new_fun;
 }
+| SYM ARROW {
+  sm_cx * parent_cx = *(sm_global_lex_stack(NULL)->top);
+  sm_fun *new_fun = sm_new_fun(parent_cx,1, (sm_object *)NULL);
+  sm_fun_set_param(new_fun, 0, $1->name, NULL, 0);
+  $$ = new_fun;
+}
 
 PARAM_LIST : '(' ')' {
   $$ = sm_new_expr_n(SM_PARAM_LIST_EXPR, 0, 0);
