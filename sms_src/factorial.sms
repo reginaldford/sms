@@ -5,7 +5,7 @@
   let fac =1;
   let x = 1;
 
-  let factorial=(counter)=>{
+  let factorial= counter => {
     fac = 1;
     while( counter > 0, {
       fac = fac * counter;
