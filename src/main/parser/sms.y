@@ -228,15 +228,17 @@ void _lex_cstr(char * cstr,int len);
 
 %token <expr> NEW_FN
 %token <fun>  ARROW
-%token <expr> FN_XPR
+%token <expr> FN_XP
+%token <expr> FN_SETXP
 %token <expr> FN_PARAMS
+%token <expr> FN_SETPARAMS
 %token <expr> FN_PARENT
 %token <expr> FN_SETPARENT
 
-%token <expr> NEW_XPR
-%token <expr> XPR_OP
-%token <expr> XPR_SETOP
-%token <expr> XPR_OPSTR
+%token <expr> NEW_XP
+%token <expr> XP_OP
+%token <expr> XP_SETOP
+%token <expr> XP_OPSTR
 
 %token <expr> NUMS_TOSTR
 %token <expr> NEW_NUMS
