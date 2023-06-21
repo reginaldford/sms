@@ -26,7 +26,7 @@
       let value = normalized * cxGet(tratios.s,u2);
       putln(toStr(x) str+ toStr(u1) str+ " = " str+
         toStr(value) str+ toStr(u2));
-      return(value);
+      return value;
     };
   cxImport(self,parent(parent(self)));
 };

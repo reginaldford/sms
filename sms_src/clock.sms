@@ -13,7 +13,7 @@
 
   # Print the time with constant width
   let d = false;
-  while(true,{
+  while(true){
     d = date();
     # Convert military time to 12-hr
     put(two_digits(
@@ -27,5 +27,5 @@
     put(two_digits(d[0]));
     putln(" " str+ am_pm_str(d[2]));
     sleep(1000);
-  });
+  };
 };

@@ -12,13 +12,6 @@
   - alt+left, alt+right to go to beginning/end
   - tab completion
 
-# eager eval for cx
-- contexts need eager eval
-
-# unary func notation
-- let a = x => x^2;
-- a x ;
-
 # data structures
 - `let myType = struct({
     age = 5;       # no decimal means int. 64 bits for now
@@ -44,7 +37,6 @@
 - let add=(:x,:y)=> eval(x)+eval(y);
 - allows for literal passing without meta operator
 
-
 # array ops
 - arr+ !! etc for parallel tuple add
 - numArr+ etc for parallel vec add
@@ -58,7 +50,6 @@
     - returns the same kind of array
   - selectAssoc( (x)=>x<5, arr1, arr2, arr3..); # selects the same from arr2, etc.
     - returns arrArr
-
 
 # break statement
 - to end a while

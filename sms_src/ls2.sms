@@ -4,7 +4,7 @@
 {
   let list = ls();
   let i=0;
-  while(i<size(list[0]),{
+  while(i<size(list[0])){
     putln(list[0][i] str+ " is a "
       str+
         if(list[1][i])
@@ -12,5 +12,5 @@
         else
           "file" str+ ".");
     i=i+1
-  });
+  };
 };

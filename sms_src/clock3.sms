@@ -18,7 +18,7 @@
   };
 
   # Print the time with constant width
-  while(true,{
+  while(true){
     let arr = strSplit(dateStr()," ");
     let index = 0;
     arr = strSplit(arr[6],":");
@@ -29,5 +29,5 @@
     put(arr[4]);
     putln(" " str+ am_pm(arr[0]));
     sleep(1000);
-  });
+  };
 };
