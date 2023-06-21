@@ -7,17 +7,17 @@
 
   let factorial= counter => {
     fac = 1;
-    while( counter > 0, {
+    while( counter > 0 ) {
       fac = fac * counter;
       counter = counter -1
-    });
+    };
     fac;
   };
 
-  while(true,{
+  while(true){
     put("Enter x: ");
     x = parse(input());
     putln("The factorial of " str+ toStr(x)  str+ " is " str+
       toStr(factorial(x)));
-  });
+  };
 };

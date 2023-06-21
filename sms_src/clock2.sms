@@ -2,7 +2,7 @@
 #Simply puts the time every second
 
 # Print the time with constant width
-while(true,{
+while(true){
   putln(strPart(dateStr(),11,8));
   sleep(1000);
-});
+};
