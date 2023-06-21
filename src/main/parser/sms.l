@@ -144,17 +144,17 @@ ceil        {return CEIL;}
 
 =>          {return ARROW;}
 newFn       {return NEW_FN;}
-fnXpr       {return FN_XPR;}
-fnSetxpr    {return FN_XPR;}
+fnXp        {return FN_XP;}
+fnSetxp     {return FN_SETXP;}
 fnParams    {return FN_PARAMS;}
-fnSetparams {return FN_PARAMS;}
+fnSetparams {return FN_SETPARAMS;}
 fnParent    {return FN_PARENT;}
 fnSetparent {return FN_SETPARENT;}
 
-newXpr     {return NEW_XPR;}
-xprOp      {return XPR_OP;}
-xprSetop   {return XPR_SETOP;}
-xprOpstr   {return XPR_OPSTR;}
+newXp       {return NEW_XP;}
+xpOp        {return XP_OP;}
+xpSetop     {return XP_SETOP;}
+xpOpstr     {return XP_OPSTR;}
 
 newMem     {return NEW_MEM;}
 memSet     {return MEM_SET;}
