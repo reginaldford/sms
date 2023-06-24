@@ -529,12 +529,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)fun->content;
       else
         return (sm_object *)sms_false;
-      return (sm_object *)sms_false;
     }
     case SM_FN_SETXP_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETXP_EXPR)) {
-        fun->content = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+        fun->content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+        return fun->content;
       }
       return (sm_object *)sms_false;
     }
@@ -573,6 +573,24 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       return (sm_object *)sms_false;
     } break;
+    case SM_FN_PARENT_EXPR: {
+      sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARENT_EXPR))
+        return (sm_object *)fun->parent;
+      else
+        return (sm_object *)sms_false;
+    }
+    case SM_FN_SETPARENT_EXPR: {
+      sm_fun *fun        = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_cx  *new_parent = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETPARENT_EXPR)) {
+        if (expect_type((sm_object *)new_parent, 1, SM_CX_TYPE, SM_FN_SETPARENT_EXPR)) {
+          fun->parent = new_parent;
+          return (sm_object *)new_parent;
+        }
+      }
+      return (sm_object *)sms_false;
+    }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str0;
@@ -1101,7 +1119,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (expect_type(obj0, 0, SM_SYMBOL_TYPE, SM_ASSIGN_EXPR)) {
         sym = (sm_symbol *)obj0;
         if (sm_cx_set(current_cx, &sym->name->content, sym->name->size, value))
-          return (sm_object *)sms_true;
+          return value;
       }
       return (sm_object *)sms_false;
     }

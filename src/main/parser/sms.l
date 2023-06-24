@@ -145,11 +145,11 @@ ceil        {return CEIL;}
 =>          {return ARROW;}
 newFn       {return NEW_FN;}
 fnXp        {return FN_XP;}
-fnSetxp     {return FN_SETXP;}
+fnSetXp     {return FN_SETXP;}
 fnParams    {return FN_PARAMS;}
 fnSetParams {return FN_SETPARAMS;}
 fnParent    {return FN_PARENT;}
-fnSetparent {return FN_SETPARENT;}
+fnSetParent {return FN_SETPARENT;}
 
 newXp       {return NEW_XP;}
 xpOp        {return XP_OP;}
