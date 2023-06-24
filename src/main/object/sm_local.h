@@ -9,4 +9,5 @@ typedef struct sm_local {
 
 sm_local    *sm_new_local(unsigned short int index, sm_string *name);
 sm_object   *sm_localize(sm_object *obj, sm_fun *fun);
+sm_object   *sm_unlocalize(sm_object *obj, sm_fun *fun);
 unsigned int sm_local_sprint(sm_local *l, char *buffer, bool fake);

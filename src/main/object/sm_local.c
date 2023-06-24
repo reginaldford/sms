@@ -15,7 +15,12 @@ sm_local *sm_new_local(unsigned short int index, sm_string *name) {
 // Else, return -1
 int sym_matches_param(sm_symbol *sym, sm_fun *fun) {
   for (unsigned short int i = 0; i < fun->num_params; i++) {
-    if (strcmp(&(sm_fun_get_param(fun, i)->name->content), &(sym->name->content)) == 0)
+    sm_fun_param *param       = sm_fun_get_param(fun, i);
+    sm_string    *param_str   = param->name;
+    char         *param_cstr  = &param_str->content;
+    sm_string    *symbol_str  = sym->name;
+    char         *symbol_cstr = &symbol_str->content;
+    if (strcmp(param_cstr, symbol_cstr) == 0)
       return i;
   }
   return -1;
@@ -44,6 +49,28 @@ sm_object *sm_localize(sm_object *obj, sm_fun *fun) {
     int        which_param = sym_matches_param(sym, fun);
     if (which_param != -1)
       return (sm_object *)sm_new_local(which_param, sym->name);
+  }
+  return obj;
+}
+
+// Replace local variables with symbol references in the expression
+sm_object *sm_unlocalize(sm_object *obj, sm_fun *fun) {
+  if (obj->my_type == SM_EXPR_TYPE) {
+    sm_expr *sme = (sm_expr *)obj;
+    if (sme->op == SM_ASSIGN_LOCAL_EXPR) {
+      sme->op         = SM_ASSIGN_EXPR;
+      sm_local *local = (sm_local *)sm_expr_get_arg(sme, 0);
+      return (sm_object *)sm_new_symbol(local->name);
+    }
+    for (unsigned int i = 0; i < sme->size; i++) {
+      sm_object *current_obj   = sm_expr_get_arg(sme, i);
+      sm_object *processed_obj = sm_unlocalize(current_obj, fun);
+      sm_expr_set_arg(sme, i, processed_obj);
+    }
+  } else if (obj->my_type == SM_LOCAL_TYPE) {
+    sm_local  *local  = (sm_local *)obj;
+    sm_symbol *symbol = sm_new_symbol(local->name);
+    return (sm_object *)symbol;
   }
   return obj;
 }
