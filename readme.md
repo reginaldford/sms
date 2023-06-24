@@ -11,7 +11,7 @@
 
 
 # Introduction:
-SMS (Symbolic Math System) is a math-oriented scripting language for POSIX friendly operating systems. SMS has built-in functions for arithmetic, trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language with a focus on mathematics (like Julia, but simpler). SMS is not compiled. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
+SMS (Symbolic Math System) is a math-focused scripting language for POSIX friendly operating systems. SMS has built-in functions for arithmetic, trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language with a focus on mathematics (like Julia). SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
 
 # Details
 
@@ -111,7 +111,7 @@ Line comments start with `#`.
 <details>
   <summary>Flow Control</summary>
 
-    1. return(x) ; # return this value from a function
+    1. return x ; # return this value from a function
 
     2. twice = (x) => 2 * x; # make a function that doubles numbers
 
@@ -119,13 +119,13 @@ Line comments start with `#`.
 
     4. { command1 ; command2 ; ... }; # A block of commands acts as 1 command
 
-    5. if(condition, command); # execute command if true, else return false
+    5. if(condition) command; # execute command if true, else return false
 
-    6. if(condition, command1, command2); # if condition evaluates to true, executes command1, else executes command2
+    6. if(condition) command1 else command2; # if condition evaluates to true, executes command1, else executes command2
 
-    7. while(condition, statement) # continually repeat statement until condition is false
+    7. while(condition) statement # continually repeat statement until condition is false
 
-    8. doWhile(statement, condition) # Repeating statement until condition is false (checking condition after running statement)
+    8. doWhile ( condition ) statement # Repeating statement until condition is false (checking condition after running statement)
 
     9. map( function, expression ) # return a new array where each element is the result of applying function to the correlating element of the given expression
 

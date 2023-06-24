@@ -523,6 +523,56 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       return (sm_object *)sms_false;
     }
+    case SM_FN_XP_EXPR: {
+      sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_XP_EXPR))
+        return (sm_object *)fun->content;
+      else
+        return (sm_object *)sms_false;
+      return (sm_object *)sms_false;
+    }
+    case SM_FN_SETXP_EXPR: {
+      sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETXP_EXPR)) {
+        fun->content = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      }
+      return (sm_object *)sms_false;
+    }
+    case SM_FN_PARAMS_EXPR: {
+      sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARAMS_EXPR)) {
+        sm_expr *result = sm_new_expr_n(SM_PARAM_LIST_EXPR, fun->num_params, fun->num_params);
+        for (unsigned int i = 0; i < fun->num_params; i++) {
+          sm_string *fn_name = sm_fun_get_param(fun, i)->name;
+          sm_expr_set_arg(result, i, (sm_object *)sm_new_symbol(fn_name));
+        }
+        return (sm_object *)result;
+      }
+      return (sm_object *)sms_false;
+    } break;
+    case SM_FN_SETPARAMS_EXPR: {
+      sm_fun  *fun    = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_expr *params = (sm_expr *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETPARAMS_EXPR)) {
+        if (expect_type((sm_object *)params, 1, SM_EXPR_TYPE, SM_FN_SETPARAMS_EXPR)) {
+          sm_fun *new_fun = sm_new_fun(fun->parent, fun->num_params, fun->content);
+          // Setting the parameters of a new function
+          for (unsigned int i = 0; i < params->size; i++) {
+            sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(params, i);
+            if (expect_type((sm_object *)sym, i, SM_SYMBOL_TYPE, SM_FN_SETPARAMS_EXPR)) {
+              sm_fun_set_param(new_fun, i, sym->name, NULL, 0);
+            } else
+              break;
+          }
+          // Relocalizing the AST
+          new_fun->content    = sm_unlocalize(new_fun->content, new_fun);
+          new_fun->num_params = params->size;
+          new_fun->content    = sm_localize(new_fun->content, new_fun);
+          return (sm_object *)new_fun;
+        }
+      }
+      return (sm_object *)sms_false;
+    } break;
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str0;
@@ -602,7 +652,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       else
         return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
-
       // obtain the content to write
       sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_string *content_str;
@@ -611,8 +660,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       else
         return (sm_object *)sms_false;
       char *content_cstr = &(content_str->content);
-
-      FILE *fptr = fopen(fname_cstr, "w");
+      FILE *fptr         = fopen(fname_cstr, "w");
       // check that file can be opened for writing
       if (fptr == NULL) {
         printf("fileWriteStr failed to open: %s\n", fname_cstr);
@@ -631,7 +679,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       else
         return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
-
       // obtain the content to write
       sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_string *content_str;
@@ -640,8 +687,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       else
         return (sm_object *)sms_false;
       char *content_cstr = &(content_str->content);
-
-      FILE *fptr = fopen(fname_cstr, "a");
+      FILE *fptr         = fopen(fname_cstr, "a");
       // check that file can be opened for writing
       if (fptr == NULL) {
         printf("fileAppendStr failed to open for appending: %s\n", fname_cstr);
@@ -681,22 +727,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       else
         return (sm_object *)sms_false;
       char *fname_cstr = &(fname_str->content);
-
-      evaluated = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      evaluated        = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_double *start_pos;
       if (expect_type(evaluated, 1, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
         start_pos = (sm_double *)evaluated;
       else
         return (sm_object *)sms_false;
-
       evaluated = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       sm_double *length;
       if (expect_type(evaluated, 2, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
         length = (sm_double *)evaluated;
       else
         return (sm_object *)sms_false;
-
-
       if (access(fname_cstr, F_OK) != 0) {
         printf("filePart failed because the file, %s ,does not exist.\n", fname_cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -733,7 +775,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       fclose(file);
       return (sm_object *)sms_true;
     }
-
     case SM_FILE_RM_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
@@ -748,7 +789,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         printf("fileRm failed: Could not rm file: %s\n", fname_cstr);
         return (sm_object *)sms_false;
       }
-
       return (sm_object *)sms_true;
     }
     case SM_FILE_STAT_EXPR: {
@@ -938,7 +978,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         fun = (sm_fun *)obj0;
       else
         return (sm_object *)sms_false;
-
       // evaluating the expression to reduce
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_expr   *arr;
@@ -946,10 +985,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         arr = (sm_expr *)obj1;
       else
         return (sm_object *)sms_false;
-
       // initial value for reduction
       sm_object *initial = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
-
       // reducing the expression
       sm_object *result = initial;
       // Evaluating with a reusable stack frame: ( result , current_ob )
@@ -1096,7 +1133,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_expr_set_arg(sf, lcl->index, value);
       } else
         return (sm_object *)sms_false;
-      return (sm_object *)sms_true;
+      return value;
       break;
     }
     case SM_ASSIGN_INDEX_EXPR: {
@@ -1244,7 +1281,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       printf("atan is not implemented yet.\n");
       return (sm_object *)sm_new_double((num0->value));
     }
-
     case SM_SEC_EXPR: {
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *num0;
