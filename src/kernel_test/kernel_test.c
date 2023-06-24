@@ -58,7 +58,7 @@ int main(int num_args, char **argv) {
   CHAPTER(chapter_3(chosen_test));
 
   if (num_fails == 0) {
-    printf("\nAll tests passed!\n");
+    printf("\nKernel tests passed!\n");
   } else {
     printf("\n%i tests failed.\n", num_fails);
   }

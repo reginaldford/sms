@@ -163,7 +163,7 @@ int perform_test_subchapter(unsigned int chapter, unsigned int subchapter, int t
     printf("Subchapter: %i out of range (max acceptable value is: %i).\n", subchapter,
            num_subchapters(chapter) - 1);
   } else {
-    sm_init(NULL);
+    sm_init(NULL, 0, NULL);
     char buf[64];
     int  len = 0;
     if (subchapter != 0)

@@ -4,7 +4,7 @@
 // Generating many objects and then collecting the garbage.
 int chapter_1(int test) {
   int num_fails = 0;
-  sm_init(NULL);
+  sm_init(NULL, 0, NULL);
   printf("Generating 100 empty contexts.\n");
   for (int i = 0; i < 100; i++)
     sm_new_cx(NULL);

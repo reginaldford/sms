@@ -10,15 +10,15 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.173%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.174%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
-void check_init(sm_env *env) {
+void check_init(sm_env *env, int num_args, char **argv) {
   if (env->initialized == false) {
     if (env->quiet_mode == false)
       print_intro();
-    sm_init(env);
+    sm_init(env, num_args, argv);
     env->initialized = true;
     sm_global_environment(env);
   }
@@ -26,9 +26,8 @@ void check_init(sm_env *env) {
 
 // Proper way to exit
 void clean_exit(sm_env *env, int code) {
-  if (env->initialized == true) {
+  if (env->initialized == true)
     sm_signal_exit(code);
-  }
   exit(code);
 }
 
@@ -77,20 +76,10 @@ void run_file(char *file_path, sm_env *env) {
 
 // Main function uses getopt from unistd.h
 int main(int num_args, char *argv[]) {
-  static struct sm_env env;
-  env.script_fp[0]  = '\0';
-  env.script_fp_len = 0;
-  env.eval_cmd[0]   = '\0';
-  env.eval_cmd_len  = 0;
-  env.gc            = true;
-  env.print_stats   = true;
-  env.mem_mbytes    = 50.0;
-  env.initialized   = false;
-  env.quiet_mode    = false;
-
-  opterr = 0; // Disable error messages for unknown options
+  static struct sm_env env; // global environment structure
+  opterr = 0;               // Disable error messages for unknown options
   int opt;
-  while ((opt = getopt(num_args, argv, "qhm:e:s:i:")) != -1) {
+  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:")) != -1) {
     switch (opt) {
     case 'h':
       printf("SMS Help\n");
@@ -102,10 +91,12 @@ int main(int num_args, char *argv[]) {
       printf("-e Print the evaluation of an expression.    sms -e \"2*sin(PI/4)\"\n");
       printf("-s Run Script file.                          sms -s script.sms\n");
       printf("-i Run a file, then start the REPL.          sms -i script.sms\n");
+      printf("-c Custom argument. Accessed via _args       sms -c \"a single string\"\n");
       printf("\nIf the -m flag is used, it must be first.  sms -m 4 -s x1.sms -i x2.sms\n");
       printf("Some flags can be repeated and all flags are executed in order.\n");
       clean_exit(&env, 0);
       break;
+
     case 'q':
       env.quiet_mode = true;
       break;
@@ -116,7 +107,7 @@ int main(int num_args, char *argv[]) {
       }
       env.mem_flag = true;
       const char *valid_values =
-        "Value must be in the range 0.01 to 4000000 inclusively (in Megabytes)";
+        "Value must be in the range 0.01 to 4000000 inclusively (Units are Megabytes)";
       long unsigned int i = 0;
       for (; i < strlen(optarg); i++) {
         env.mem_str[i] = optarg[i];
@@ -148,9 +139,9 @@ int main(int num_args, char *argv[]) {
       env.eval_cmd[optarg_len++] = ';';
       env.eval_cmd[optarg_len++] = '\0';
       env.eval_cmd_len           = optarg_len;
-      check_init(&env);
+      check_init(&env, num_args, argv);
       if (env.quiet_mode == false)
-        printf("Evaluating: %s.\n", env.eval_cmd);
+        printf("Evaluating: %s.\n", optarg);
       sm_parse_result pr = sm_parse_cstr(env.eval_cmd, env.eval_cmd_len);
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i\n", pr.return_val);
@@ -169,16 +160,16 @@ int main(int num_args, char *argv[]) {
     }
     case 's':
       sm_strncpy(&(env.script_fp[0]), optarg, strlen(optarg));
-      check_init(&env);
+      check_init(&env, num_args, argv);
       if (env.quiet_mode == false)
-        printf("Running: %s... \n", env.script_fp);
+        printf("Running: %s... \n", optarg);
       run_file(optarg, &env);
       break;
     case 'i':
-      sm_strncpy(&(env.script_fp[0]), optarg, strlen(optarg));
-      check_init(&env);
+      sm_strncpy(env.script_fp, optarg, strlen(optarg));
+      check_init(&env, num_args, argv);
       if (env.quiet_mode == false)
-        printf("Loading: %s... \n", env.script_fp);
+        printf("Loading: %s... \n", optarg);
       run_file(optarg, &env);
       start_repl();
       break;
@@ -201,12 +192,12 @@ int main(int num_args, char *argv[]) {
   if (optind < num_args) {
     char *input_file = argv[optind];
     sm_strncpy(&(env.script_fp[0]), input_file, strlen(input_file));
-    check_init(&env);
+    check_init(&env, num_args, argv);
     if (env.quiet_mode == false)
       printf("Running: %s... \n", env.script_fp);
     run_file(input_file, &env);
   } else if (env.initialized == false) {
-    check_init(&env);
+    check_init(&env, num_args, argv);
     start_repl();
   }
   clean_exit(&env, 0);
