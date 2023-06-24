@@ -6,7 +6,7 @@ int chapter_3(int test) {
   int num_fails = 0;
   if (test != -1)
     printf("This chapter does not take a test number.\n");
-  sm_init(NULL);
+  sm_init(NULL, 0, NULL);
 
   sm_cx *test_parent_cx = sm_new_cx(NULL);
   sm_cx *test_cx        = sm_new_cx(test_parent_cx);

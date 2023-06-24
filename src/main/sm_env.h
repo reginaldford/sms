@@ -16,4 +16,6 @@ typedef struct sm_env {
   bool   print_stats;
   bool   initialized;
   bool   quiet_mode;
+  int    num_args;
+  char **args;
 } sm_env;

@@ -4,16 +4,27 @@
 
 extern sm_heap *sms_heap;
 
-void sm_init(sm_env *env) {
+void sm_init(sm_env *env, int num_args, char **argv) {
+  // Default (inner) environment variables
+  double mem_mbytes = 50; // 50 default heap size
+  if (env) {
+    env->script_fp[0]  = '\0';
+    env->script_fp_len = 0;
+    env->eval_cmd[0]   = '\0';
+    env->eval_cmd_len  = 0;
+    env->gc            = true;
+    env->print_stats   = true;
+    env->mem_mbytes    = mem_mbytes;
+    env->initialized   = false;
+    env->quiet_mode    = false;
+    env->num_args      = num_args;
+    env->args          = argv;
+  }
+
   // Register the signal handler
   sm_register_signals();
 
   // Initialize the current memory heap
-  double mem_mbytes = 50;
-  if (env != NULL)
-    mem_mbytes = env->mem_mbytes;
-
-  // Start with half of the heap size allocated.
   // During first gc, a second heap of the same size will be allocated.
   sms_heap = sm_new_heap(mem_mbytes * 1024 * 1024 / 2);
 
@@ -26,7 +37,14 @@ void sm_init(sm_env *env) {
   // Build the global context's parent
   sm_cx *parent_cx = sm_new_cx(NULL);
   sm_cx_let(parent_cx, "PI", 2, (sm_object *)sm_new_double(3.14159265358979323846));
-
+  // Add program args if available
+  if (env) {
+    sm_expr *args = sm_new_expr_n(SM_ARRAY_EXPR, env->num_args, env->num_args);
+    for (int i = 0; i < env->num_args; i++) {
+      sm_expr_set_arg(args, i, (sm_object *)sm_new_string(strlen(env->args[i]), env->args[i]));
+    }
+    sm_cx_let(parent_cx, "_args", 5, (sm_object *)args);
+  }
   // true singleton
   sm_symbol *true_sym = sm_new_symbol_manual(sm_new_string(4, "true"));
   sm_cx_let(parent_cx, "true", 4, (sm_object *)true_sym);

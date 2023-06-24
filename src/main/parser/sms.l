@@ -215,7 +215,6 @@ ls           	 {return LS;}
 cd           	 {return CD;}
 
 _thisProcess   {return THISPROCESS;}
-_args          {return ARGS;}
 _getOptions    {return GETOPTIONS;}
 _setOptions    {return SETOPTIONS;}
 _resetOptions  {return RESETOPTIONS;}
