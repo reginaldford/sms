@@ -494,13 +494,11 @@ BLOCK : OPEN_BLOCK '}' {
   sm_stack_pop(sm_global_lex_stack(NULL));
 }
 
-OPEN_BLOCK : '{' EXPR ';' EXPR {
+OPEN_BLOCK : '{' EXPR {
   sm_cx * new_cx = sm_new_cx((sm_cx*)*sm_global_lex_stack(NULL)->top);
-  // 2 Expressions were already linked to the wrong cx
   sm_cx_contextualize((sm_object*)$2,new_cx);
-  sm_cx_contextualize((sm_object*)$4,new_cx);
   sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL), new_cx));
-  $$ = sm_new_expr_3(SM_BLOCK_EXPR,(sm_object*)new_cx, (sm_object *)$2, (sm_object *)$4); 
+  $$ = sm_new_expr_2(SM_BLOCK_EXPR,(sm_object*)new_cx, (sm_object *)$2); 
 }
 | OPEN_BLOCK ';' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
 

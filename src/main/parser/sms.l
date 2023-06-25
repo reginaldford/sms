@@ -245,7 +245,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
 \"([^"\\]|\\.)*\" {
   // Text after the first quotation will be at &(yytext[1])
   // We also have string length yyleng-2, for trimming quotes.
-  char *text = &(yytext[1]) ;
+  char *text = &(yytext[1]);
 
   // Replace the escape codes in place
   int i = 0;       // Index during the scan of input string
@@ -259,31 +259,40 @@ _mem_checkFile {return MEM_CHECKFILE;}
           break;
         case 't':
           text[final_i] = '\t';
-         break;
+          break;
         case 'r':
           text[final_i] = '\r';
-         break;
+          break;
         case '\\':
-         text[final_i] = '\\';
-         break;
+          text[final_i] = '\\';
+          break;
         case '"':
-         text[final_i] = '\"';
-         break;
-        default: // Unrecognized escape. backslash as default
-         text[final_i] = '\\';
-         break;
+          text[final_i] = '\"';
+          break;
+        case 'x': {
+          // Hex escape code
+          char hex[3] = {text[i + 2], text[i + 3], '\0'};
+          int value = (int)strtol(hex, NULL, 16);
+          text[final_i] = (char)value;
+          i += 2;
+          break;
         }
-        i += 2;  // Skip the escape code
-      } else {
-        // Pass through regular characters
-        text[final_i] = text[i];
-        i ++;
+        default: // Unrecognized escape. backslash as default
+          text[final_i] = '\\';
+          break;
       }
-    final_i ++;
+      i += 2; // Skip the escape code
+    } else {
+      // Pass through regular characters
+      text[final_i] = text[i];
+      i++;
+    }
+    final_i++;
   }
-    yylval.str = sm_new_string(final_i,text);
-    return STRING;
-  }
+  yylval.str = sm_new_string(final_i, text);
+  return STRING;
+}
+
 
 
 %%
