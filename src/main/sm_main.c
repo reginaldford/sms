@@ -77,7 +77,8 @@ void run_file(char *file_path, sm_env *env) {
 // Main function uses getopt from unistd.h
 int main(int num_args, char *argv[]) {
   static struct sm_env env; // global environment structure
-  opterr = 0;               // Disable error messages for unknown options
+  env.initialized = false;
+  opterr          = 0; // Disable error messages for unknown options
   int opt;
   while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:")) != -1) {
     switch (opt) {
@@ -112,7 +113,7 @@ int main(int num_args, char *argv[]) {
       for (; i < strlen(optarg); i++) {
         env.mem_str[i] = optarg[i];
       }
-      env.mem_mbytes = atof(env.mem_str);
+      env.mem_mbytes = atof(optarg);
       if (env.mem_mbytes < 0.01 || env.mem_mbytes > 1000 * 4000) {
         printf("Invalid memory heap size: %s\n", env.mem_str);
         printf("%s\n", valid_values);
@@ -142,7 +143,7 @@ int main(int num_args, char *argv[]) {
       check_init(&env, num_args, argv);
       if (env.quiet_mode == false)
         printf("Evaluating: %s.\n", optarg);
-      sm_parse_result pr = sm_parse_cstr(env.eval_cmd, env.eval_cmd_len);
+      sm_parse_result pr = sm_parse_cstr(optarg, optarg_len);
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i\n", pr.return_val);
         clean_exit(&env, 1);
@@ -194,7 +195,7 @@ int main(int num_args, char *argv[]) {
     sm_strncpy(&(env.script_fp[0]), input_file, strlen(input_file));
     check_init(&env, num_args, argv);
     if (env.quiet_mode == false)
-      printf("Running: %s... \n", env.script_fp);
+      printf("Running: %s... \n", input_file);
     run_file(input_file, &env);
   } else if (env.initialized == false) {
     check_init(&env, num_args, argv);

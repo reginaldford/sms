@@ -46,7 +46,6 @@ void _lex_cstr(char * cstr,int len);
 %type <context> CONTEXT
 %type <context> CONTEXT_LIST
 %type <expr> EXPR
-%type <expr> EXPR_LIST
 %type <expr> ARRAY
 %type <expr> ARRAY_LIST
 %type <expr> EQ
@@ -343,7 +342,6 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | SIMP '(' EXPR ')' { $$ = sm_new_expr(SM_SIMP_EXPR, (sm_object *)$3); }
 | MAP '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_MAP_EXPR,(sm_object*)$3,(sm_object*)$5); }
 | REDUCE '(' EXPR ',' EXPR ',' EXPR  ')' { $$ = sm_new_expr_3(SM_REDUCE_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7); }
-| EXPR_LIST ')' {}
 | CONTEXT{}
 | ARRAY{}
 | META_EXPR{}
@@ -505,13 +503,6 @@ OPEN_BLOCK : '{' EXPR ';' EXPR {
   $$ = sm_new_expr_3(SM_BLOCK_EXPR,(sm_object*)new_cx, (sm_object *)$2, (sm_object *)$4); 
 }
 | OPEN_BLOCK ';' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
-
-EXPR_LIST : '+' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object *)$3, (sm_object *)$5); }
-| '-' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_MINUS_EXPR, (sm_object *)$3, (sm_object *)$5); }
-| '*' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$3, (sm_object *)$5); }
-| '/' '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$3, (sm_object *)$5); }
-| STR_CAT '(' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$3, (sm_object *)$5); }
-| EXPR_LIST ',' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
 
 TEST_LT : '<' '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(SM_LT_EXPR, (sm_object *)($3), (sm_object *)($5));

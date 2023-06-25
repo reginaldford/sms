@@ -6,20 +6,21 @@ extern sm_heap *sms_heap;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Default (inner) environment variables
-  double mem_mbytes = 50; // 50 default heap size
-  if (env) {
-    env->script_fp[0]  = '\0';
-    env->script_fp_len = 0;
-    env->eval_cmd[0]   = '\0';
-    env->eval_cmd_len  = 0;
-    env->gc            = true;
-    env->print_stats   = true;
-    env->mem_mbytes    = mem_mbytes;
-    env->initialized   = false;
-    env->quiet_mode    = false;
-    env->num_args      = num_args;
-    env->args          = argv;
-  }
+  int mem_mbytes     = 50;
+  env->script_fp[0]  = '\0';
+  env->script_fp_len = 0;
+  env->eval_cmd[0]   = '\0';
+  env->eval_cmd_len  = 0;
+  env->gc            = true;
+  env->print_stats   = true;
+  env->initialized   = false;
+  env->quiet_mode    = false;
+  env->num_args      = num_args;
+  env->args          = argv;
+  if (env->mem_flag)
+    mem_mbytes = env->mem_mbytes; // mem_mbytes overrides
+  else
+    env->mem_mbytes = mem_mbytes;
 
   // Register the signal handler
   sm_register_signals();

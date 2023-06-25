@@ -1176,52 +1176,44 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sms_false;
     }
     case SM_PLUS_EXPR: {
-      double sum = 0;
-      for (unsigned int i = 0; i < sme->size; i++) {
-        sm_object *current_obj = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_PLUS_EXPR))
-          sum += ((sm_double *)current_obj)->value;
-        else
-          return (sm_object *)sms_false;
+      sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
+        if (expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
+          return (sm_object *)sm_new_double(obj0->value + obj1->value);
+        }
       }
-      return (sm_object *)sm_new_double(sum);
+      return (sm_object *)sms_false;
     }
     case SM_MINUS_EXPR: {
-      sm_object *a = sm_expr_get_arg(sme, 0);
-      a            = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      double sum   = ((sm_double *)a)->value;
-      for (unsigned int i = 1; i < sme->size; i++) {
-        sm_object *current_obj = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_MINUS_EXPR))
-          sum -= ((sm_double *)current_obj)->value;
-        else
-          return (sm_object *)sms_false;
+      sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_MINUS_EXPR)) {
+        if (expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_MINUS_EXPR)) {
+          return (sm_object *)sm_new_double(obj0->value - obj1->value);
+        }
       }
-      return (sm_object *)sm_new_double(sum);
+      return (sm_object *)sms_false;
     }
     case SM_TIMES_EXPR: {
-      double product =
-        ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf))->value;
-      for (unsigned int i = 1; i < sme->size; i++) {
-        sm_object *current_obj = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_TIMES_EXPR))
-          product *= ((sm_double *)current_obj)->value;
-        else
-          return (sm_object *)sms_false;
+      sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_TIMES_EXPR)) {
+        if (expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_TIMES_EXPR)) {
+          return (sm_object *)sm_new_double(obj0->value * obj1->value);
+        }
       }
-      return (sm_object *)sm_new_double(product);
+      return (sm_object *)sms_false;
     }
     case SM_DIVIDE_EXPR: {
-      double quotient =
-        ((sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf))->value;
-      for (unsigned int i = 1; i < sme->size; i++) {
-        sm_object *current_obj = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        if (expect_type(current_obj, i, SM_DOUBLE_TYPE, SM_DIVIDE_EXPR))
-          quotient /= ((sm_double *)current_obj)->value;
-        else
-          return (sm_object *)sms_false;
+      sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_DIVIDE_EXPR)) {
+        if (expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_DIVIDE_EXPR)) {
+          return (sm_object *)sm_new_double(obj0->value / obj1->value);
+        }
       }
-      return (sm_object *)sm_new_double(quotient);
+      return (sm_object *)sms_false;
     }
     case SM_POW_EXPR: {
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
