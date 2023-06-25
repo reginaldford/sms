@@ -1572,8 +1572,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     if (sr)
       return sr;
     else {
-      // should return error object
-      printf("Could not find variable: %s\n", &(var_name->content));
+      sm_string *base_str = sm_object_to_string((sm_object *)current_cx);
+      printf("Error: Could not find variable: %s within %s\n", &(var_name->content),
+             &(base_str->content));
       return (sm_object *)sm_new_double(0);
     }
   }
