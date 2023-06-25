@@ -30,9 +30,9 @@ The following is 'hello world' in SMS:
 
 `putln("Hello world!");`
 
-SMS versions have 2 significant figures (like 0.170) during a milestone point. During these versions, development focuses on documentation, unit tests, and bugs.
+SMS versions have 2 significant figures (like 0.180) during a milestone point. During these versions, development focuses on documentation, unit tests, and bugs.
 
-SMS versions with 3 significant figures (like 0.171) are in feature development, so they may lack documentation for new features, and might have unannounced changes to existing features, are are generally less stable than the milestone versions. This readme is only syncronized with the last milestone version.
+SMS versions with 3 significant figures (like 0.181) are in feature development, so they may lack documentation for new features, and might have unannounced changes to existing features, are are generally less stable than the milestone versions. This readme is only syncronized with the last milestone version.
 
 
 # Cheat Sheet
