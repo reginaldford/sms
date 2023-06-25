@@ -4,8 +4,10 @@
 // Since the sms_test system only checks that to_string(evaluated)==to_string(literal)
 // Proving that literals print to what they should to verify expression printing mechanics.
 int chapter_2(int test) {
-  int num_fails = 0;
-  sm_init(NULL, 0, NULL);
+  int           num_fails = 0;
+  static sm_env env;
+  env.mem_flag = false;
+  sm_init(&env, 0, NULL);
   unsigned short int num_fns = sm_global_num_fns();
   for (unsigned short int i = 0; i < num_fns; i++) {
     char        *op_name   = sm_global_fn_name(i);

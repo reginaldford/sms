@@ -6,12 +6,14 @@ int chapter_3(int test) {
   int num_fails = 0;
   if (test != -1)
     printf("This chapter does not take a test number.\n");
-  sm_init(NULL, 0, NULL);
+
+  sm_env env;
+  env.mem_flag = false;
+  sm_init(&env, 0, NULL);
 
   sm_cx *test_parent_cx = sm_new_cx(NULL);
   sm_cx *test_cx        = sm_new_cx(test_parent_cx);
 
-  sm_cx_let(test_parent_cx, "PI", 2, (sm_object *)sm_new_double(3.14));
   sm_cx_let(test_parent_cx, "a", 1, (sm_object *)sm_new_double(1));
   sm_cx_let(test_parent_cx, "b", 1, (sm_object *)sm_new_double(2));
   sm_cx_let(test_parent_cx, "ab", 2, (sm_object *)sm_new_double(3));
