@@ -45,49 +45,41 @@ Line comments start with `#`.
 
     1. a + b ; # Add two numbers
 
-    2. +( a, b, c) ; # 2 or more numbers can be added with prefix notation
+    2. a * b ; # Mulitply two numbers
 
-    3. a * b ; # Mulitply two numbers
+    3. a - b ; # Subtract two numbers
 
-    4. *( a, b, ..); # Multiply 2 or more numbers
+    4. a / b ; # Divide a by b
 
-    5. a - b ; # Subtract two numbers
+    5. a ^ b; # Raise a to the power of b
 
-    6. -(a,b...) ; # Substract remaining numbers from the first
+    6. sin(x); cos(x); tan(x); # Trig functions
 
-    7. a / b ; # Divide a by b
+    7. sinh(x); cosh(x); tanh(x); # Hyperbolic trig functions
 
-    8. /(a,b,...) # Divide a by b, then divide by remaining numbers
+    8. sec(x); csc(x); cot(x); # Inverse trig funtions
 
-    9. a ^ b; # Raise a to the power of b
+    9. sech(x); csch(x); coth(x); # Inverse hyperbolic trig functions
 
-    10. sin(x); cos(x); tan(x); # Trig functions
+    10. abs(x); # Return the absolute value of x
 
-    11. sinh(x); cosh(x); tanh(x); # Hyperbolic trig functions
+    11. exp(x); # Euler's number, raised to the power of x
 
-    12. sec(x); csc(x); cot(x); # Inverse trig funtions
+    12. ln(x); # Natural log of x
 
-    13. sech(x); csch(x); coth(x); # Inverse hyperbolic trig functions
+    13. log(b,x); # Log, base b of x
 
-    14. abs(x); # Return the absolute value of x
+    14. sqrt(x); # Square root of x
 
-    15. exp(x); # Euler's number, raised to the power of x
+    15. random(); # Generate a random number from 0 to 1
 
-    16. ln(x); # Natural log of x
+    16. round(); # Nearest integer
 
-    16. log(b,x); # Log, base b of x
+    17. seed(number); # Seed the random generator based on an integer
 
-    17. sqrt(x); # Square root of x
+    18. diff(:sin(x),:x); # Return the derivative of sin(x) with respect to x
 
-    18. random(); # Generate a random number from 0 to 1
-
-    19. round(); # Nearest integer
-
-    20. seed(number); # Seed the random generator based on an integer
-
-    21. diff(:sin(x),:x); # Return the derivative of sin(x) with respect to x
-
-    22. simp(:expr); # Attempt to simplify the given expression
+    19. simp(:expr); # Attempt to simplify the given expression
 
 </details>
 
@@ -153,31 +145,31 @@ Line comments start with `#`.
 
     5. context.var1; # Retreive the value of a specific variable from the context
 
-    5. context.var1 = value; # Set the value of a specific variable from the context
+    6. context.var1 = value; # Set the value of a specific variable from the context
 
-    6. parent(context); # Return the parent scope of the provided context
+    7. parent(context); # Return the parent scope of the provided context
 
-    7. cxLet(cx,:x,value); # A way to create a new variable in a context or just set it to a new value
+    8. cxLet(cx,:x,value); # A way to create a new variable in a context or just set it to a new value
 
-    8. cxSet(cx,:x,value); # A way to set cx.x=value for a context cx or return false
+    9. cxSet(cx,:x,value); # A way to set cx.x=value for a context cx or return false
 
-    9. cxGet(cx,:x); # Get a value associated with the given key, or return false
+    10. cxGet(cx,:x); # Get a value associated with the given key, or return false
 
-    10. cxGetFar(cx,:x,value); # Get the value, searching to higher scopes in the search
+    11. cxGetFar(cx,:x,value); # Get the value, searching to higher scopes in the search
 
-    11. cxSize(cx); # Return the number of entries in this context
+    12. cxSize(cx); # Return the number of entries in this context
 
-    12. cxValues(cx); # Return an array with the values of the context
+    13. cxValues(cx); # Return an array with the values of the context
 
-    13. cxKeys(cx); # Return an array with the keys of the context
+    14. cxKeys(cx); # Return an array with the keys of the context
 
-    14. cxDot(cx,:symbol); # Return this variable from this context
+    15. cxDot(cx,:symbol); # Return this variable from this context
 
-    15. cxContaining(cx,:key); # Returns the context which contains :key, by looking at cx and its ancetry
+    16. cxContaining(cx,:key); # Returns the context which contains :key, by looking at cx and its ancetry
 
-    16. cxRm(cx, :var); # Remove this entry from the context
+    17. cxRm(cx, :var); # Remove this entry from the context
 
-    17. cxImport(cx1, cx2); # import the key/value pairs from cx1 into cx2. Overwrites existing key values
+    18. cxImport(cx1, cx2); # import the key/value pairs from cx1 into cx2. Overwrites existing key values
 </details>
 
 <details>
