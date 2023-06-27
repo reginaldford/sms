@@ -197,6 +197,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> ROUND
 %token <expr> FLOOR
 %token <expr> CEIL
+%token <expr> MOD
 %token <expr> LT
 %token <expr> GT
 %token <expr> LT_EQ
@@ -408,6 +409,9 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | RANDOM  '(' ')' { $$ = sm_new_expr_n(SM_RANDOM_EXPR,0,0);}
 | SEED  '(' EXPR ')' { $$ = sm_new_expr(SM_SEED_EXPR,(sm_object*)$3);}
 | ROUND '(' EXPR ')' { $$ = sm_new_expr(SM_ROUND_EXPR,(sm_object*)$3);}
+| CEIL '(' EXPR ')' { $$ = sm_new_expr(SM_CEIL_EXPR,(sm_object*)$3);}
+| MOD '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_MOD_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| FLOOR '(' EXPR ')' { $$ = sm_new_expr(SM_FLOOR_EXPR,(sm_object*)$3);}
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3);}
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR AND EXPR   { $$ = sm_new_expr_2(SM_AND_EXPR,(sm_object*)$1,(sm_object*)$3);}
