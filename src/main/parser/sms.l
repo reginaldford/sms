@@ -141,6 +141,7 @@ seed        {return SEED;}
 round       {return ROUND;}
 floor       {return FLOOR;}
 ceil        {return CEIL;}
+mod         {return MOD;}
 
 =>          {return ARROW;}
 newFn       {return NEW_FN;}

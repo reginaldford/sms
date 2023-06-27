@@ -645,6 +645,38 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       int    floor_val = val > 0 ? val + 0.5 : val - 0.5;
       return (sm_object *)sm_new_double(floor_val);
     }
+    case SM_FLOOR_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *number;
+      if (expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_FLOOR_EXPR))
+        number = (sm_double *)obj0;
+      else
+        return (sm_object *)sm_new_string(0, "");
+      double val = number->value;
+      return (sm_object *)sm_new_double(floor(val));
+    }
+    case SM_CEIL_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_double *number;
+      if (expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_CEIL_EXPR))
+        number = (sm_double *)obj0;
+      else
+        return (sm_object *)sm_new_string(0, "");
+      double val = number->value;
+      return (sm_object *)sm_new_double(ceil(val));
+    }
+    case SM_MOD_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_MOD_EXPR)) {
+        sm_double *num0 = (sm_double *)obj0;
+        if (expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_MOD_EXPR)) {
+          sm_double *num1 = (sm_double *)obj1;
+          return (sm_object *)sm_new_double(fmod(num0->value, num1->value));
+        }
+      }
+      return (sm_object *)sms_false;
+    }
     case SM_RANDOM_EXPR: {
       return (sm_object *)sm_new_double(((double)rand()) / ((double)RAND_MAX));
     }
@@ -678,13 +710,19 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       else
         return (sm_object *)sms_false;
       char *content_cstr = &(content_str->content);
-      FILE *fptr         = fopen(fname_cstr, "w");
+      FILE *fptr         = fopen(fname_cstr, "wb");
       // check that file can be opened for writing
       if (fptr == NULL) {
-        printf("fileWriteStr failed to open: %s\n", fname_cstr);
+        printf("fileWrite failed to open: %s\n", fname_cstr);
         return (sm_object *)sms_false;
       }
-      fprintf(fptr, "%s", content_cstr);
+      const int CHUNK_SIZE = 128;
+      fwrite(content_cstr, CHUNK_SIZE, content_str->size / CHUNK_SIZE, fptr);
+      if (fmod(content_str->size, CHUNK_SIZE)) {
+        unsigned int cursor = (content_str->size / CHUNK_SIZE) * CHUNK_SIZE;
+        fwrite(&content_cstr[cursor], 1, content_str->size - cursor, fptr);
+      }
+
       fclose(fptr);
       return (sm_object *)sms_true;
     }
