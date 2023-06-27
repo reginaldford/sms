@@ -1128,7 +1128,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object      *obj0     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, new_args);
       if (obj0->my_type == SM_FUN_TYPE) {
         sm_fun    *fun    = (sm_fun *)obj0;
-        sm_object *result = sm_engine_eval(fun->content, current_cx, new_args);
+        sm_object *result = sm_engine_eval(fun->content, fun->parent, new_args);
         if (result->my_type == SM_RETURN_TYPE)
           return ((sm_return *)result)->address;
         else
