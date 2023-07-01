@@ -28,5 +28,5 @@
         toStr(value) str+ toStr(u2));
       return value;
     };
-  cxImport(self,parent(parent(self)));
+  cxImport(self,_scratch);
 };

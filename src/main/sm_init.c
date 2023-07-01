@@ -57,5 +57,9 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   sms_false = false_sym;
 
   // Initialize the global context
-  sm_stack_push(sm_global_lex_stack(NULL), sm_new_cx(parent_cx));
+  sm_cx *scratch = sm_new_cx(parent_cx);
+  sm_stack_push(sm_global_lex_stack(NULL), scratch);
+
+  // _scratch global cx variable
+  sm_cx_let(parent_cx, "_scratch", 8, (sm_object *)scratch);
 }
