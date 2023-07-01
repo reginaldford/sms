@@ -33,5 +33,5 @@
       return value ;
     };
   };
-  cxImport(self,parent(parent(self)));
+  cxImport(self,_scratch);
 };

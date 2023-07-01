@@ -45,7 +45,7 @@ Line comments start with `#`.
 
     1. a + b ; # Add two numbers
 
-    2. a * b ; # Mulitply two numbers
+    2. a * b ; # Multiply two numbers
 
     3. a - b ; # Subtract two numbers
 
@@ -73,9 +73,9 @@ Line comments start with `#`.
 
     15. random(); # Generate a random number from 0 to 1
 
-    16. round(); # Nearest integer
+    16. seed(number); # Seed the random generator based on an integer
 
-    17. seed(number); # Seed the random generator based on an integer
+    17. round(); # Nearest integer
 
     18. diff(:sin(x),:x); # Return the derivative of sin(x) with respect to x
 
@@ -141,7 +141,7 @@ Line comments start with `#`.
 
     3. var = value; # searches for var in this context, then up the parent path, and if found, sets to value, else a new variable is created in the current context.
 
-    4. let context = { var1 = value1; var2 = value2 }; # builds a context with 2 variables and saves it under the variable 'context'
+    4. let context = { var1 -> value1; var2 -> value2 }; # builds a context with 2 variables and saves it under the variable 'context'
 
     5. context.var1; # Retreive the value of a specific variable from the context
 
@@ -328,7 +328,6 @@ This command builds the executable and copies it to /usr/local/bin/sms
 - [ ] 'Last moment' garbage collection.
 - [ ] Tail call optimization.
 - [ ] Modern terminal support
-- [ ] Try/Catch error syntax.
 - [ ] Dynamic heap size, with min, max, and max_emptiness specs.
 - [ ] An integral command for taking integrals.
 - [ ] Arbitrary precision support.

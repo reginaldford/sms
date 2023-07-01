@@ -293,7 +293,7 @@ COMMAND : EXPR ';' {
   YYACCEPT;
 }
 | error  { YYABORT; return 4; }
-| DONE      { YYACCEPT;}
+| DONE      { YYACCEPT; }
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->top)); }
 | EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3);  }

@@ -1,3 +1,34 @@
+# full silence with -q, for pipes
+
+# precedence issue: 
+{let x= let y=5;
+  {
+    let f=(x,y)=>{ return x + y + parent(self).x + parent(self).y};
+  }
+}
+should work
+
+# strSize/strCapacity
+
+# osExec alternative where the output is returned as a string
+
+# bytes and byte ops
+- sm_mem object
+- m
+- \x00 etc
+- &
+- ||
+- <<, >>
+- 
+
+# Use -v <n> for verbosity level, no more -q
+
+# add semicolon for convenience for parse cmds
+
+# cx
+- cxSetParent
+- save and load
+
 # expression chapter
 - get op symbol from an xp
 - set op symbol for an xp

@@ -22,5 +22,5 @@
       n
     else
       f(n - 1) + f(n - 2);
-  benchmark(:f(30));
+  benchmark(:f(31));
 };
