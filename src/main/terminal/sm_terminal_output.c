@@ -7,7 +7,8 @@ extern int yylineno;
 
 // Print the prompt
 void sm_terminal_print_prompt() {
-  putc('\n', stdout);
+  if (yylineno > 1)
+    putc('\n', stdout);
   printf("%s", sm_terminal_fg_color(SM_TERM_B_GREEN));
   printf("%i", yylineno);
   putc('>', stdout);
