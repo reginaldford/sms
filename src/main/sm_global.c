@@ -15,18 +15,16 @@ The following globals use functions f(x):
 This allows us to use a breakpoint or printf to detect reads/writes to the global.
 */
 
-// tracking number of garbage collections
-// instead of NULL, use 0
+// Tracking number of garbage collections
 int sm_gc_count(int increase) {
   static int gc_count = 0;
   gc_count += increase;
   return gc_count;
 }
 
+// New capacity of arrays that need to grow:
 // Replacement is ignored if less than 1.
-// New capacity assumes this increment:
-// new_cap = old_cap * growth_factor + 1;
-// Lowest possible value for replacement setting is 1.
+// new_capacity = old_capacity * growth_factor + 1;
 double sm_global_growth_factor(double replacement) {
   static double factor = 1.25;
   if (replacement >= 1.0) {
@@ -74,7 +72,7 @@ unsigned short int sm_global_type_name_len(unsigned short int which) {
   return response_len[which];
 }
 
-// primitive_names. read only
+// Primitive_names
 char *sm_global_fn_name(unsigned short int which) {
   const unsigned short int num_functions = sm_global_num_fns();
   // Should be syncronized with enum SM_EXPR_TYPE
@@ -281,7 +279,7 @@ unsigned int sm_global_num_fns() {
   return num_fns;
 }
 
-// This makes the bison parser globally accessible
+// Bison parser output
 sm_object *sm_global_parser_output(sm_object *replacement) {
   static sm_object *parser_output;
   if (replacement != NULL) {
@@ -292,13 +290,13 @@ sm_object *sm_global_parser_output(sm_object *replacement) {
     return parser_output;
 }
 
-// Options from the command line arguments
+// Environment structure
 sm_env *sm_global_environment(sm_env *replacement) {
-  static sm_env *options;
+  static sm_env *environment;
   if (replacement != NULL) {
-    sm_env *temp = options;
-    options      = replacement;
+    sm_env *temp = environment;
+    environment  = replacement;
     return temp;
   } else
-    return options;
+    return environment;
 }

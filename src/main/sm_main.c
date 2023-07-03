@@ -76,9 +76,8 @@ void run_file(char *file_path, sm_env *env) {
 
 // Main function uses getopt from unistd.h
 int main(int num_args, char *argv[]) {
-  static struct sm_env env; // global environment structure
-  env.initialized = false;
-  opterr          = 0; // Disable error messages for unknown options
+  static struct sm_env env = {0}; // global environment structure
+  opterr                   = 0;   // Disable error messages for unknown options
   int opt;
   while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:")) != -1) {
     switch (opt) {
@@ -109,8 +108,7 @@ int main(int num_args, char *argv[]) {
       env.mem_flag = true;
       const char *valid_values =
         "Value must be in the range 0.01 to 4000000 inclusively (Units are Megabytes)";
-      long unsigned int i = 0;
-      for (; i < strlen(optarg); i++) {
+      for (long unsigned int i = 0; i < strlen(optarg); i++) {
         env.mem_str[i] = optarg[i];
       }
       env.mem_mbytes = atof(optarg);
@@ -162,8 +160,6 @@ int main(int num_args, char *argv[]) {
     case 's':
       sm_strncpy(&(env.script_fp[0]), optarg, strlen(optarg));
       check_init(&env, num_args, argv);
-      if (env.quiet_mode == false)
-        printf("Running: %s... \n", optarg);
       run_file(optarg, &env);
       break;
     case 'i':
@@ -190,14 +186,12 @@ int main(int num_args, char *argv[]) {
       break;
     }
   }
-  if (optind < num_args) {
+  if (optind < num_args) { // Assuming the last arg is a filename
     char *input_file = argv[optind];
     sm_strncpy(&(env.script_fp[0]), input_file, strlen(input_file));
     check_init(&env, num_args, argv);
-    if (env.quiet_mode == false)
-      printf("Running: %s... \n", input_file);
     run_file(input_file, &env);
-  } else if (env.initialized == false) {
+  } else if (env.initialized == false) { // No filename provided
     check_init(&env, num_args, argv);
     start_repl();
   }
