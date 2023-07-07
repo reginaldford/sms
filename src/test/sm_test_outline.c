@@ -21,7 +21,7 @@ test_outline *parse_test_outline(char *filepath) {
   sm_strncpy(result_outline->test_zone_path, filepath, strlen(filepath));
   sm_env env;
   env.mem_flag = false;
-  sm_init(&env, 0, NULL);
+  sm_init(&env, 0, NULL, true);
   printf("Parsing test outline file: %s ...\n", filepath);
   sm_parse_result pr = sm_parse_file(filepath);
   if (pr.return_val != 0) {

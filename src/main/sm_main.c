@@ -10,16 +10,15 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.18%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.181%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
-void check_init(sm_env *env, int num_args, char **argv) {
+void check_init(sm_env *env, int num_args, char **argv, bool quiet) {
   if (env->initialized == false) {
-    if (env->quiet_mode == false)
+    if (quiet == false)
       print_intro();
-    sm_init(env, num_args, argv);
-    env->initialized = true;
+    sm_init(env, num_args, argv, quiet);
     sm_global_environment(env);
   }
 }
@@ -96,9 +95,8 @@ int main(int num_args, char *argv[]) {
       printf("Some flags can be repeated and all flags are executed in order.\n");
       clean_exit(&env, 0);
       break;
-
     case 'q':
-      env.quiet_mode = true;
+      check_init(&env, num_args, argv, true);
       break;
     case 'm': {
       if (env.mem_flag) {
@@ -134,14 +132,14 @@ int main(int num_args, char *argv[]) {
     }
     case 'e': {
       int optarg_len = strlen(optarg);
-      sm_strncpy(&(env.eval_cmd[0]), optarg, optarg_len);
+      check_init(&env, num_args, argv, false);
+      sm_strncpy(env.eval_cmd, optarg, optarg_len);
       env.eval_cmd[optarg_len++] = ';';
       env.eval_cmd[optarg_len++] = '\0';
       env.eval_cmd_len           = optarg_len;
-      check_init(&env, num_args, argv);
       if (env.quiet_mode == false)
-        printf("Evaluating: %s.\n", optarg);
-      sm_parse_result pr = sm_parse_cstr(optarg, optarg_len);
+        printf("parsing: %s\n", env.eval_cmd);
+      sm_parse_result pr = sm_parse_cstr(env.eval_cmd, env.eval_cmd_len);
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i\n", pr.return_val);
         clean_exit(&env, 1);
@@ -158,13 +156,13 @@ int main(int num_args, char *argv[]) {
       break;
     }
     case 's':
+      check_init(&env, num_args, argv, false);
       sm_strncpy(&(env.script_fp[0]), optarg, strlen(optarg));
-      check_init(&env, num_args, argv);
       run_file(optarg, &env);
       break;
     case 'i':
+      check_init(&env, num_args, argv, false);
       sm_strncpy(env.script_fp, optarg, strlen(optarg));
-      check_init(&env, num_args, argv);
       if (env.quiet_mode == false)
         printf("Loading: %s... \n", optarg);
       run_file(optarg, &env);
@@ -188,11 +186,11 @@ int main(int num_args, char *argv[]) {
   }
   if (optind < num_args) { // Assuming the last arg is a filename
     char *input_file = argv[optind];
+    check_init(&env, num_args, argv, false);
     sm_strncpy(&(env.script_fp[0]), input_file, strlen(input_file));
-    check_init(&env, num_args, argv);
     run_file(input_file, &env);
   } else if (env.initialized == false) { // No filename provided
-    check_init(&env, num_args, argv);
+    check_init(&env, num_args, argv, false);
     start_repl();
   }
   clean_exit(&env, 0);
