@@ -4,7 +4,7 @@
 
 extern sm_heap *sms_heap;
 
-void sm_init(sm_env *env, int num_args, char **argv) {
+void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
   // Default (inner) environment variables
   int mem_mbytes     = 50;
   env->script_fp[0]  = '\0';
@@ -13,10 +13,10 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   env->eval_cmd_len  = 0;
   env->gc            = true;
   env->print_stats   = true;
-  env->initialized   = false;
-  env->quiet_mode    = false;
   env->num_args      = num_args;
   env->args          = argv;
+  env->quiet_mode    = quiet;
+
   if (env->mem_flag)
     mem_mbytes = env->mem_mbytes; // mem_mbytes overrides
   else
@@ -62,4 +62,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
 
   // _scratch global cx variable
   sm_cx_let(parent_cx, "_scratch", 8, (sm_object *)scratch);
+
+  // Done
+  env->initialized = true;
 }

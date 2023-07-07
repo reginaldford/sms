@@ -165,7 +165,7 @@ int perform_test_subchapter(unsigned int chapter, unsigned int subchapter, int t
   } else {
     sm_env env;
     env.mem_flag = false;
-    sm_init(&env, 0, NULL);
+    sm_init(&env, 0, NULL, true);
     char buf[64];
     int  len = 0;
     if (subchapter != 0)
