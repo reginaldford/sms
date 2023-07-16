@@ -1110,13 +1110,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *evaluated0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *evaluated1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_symbol *sym1;
-      if (expect_type(evaluated1, 0, SM_SYMBOL_TYPE, SM_DIFF_EXPR))
+      if (expect_type(evaluated1, 1, SM_SYMBOL_TYPE, SM_DIFF_EXPR))
         sym1 = (sm_symbol *)evaluated1;
       else
         return (sm_object *)sms_false;
       sm_object *result = sm_diff(evaluated0, sym1);
-      result            = sm_simplify(result);
-      return result;
+      return sm_simplify(result);
     }
     case SM_SIMP_EXPR: {
       sm_object *evaluated0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);

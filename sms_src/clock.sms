@@ -15,6 +15,8 @@
   let d = false;
   while(true){
     d = date();
+    # Clear the screen
+    osExec("clear");
     # Convert military time to 12-hr
     put(two_digits(
       if(d[2]>12)
