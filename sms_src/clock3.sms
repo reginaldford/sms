@@ -22,6 +22,7 @@
     let arr = strSplit(dateStr()," ");
     let index = 0;
     arr = strSplit(arr[6],":");
+    osExec("clear");
     put(to_12hr(arr[0]));
     put(":");
     put(arr[2]);
