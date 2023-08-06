@@ -99,7 +99,7 @@ bool sm_is_infix(enum SM_EXPR_TYPE op) {
   }
 }
 
-// Print to string buffer the comma/semicolon sepearted list
+// Print to string buffer the comma/semicolon separated list
 unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum SM_EXPR_TYPE op, bool fake) {
   if (expr->size == 0)
     return 0;
@@ -150,6 +150,56 @@ unsigned int sm_prefix_sprint(sm_expr *expr, char *buffer, bool fake) {
   if (!fake)
     buffer[cursor] = expr->op == SM_BLOCK_EXPR ? '}' : ')';
   cursor++;
+  return cursor;
+}
+
+// Print description of conditional expression to buffer
+// Works with if, while and doWhile expressions
+unsigned int sm_ifwhile_sprint(sm_expr *expr, char *buffer, bool fake) {
+  if (!fake)
+    sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+  unsigned int cursor = sm_global_fn_name_len(expr->op);
+
+  if (!fake)
+    buffer[cursor] ='(';
+  cursor++;
+
+  cursor+=sm_object_sprint(sm_expr_get_arg(expr,0), &(buffer[cursor]), fake);
+
+  if (!fake)
+    buffer[cursor] = ')';
+  cursor++;
+
+  cursor += sm_object_sprint(sm_expr_get_arg(expr,1), &(buffer[cursor]), fake);
+  
+  return cursor;
+}
+
+// Print description of ifelse expression to buffer
+unsigned int sm_ifelse_sprint(sm_expr *expr, char *buffer, bool fake) {
+  if (!fake)
+    sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+  unsigned int cursor = sm_global_fn_name_len(expr->op);
+
+  if (!fake)
+    buffer[cursor] ='(';
+  cursor++;
+
+  cursor+=sm_object_sprint(sm_expr_get_arg(expr,0), &(buffer[cursor]), fake);
+
+  if (!fake)
+    buffer[cursor] = ')';
+  cursor++;
+
+  cursor += sm_object_sprint(sm_expr_get_arg(expr,1), &(buffer[cursor]), fake);
+  
+  static char* else_str = " else ";
+  for(int i=0;i<6;i++)
+    if(!fake)
+       buffer[cursor++]=else_str[i];
+
+  cursor += sm_object_sprint(sm_expr_get_arg(expr,2), &(buffer[cursor]), fake); 
+
   return cursor;
 }
 
@@ -258,7 +308,7 @@ unsigned int sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
     return sm_expr_array_sprint(expr, buffer, fake);
     break;
   }
-  case SM_FUN_CALL_EXPR: {
+  case SM_FUN_CALL_EXPR:{
     return sm_fun_call_sprint(expr, buffer, fake);
     break;
   }
@@ -266,6 +316,14 @@ unsigned int sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
     return sm_prefix_sprint(expr, buffer, fake);
     break;
   }
+  case SM_IF_EXPR:
+  case SM_WHILE_EXPR:
+  case SM_DO_WHILE_EXPR:
+    return sm_ifwhile_sprint(expr, buffer, fake);
+    break;
+  case SM_IF_ELSE_EXPR:
+    return sm_ifelse_sprint(expr, buffer, fake);
+    break;
   default:
     if (expr->op < sm_global_num_fns()) {
       if (sm_is_infix(expr->op))
