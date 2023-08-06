@@ -13,13 +13,16 @@ int chapter_2(int test) {
     char        *op_name   = sm_global_fn_name(i);
     sm_object   *test_obj1 = (sm_object *)sm_new_string(5, "Hello");
     sm_object   *test_obj2 = (sm_object *)sm_new_string(5, "World");
+    sm_object   *test_obj3 = (sm_object *)sm_new_string(6, "3rdArg");
     unsigned int len       = sm_global_fn_name_len(i);
-    sm_expr     *expr      = sm_new_expr_2(i, test_obj1, test_obj2);
+    sm_expr     *expr      = sm_new_expr_3(i, test_obj1, test_obj2, test_obj3);
     char        *to_str    = &(sm_object_to_string((sm_object *)expr)->content);
     printf("%i: expression: %s is %i characters long and prints as %s\n", i, op_name, len, to_str);
+    fflush(stdout);
     if (strlen(sm_global_fn_name(i)) != len) {
       printf("string length mismatch: the counted length is %lu but the global setting is %i\n",
              (long unsigned int)strlen(sm_global_fn_name(i)), len);
+      fflush(stdout);
       num_fails++;
     }
   }
