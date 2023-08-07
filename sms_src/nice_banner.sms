@@ -9,9 +9,9 @@
     "special","something else", "on fire", "doing it!"
   ];
 
-  while(true,{
+  while(true){
     let selection = round(random()*(size(adjectives)-1));
     putln("Hey, " str+ userName str+ ", You're " str+ adjectives[selection]);
     sleep(2000);
-  });
+  };
 };
