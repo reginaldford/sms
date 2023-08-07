@@ -6,9 +6,10 @@
   let in = "";
   let ans = [];
 
-  while(true,{
+  while(true){
     put("> ");
     in = input();
     ans = eval(parse(in));
-    putln(toStr(ans))});
+    putln(toStr(ans))
+  };
 };
