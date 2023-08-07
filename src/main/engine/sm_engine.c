@@ -63,10 +63,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_SLEEP_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       int        tms;
-      if (expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_SLEEP_EXPR))
-        tms = (int)((sm_double *)obj0)->value;
-      else
+      if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_SLEEP_EXPR))
         return (sm_object *)sm_new_double(0);
+
+      tms = (int)((sm_double *)obj0)->value;
 
       if (tms < 0) {
         printf("ERROR: sleep function was provided a negative value.\n");
@@ -98,10 +98,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_EXEC_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *path;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_EXEC_EXPR))
-        path = (sm_string *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_EXEC_EXPR))
         return (sm_object *)sms_false;
+      path = (sm_string *)obj0;
       // The system command leaves 8 bits for extra information
       // We do not need it, so we shift away the 8 bits
       int result = system(&path->content) >> 8;
@@ -111,10 +110,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_OS_GETENV_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *key;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_OS_GETENV_EXPR))
-        key = (sm_string *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_OS_GETENV_EXPR))
         return (sm_object *)sms_false;
+      key          = (sm_string *)obj0;
       char *result = getenv(&key->content);
       if (!result)
         return (sm_object *)sms_false;
@@ -126,14 +124,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_string *key;
       sm_string *value;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_OS_SETENV_EXPR))
-        key = (sm_string *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_OS_SETENV_EXPR))
         return (sm_object *)sms_false;
-      if (expect_type(obj1, 1, SM_STRING_TYPE, SM_OS_SETENV_EXPR))
-        value = (sm_string *)obj1;
-      else
+      key = (sm_string *)obj0;
+      if (!expect_type(obj1, 1, SM_STRING_TYPE, SM_OS_SETENV_EXPR))
         return (sm_object *)sms_false;
+      value      = (sm_string *)obj1;
       int result = setenv(&key->content, &value->content, 1);
       return (sm_object *)sm_new_double(result);
       break;
@@ -197,10 +193,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_CD_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *path;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_CD_EXPR))
-        path = (sm_string *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_CD_EXPR))
         return (sm_object *)sm_new_double(0);
+      path = (sm_string *)obj0;
 
       char *path_cstr = &path->content;
       if (chdir(path_cstr) == 0)
@@ -233,16 +228,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_STR_FIND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *haystack;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_FIND_EXPR))
-        haystack = (sm_string *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_FIND_EXPR))
         return (sm_object *)sm_new_double(0);
+      haystack        = (sm_string *)obj0;
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_string *needle;
-      if (expect_type(obj1, 1, SM_STRING_TYPE, SM_STR_FIND_EXPR))
-        needle = (sm_string *)obj1;
-      else
+      if (!expect_type(obj1, 1, SM_STRING_TYPE, SM_STR_FIND_EXPR))
         return (sm_object *)sm_new_double(0);
+      needle = (sm_string *)obj1;
       return (sm_object *)sm_str_find(haystack, needle);
       break;
     }
@@ -250,37 +243,32 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *haystack;
       if (expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_SPLIT_EXPR))
-        haystack = (sm_string *)obj0;
-      else
         return (sm_object *)sm_new_double(0);
+      haystack        = (sm_string *)obj0;
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_string *needle;
       if (expect_type(obj1, 1, SM_STRING_TYPE, SM_STR_SPLIT_EXPR))
-        needle = (sm_string *)obj1;
-      else
         return (sm_object *)sm_new_double(0);
+      needle = (sm_string *)obj1;
       return (sm_object *)sm_str_split(haystack, needle);
       break;
     }
     case SM_STR_PART_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str0;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_PART_EXPR))
-        str0 = (sm_string *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_PART_EXPR))
         return (sm_object *)sm_new_string(0, "");
+      str0            = (sm_string *)obj0;
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_double *start;
-      if (expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_STR_PART_EXPR))
-        start = (sm_double *)obj1;
-      else
+      if (!expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_STR_PART_EXPR))
         return (sm_object *)sm_new_string(0, "");
+      start           = (sm_double *)obj1;
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       sm_double *desired_len;
-      if (expect_type(obj2, 2, SM_DOUBLE_TYPE, SM_STR_PART_EXPR))
-        desired_len = (sm_double *)obj2;
-      else
+      if (!expect_type(obj2, 2, SM_DOUBLE_TYPE, SM_STR_PART_EXPR))
         return (sm_object *)sm_new_string(0, "");
+      desired_len = (sm_double *)obj2;
       if (start->value < 0 || start->value >= str0->size) {
         printf("Error: Calling %s with out of range start value: %i.\n",
                sm_global_fn_name(SM_STR_PART_EXPR), (int)start->value);
@@ -300,16 +288,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_STR_CAT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str0;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_CAT_EXPR))
-        str0 = (sm_string *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_CAT_EXPR))
         return (sm_object *)sm_new_string(0, "");
+      str0            = (sm_string *)obj0;
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_string *str1;
-      if (expect_type(obj1, 1, SM_STRING_TYPE, SM_STR_CAT_EXPR))
-        str1 = (sm_string *)obj1;
-      else
+      if (!expect_type(obj1, 1, SM_STRING_TYPE, SM_STR_CAT_EXPR))
         return (sm_object *)sm_new_string(0, "");
+      str1               = (sm_string *)obj1;
       sm_string *new_str = sm_new_string_manual(str0->size + str1->size);
       char      *content = &(new_str->content);
       sm_strncpy(content, &(str0->content), str0->size);
@@ -320,20 +306,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_STR_SIZE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str0;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_SIZE_EXPR))
-        str0 = (sm_string *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_SIZE_EXPR))
         return (sm_object *)sm_new_string(0, "");
+      str0 = (sm_string *)obj0;
       return (sm_object *)sm_new_double(str0->size);
       break;
     }
     case SM_EXIT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *num0;
-      if (expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_EXIT_EXPR))
-        num0 = (sm_double *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_EXIT_EXPR))
         return (sm_object *)sm_new_string(0, "");
+      num0          = (sm_double *)obj0;
       int exit_code = num0->value;
       sm_signal_exit(exit_code);
       break;
@@ -341,263 +325,238 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_LET_EXPR: {
       sm_symbol *sym   = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_LET_EXPR)) {
-        if (sm_cx_let(current_cx, &sym->name->content, sym->name->size, value))
-          return (sm_object *)value;
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_LET_EXPR))
+        return (sm_object *)sms_false;
+      if (sm_cx_let(current_cx, &sym->name->content, sym->name->size, value))
+        return (sm_object *)value;
     }
     case SM_CX_LET_EXPR: {
       sm_cx     *cx    = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym   = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_LET_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_LET_EXPR)) {
-          if (sm_cx_let(cx, &sym->name->content, sym->name->size, value))
-            return (sm_object *)sms_true;
-        }
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_LET_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_LET_EXPR))
+        return (sm_object *)sms_false;
+      if (sm_cx_let(cx, &sym->name->content, sym->name->size, value))
+        return (sm_object *)sms_true;
     }
     case SM_CX_GET_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_GET_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_EXPR)) {
-          sm_object *result = sm_cx_get(cx, &sym->name->content, sym->name->size);
-          if (result)
-            return result;
-        }
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_GET_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_EXPR))
+        return (sm_object *)sms_false;
+      sm_object *result = sm_cx_get(cx, &sym->name->content, sym->name->size);
+      if (result)
+        return result;
+      else
+        return (sm_object *)sms_false;
     }
     case SM_CX_HAS_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_HAS_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_HAS_EXPR)) {
-          sm_object *result = sm_cx_get(cx, &sym->name->content, sym->name->size);
-          if (result)
-            return (sm_object *)sms_true;
-        }
-      }
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_HAS_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_HAS_EXPR))
+        return (sm_object *)sms_false;
+      sm_object *result = sm_cx_get(cx, &sym->name->content, sym->name->size);
+      if (result)
+        return (sm_object *)sms_true;
       return (sm_object *)sms_false;
     }
     case SM_CX_GET_FAR_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_GET_FAR_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR)) {
-          sm_object *result = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
-          if (result)
-            return result;
-        }
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_GET_FAR_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR))
+        return (sm_object *)sms_false;
+      sm_object *result = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
+      if (!result)
+        return (sm_object *)sms_false;
+      return result;
     }
     case SM_CX_HAS_FAR_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_GET_FAR_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR)) {
-          sm_object *result = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
-          if (result)
-            return (sm_object *)sms_true;
-        }
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_GET_FAR_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR))
+        return (sm_object *)sms_false;
+      sm_object *result = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
+      if (!result)
+        return (sm_object *)sms_false;
+      return (sm_object *)sms_true;
     }
     case SM_CX_SET_EXPR: {
       sm_cx     *cx    = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym   = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SET_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_SET_EXPR)) {
-          if (sm_cx_set(cx, &sym->name->content, sym->name->size, value))
-            return (sm_object *)sms_true;
-        }
-      }
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SET_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_SET_EXPR))
+        return (sm_object *)sms_false;
+      if (sm_cx_set(cx, &sym->name->content, sym->name->size, value))
+        return (sm_object *)sms_true;
       return (sm_object *)sms_false;
     }
     case SM_CX_DOT_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_DOT_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_DOT_EXPR)) {
-          sm_object *retrieved = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
-          if (retrieved)
-            return retrieved;
-          else
-            return (sm_object *)sms_false;
-        }
-      }
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_DOT_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_DOT_EXPR))
+        return (sm_object *)sms_false;
+      sm_object *retrieved = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
+      if (retrieved)
+        return retrieved;
       return (sm_object *)sms_false;
     }
     case SM_CX_CLEAR_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_CLEAR_EXPR)) {
-        sm_cx_clear(cx);
-        return (sm_object *)sms_true;
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_CLEAR_EXPR))
+        return (sm_object *)sms_false;
+      sm_cx_clear(cx);
+      return (sm_object *)sms_true;
     }
     case SM_CX_IMPORT_EXPR: {
       sm_cx *cxFrom = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)cxFrom, 0, SM_CX_TYPE, SM_CX_IMPORT_EXPR)) {
-        sm_cx *cxTo = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-        if (expect_type((sm_object *)cxTo, 1, SM_CX_TYPE, SM_CX_IMPORT_EXPR)) {
-          sm_cx_import(cxFrom, cxTo);
-        }
-        return (sm_object *)sms_true;
-      }
-
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)cxFrom, 0, SM_CX_TYPE, SM_CX_IMPORT_EXPR))
+        return (sm_object *)sms_false;
+      sm_cx *cxTo = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      if (!expect_type((sm_object *)cxTo, 1, SM_CX_TYPE, SM_CX_IMPORT_EXPR))
+        return (sm_object *)sms_false;
+      sm_cx_import(cxFrom, cxTo);
+      return (sm_object *)sms_true;
     }
     case SM_CX_CONTAINING_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_CONTAINING_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_CONTAINING_EXPR)) {
-          sm_cx *retrieved = sm_cx_get_container(cx, &sym->name->content, sym->name->size);
-          if (retrieved)
-            return (sm_object *)retrieved;
-          else
-            return (sm_object *)sms_false;
-        }
-      }
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_CONTAINING_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_CONTAINING_EXPR))
+        return (sm_object *)sms_false;
+      sm_cx *retrieved = sm_cx_get_container(cx, &sym->name->content, sym->name->size);
+      if (retrieved)
+        return (sm_object *)retrieved;
       return (sm_object *)sms_false;
     }
     case SM_CX_SIZE_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SIZE_EXPR)) {
-        int size = sm_cx_size(cx);
-        return (sm_object *)sm_new_double(size);
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SIZE_EXPR))
+        return (sm_object *)sms_false;
+      int size = sm_cx_size(cx);
+      return (sm_object *)sm_new_double(size);
     }
     case SM_RM_EXPR: {
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-      if (expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_RM_EXPR)) {
-        bool success = sm_cx_rm(current_cx, &sym->name->content, sym->name->size);
-        if (success == true)
-          return (sm_object *)sms_true;
-        else
-          return (sm_object *)sms_false;
-      }
+      if (!expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_RM_EXPR))
+        return (sm_object *)sms_false;
+      bool success = sm_cx_rm(current_cx, &sym->name->content, sym->name->size);
+      if (success == true)
+        return (sm_object *)sms_true;
       return (sm_object *)sms_false;
     }
     case SM_CX_RM_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *sym = (sm_symbol *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_RM_EXPR)) {
-        if (expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_RM_EXPR)) {
-          bool success = sm_cx_rm(cx, &sym->name->content, sym->name->size);
-          if (success == true)
-            return (sm_object *)sms_true;
-          else
-            return (sm_object *)sms_false;
-        }
-      }
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_RM_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_RM_EXPR))
+        return (sm_object *)sms_false;
+      bool success = sm_cx_rm(cx, &sym->name->content, sym->name->size);
+      if (success == true)
+        return (sm_object *)sms_true;
       return (sm_object *)sms_false;
     }
     case SM_CX_KEYS_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_KEYS_EXPR)) {
-        sm_expr *success =
-          sm_node_keys(cx->content, sm_new_stack(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
-        if (success)
-          return (sm_object *)success;
-        else
-          return (sm_object *)sms_false;
-      }
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_KEYS_EXPR))
+        return (sm_object *)sms_false;
+      sm_expr *success =
+        sm_node_keys(cx->content, sm_new_stack(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
+      if (success)
+        return (sm_object *)success;
       return (sm_object *)sms_false;
     }
     case SM_CX_VALUES_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_VALUES_EXPR)) {
-        sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
-        if (success)
-          return (sm_object *)success;
-        else
-          return (sm_object *)sms_false;
-      }
+      if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_VALUES_EXPR))
+        return (sm_object *)sms_false;
+      sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
+      if (success)
+        return (sm_object *)success;
       return (sm_object *)sms_false;
     }
     case SM_FN_XP_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_XP_EXPR))
-        return (sm_object *)fun->content;
-      else
+      if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_XP_EXPR))
         return (sm_object *)sms_false;
+      return (sm_object *)fun->content;
     }
     case SM_FN_SETXP_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETXP_EXPR)) {
-        fun->content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-        return fun->content;
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETXP_EXPR))
+        return (sm_object *)sms_false;
+      fun->content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      return fun->content;
     }
     case SM_FN_PARAMS_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARAMS_EXPR)) {
-        sm_expr *result = sm_new_expr_n(SM_PARAM_LIST_EXPR, fun->num_params, fun->num_params);
-        for (unsigned int i = 0; i < fun->num_params; i++) {
-          sm_string *fn_name = sm_fun_get_param(fun, i)->name;
-          sm_expr_set_arg(result, i, (sm_object *)sm_new_symbol(fn_name));
-        }
-        return (sm_object *)result;
+      if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARAMS_EXPR))
+        return (sm_object *)sms_false;
+      sm_expr *result = sm_new_expr_n(SM_PARAM_LIST_EXPR, fun->num_params, fun->num_params);
+      for (unsigned int i = 0; i < fun->num_params; i++) {
+        sm_string *fn_name = sm_fun_get_param(fun, i)->name;
+        sm_expr_set_arg(result, i, (sm_object *)sm_new_symbol(fn_name));
       }
-      return (sm_object *)sms_false;
+      return (sm_object *)result;
     } break;
     case SM_FN_SETPARAMS_EXPR: {
       sm_fun  *fun    = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_expr *params = (sm_expr *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETPARAMS_EXPR)) {
-        if (expect_type((sm_object *)params, 1, SM_EXPR_TYPE, SM_FN_SETPARAMS_EXPR)) {
-          sm_fun *new_fun = sm_new_fun(fun->parent, fun->num_params, fun->content);
-          // Setting the parameters of a new function
-          for (unsigned int i = 0; i < params->size; i++) {
-            sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(params, i);
-            if (expect_type((sm_object *)sym, i, SM_SYMBOL_TYPE, SM_FN_SETPARAMS_EXPR)) {
-              sm_fun_set_param(new_fun, i, sym->name, NULL, 0);
-            } else
-              break;
-          }
-          // Relocalizing the AST
-          new_fun->content    = sm_unlocalize(new_fun->content, new_fun);
-          new_fun->num_params = params->size;
-          new_fun->content    = sm_localize(new_fun->content, new_fun);
-          return (sm_object *)new_fun;
-        }
+      if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETPARAMS_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)params, 1, SM_EXPR_TYPE, SM_FN_SETPARAMS_EXPR))
+        return (sm_object *)sms_false;
+      sm_fun *new_fun = sm_new_fun(fun->parent, fun->num_params, fun->content);
+      // Setting the parameters of a new function
+      for (unsigned int i = 0; i < params->size; i++) {
+        sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(params, i);
+        if (!expect_type((sm_object *)sym, i, SM_SYMBOL_TYPE, SM_FN_SETPARAMS_EXPR))
+          break;
+        sm_fun_set_param(new_fun, i, sym->name, NULL, 0);
       }
-      return (sm_object *)sms_false;
+      // Relocalizing the AST
+      new_fun->content    = sm_unlocalize(new_fun->content, new_fun);
+      new_fun->num_params = params->size;
+      new_fun->content    = sm_localize(new_fun->content, new_fun);
+      return (sm_object *)new_fun;
     } break;
     case SM_FN_PARENT_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARENT_EXPR))
-        return (sm_object *)fun->parent;
-      else
+      if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARENT_EXPR))
         return (sm_object *)sms_false;
+      return (sm_object *)fun->parent;
     }
     case SM_FN_SETPARENT_EXPR: {
       sm_fun *fun        = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_cx  *new_parent = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETPARENT_EXPR)) {
-        if (expect_type((sm_object *)new_parent, 1, SM_CX_TYPE, SM_FN_SETPARENT_EXPR)) {
-          fun->parent = new_parent;
-          return (sm_object *)new_parent;
-        }
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETPARENT_EXPR))
+        return (sm_object *)sms_false;
+      if (!expect_type((sm_object *)new_parent, 1, SM_CX_TYPE, SM_FN_SETPARENT_EXPR))
+        return (sm_object *)sms_false;
+      fun->parent = new_parent;
+      return (sm_object *)new_parent;
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str0;
-      if (expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_ESCAPE_EXPR))
-        str0 = (sm_string *)obj0;
-      else
-        return (sm_object *)sm_new_string(0, "");
+      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_STR_ESCAPE_EXPR))
+        return (sm_object *)sms_false;
+      str0 = (sm_string *)obj0;
       return (sm_object *)sm_string_escape(str0);
     }
     case SM_INPUT_EXPR: {
@@ -668,14 +627,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_MOD_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_MOD_EXPR)) {
-        sm_double *num0 = (sm_double *)obj0;
-        if (expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_MOD_EXPR)) {
-          sm_double *num1 = (sm_double *)obj1;
-          return (sm_object *)sm_new_double(fmod(num0->value, num1->value));
-        }
-      }
-      return (sm_object *)sms_false;
+      if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_MOD_EXPR))
+        return (sm_object *)sms_false;
+      sm_double *num0 = (sm_double *)obj0;
+      if (!expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_MOD_EXPR))
+        return (sm_object *)sms_false;
+      sm_double *num1 = (sm_double *)obj1;
+      return (sm_object *)sm_new_double(fmod(num0->value, num1->value));
     }
     case SM_RANDOM_EXPR: {
       return (sm_object *)sm_new_double(((double)rand()) / ((double)RAND_MAX));
@@ -683,32 +641,28 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_SEED_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *number;
-      if (expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_SEED_EXPR))
-        number = (sm_double *)obj0;
-      else
-        return (sm_object *)sm_new_string(0, "");
+      if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_SEED_EXPR))
+        return (sm_object *)sms_false;
+      number           = (sm_double *)obj0;
       double val       = number->value;
       int    floor_val = val > 0 ? val + 0.5 : val - 0.5;
       srand((int)floor_val);
       return (sm_object *)sms_true;
-      ;
     }
     case SM_FILE_WRITE_EXPR: {
       // obtain the file name
       sm_string *fname_str;
       sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type(evaluated_fname, 0, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
-        fname_str = (sm_string *)evaluated_fname;
-      else
+      if (!expect_type(evaluated_fname, 0, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
         return (sm_object *)sms_false;
+      fname_str        = (sm_string *)evaluated_fname;
       char *fname_cstr = &(fname_str->content);
       // obtain the content to write
       sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_string *content_str;
-      if (expect_type(evaluated_content, 1, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
-        content_str = (sm_string *)evaluated_content;
-      else
+      if (!expect_type(evaluated_content, 1, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
         return (sm_object *)sms_false;
+      content_str        = (sm_string *)evaluated_content;
       char *content_cstr = &(content_str->content);
       FILE *fptr         = fopen(fname_cstr, "wb");
       // check that file can be opened for writing
@@ -730,18 +684,16 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       // obtain the file name
       sm_string *fname_str;
       sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (expect_type(evaluated_fname, 0, SM_STRING_TYPE, SM_FILE_APPEND_EXPR))
-        fname_str = (sm_string *)evaluated_fname;
-      else
+      if (!expect_type(evaluated_fname, 0, SM_STRING_TYPE, SM_FILE_APPEND_EXPR))
         return (sm_object *)sms_false;
+      fname_str        = (sm_string *)evaluated_fname;
       char *fname_cstr = &(fname_str->content);
       // obtain the content to write
       sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_string *content_str;
-      if (expect_type(evaluated_content, 1, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
-        content_str = (sm_string *)evaluated_content;
-      else
+      if (!expect_type(evaluated_content, 1, SM_STRING_TYPE, SM_FILE_WRITE_EXPR))
         return (sm_object *)sms_false;
+      content_str        = (sm_string *)evaluated_content;
       char *content_cstr = &(content_str->content);
       FILE *fptr         = fopen(fname_cstr, "a");
       // check that file can be opened for writing
@@ -756,10 +708,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FILE_READ_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_READ_EXPR))
-        fname_str = (sm_string *)evaluated;
-      else
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_READ_EXPR))
         return (sm_object *)sms_false;
+      fname_str        = (sm_string *)evaluated;
       char *fname_cstr = &(fname_str->content);
       if (access(fname_cstr, F_OK) != 0) {
         printf("fileReadStr failed because the file, %s ,does not exist.\n", fname_cstr);
@@ -778,23 +729,20 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FILE_PART_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_PART_EXPR))
-        fname_str = (sm_string *)evaluated;
-      else
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_PART_EXPR))
         return (sm_object *)sms_false;
+      fname_str        = (sm_string *)evaluated;
       char *fname_cstr = &(fname_str->content);
       evaluated        = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_double *start_pos;
-      if (expect_type(evaluated, 1, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
-        start_pos = (sm_double *)evaluated;
-      else
+      if (!expect_type(evaluated, 1, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
         return (sm_object *)sms_false;
+      start_pos = (sm_double *)evaluated;
       evaluated = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       sm_double *length;
-      if (expect_type(evaluated, 2, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
-        length = (sm_double *)evaluated;
-      else
+      if (!expect_type(evaluated, 2, SM_DOUBLE_TYPE, SM_FILE_PART_EXPR))
         return (sm_object *)sms_false;
+      length = (sm_double *)evaluated;
       if (access(fname_cstr, F_OK) != 0) {
         printf("filePart failed because the file, %s ,does not exist.\n", fname_cstr);
         return (sm_object *)sm_new_string(0, "");
@@ -818,10 +766,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FILE_EXISTS_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_EXISTS_EXPR))
-        fname_str = (sm_string *)evaluated;
-      else
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_EXISTS_EXPR))
         return (sm_object *)sms_false;
+      fname_str        = (sm_string *)evaluated;
       char *fname_cstr = &(fname_str->content);
 
       FILE *file = fopen(fname_cstr, "r");
@@ -834,10 +781,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FILE_RM_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_RM_EXPR))
-        fname_str = (sm_string *)evaluated;
-      else
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_RM_EXPR))
         return (sm_object *)sms_false;
+      fname_str        = (sm_string *)evaluated;
       char *fname_cstr = &(fname_str->content);
 
       int result = remove(fname_cstr);
@@ -850,10 +796,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FILE_STAT_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_STAT_EXPR))
-        fname_str = (sm_string *)evaluated;
-      else
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_STAT_EXPR))
         return (sm_object *)sms_false;
+      fname_str              = (sm_string *)evaluated;
       char       *fname_cstr = &(fname_str->content);
       struct stat filestat;
       sm_expr    *output;
@@ -885,29 +830,24 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FILE_PARSE_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_PARSE_EXPR))
-        str = (sm_string *)evaluated;
-      else {
-        return (sm_object *)sm_new_double(0);
-      }
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_FILE_PARSE_EXPR))
+        return (sm_object *)sms_false;
+      str                  = (sm_string *)evaluated;
       char           *cstr = &(str->content);
       sm_parse_result pr   = sm_parse_file(cstr);
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i.\n", pr.return_val);
         return (sm_object *)sms_false;
-      } else {
-        return pr.parsed_object;
       }
+      return pr.parsed_object;
       break;
     }
     case SM_PARSE_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PARSE_EXPR))
-        str = (sm_string *)evaluated;
-      else {
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_PARSE_EXPR))
         return (sm_object *)sms_false;
-      }
+      str                = (sm_string *)evaluated;
       char *cstr         = &(str->content);
       cstr[str->size]    = ';'; // Temporarily replacing the NULL char
       sm_parse_result pr = sm_parse_cstr(cstr, str->size + 1);
@@ -915,8 +855,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i.\n", pr.return_val);
         return (sm_object *)sms_false;
-      } else
-        return pr.parsed_object;
+      }
+      return pr.parsed_object;
     }
     case SM_TO_STRING_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -930,18 +870,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj1      = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_cx     *where_to_eval;
-      if (expect_type(evaluated, 0, SM_CX_TYPE, SM_CX_EVAL_EXPR))
-        where_to_eval = (sm_cx *)evaluated;
-      else
-        return (sm_object *)sm_new_double(0);
+      if (!expect_type(evaluated, 0, SM_CX_TYPE, SM_CX_EVAL_EXPR))
+        return (sm_object *)sms_true;
+      where_to_eval = (sm_cx *)evaluated;
       return sm_engine_eval(obj1, where_to_eval, sf);
     }
     case SM_PUT_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUT_EXPR))
-        str = (sm_string *)evaluated;
-      else
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUT_EXPR))
         return (sm_object *)sms_false;
       str = (sm_string *)evaluated;
       for (unsigned int i = 0; i < str->size; i++)
@@ -954,9 +891,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_PUTLN_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str;
-      if (expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUTLN_EXPR))
-        str = (sm_string *)evaluated;
-      else
+      if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUTLN_EXPR))
         return (sm_object *)sms_false;
       str = (sm_string *)evaluated;
       for (unsigned int i = 0; i < str->size; i++)
@@ -998,26 +933,23 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_SIZE_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_expr   *arr;
-      if (expect_type(base_obj, 0, SM_EXPR_TYPE, SM_SIZE_EXPR))
-        arr = (sm_expr *)base_obj;
-      else
-        return (sm_object *)sm_new_double(-1);
+      if (!expect_type(base_obj, 0, SM_EXPR_TYPE, SM_SIZE_EXPR))
+        return (sm_object *)sms_false;
+      arr = (sm_expr *)base_obj;
       return (sm_object *)sm_new_double(arr->size);
     }
     case SM_MAP_EXPR: {
       // expecting a unary func
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_fun    *fun;
-      if (expect_type(obj0, 0, SM_FUN_TYPE, SM_MAP_EXPR))
-        fun = (sm_fun *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_FUN_TYPE, SM_MAP_EXPR))
         return (sm_object *)sms_false;
+      fun             = (sm_fun *)obj0;
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_expr   *arr;
-      if (expect_type(obj1, 1, SM_EXPR_TYPE, SM_MAP_EXPR))
-        arr = (sm_expr *)obj1;
-      else
+      if (!expect_type(obj1, 1, SM_EXPR_TYPE, SM_MAP_EXPR))
         return (sm_object *)sms_false;
+      arr             = (sm_expr *)obj1;
       sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size);
       for (unsigned int i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
@@ -1030,17 +962,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       // expecting a binary function
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_fun    *fun;
-      if (expect_type(obj0, 0, SM_FUN_TYPE, SM_REDUCE_EXPR))
-        fun = (sm_fun *)obj0;
-      else
+      if (!expect_type(obj0, 0, SM_FUN_TYPE, SM_REDUCE_EXPR))
         return (sm_object *)sms_false;
+      fun = (sm_fun *)obj0;
       // evaluating the expression to reduce
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_expr   *arr;
-      if (expect_type(obj1, 1, SM_EXPR_TYPE, SM_REDUCE_EXPR))
-        arr = (sm_expr *)obj1;
-      else
+      if (!expect_type(obj1, 1, SM_EXPR_TYPE, SM_REDUCE_EXPR))
         return (sm_object *)sms_false;
+      arr = (sm_expr *)obj1;
       // initial value for reduction
       sm_object *initial = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       // reducing the expression
@@ -1058,16 +988,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_INDEX_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_expr   *arr;
-      if (expect_type(base_obj, 0, SM_EXPR_TYPE, SM_INDEX_EXPR))
-        arr = (sm_expr *)base_obj;
-      else
+      if (!expect_type(base_obj, 0, SM_EXPR_TYPE, SM_INDEX_EXPR))
         return (sm_object *)sms_false;
+      arr                  = (sm_expr *)base_obj;
       sm_object *index_obj = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_double *index_double;
-      if (expect_type(index_obj, 1, SM_DOUBLE_TYPE, SM_INDEX_EXPR))
-        index_double = (sm_double *)index_obj;
-      else
+      if (!expect_type(index_obj, 1, SM_DOUBLE_TYPE, SM_INDEX_EXPR))
         return (sm_object *)sm_new_string(0, "");
+      index_double       = (sm_double *)index_obj;
       unsigned int index = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
         printf("Error: Index out of range: %i . Array size is %i\n", index, arr->size);
@@ -1080,10 +1008,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
       sm_string *field_name = field_sym->name;
       sm_cx     *base_cx;
-      if (expect_type(base_obj, 0, SM_CX_TYPE, SM_DOT_EXPR))
-        base_cx = (sm_cx *)base_obj;
-      else
+      if (!expect_type(base_obj, 0, SM_CX_TYPE, SM_DOT_EXPR))
         return (sm_object *)sms_false;
+      base_cx       = (sm_cx *)base_obj;
       sm_object *sr = sm_cx_get_far(base_cx, &field_name->content, field_name->size);
       if (sr == NULL) {
         sm_string *base_str = sm_object_to_string(base_obj);
@@ -1097,10 +1024,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_PARENT_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_cx     *base_cx;
-      if (expect_type(base_obj, 0, SM_CX_TYPE, SM_PARENT_EXPR))
-        base_cx = (sm_cx *)base_obj;
-      else
+      if (!expect_type(base_obj, 0, SM_CX_TYPE, SM_PARENT_EXPR))
         return (sm_object *)sms_false;
+      base_cx = (sm_cx *)base_obj;
       if (base_cx->parent == NULL) {
         return (sm_object *)sms_false;
       }
@@ -1110,10 +1036,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *evaluated0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *evaluated1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_symbol *sym1;
-      if (expect_type(evaluated1, 1, SM_SYMBOL_TYPE, SM_DIFF_EXPR))
-        sym1 = (sm_symbol *)evaluated1;
-      else
+      if (!expect_type(evaluated1, 1, SM_SYMBOL_TYPE, SM_DIFF_EXPR))
         return (sm_object *)sms_false;
+      sym1              = (sm_symbol *)evaluated1;
       sm_object *result = sm_diff(evaluated0, sym1);
       return sm_simplify(result);
     }
@@ -1589,8 +1514,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     default:
       return input;
-    } // End of switch inside expr case
-  }   // End of expr case
+    } // End of expr case
+  }
   case SM_META_TYPE: {
     return ((sm_meta *)input)->address;
   }
