@@ -1,0 +1,8 @@
+# Mass related ratios for vert.sms
+{
+  kg -> 1;
+  lbs->2.2046226218487758;
+  g -> 1e3;
+  oz -> 35.273961949580413;
+  t -> 1e-3;
+};
