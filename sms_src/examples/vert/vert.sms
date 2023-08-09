@@ -1,0 +1,43 @@
+#!/usr/local/bin/sms -qi
+cxLet(parent(_scratch), :vert, (x,u1,u2)=>{
+    # Import the tools for each dimension if necessary
+    if(not(cxHasFar(self,:mratios))){
+      let mratios=fileParse("mvert.sms");
+      let lratios=fileParse("lvert.sms");
+      let tratios=fileParse("tvert.sms");
+      cxImport(self,parent(self));
+    };
+    
+    # Generic convert function
+    let convert=(x,u1,u2,ratioCX)=>{
+      let normalized = x / cxGet(ratioCX,u1);
+      let value = normalized * cxGet(ratioCX,u2);
+      putln(toStr(x) str+ toStr(u1) str+ " = " str+
+        toStr(value) str+ toStr(u2));
+      return value;
+    };
+
+    # Find a CX that contains both units u1 and u2
+
+    # Mass
+    if(cxGet(mratios,u1) and cxGet(mratios,u2))
+     return convert(x,u1,u2,mratios);
+
+    # Length
+    if(cxGet(lratios,u1) and cxGet(lratios,u2))
+      return convert(x,u1,u2,lratios);
+
+    # Time
+    if(cxGet(tratios,u1) and cxGet(tratios,u2))
+     return convert(x,u1,u2,tratios);
+
+    # We must have supplied something invalid
+    putln("The following units are allowed:");
+    putln("Mass Units:");
+    putln(toStr(cxKeys(mratios)) str+ "\n");
+    putln("Length Units:");
+    putln(toStr(cxKeys(lratios)) str+ "\n");
+    putln("Time Units:");
+    putln(toStr(cxKeys(tratios)) str+ "\n");
+    putln("Conversions must remain in the same dimension.");
+});
