@@ -914,6 +914,41 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sms_true;
       break;
     }
+    case SM_FOR_EXPR: {
+      sm_expr   *init       = (sm_expr *)sm_expr_get_arg(sme, 0);
+      sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
+      sm_expr   *increment  = (sm_expr *)sm_expr_get_arg(sme, 2);
+      sm_object *expression = sm_expr_get_arg(sme, 3);
+      sm_cx     *inner_cx   = sm_new_cx(current_cx);
+      // Run init 1 time
+      sm_engine_eval((sm_object *)init, inner_cx, sf);
+
+      // Stack safe, but not thread safe
+      if (expression->my_type == SM_EXPR_TYPE && ((sm_expr *)expression)->op == SM_BLOCK_EXPR) {
+        sm_cx *orig_cx = (sm_cx *)sm_expr_get_arg((sm_expr *)expression, 0);
+        sm_expr_set_arg((sm_expr *)expression, 0, (sm_object *)inner_cx);
+
+        while (!IS_FALSE(sm_engine_eval((sm_object *)condition, inner_cx, sf))) {
+          sm_object *result = sm_engine_eval(expression, inner_cx, sf);
+          if (result->my_type == SM_RETURN_TYPE)
+            return result;
+          // Run increment after each loop
+          sm_engine_eval((sm_object *)increment, inner_cx, sf);
+        }
+        sm_expr_set_arg((sm_expr *)expression, 0, (sm_object *)orig_cx);
+      } else {
+        while (!IS_FALSE(sm_engine_eval((sm_object *)condition, inner_cx, sf))) {
+          sm_object *result = sm_engine_eval(expression, inner_cx, sf);
+          if (result->my_type == SM_RETURN_TYPE)
+            return result;
+          // Run increment after each loop
+          sm_engine_eval((sm_object *)increment, inner_cx, sf);
+        }
+      };
+
+      return (sm_object *)sms_true;
+      break;
+    }
     case SM_DO_WHILE_EXPR: {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
       sm_object *expression = sm_expr_get_arg(sme, 0);

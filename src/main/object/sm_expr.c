@@ -34,6 +34,16 @@ sm_expr *sm_new_expr_3(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, s
   return sm_expr_set_arg(new_expr, 2, arg3);
 }
 
+// New expression with 4 arguments
+sm_expr *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
+                       sm_object *arg4) {
+  sm_expr *new_expr = sm_new_expr_n(op, 4, 4);
+  sm_expr_set_arg(new_expr, 0, arg1);
+  sm_expr_set_arg(new_expr, 1, arg2);
+  sm_expr_set_arg(new_expr, 2, arg3);
+  return sm_expr_set_arg(new_expr, 3, arg4);
+}
+
 // Append another object to this expression.
 sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg) {
   if (expr->size == expr->capacity) {

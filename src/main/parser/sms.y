@@ -115,6 +115,7 @@ void _lex_cstr(char * cstr,int len);
 %token IF
 %token ELSE
 %token <expr> WHILE
+%token <expr> FOR
 %token <expr> DO_WHILE
 %token <expr> RETURN
 %token <expr> PARENT
@@ -277,13 +278,13 @@ void _lex_cstr(char * cstr,int len);
 %left ':'
 %left  '='
 %nonassoc ','
-%left IF WHILE DOWHILE
+%left IF WHILE FOR DOWHILE
 %left OR AND NOT
+%left '.'
 %left DOT
 %left '+' '-'
 %left '*' '/'
 %left '^'
-%left '.'
 %left ';'
 
 %%
@@ -365,6 +366,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);}
 | SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_SIZE_EXPR,(sm_object*)$3);}
 | WHILE '(' EXPR ')' EXPR {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| FOR '(' EXPR ';' EXPR ';' EXPR ')' EXPR { $$ = sm_new_expr_4(SM_FOR_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,(sm_object*)$9);}
 | DO_WHILE '(' EXPR ')' EXPR {$$ = sm_new_expr_2(SM_DO_WHILE_EXPR,(sm_object*)$5,(sm_object*)$3);}
 | RETURN EXPR {$$ = sm_new_expr(SM_RETURN_EXPR,(sm_object*)$2);}
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3);}

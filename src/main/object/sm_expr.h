@@ -61,6 +61,7 @@ enum SM_EXPR_TYPE {
   SM_REDUCE_EXPR,
   SM_PARENT_EXPR,
   SM_WHILE_EXPR,
+  SM_FOR_EXPR,
   SM_DO_WHILE_EXPR,
   SM_RETURN_EXPR,
   SM_EVAL_EXPR,
@@ -208,6 +209,8 @@ typedef struct sm_expr {
 sm_expr *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg);
 sm_expr *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2);
 sm_expr *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
+sm_expr *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
+                       sm_object *arg4);
 sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op1, unsigned int size, unsigned int capacity);
 sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg);
 unsigned int sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);

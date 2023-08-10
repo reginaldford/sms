@@ -58,6 +58,7 @@ int          {return INT;}
 if           {return IF;}
 else         {return ELSE;}
 while        {return WHILE;}
+for          {return FOR;}
 doWhile      {return DO_WHILE;}
 return       {return RETURN;}
 eval         {return EVAL;}
