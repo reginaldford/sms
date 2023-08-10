@@ -102,6 +102,41 @@ unsigned int sm_ifelse_sprint(sm_expr *expr, char *buffer, bool fake) {
   return cursor;
 }
 
+// Print description of for expression to buffer
+unsigned int sm_for_sprint(sm_expr *expr, char *buffer, bool fake) {
+  if (!fake)
+    sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+  unsigned int cursor = sm_global_fn_name_len(expr->op);
+
+  if (!fake)
+    buffer[cursor] = '(';
+  cursor++;
+
+  cursor += sm_object_sprint(sm_expr_get_arg(expr, 0), &(buffer[cursor]), fake);
+
+  if (!fake)
+    buffer[cursor] = ';';
+  cursor++;
+
+
+  cursor += sm_object_sprint(sm_expr_get_arg(expr, 1), &(buffer[cursor]), fake);
+
+  if (!fake)
+    buffer[cursor] = ';';
+  cursor++;
+
+  cursor += sm_object_sprint(sm_expr_get_arg(expr, 2), &(buffer[cursor]), fake);
+
+  if (!fake)
+    buffer[cursor] = ')';
+  cursor++;
+
+  cursor += sm_object_sprint(sm_expr_get_arg(expr, 3), &(buffer[cursor]), fake);
+
+  return cursor;
+}
+
+
 // Print description of let expression to buffer
 unsigned int sm_let_sprint(sm_expr *expr, char *buffer, bool fake) {
   if (!fake)
@@ -218,6 +253,9 @@ unsigned int sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
     break;
   case SM_IF_ELSE_EXPR:
     return sm_ifelse_sprint(expr, buffer, fake);
+    break;
+  case SM_FOR_EXPR:
+    return sm_for_sprint(expr, buffer, fake);
     break;
   case SM_LET_EXPR:
     return sm_let_sprint(expr, buffer, fake);
