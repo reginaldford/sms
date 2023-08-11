@@ -922,22 +922,20 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_cx     *inner_cx   = sm_new_cx(current_cx);
       // Run init 1 time
       sm_engine_eval((sm_object *)init, inner_cx, sf);
-
-      // Stack safe, but not thread safe
+      sm_object * result = (sm_object*)sms_false;
+      // If it's a block, copy the block to set the inner_cx as scope
       if (expression->my_type == SM_EXPR_TYPE && ((sm_expr *)expression)->op == SM_BLOCK_EXPR) {
         expression = sm_copy(expression);
         sm_expr_set_arg((sm_expr *)expression, 0, (sm_object *)inner_cx);
       }
-
       while (!IS_FALSE(sm_engine_eval((sm_object *)condition, inner_cx, sf))) {
-        sm_object *result = sm_engine_eval(expression, inner_cx, sf);
+        result = sm_engine_eval(expression, inner_cx, sf);
         if (result->my_type == SM_RETURN_TYPE)
           return result;
         // Run increment after each loop
         sm_engine_eval((sm_object *)increment, inner_cx, sf);
       }
-
-      return (sm_object *)sms_true;
+      return result;
       break;
     }
     case SM_DO_WHILE_EXPR: {
@@ -1385,19 +1383,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_IF_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (!IS_FALSE(condition_result)) {
+      if (!IS_FALSE(condition_result))
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      }
       return (sm_object *)sms_false;
     }
     case SM_IF_ELSE_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (condition_result->my_type != SM_SYMBOL_TYPE) {
-        return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
-      }
-      if (IS_FALSE(condition_result) == false) {
+      if (!IS_FALSE(condition_result)) 
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      }
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
     }
     case SM_ARRAY_EXPR: {

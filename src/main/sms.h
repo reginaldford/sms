@@ -74,4 +74,4 @@ enum sm_object_type {
 #include "engine/sm_diff.h"
 #include "engine/sm_simplify.h"
 #include "object/sm_return.h"
-#include "engine/sm_engine.h"
+#include "engine/sm_ast_engine.h"
