@@ -200,7 +200,7 @@ Line comments start with `#`.
 
     4. strEscape(s); # Convert any escape codes into their correlating character
 
-    5. str+(s1,s2); # Return a string that is the concatenation of s1 with s2 in order
+    5. "this" str+ "that"; # Return a string that is the concatenation of s1 with s2 in order
 
     6. strPart(s1,start,len) # Return a part of the string, starting at index start, and with length len
 

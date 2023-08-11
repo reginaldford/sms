@@ -280,9 +280,7 @@ void _lex_cstr(char * cstr,int len);
 %nonassoc ','
 %left IF WHILE FOR DOWHILE
 %left OR AND NOT
-%left '.'
-%left DOT
-%left '+' '-'
+%left DOT '+' '-'
 %left '*' '/'
 %left '^'
 %left ';'
@@ -297,10 +295,12 @@ COMMAND : EXPR ';' {
 | DONE      { YYACCEPT; }
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->top)); }
-| EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3);  }
-| LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4);}
-| RM SYM {$$ = sm_new_expr(SM_RM_EXPR, (sm_object *)$2);}
+| EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3); }
+| LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4); }
+| RM SYM {$$ = sm_new_expr(SM_RM_EXPR, (sm_object *)$2); }
 | SYM{}
+| SYM DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3); }
+| EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3); }
 | EXPR '+' EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object *)$1, (sm_object *)$3); }
 | EXPR '-' EXPR { $$ = sm_new_expr_2(SM_MINUS_EXPR, (sm_object *)$1, (sm_object *)$3); }
 | EXPR '*' EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$1, (sm_object *)$3); }
@@ -360,7 +360,6 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->to
 | TEST_LT_EQ{}
 | TEST_GT_EQ{}
 | BLOCK {}
-| EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | SYM '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3);}
 | PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3);}
@@ -484,8 +483,8 @@ PARAM_LIST_OPEN : '(' SYM ',' {
   $$ = sm_expr_append($1, (sm_object *)new_param);
 }
 
-DOT_ASSIGNMENT : EXPR '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
-| SYM '.' SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
+DOT_ASSIGNMENT : EXPR DOT SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
+| SYM DOT SYM '=' EXPR { $$ = sm_new_expr_3(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3), (sm_object *)($5)); }
 | EXPR '=' EXPR { $$ = sm_new_expr_2(SM_ASSIGN_DOT_EXPR, (sm_object *)($1), (sm_object *)($3)); }
 
 ASSIGNMENT : SYM '=' EXPR { $$ = sm_new_expr_2(SM_ASSIGN_EXPR, (sm_object *)($1), (sm_object *)($3)); }
