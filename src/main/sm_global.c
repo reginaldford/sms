@@ -216,7 +216,7 @@ char *sm_global_fn_name(unsigned short int which) {
     "strMap",       // SM_STR_MAP_EXPR
     "strFind",      // SM_STR_FIND_EXPR
     "strFindr",     // SM_STR_FINDR_EXPR
-    "strCat",       // SM_STR_CAT_EXPR
+    "str+",         // SM_STR_CAT_EXPR
     "strSplit",     // SM_STR_SPLIT_EXPR
     "strPart",      // SM_STR_PART_EXPR
     "strEscape",    // SM_STR_ESCAPE_EXPR
@@ -268,7 +268,7 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
     5, 5, 3, 3, 3,  4, 4, 4, 4, 4, 4,  5, 5,  5, 2, 3, 3, 4, 3, 4,  4, 3, 2, 2,  3, 6, 6, 5, 3, 7,
     6, 4, 6, 8, 12, 5, 5, 4, 2, 2, 2,  1, 1,  2, 2, 0, 0, 0, 5, 3,  5, 5, 2, 5,  5, 5, 5, 8, 8, 12,
     5, 4, 7, 6, 8,  6, 8, 5, 9, 8, 7,  8, 10, 8, 9, 6, 6, 6, 9, 11, 8, 8, 3, 3,  6, 4, 4, 6, 4, 5,
-    5, 4, 3, 3, 2,  3, 3, 4, 7, 8, 11, 8, 11, 7, 6, 6, 6, 7, 8, 6,  8, 7, 9, 11, 8, 6, 9, 8, 3, 5,
+    5, 4, 3, 3, 2,  3, 3, 4, 7, 8, 11, 8, 11, 7, 6, 6, 6, 7, 8, 4,  8, 7, 9, 11, 8, 6, 9, 8, 3, 5,
     6, 6, 6, 8, 7,  9, 9, 9, 8, 6, 6,  8, 7,  0, 0, 8, 4, 7, 4, 4,  5, 6, 6, 6,  8, 8, 3, 1};
   if (which >= sm_global_num_fns())
     return 1; // "?"
