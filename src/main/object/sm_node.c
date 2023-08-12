@@ -102,13 +102,36 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
   return true;
 }
 
+// Count the set bits in a long
+// Helper for left_count
+int count_set_bits(unsigned long long num) {
+  int count = 0;
+
+  while (num > 0) {
+    count += num & 1;
+    num >>= 1;
+  }
+  return count;
+}
+
+// Define popcountll whether or not we have the built-in instruction.
+#if defined(__x86_64__) || defined(_M_X64)
+// Assuming we have __builtin_popcountll
+int popcountll(unsigned long long num) { return __builtin_popcountll(num); }
+#else
+// Assuming we don't have the instruction
+int popcountll(unsigned long long num) {
+  int count;
+  for (count = 0; num > 0; num >>= 1)
+    count += num & 1;
+  return count;
+}
+#endif
+
 // Return the number of set bits to the left of map_index'th bit in map
 // Put in 64 for the number of 1 bits in the long long
 int sm_node_map_left_count(unsigned long long map, int bit_index) {
-  if (bit_index < 0) {
-    return -1;
-  }
-  return __builtin_popcountll(map & ((1LL << bit_index) - 1));
+  return popcountll(map & ((1LL << bit_index) - 1));
 }
 
 // Return the node of the trie addressed by needle, or return NULL
@@ -226,7 +249,7 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack)
 }
 
 // Return the number of children
-int sm_node_map_size(unsigned long long map) { return __builtin_popcountll(map); }
+int sm_node_map_size(unsigned long long map) { return popcountll(map); }
 
 // Set a bit of map to 1 or 0 depending on the provided boolean
 void sm_node_map_set(unsigned long long *map, int index, bool on) {
@@ -245,7 +268,7 @@ bool sm_node_map_get(unsigned long long map, int i) {
 
 // Return the correlating child index to this bit in the map
 int sm_node_child_index(unsigned long long map, int map_index) {
-  return __builtin_popcountll(map & ((1LL << map_index) - 1));
+  return popcountll(map & ((1LL << map_index) - 1));
 }
 
 bool sm_node_rm_nth(struct sm_node *root, int n) {
