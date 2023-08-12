@@ -11,7 +11,11 @@
 #include <time.h>
 #include <stdint.h>
 #include <termios.h>
+
+// We use __builtin_popcount_ll in sm_node.c
+#if defined(__x86_64__) || defined(_M_X64)
 #include <x86intrin.h>
+#endif
 
 // These are the major object types of SMS
 // Keep syncronized with function sm_object_type_str
@@ -33,7 +37,8 @@ enum sm_object_type {
   SM_ERROR_TYPE,     // 14
   SM_SELF_TYPE,      // 15
   SM_RETURN_TYPE,    // 16
-  SM_UNKNOWN_TYPE    // 17
+  SM_BC_BLOCK_TYPE,  // 17
+  SM_UNKNOWN_TYPE    // 18
 };
 
 // Useful macros
@@ -64,6 +69,7 @@ enum sm_object_type {
 #include "object/sm_meta.h"
 #include "object/sm_self.h"
 #include "object/sm_error.h"
+#include "object/sm_bc_block.h"
 #include "memory/sm_pointer.h"
 #include "memory/sm_space.h"
 #include "memory/sm_gc.h"

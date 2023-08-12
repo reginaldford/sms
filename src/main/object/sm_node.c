@@ -102,24 +102,12 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
   return true;
 }
 
-// Count the set bits in a long
-// Helper for left_count
-int count_set_bits(unsigned long long num) {
-  int count = 0;
-
-  while (num > 0) {
-    count += num & 1;
-    num >>= 1;
-  }
-  return count;
-}
-
 // Define popcountll whether or not we have the built-in instruction.
 #if defined(__x86_64__) || defined(_M_X64)
 // Assuming we have __builtin_popcountll
 int popcountll(unsigned long long num) { return __builtin_popcountll(num); }
 #else
-// Assuming we don't have the instruction
+// Assuming we do NOT have __builtin_popcountll
 int popcountll(unsigned long long num) {
   int count;
   for (count = 0; num > 0; num >>= 1)
