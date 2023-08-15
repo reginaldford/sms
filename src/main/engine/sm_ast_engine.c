@@ -11,7 +11,6 @@ extern sm_heap   *sms_heap;
 extern sm_heap   *sms_other_heap;
 extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
-extern sm_stack  *sms_callstack;
 
 // The engine should return an error if this returns false
 // and the next function will complain about type mismatch,
@@ -494,7 +493,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_XP_EXPR))
         return (sm_object *)sms_false;
-      return (sm_object *)fun->content;
+      return sm_unlocalize((sm_object *)fun->content, fun);
     }
     case SM_FN_SETXP_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -978,7 +977,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       for (unsigned int i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj);
-        sm_expr_set_arg(output, i, sm_engine_eval(fun->content, fun->parent, new_sf));
+
+        sm_object *map_result = sm_engine_eval(fun->content, fun->parent, new_sf);
+
+        if (map_result->my_type == SM_RETURN_TYPE)
+          map_result = ((sm_return *)map_result)->address;
+
+        sm_expr_set_arg(output, i, map_result);
       }
       return (sm_object *)output;
     }

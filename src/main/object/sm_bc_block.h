@@ -6,3 +6,5 @@ typedef struct sm_bc_block {
   unsigned int       size;
   char               content;
 } sm_bc_block;
+
+sm_bc_block *sm_new_bc_block(sm_cx *meta, int size, char *content);
