@@ -1,10 +1,14 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
+// Implements a pointer stack that lives in OS malloc space.
+// The stack will grow arbitrarily large upon continuos pushing.
+// New capacity is sm_global_growth_factor*old_capacity + 1
+
 #include "sms.h"
 
 // New stack (not an object)
 sm_stack *sm_new_stack(unsigned int capacity) {
-  sm_stack *new_stack = malloc(sizeof(sm_stack) + sizeof(sm_cx *) * capacity);
+  sm_stack *new_stack = malloc(sizeof(sm_stack) + sizeof(void *) * capacity);
   new_stack->capacity = capacity;
   new_stack->top      = sm_stack_empty_top(new_stack);
   return new_stack;
@@ -28,11 +32,7 @@ sm_stack *sm_stack_push(sm_stack *self, void *ptr) {
 
 sm_stack *sm_stack_pop(sm_stack *self) {
   void *previous_top_obj = *(self->top);
-  if (self->top != NULL) {
-    self->top--;
-    return previous_top_obj;
-  }
-  printf("stack underflow occurred\n");
+  self->top--;
   return previous_top_obj;
 }
 
