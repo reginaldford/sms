@@ -52,7 +52,7 @@ void start_repl() {
       // Count this as a line
       yylineno++;
     } else {
-      printf("Error: parser returned %i\n", pr.return_val);
+      printf("Error: Parser returned %i\n", pr.return_val);
       if (!pr.parsed_object)
         printf("Nothing was parsed.");
     }

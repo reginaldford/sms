@@ -493,7 +493,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_XP_EXPR))
         return (sm_object *)sms_false;
-      return sm_unlocalize(sm_copy((sm_object *)fun->content));
+      return sm_unlocalize((sm_object *)fun->content);
     }
     case SM_FN_SETXP_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);

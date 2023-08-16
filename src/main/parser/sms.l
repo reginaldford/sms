@@ -109,7 +109,7 @@ cxValues     {return CX_VALUES;}
 cxSize       {return CX_SIZE;}
 cxImport     {return CX_IMPORT;}
 cxMap        {return CX_MAP;}
-cxReduce     {return CX_REDUCE;/*not done*/}
+cxReduce     {return CX_REDUCE;}
 
 fileParse    {return FILE_PARSE;}
 fileRun      {return FILE_RUN;}

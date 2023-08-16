@@ -8,6 +8,20 @@ sm_object *sm_copy(sm_object *obj) {
   return new_obj;
 }
 
+// Deep Copy the object
+sm_object *sm_deep_copy(sm_object *obj) {
+  if(obj->my_type == SM_EXPR_TYPE){
+    sm_expr * expr=(sm_expr*)sm_copy(obj);
+    for(unsigned int i=0;i<expr->size;i++){
+      sm_expr_set_arg(expr,i,sm_deep_copy(sm_expr_get_arg(expr,i)));
+    }
+    return obj;
+  }else{
+    sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
+    return new_obj;
+  }
+}
+
 // Copy the object to the new heap
 // Leave an sm_pointer in the old space
 sm_object *sm_move_to_new_heap(sm_object *obj) {
