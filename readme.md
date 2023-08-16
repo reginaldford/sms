@@ -11,7 +11,7 @@
 
 
 # Introduction:
-SMS (Symbolic Math System) is a math-focused scripting language for POSIX friendly operating systems. SMS has built-in functions for arithmetic, trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language with a focus on mathematics (like Julia). SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
+SMS (Symbolic Math System) is a math-focused scripting language for POSIX friendly operating systems. SMS has built-in functions for arithmetic, trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
 
 # Details
 
@@ -30,9 +30,9 @@ The following is 'hello world' in SMS:
 
 `putln("Hello world!");`
 
-SMS versions have 2 significant figures (like 0.180) during a milestone point. During these versions, development focuses on documentation, unit tests, and bugs.
+SMS versions have 2 significant figures (like 0.190) during a milestone point. During these versions, development focuses on documentation, unit tests, and bugs.
 
-SMS versions with 3 significant figures (like 0.181) are in feature development, so they may lack documentation for new features, and might have unannounced changes to existing features, are are generally less stable than the milestone versions. This readme is only syncronized with the last milestone version.
+SMS versions with 3 significant figures (like 0.191) are in feature development, so they may lack documentation for new features, and might have unannounced changes to existing features, are are generally less stable than the milestone versions. This readme is only syncronized with the last milestone version.
 
 
 # Cheat Sheet
@@ -116,6 +116,8 @@ Line comments start with `#`.
     6. if(condition) command1 else command2; # if condition evaluates to true, executes command1, else executes command2
 
     7. while(condition) statement # continually repeat statement until condition is false
+
+    8. for(let a = 0;a < 100;a = a + 1) putln(toStr(a)) # will print 0 to 100
 
     8. doWhile ( condition ) statement # Repeating statement until condition is false (checking condition after running statement)
 
