@@ -493,13 +493,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_XP_EXPR))
         return (sm_object *)sms_false;
-      return sm_unlocalize((sm_object *)fun->content, fun);
+      return sm_unlocalize(sm_copy((sm_object *)fun->content));
     }
     case SM_FN_SETXP_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETXP_EXPR))
         return (sm_object *)sms_false;
-      fun->content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      fun->content = sm_localize(sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf), fun);
       return fun->content;
     }
     case SM_FN_PARAMS_EXPR: {
@@ -529,7 +529,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_fun_set_param(new_fun, i, sym->name, NULL, 0);
       }
       // Relocalizing the AST
-      new_fun->content    = sm_unlocalize(new_fun->content, new_fun);
+      new_fun->content    = sm_unlocalize(new_fun->content);
       new_fun->num_params = params->size;
       new_fun->content    = sm_localize(new_fun->content, new_fun);
       return (sm_object *)new_fun;

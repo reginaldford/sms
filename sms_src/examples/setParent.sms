@@ -1,6 +1,6 @@
 #!/usr/local/bin/sms -q
 # Demonstrates fnSetParent
-# fnSetParent sets the parent scope of a context,
+# fnSetParent sets the parent scope of a function,
 # overriding the lexical scope.
 {
   # Build a cx for the function to live
@@ -10,11 +10,8 @@
   # Change the parent from self to env
   fnSetParent(f,env);
   # Run f 10 times
-  let i = 0;
-  while (i < 10) {
+  for(let i = 0; i < 10 ; i = i + 1)
     putln(toStr(f()));
-    i = i + 1;
-  };
   # Show the env cx
   putln(toStr(env));
 };

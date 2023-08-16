@@ -54,7 +54,7 @@ sm_object *sm_localize(sm_object *obj, sm_fun *fun) {
 }
 
 // Replace local variables with symbol references in the expression
-sm_object *sm_unlocalize(sm_object *obj, sm_fun *fun) {
+sm_object *sm_unlocalize(sm_object *obj) {
   if (obj->my_type == SM_EXPR_TYPE) {
     sm_expr *sme = (sm_expr *)obj;
     if (sme->op == SM_ASSIGN_LOCAL_EXPR) {
@@ -64,7 +64,7 @@ sm_object *sm_unlocalize(sm_object *obj, sm_fun *fun) {
     }
     for (unsigned int i = 0; i < sme->size; i++) {
       sm_object *current_obj   = sm_expr_get_arg(sme, i);
-      sm_object *processed_obj = sm_unlocalize(current_obj, fun);
+      sm_object *processed_obj = sm_unlocalize(current_obj);
       sm_expr_set_arg(sme, i, processed_obj);
     }
   } else if (obj->my_type == SM_LOCAL_TYPE) {
