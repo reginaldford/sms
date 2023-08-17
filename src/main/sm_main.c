@@ -189,7 +189,7 @@ int main(int num_args, char *argv[]) {
     check_init(&env, num_args, argv, false);
     sm_strncpy(&(env.script_fp[0]), input_file, strlen(input_file));
     run_file(input_file, &env);
-  } else if (env.initialized == false) { // No filename provided
+  } else { // No filename provided
     check_init(&env, num_args, argv, false);
     start_repl();
   }
