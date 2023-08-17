@@ -225,7 +225,7 @@ _mem_saveFile  {return MEM_SAVEFILE;}
 _mem_readFile  {return MEM_READFILE;}
 _mem_checkFile {return MEM_CHECKFILE;}
 
-<<EOF>>     {return DONE;}
+<<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}
 
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {

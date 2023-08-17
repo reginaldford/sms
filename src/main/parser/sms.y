@@ -272,6 +272,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> THISPROCESS
 
 %token DONE
+%token ENDOFFILE
 
 %nonassoc SYM
 %nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS
@@ -291,8 +292,11 @@ COMMAND : EXPR ';' {
   sm_global_parser_output((sm_object *)($1));
   YYACCEPT;
 }
-| error  { YYABORT; return 4; }
+| error     { YYABORT; return 4; }
 | DONE      { YYACCEPT; }
+| ENDOFFILE {
+  sm_global_parser_output((sm_object*)sm_new_expr(SM_EXIT_EXPR,(sm_object*) sm_new_double(0)));  
+ YYACCEPT;}
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->top)); }
 | EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3); }
