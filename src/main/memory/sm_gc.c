@@ -10,13 +10,13 @@ sm_object *sm_copy(sm_object *obj) {
 
 // Deep Copy the object
 sm_object *sm_deep_copy(sm_object *obj) {
-  if(obj->my_type == SM_EXPR_TYPE){
-    sm_expr * expr=(sm_expr*)sm_copy(obj);
-    for(unsigned int i=0;i<expr->size;i++){
-      sm_expr_set_arg(expr,i,sm_deep_copy(sm_expr_get_arg(expr,i)));
+  if (obj->my_type == SM_EXPR_TYPE) {
+    sm_expr *expr = (sm_expr *)sm_copy(obj);
+    for (unsigned int i = 0; i < expr->size; i++) {
+      sm_expr_set_arg(expr, i, sm_deep_copy(sm_expr_get_arg(expr, i)));
     }
     return obj;
-  }else{
+  } else {
     sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
     return new_obj;
   }
@@ -127,11 +127,6 @@ void sm_inflate_heap() {
     case SM_LOCAL_TYPE: {
       sm_local *local = (sm_local *)current_obj;
       local->name     = (sm_string *)sm_meet_object((sm_object *)local->name);
-      break;
-    }
-    case SM_SELF_TYPE: {
-      sm_self *self = (sm_self *)current_obj;
-      self->context = (sm_cx *)sm_meet_object((sm_object *)self->context);
       break;
     }
     case SM_RETURN_TYPE: {

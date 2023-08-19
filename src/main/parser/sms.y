@@ -298,7 +298,7 @@ COMMAND : EXPR ';' {
   sm_global_parser_output((sm_object*)sm_new_expr(SM_EXIT_EXPR,(sm_object*) sm_new_double(0)));  
  YYACCEPT;}
 
-EXPR : SELF { $$ = (sm_expr*)sm_new_self((sm_cx*)*(sm_global_lex_stack(NULL)->top)); }
+EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3); }
 | LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4); }
 | RM SYM {$$ = sm_new_expr(SM_RM_EXPR, (sm_object *)$2); }

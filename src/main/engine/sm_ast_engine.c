@@ -1516,7 +1516,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     return ((sm_meta *)input)->address;
   }
   case SM_SELF_TYPE: {
-    return (sm_object *)((sm_self *)input)->context;
+    return (sm_object *)current_cx;
   }
   case SM_PRIMITIVE_TYPE: {
     printf("Primitives are not developed yet\n");

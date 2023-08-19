@@ -198,11 +198,6 @@ void sm_cx_contextualize(sm_object *input, sm_cx *cx) {
     input_fun->parent = cx;
     break;
   }
-  case SM_SELF_TYPE: {
-    sm_self *input_self = (sm_self *)input;
-    input_self->context = cx;
-    break;
-  }
   case SM_EXPR_TYPE: {
     sm_expr *input_expr = (sm_expr *)input;
     if (input_expr->op == SM_BLOCK_EXPR)

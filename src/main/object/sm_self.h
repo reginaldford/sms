@@ -5,5 +5,5 @@ typedef struct sm_self {
   struct sm_cx *context;
 } sm_self;
 
-struct sm_self *sm_new_self(struct sm_cx *context);
+struct sm_self *sm_new_self();
 int             sm_self_sprint(sm_self *self, char *buffer, bool fake);
