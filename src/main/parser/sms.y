@@ -509,7 +509,10 @@ OPEN_BLOCK : '{' EXPR {
   sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL), new_cx));
   $$ = sm_new_expr_2(SM_BLOCK_EXPR,(sm_object*)new_cx, (sm_object *)$2); 
 }
-| OPEN_BLOCK ';' EXPR { $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3); }
+| OPEN_BLOCK ';' EXPR {
+  sm_cx_contextualize((sm_object*)$3,*sm_global_lex_stack(NULL)->top);
+  $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3);
+}
 
 TEST_LT : '<' '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(SM_LT_EXPR, (sm_object *)($3), (sm_object *)($5));
