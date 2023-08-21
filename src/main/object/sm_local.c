@@ -29,9 +29,11 @@ int sym_matches_param(sm_symbol *sym, sm_fun *fun) {
 // Replace symbols in the expression with locals for function definition
 // This way, local variables use stack frame references.
 sm_object *sm_localize(sm_object *obj, sm_fun *fun) {
-  obj = sm_copy(obj);
+  if (obj->my_type != SM_CX_TYPE)
+    obj = sm_copy(obj);
   if (obj->my_type == SM_EXPR_TYPE) {
     sm_expr *sme = (sm_expr *)obj;
+
     if (sme->op == SM_ASSIGN_EXPR) {
       int which_param = sym_matches_param((sm_symbol *)sm_expr_get_arg(sme, 0), fun);
       if (which_param != -1) {
@@ -40,6 +42,7 @@ sm_object *sm_localize(sm_object *obj, sm_fun *fun) {
         sm_expr_set_arg(sme, 0, (sm_object *)sm_new_local(which_param, sym->name));
       }
     }
+
     for (unsigned int i = 0; i < sme->size; i++) {
       sm_object *current_obj   = sm_expr_get_arg(sme, i);
       sm_object *processed_obj = sm_localize(current_obj, fun);
@@ -56,7 +59,9 @@ sm_object *sm_localize(sm_object *obj, sm_fun *fun) {
 
 // Replace local variables with symbol references in the expression
 sm_object *sm_unlocalize(sm_object *obj) {
-  obj = sm_copy(obj);
+  if (obj->my_type != SM_CX_TYPE)
+    obj = sm_copy(obj);
+
   if (obj->my_type == SM_EXPR_TYPE) {
     sm_expr *sme = (sm_expr *)obj;
     if (sme->op == SM_ASSIGN_LOCAL_EXPR) {

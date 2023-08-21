@@ -200,9 +200,12 @@ void sm_cx_contextualize(sm_object *input, sm_cx *cx) {
   }
   case SM_EXPR_TYPE: {
     sm_expr *input_expr = (sm_expr *)input;
-    if (input_expr->op == SM_BLOCK_EXPR)
-      sm_expr_set_arg(input_expr, 0, (sm_object *)cx);
-    else
+    if (input_expr->op == SM_BLOCK_EXPR) {
+      sm_cx *block_cx  = (sm_cx *)sm_expr_get_arg(input_expr, 0);
+      block_cx->parent = cx;
+      for (unsigned int i = 1; i < input_expr->size; i++)
+        sm_cx_contextualize(sm_expr_get_arg(input_expr, i), cx);
+    } else
       for (unsigned int i = 0; i < input_expr->size; i++)
         sm_cx_contextualize(sm_expr_get_arg(input_expr, i), cx);
   }
