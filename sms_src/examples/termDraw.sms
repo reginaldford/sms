@@ -1,0 +1,31 @@
+#!/usr/local/bin/sms -q
+# Uses tput to get terminal dimensions, 
+# Then runs a for loop to fill up the screen with numbers
+{
+  # Function to get a number from a command
+  let getOutput = cmd => {
+    osExec(cmd str+ " > _tmp.dat" );
+    let output = fileRead("_tmp.dat");
+    osExec("rm _tmp.dat");
+    return parse(output);
+  };
+  # Artistic engine
+  let printChar=(x,y)=>{
+    x=x*2.5;
+    let v = abs(
+      floor(
+        9*sin(((x+tWidth/2)+y)/9)
+        *sin(y*3/(x/3+1))));
+    if(v <= 2) v = 0;
+    let s = if(not(v == 0) and not(v == 9))
+      toStr(v) else " ";
+    put(s);
+  };
+  
+  # Run the double for loop
+  let tWidth = getOutput("tput cols");
+  let tHeight = getOutput("tput lines")-2;
+  for(let x=0;x<tHeight;x=x+1)
+    for(let y=0;y<tWidth;y=y+1)
+      printChar(x,y);
+};
