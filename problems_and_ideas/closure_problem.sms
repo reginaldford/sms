@@ -1,0 +1,27 @@
+#!/usr/local/bin/sms
+# sm_fun_args_to_cx(fun,fun2->parent) at call.
+{
+  let makeAdder = x => {
+    let a = x;
+    return y => {return y + a};
+  };
+
+  let add5 = makeAdder(5);
+  putln("add5 is " str+ toStr(add5));
+  putln("add5 parent is: " str+ toStr(fnParent(add5)));
+  putln("add5 parent2 is: " str+ toStr(parent(fnParent(add5))));
+  putln("add5(2) is " str+toStr(add5(2)));
+
+  let add6 = makeAdder(6);
+  putln("\nadd6 is " str+ toStr(add6));
+  putln("add6 parent is: " str+ toStr(fnParent(add6)));
+  putln("add6 parent2 is: " str+ toStr(parent(fnParent(add6))));
+  putln("add6(2) is " str+ toStr(add6(2)));
+
+  putln("\nadd5 is " str+ toStr(add5));
+  putln("add5 parent is: " str+ toStr(fnParent(add5)));
+  putln("add5 parent2 is: " str+ toStr(parent(fnParent(add5))));
+  putln("add5(2) is " str+ toStr(add5(2)));
+
+  cxImport(self,_scratch);
+};
