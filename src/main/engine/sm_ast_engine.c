@@ -500,7 +500,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETXP_EXPR))
         return (sm_object *)sms_false;
       fun->content = sm_localize(sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf), fun);
-      return fun->content;
+      return (sm_object *)fun;
     }
     case SM_FN_PARAMS_EXPR: {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -543,12 +543,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FN_SETPARENT_EXPR: {
       sm_fun *fun        = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_cx  *new_parent = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      fun                = (sm_fun *)sm_copy((sm_object *)fun);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETPARENT_EXPR))
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)new_parent, 1, SM_CX_TYPE, SM_FN_SETPARENT_EXPR))
         return (sm_object *)sms_false;
       fun->parent = new_parent;
-      return (sm_object *)new_parent;
+      return (sm_object *)fun;
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1094,13 +1095,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       unsigned int i        = 1;
       sm_object   *result   = (sm_object *)sms_true;
       sm_cx       *inner_cx = (sm_cx *)sm_expr_get_arg(sme, 0);
-      while (i + 1 < sme->size) {
-        result = sm_engine_eval(sm_expr_get_arg(sme, i), inner_cx, sf);
+      sm_cx       *new_cx   = sm_new_cx(inner_cx->parent);
+      while (i < sme->size) {
+        result = sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);
         if (result->my_type == SM_RETURN_TYPE)
           return result;
         i++;
       }
-      return sm_engine_eval(sm_expr_get_arg(sme, sme->size - 1), inner_cx, sf);
+      return result;
       break;
     }
     case SM_ASSIGN_EXPR: {
@@ -1539,6 +1541,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   case SM_LOCAL_TYPE: {
     sm_local *local = (sm_local *)input;
     return sm_expr_get_arg(sf, local->index);
+  }
+  case SM_FUN_TYPE: {
+    sm_fun *f = (sm_fun *)input;
+    f         = (sm_fun *)sm_copy((sm_object *)f);
+    f->parent = current_cx;
+    return (sm_object *)f;
   }
   case SM_ERROR_TYPE: {
     // TODO: Add callstack info here.
