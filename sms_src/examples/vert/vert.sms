@@ -5,6 +5,10 @@ cxLet(parent(_scratch), :vert, (x,u1,u2)=>{
       let mratios=fileParse("mvert.sms");
       let lratios=fileParse("lvert.sms");
       let tratios=fileParse("tvert.sms");
+
+
+
+      # parent of self here is not the same cx as the outter lexical
       cxImport(self,parent(self));
     };
     
