@@ -7,7 +7,8 @@ unsigned int sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum SM_EXPR_T
   if (expr->size == 0)
     return 0;
   unsigned int buffer_pos = 0;
-  for (unsigned int i = 0; i + 1 < expr->size; i++) {
+  unsigned int i          = op == SM_BLOCK_EXPR ? 1 : 0;
+  for (; i + 1 < expr->size; i++) {
     buffer_pos += sm_object_sprint(sm_expr_get_arg(expr, i), &(buffer[buffer_pos]), fake);
     if (!fake)
       buffer[buffer_pos] = op == SM_BLOCK_EXPR ? ';' : ',';
