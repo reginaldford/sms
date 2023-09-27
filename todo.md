@@ -1,12 +1,10 @@
 # full silence with -q, for pipes
 
 # precedence issue: 
-{let x= let y=5;
-  {
-    let f=(x,y)=>{ return x + y + parent(self).x + parent(self).y};
-  }
+{ let x= let y=5;
+  { let f=(x,y)=>{ return x + y + parent(self).x + parent(self).y}; }
 }
-should work
+should work, but we are getting x+(y+parent(self)).x + ...
 
 # strSize/strCapacity
 
@@ -104,7 +102,6 @@ should work
 - large numArray: numArr@<len>
 - toStr does full mode, no prettyprinting
 - toStrPretty takes an optional cx of options?
-- color mode eventually.
 
 # internal power series engine
 - to cover missing trig functions
