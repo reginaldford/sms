@@ -841,22 +841,17 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_expr_set_arg(output, 7, (sm_object *)sm_new_double(filestat.st_size));
         sm_expr_set_arg(output, 8, (sm_object *)sm_new_double(filestat.st_blksize));
         sm_expr_set_arg(output, 9, (sm_object *)sm_new_double(filestat.st_blocks));
-        sm_expr_set_arg(output, 10, (sm_object *)sm_new_double(filestat.st_atime.tv_sec));
-#if __APPLE__
-        sm_expr_set_arg(output, 11, (sm_object *)sm_new_double(0));
-#else
-        sm_expr_set_arg(output, 11, (sm_object *)sm_new_double(filestat.st_atim.tv_nsec));
-#endif
         sm_expr_set_arg(output, 12, (sm_object *)sm_new_double(filestat.st_mtime));
-#if __APPLE__
-        sm_expr_set_arg(output, 13, (sm_object *)sm_new_double(0));
-#else
-        sm_expr_set_arg(output, 13, (sm_object *)sm_new_double(filestat.st_mtim.tv_nsec));
-#endif
         sm_expr_set_arg(output, 14, (sm_object *)sm_new_double(filestat.st_ctime));
 #if __APPLE__
+        sm_expr_set_arg(output, 10, (sm_object *)sm_new_double(filestat.st_atime.tv_sec));
+        sm_expr_set_arg(output, 11, (sm_object *)sm_new_double(0));
+        sm_expr_set_arg(output, 13, (sm_object *)sm_new_double(0));
         sm_expr_set_arg(output, 15, (sm_object *)sm_new_double(0));
 #else
+        sm_expr_set_arg(output, 10, (sm_object *)sm_new_double(filestat.st_atim.tv_sec));
+        sm_expr_set_arg(output, 11, (sm_object *)sm_new_double(filestat.st_atim.tv_nsec));
+        sm_expr_set_arg(output, 13, (sm_object *)sm_new_double(filestat.st_mtim.tv_nsec));
         sm_expr_set_arg(output, 15, (sm_object *)sm_new_double(filestat.st_ctim.tv_nsec));
 #endif
       } else {
