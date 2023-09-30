@@ -24,12 +24,7 @@ should work, but we are getting x+(y+parent(self)).x + ...
 # add semicolon for convenience for parse cmds
 
 # cx
-- cxSetParent
 - save and load
-
-# expression chapter
-- get op symbol from an xp
-- set op symbol for an xp
 
 # active terminal support
 - This code is being developed in the feature/smartput branch
@@ -98,7 +93,7 @@ should work, but we are getting x+(y+parent(self)).x + ...
 - long strings will show as str@<len>
 - long arrays will show as arr@<len>
 - large contexts will show as cx@<len>
-- large byte array: byteArr@<len>
+:- large byte array: byteArr@<len>
 - large numArray: numArr@<len>
 - toStr does full mode, no prettyprinting
 - toStrPretty takes an optional cx of options?
