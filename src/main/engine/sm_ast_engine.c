@@ -841,7 +841,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_expr_set_arg(output, 7, (sm_object *)sm_new_double(filestat.st_size));
         sm_expr_set_arg(output, 8, (sm_object *)sm_new_double(filestat.st_blksize));
         sm_expr_set_arg(output, 9, (sm_object *)sm_new_double(filestat.st_blocks));
-        sm_expr_set_arg(output, 10, (sm_object *)sm_new_double(filestat.st_atim.tv_sec));
+        sm_expr_set_arg(output, 10, (sm_object *)sm_new_double(filestat.st_atime.tv_sec));
 #if __APPLE__
         sm_expr_set_arg(output, 11, (sm_object *)sm_new_double(0));
 #else
