@@ -155,8 +155,8 @@ fnSetParent {return FN_SETPARENT;}
 
 newXp       {return NEW_XP;}
 xpOp        {return XP_OP;}
-xpSetop     {return XP_SETOP;}
-xpOpstr     {return XP_OPSTR;}
+xpSetOp     {return XP_SETOP;}
+xpOpStr     {return XP_OPSTR;}
 
 newMem     {return NEW_MEM;}
 memSet     {return MEM_SET;}
