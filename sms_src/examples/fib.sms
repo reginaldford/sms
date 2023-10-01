@@ -1,8 +1,5 @@
 #!/usr/local/bin/sms -qi
 {
-  # when the anonymous func is created, the scratchpad cx is stored
-  # so, we find fib on line 8, but fib does not find fib.
-  # bc fib runs in a closure whose parent is scratchpad, not this block.
   let fib = n => if( n < 2 ) 1 else fib(n - 1) + fib(n - 2);
   let playFib = () => {
     while(true){
