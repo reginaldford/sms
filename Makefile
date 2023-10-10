@@ -39,6 +39,7 @@ BIN_NAME_TEST   := sms_test
 BIN_NAME_KT     := sms_kernel_test
 BIN_NAME_PROF   := sms_prof
 THREADS         := 8 #match the number of threads on your machine
+DOCS_CONFIG     := docs/docs.conf
 
 # sms executable
 main:
@@ -93,7 +94,7 @@ $(BUILD_DIR)/%.c.prof.o: %.c
 	$(CC_PROF) $(CFLAGS_PROF) -c $< -o $@
 
 # Artificial BIN_NAMEs (not file destinations)
-.PHONY: all clean install
+.PHONY: all clean install docs
 
 # Reset file state
 clean:
@@ -135,6 +136,10 @@ check: dev
 	./bin/$(BIN_NAME_KT) &&\
 	./bin/$(BIN_NAME_TEST) test_zone/outline.sms &&\
 	echo Kernel Tests and SMS Tests Passed.
+
+# Generate html for docs with doxygen
+docs:
+	doxygen $(DOCS_CONFIG)
 
 # sms unified binary will be faster
 unified:
