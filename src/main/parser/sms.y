@@ -18,8 +18,6 @@ void _lex_cstr(char * cstr,int len);
 
 %}
 
-%define parse.error verbose
-
 %union {
   sm_double        *num;
   sm_symbol        *sym;
