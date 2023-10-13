@@ -844,7 +844,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_expr_set_arg(output, 12, (sm_object *)sm_new_double(filestat.st_mtime));
         sm_expr_set_arg(output, 14, (sm_object *)sm_new_double(filestat.st_ctime));
 #if __APPLE__
-        sm_expr_set_arg(output, 10, (sm_object *)sm_new_double(filestat.st_atime.tv_sec));
+        sm_expr_set_arg(output, 10, (sm_object *)sm_new_double(filestat.st_atime));
         sm_expr_set_arg(output, 11, (sm_object *)sm_new_double(0));
         sm_expr_set_arg(output, 13, (sm_object *)sm_new_double(0));
         sm_expr_set_arg(output, 15, (sm_object *)sm_new_double(0));
