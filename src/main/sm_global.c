@@ -210,6 +210,9 @@ char *sm_global_fn_name(unsigned short int which) {
     "fnSetParams",  // SM_FN_SETPARAMS_EXPR
     "fnParent",     // SM_FN_PARENT_EXPR
     "fnSetParent",  // SM_FN_SETPARENT_EXPR
+    "xpOp",         // SM_XPR_OP
+    "xpSetOp",      // SM_XPR_SETOP
+    "xpOpStr",      // SM_XPR_OPSTR
     "strSize",      // SM_STR_SIZE_EXPR
     "strGet",       // SM_STR_GET_EXPR
     "strSet",       // SM_STR_SET_EXPR
