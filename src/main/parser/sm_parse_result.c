@@ -8,7 +8,7 @@ void  end_scan_str(void);
 FILE *lex_file(char *filepath);
 void  lex_cstr(char *cstr, int len);
 void  _done_lexing_file(FILE *f);
-int yyparse(void);
+int   yyparse(void);
 
 // Parse a string with known length
 sm_parse_result sm_parse_cstr(char *cstr, int len) {
