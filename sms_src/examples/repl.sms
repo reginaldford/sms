@@ -5,11 +5,11 @@
 {
   let in = "";
   let ans = [];
-
+  let env = {};
   while(true){
     put("> ");
     in = input();
-    ans = eval(parse(in));
+    ans = cxEval(env,parse(in));
     putln(toStr(ans))
   };
 };
