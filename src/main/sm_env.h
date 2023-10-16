@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-// Structure to hold global info affected by command line arguments
+/// Structure to hold global info affected by command line arguments
 typedef struct sm_env {
   bool   script_flag;
   char   script_fp[256];
@@ -13,7 +13,6 @@ typedef struct sm_env {
   bool   mem_flag;
   double mem_mbytes;
   char   mem_str[10];
-  bool   print_stats;
   bool   initialized;
   bool   quiet_mode;
   int    num_args;
