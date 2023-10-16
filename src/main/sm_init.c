@@ -12,7 +12,6 @@ void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
   env->eval_cmd[0]   = '\0';
   env->eval_cmd_len  = 0;
   env->gc            = true;
-  env->print_stats   = true;
   env->num_args      = num_args;
   env->args          = argv;
   env->quiet_mode    = quiet;
