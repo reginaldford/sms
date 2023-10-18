@@ -42,7 +42,6 @@ enum sm_object_type {
 };
 
 // Useful macros
-#define ABS(x) (x < 0 ? -1 * x : x)
 #define MIN(x, y) (x < y ? x : y)
 #define MAX(x, y) (x > y ? x : y)
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x))

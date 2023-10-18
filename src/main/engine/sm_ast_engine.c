@@ -210,7 +210,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       time(&rawtime);
       timeinfo          = localtime(&rawtime);
       sm_string *result = sm_new_string_manual(24);
-      snprintf(&(result->content), 25, "%s", asctime(timeinfo));
+      sm_strncpy(&(result->content),asctime(timeinfo),24);
       (&result->content)[24] = '\0';
       return (sm_object *)result;
       break;
