@@ -47,8 +47,8 @@ main:
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME)
 
-bin/$(BIN_NAME): $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
-	$(CC_DEBUG) -lm $(CFLAGS_DEBUG) $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
+bin/$(BIN_NAME): $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
+	$(CC) $(CFLAGS) -lm $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
 
 
 # Not files
