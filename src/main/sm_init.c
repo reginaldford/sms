@@ -6,7 +6,7 @@ extern sm_heap *sms_heap;
 
 void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
   // Default (inner) environment variables
-  int mem_mbytes     = 50;
+  double mem_mbytes  = 64 * 1024 * 1024;
   env->script_fp[0]  = '\0';
   env->script_fp_len = 0;
   env->eval_cmd[0]   = '\0';
@@ -26,7 +26,7 @@ void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
 
   // Initialize the current memory heap
   // During first gc, a second heap of the same size will be allocated.
-  sms_heap = sm_new_heap(mem_mbytes * 1024 * 1024 / 2);
+  sms_heap = sm_new_heap(mem_mbytes / 2);
 
   // Initialize the global space arrays
   sm_global_space_array(sm_new_space_array(0, 100));

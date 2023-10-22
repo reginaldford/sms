@@ -182,27 +182,9 @@ void sm_garbage_collect() {
     putc('\n', stdout);
     printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
     putc('(', stdout);
-    if (sms_heap->used < KB)
-      printf("%.3gB", (double)sms_heap->used);
-    else if (sms_heap->used < KB * KB)
-      printf("%.3gKB", (double)sms_heap->used / KB);
-    else if (sms_heap->used < (KB * KB * KB))
-      printf("%.3gMB", (double)sms_heap->used / (KB * KB));
-    else if (sms_heap->used >= (KB * KB * KB * KB) && sms_heap->used < (KB * KB))
-      printf("%.3gGB", (double)sms_heap->used / (KB * KB * KB));
-    else if (sms_heap->used >= (KB * KB * KB * KB * KB))
-      printf("%.3gTB", (double)sms_heap->used / (KB * KB * KB * KB));
+    sm_print_fancy_bytelength((long long)sms_heap->used);
     printf(" / ");
-    if (sms_heap->capacity < KB)
-      printf("%.3gB", (double)sms_heap->capacity);
-    else if (sms_heap->capacity < KB * KB)
-      printf("%.3gKB", (double)sms_heap->capacity / KB);
-    else if (sms_heap->capacity < (KB * KB * KB))
-      printf("%.3gMB", (double)sms_heap->capacity / (KB * KB));
-    else if (sms_heap->capacity >= (KB * KB * KB * KB) && sms_heap->capacity < (KB * KB))
-      printf("%.3gGB", (double)sms_heap->capacity / (KB * KB * KB));
-    else if (sms_heap->capacity >= (KB * KB * KB * KB * KB))
-      printf("%.3gTB", (double)sms_heap->capacity / (KB * KB * KB * KB));
+    sm_print_fancy_bytelength((long long)sms_heap->capacity);
     putc(')', stdout);
     printf("%s", sm_terminal_reset());
   }

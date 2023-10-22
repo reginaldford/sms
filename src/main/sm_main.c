@@ -10,7 +10,7 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.193%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.194%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
@@ -83,15 +83,15 @@ int main(int num_args, char *argv[]) {
     case 'h':
       printf("SMS Help\n");
       printf("Running sms with no flags will start the command line.\n");
-      printf(" Flag:                                      Example:\n");
-      printf("-h Help.                                     sms -h\n");
-      printf("-q Quiet mode, does not print intro/outro.   sms -q -s script.sms\n");
-      printf("-m Set the heap size in MB. Default: 50.     sms -m 150\n");
-      printf("-e Print the evaluation of an expression.    sms -e \"2*sin(PI/4)\"\n");
-      printf("-s Run Script file.                          sms -s script.sms\n");
-      printf("-i Run a file, then start the REPL.          sms -i script.sms\n");
-      printf("-c Custom argument. Accessed via _args       sms -c \"a single string\"\n");
-      printf("\nIf the -m flag is used, it must be first.  sms -m 4 -s x1.sms -i x2.sms\n");
+      printf(" Flag:                                           Example:\n");
+      printf("-h Help.                                          sms -h\n");
+      printf("-q Quiet mode, does not print intro/outro.        sms -q -s script.sms\n");
+      printf("-m Set memory usage. Units: kmgt. Default is 64m. sms -m 150m\n");
+      printf("-e Print the evaluation of an expression.         sms -e \"2*sin(PI/4)\"\n");
+      printf("-s Run Script file.                               sms -s script.sms\n");
+      printf("-i Run a file, then start the REPL.               sms -i script.sms\n");
+      printf("-c Custom argument. Accessed via _args            sms -c \"a single string\"\n");
+      printf("\nIf the -m flag is used, it must be first.       sms -m 4 -s x1.sms -i x2.sms\n");
       printf("Some flags can be repeated and all flags are executed in order.\n");
       clean_exit(&env, 0);
       break;
@@ -105,28 +105,22 @@ int main(int num_args, char *argv[]) {
       }
       env.mem_flag = true;
       const char *valid_values =
-        "Value must be in the range 0.01 to 4000000 inclusively (Units are Megabytes)";
+        "Value must be within range 2.5k to 4t (2.5 kilobytes to 4 terrabytes).";
       for (long unsigned int i = 0; i < strlen(optarg); i++) {
         env.mem_str[i] = optarg[i];
       }
-      env.mem_mbytes = atof(optarg);
-      if (env.mem_mbytes < 0.01 || env.mem_mbytes > 1000 * 4000) {
+      env.mem_mbytes = sm_bytelength_parse(env.mem_str, strlen(optarg));
+      if ((env.mem_mbytes < 2.5 * 1024) || (env.mem_mbytes > pow(1024, 4) * 4)) {
         printf("Invalid memory heap size: %s\n", env.mem_str);
         printf("%s\n", valid_values);
         printf("Try -h for help.\n");
         clean_exit(&env, 1);
       }
       if (env.quiet_mode == false) {
-        const int KB = 1024;
         printf("Custom Heap Size: ");
-        if (env.mem_mbytes < 1)
-          printf("%.4g KB\n", env.mem_mbytes * KB);
-        else if (env.mem_mbytes < (KB))
-          printf("%.4g MB\n", env.mem_mbytes);
-        else if (env.mem_mbytes >= (KB) && env.mem_mbytes < (KB * KB))
-          printf("%.4g GB\n", env.mem_mbytes / KB);
-        else if (env.mem_mbytes >= (KB * KB))
-          printf("%.4g TB\n", env.mem_mbytes / (KB * KB));
+        printf("%lld Bytes (", (long long)env.mem_mbytes);
+        sm_print_fancy_bytelength((long long)env.mem_mbytes);
+        printf(")\n");
       }
       break;
     }
