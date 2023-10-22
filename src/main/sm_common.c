@@ -26,7 +26,7 @@ int sm_is_unit(char c) {
 }
 
 // Parse a c string into an integer specifying a number of bytes.
-long long sm_bytelength_parse(char *str, int length) {
+unsigned long long sm_bytelength_parse(char *str, int length) {
   char buffer[16]; // 16 characters for the numeric value
   for (int i = 0; i < 17; i++) {
     char current_char = str[i];
@@ -52,7 +52,7 @@ long long sm_bytelength_parse(char *str, int length) {
   return -1;
 }
 
-void sm_print_fancy_bytelength(long long bytelength) {
+void sm_print_fancy_bytelength(unsigned long long bytelength) {
   const unsigned long long KB = 1024;
   if (bytelength < KB)
     printf("%.3gB", (double)bytelength);
@@ -60,8 +60,8 @@ void sm_print_fancy_bytelength(long long bytelength) {
     printf("%.3gKB", (double)bytelength / KB);
   else if (bytelength < (KB * KB * KB))
     printf("%.3gMB", (double)bytelength / (KB * KB));
-  else if (bytelength >= (KB * KB * KB * KB) && bytelength < (KB * KB))
+  else if (bytelength < (KB * KB * KB * KB))
     printf("%.3gGB", (double)bytelength / (KB * KB * KB));
-  else if (bytelength >= (KB * KB * KB * KB * KB))
+  else
     printf("%.3gTB", (double)bytelength / (KB * KB * KB * KB));
 }
