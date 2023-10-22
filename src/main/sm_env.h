@@ -16,7 +16,7 @@ typedef struct sm_env {
   /// Whether custom memory size was specified (-m)
   bool mem_flag;
   /// Number of megabytes specified through -m
-  double mem_mbytes;
+  double mem_bytes;
   /// The string parsed to to mem_bytes
   char mem_str[10];
   /// Whether sm_init has completed

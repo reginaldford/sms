@@ -109,8 +109,8 @@ int main(int num_args, char *argv[]) {
       for (long unsigned int i = 0; i < strlen(optarg); i++) {
         env.mem_str[i] = optarg[i];
       }
-      env.mem_mbytes = sm_bytelength_parse(env.mem_str, strlen(optarg));
-      if ((env.mem_mbytes < 2.5 * 1024) || (env.mem_mbytes > pow(1024, 4) * 4)) {
+      env.mem_bytes = sm_bytelength_parse(env.mem_str, strlen(optarg));
+      if ((env.mem_bytes < 2.5 * 1024) || (env.mem_bytes > pow(1024, 4) * 4)) {
         printf("Invalid memory heap size: %s\n", env.mem_str);
         printf("%s\n", valid_values);
         printf("Try -h for help.\n");
@@ -118,8 +118,8 @@ int main(int num_args, char *argv[]) {
       }
       if (env.quiet_mode == false) {
         printf("Custom Heap Size: ");
-        printf("%lld Bytes (", (long long)env.mem_mbytes);
-        sm_print_fancy_bytelength((long long)env.mem_mbytes);
+        printf("%lld Bytes (", (long long)env.mem_bytes);
+        sm_print_fancy_bytelength((long long)env.mem_bytes);
         printf(")\n");
       }
       break;
