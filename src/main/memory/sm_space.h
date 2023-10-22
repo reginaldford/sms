@@ -1,28 +1,35 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-// Anything with a type too high is a space
-// sm_space_type is to be subtracted from my_type to calculate the size
+/// An object representing an unused memory space
 typedef struct sm_space {
   enum sm_object_type my_type;
   unsigned short int  size;
 } sm_space;
 
-// Not part of the heap
-// Has pointers to spaces following the struct
+/** The space array is a global array of pointers to spaces in the heap.
+This array is not stored inside the heap.
+Has pointers to spaces following the struct.
+If an algorithm knowingly generates garbage, it may add spaces to the space array, which can then be
+checked for new space to use as opposed to actually using more space in the heap.
+**/
 typedef struct sm_space_array {
   unsigned int size;
   unsigned int capacity;
 } sm_space_array;
 
-// by setting found to false and using index to indicate where it would be
+/// Results from sm_space_array_find and sm_space_array_find_by_pos
 typedef struct sm_search_result {
   bool         found;
   unsigned int index;
 } sm_search_result;
 
-sm_space        *sm_new_space(void *trash, unsigned int size);
-sm_space_array  *sm_new_space_array(unsigned int size, unsigned int capacity);
-sm_space_array  *sm_resize_space_array(sm_space_array *table, unsigned int new_capacity);
+/// Create a new space
+sm_space *sm_new_space(void *trash, unsigned int size);
+/// Create a new space array
+sm_space_array *sm_new_space_array(unsigned int size, unsigned int capacity);
+/// Actually relies on OS realloc. This should be extremely rare
+sm_space_array *sm_resize_space_array(sm_space_array *table, unsigned int new_capacity);
+/// YOU ARE HERE
 sm_space       **sm_get_space_array(sm_space_array *table);
 sm_string       *sm_space_to_string(sm_space *self);
 sm_space_array  *sm_space_add_by_pos(sm_space *space, sm_space_array *table);
