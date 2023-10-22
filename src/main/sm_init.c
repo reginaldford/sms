@@ -6,7 +6,7 @@ extern sm_heap *sms_heap;
 
 void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
   // Default (inner) environment variables
-  double mem_mbytes  = 64 * 1024 * 1024;
+  double mem_bytes   = 64 * 1024 * 1024;
   env->script_fp[0]  = '\0';
   env->script_fp_len = 0;
   env->eval_cmd[0]   = '\0';
@@ -17,16 +17,16 @@ void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
   env->quiet_mode    = quiet;
 
   if (env->mem_flag)
-    mem_mbytes = env->mem_mbytes; // mem_mbytes overrides
+    mem_bytes = env->mem_bytes; // mem_bytes overrides
   else
-    env->mem_mbytes = mem_mbytes;
+    env->mem_bytes = mem_bytes;
 
   // Register the signal handler
   sm_register_signals();
 
   // Initialize the current memory heap
   // During first gc, a second heap of the same size will be allocated.
-  sms_heap = sm_new_heap(mem_mbytes / 2);
+  sms_heap = sm_new_heap(mem_bytes / 2);
 
   // Initialize the global space arrays
   sm_global_space_array(sm_new_space_array(0, 100));
