@@ -59,7 +59,8 @@ unsigned long long sm_bytelength_parse(char *str, int length) {
     } else if (current_char == 0) {
       buffer[i] = 0;
       return (unsigned long long)atof(buffer);
-    }else break;
+    } else
+      break;
   }
   return -1;
 }
