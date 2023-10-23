@@ -15,9 +15,20 @@ bool sm_is_letter(char c) {
   return (number >= 65 && number <= 90) || (number >= 97 && number <= 122);
 }
 
-// Returns -1 if c is not found within the string "bBkKmMgGtT"
+/// Returns whether a character is a letter of the alphabet
+char sm_to_lowercase(char c) {
+  int number = (int)c;
+  // ASCII char 0 through 9 is 48 through 57
+  // return (number >= 65 && number <= 90) || (number >= 97 && number <= 122);
+  if (number >= 65 && number <= 90)
+    return (char)(number + 32);
+  return c;
+}
+
+// Returns -1 if lowercase(c) is not found within the string "bkmgt"
 // Otherwise, returns the index of
 int sm_is_unit(char c) {
+  c                 = sm_to_lowercase(c);
   const char *units = "bkmgt"; // memory units
   for (int i = 0; i < 10; i++)
     if (units[i] == c)
@@ -32,7 +43,8 @@ unsigned long long sm_bytelength_parse(char *str, int length) {
     char current_char = str[i];
     if (current_char == 0) {
       buffer[i] = 0;
-      return atoi(buffer);
+      // If no unit is given, assume megabytes (m)
+      return (unsigned long long)atof(buffer) * 1024 * 1024;
     }
     if (sm_is_digit(current_char) || current_char == '.')
       buffer[i] = current_char;
@@ -46,8 +58,8 @@ unsigned long long sm_bytelength_parse(char *str, int length) {
       return unit_in_bytes * atof(buffer);
     } else if (current_char == 0) {
       buffer[i] = 0;
-      return (long long)atof(buffer);
-    }
+      return (unsigned long long)atof(buffer);
+    }else break;
   }
   return -1;
 }
