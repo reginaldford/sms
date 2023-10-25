@@ -29,10 +29,10 @@ void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
   sms_heap = sm_new_heap(mem_bytes / 2);
 
   // Initialize the global space arrays
-  sm_global_space_array(sm_new_space_array(0, 100));
+  // sm_global_space_array(sm_new_space_array(0, 1024));
 
   // Initialize the lexical stack
-  sm_global_lex_stack(sm_new_stack(100));
+  sm_global_lex_stack(sm_new_stack(128));
 
   // Build the global context's parent
   sm_cx *parent_cx = sm_new_cx(NULL);

@@ -109,7 +109,8 @@ clean:
 		$(BUILD_DIR)/$(SRC_ENGINE)/*.o\
 		$(BUILD_DIR)/$(SRC_MEM)/*.o\
 		$(BUILD_DIR)/$(SRC_TERMINAL)/*.o\
-		bin/sms*
+		bin/sms*\
+		docs/html
 
 # Install the binary to a unix-like system
 install: main

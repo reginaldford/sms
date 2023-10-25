@@ -2,7 +2,11 @@
 
 /// Returns whether a character is a digit
 bool sm_is_digit(char c);
-/// Returns -1 if c is not found within the string "bBkKmMgGtT"
+/// Returns whether a character is a letter of the alphabet
+bool sm_is_letter(char c);
+/// If the letter is A-Z, returns the lowercase a-z
+char sm_to_lowercase(char c);
+/// Returns -1 if lowercase(c) is not found within the string "bkmgt"
 /// @note If the character is found, returns the character index in the string
 int sm_is_unit(char c);
 /// Parse a c string into an integer specifying a number of bytes.

@@ -103,14 +103,15 @@ void *sm_malloc_from_spaces(unsigned int size) {
   return NULL;
 }
 
-// Internal 'malloc'. checks space array first, else move the 'used' integer up
+// Internal 'malloc'. Checks space array first, else move the 'used' integer up
 void *sm_malloc(unsigned int size) {
-  // If no spaces were found, default to classic copy gc allocation
-  // void *space_search = sm_malloc_from_spaces(size);
-  // if (space_search != NULL) {
-  // return space_search;
-  // } else {
+  // void        *space_search = sm_malloc_from_spaces(size);
   unsigned int bytes_used = sms_heap->used;
+  // Try space array, where we kept deallocated space
+  // if (space_search != NULL)
+  // return space_search;
+  // If no spaces were found, default to classic copy gc allocation
+  // else {
   sms_heap->used += size;
   return (void *)(((char *)sms_heap->storage) + bytes_used);
   // }
@@ -131,7 +132,6 @@ bool sm_is_within_heap(void *obj, sm_heap *heap) {
 int sm_mem_dump(sm_heap *heap, char *name) {
   void *buffer        = heap->storage;
   int   buffer_length = heap->used;
-
   // Open a file for writing
   FILE *fp = fopen(name, "wb");
   // Write the data to the file
@@ -150,6 +150,7 @@ void sm_dump_and_count() {
   sm_mem_dump(sms_heap, fname);
   snprintf(fname, 10 + index_len, "other_%i.mem", index);
   sm_mem_dump(sms_heap, fname);
+  index++;
 }
 
 // Free the heaps, preparing for closing or restarting
