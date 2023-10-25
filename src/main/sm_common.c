@@ -1,25 +1,23 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 #include "sms.h"
 
-/// Returns whether a character is a digit
+// Returns whether a character is a digit
 bool sm_is_digit(char c) {
   int number = (int)c;
   // ASCII char 0 through 9 is 48 through 57
   return number >= 48 && number <= 57;
 }
 
-/// Returns whether a character is a letter of the alphabet
+// Returns whether a character is a letter of the alphabet
 bool sm_is_letter(char c) {
   int number = (int)c;
-  // ASCII char 0 through 9 is 48 through 57
+  // ASCII char A-Z is [65-90] inclusively and a-z is [97-122]
   return (number >= 65 && number <= 90) || (number >= 97 && number <= 122);
 }
 
-/// Returns whether a character is a letter of the alphabet
+// If the letter is A-Z, returns the lowercase a-z
 char sm_to_lowercase(char c) {
   int number = (int)c;
-  // ASCII char 0 through 9 is 48 through 57
-  // return (number >= 65 && number <= 90) || (number >= 97 && number <= 122);
   if (number >= 65 && number <= 90)
     return (char)(number + 32);
   return c;
@@ -30,7 +28,7 @@ char sm_to_lowercase(char c) {
 int sm_is_unit(char c) {
   c                 = sm_to_lowercase(c);
   const char *units = "bkmgt"; // memory units
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 5; i++)
     if (units[i] == c)
       return i;
   return -1;
@@ -39,7 +37,7 @@ int sm_is_unit(char c) {
 // Parse a c string into an integer specifying a number of bytes.
 unsigned long long sm_bytelength_parse(char *str, int length) {
   char buffer[16]; // 16 characters for the numeric value
-  for (int i = 0; i < 17; i++) {
+  for (int i = 0; i < 16; i++) {
     char current_char = str[i];
     if (current_char == 0) {
       buffer[i] = 0;
@@ -75,6 +73,12 @@ void sm_print_fancy_bytelength(unsigned long long bytelength) {
     printf("%.3gMB", (double)bytelength / (KB * KB));
   else if (bytelength < (KB * KB * KB * KB))
     printf("%.3gGB", (double)bytelength / (KB * KB * KB));
+  else if (bytelength < (KB * KB * KB * KB * KB))
+    printf("%.3gTB", (double)bytelength / (KB * KB * KB * KB * KB));
+  else if (bytelength < (KB * KB * KB * KB * KB * KB))
+    printf("%.3gEB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
+  else if (bytelength < (KB * KB * KB * KB * KB * KB * KB))
+    printf("%.3gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB * KB));
   else
-    printf("%.3gTB", (double)bytelength / (KB * KB * KB * KB));
+    printf("lots");
 }

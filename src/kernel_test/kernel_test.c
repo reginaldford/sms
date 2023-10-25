@@ -6,10 +6,11 @@
 
 #include "../main/sms.h"
 #include <ctype.h>
-#include "chapter_0.h"
-#include "chapter_1.h"
-#include "chapter_2.h"
-#include "chapter_3.h"
+#include "chapter_0.h" // Just report the size of structures.
+#include "chapter_1.h" // Generating many objects and then collecting the garbage.
+#include "chapter_2.h" // Verify some expression printing mechanics.
+#include "chapter_3.h" // Checks that contexts can scope and that memory is managed correctly
+// #include "chapter_4.h" // Testing space array system, for deallocated space
 
 #define CHAPTER(f)                                                                                 \
   if (chosen_chapter == -1 || chosen_chapter == current_chapter) {                                 \
@@ -27,7 +28,7 @@ int main(int num_args, char **argv) {
   if (num_args > 1) {
     // isalpha returns nonzero if the character is alpha
     // Assuming the relative path to outline.sms does not start with an integer
-    if (isalpha(*(argv[1])) == 0) {
+    if (sm_is_letter(*(argv[1])) == 0) {
       if (strcmp(argv[1], "--help") == 0) {
         printf("Supplying no arguments will run all tests.\n");
         printf("Example: ./%s\n", argv[0]);
@@ -37,7 +38,7 @@ int main(int num_args, char **argv) {
         printf("Example: ./%s 1 0\n", argv[0]);
         return 0;
       }
-      printf("First argument must be integer for chapter.\n");
+      printf("First argument must be integer for chapter. Provided: %s\n", argv[1]);
       return -1;
     }
     chosen_chapter = atoi(argv[1]);
@@ -56,6 +57,7 @@ int main(int num_args, char **argv) {
   CHAPTER(chapter_1(chosen_test));
   CHAPTER(chapter_2(chosen_test));
   CHAPTER(chapter_3(chosen_test));
+  // CHAPTER(chapter_4(chosen_test));
 
   if (num_fails == 0) {
     printf("\nKernel tests passed!\n");

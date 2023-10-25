@@ -5,15 +5,13 @@
 // Overwrites an existing object to create a space or returns NULL
 sm_space *sm_new_space(void *trash, unsigned int size) {
   // Size sets the whole obj size manually
-  // Size must be more than sizeof(sm_space)
-  if (size >= sizeof(sm_space)) {
-    sm_space *new_space = (sm_space *)trash;
-    // sm_space needs to be the highest type value
-    new_space->my_type = SM_SPACE_TYPE + size;
-    sm_global_space_array(sm_space_add(new_space, sm_global_space_array(NULL)));
-    return new_space;
-  } else
-    return NULL;
+  // Size must be more than or equal to sizeof(sm_space)
+  sm_space *new_space = (sm_space *)trash;
+  // sm_space needs to be the highest type value
+  new_space->my_type = SM_SPACE_TYPE;
+  new_space->size    = size;
+  sm_global_space_array(sm_space_add(new_space, sm_global_space_array(NULL)));
+  return new_space;
 }
 
 // New space just after the given object
@@ -87,7 +85,7 @@ sm_search_result sm_space_array_find(sm_space_array *table, unsigned int size) {
 
 // add a space to the space array, keeping it sorted
 sm_space_array *sm_space_add(sm_space *space, sm_space_array *table) {
-  sm_search_result sr            = sm_space_array_find(table, space->my_type - SM_SPACE_TYPE);
+  sm_search_result sr            = sm_space_array_find(table, space->size);
   sm_space       **table_entries = sm_get_space_array(table);
 
   if (table->size == table->capacity) {
