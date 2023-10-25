@@ -156,7 +156,7 @@ void sm_garbage_collect() {
     sms_heap->used = 0;
 
     // Reset the space array
-    sm_global_space_array(NULL)->size = 0;
+    // sm_global_space_array(NULL)->size = 0;
 
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
