@@ -2,7 +2,7 @@
 
 #include "../sms.h"
 
-// Create a new sm_node with the given size
+// Create a new sm_node
 sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
                      struct sm_node *children) {
   sm_node *node  = sm_malloc(sizeof(sm_node));
@@ -117,7 +117,6 @@ int popcountll(unsigned long long num) {
 #endif
 
 // Return the number of set bits to the left of map_index'th bit in map
-// Put in 64 for the number of 1 bits in the long long
 int sm_node_map_left_count(unsigned long long map, int bit_index) {
   return popcountll(map & ((1LL << bit_index) - 1));
 }

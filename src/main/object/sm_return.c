@@ -12,15 +12,6 @@ sm_return *sm_new_return(sm_object *address) {
   return smr;
 }
 
-// New string with description of this sm_return
-sm_string *sm_return_to_string(sm_return *return_obj) {
-  const unsigned int final_len = sm_return_sprint(return_obj, NULL, true);
-  sm_string         *new_str   = sm_new_string_manual(final_len);
-  sm_return_sprint(return_obj, &(new_str->content), false);
-  (&new_str->content)[final_len] = '\0';
-  return new_str;
-}
-
 // Print to c string buffer a description of this sm_return
 unsigned int sm_return_sprint(sm_return *return_obj, char *buffer, bool fake) {
   if (!fake)
