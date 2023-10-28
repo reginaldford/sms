@@ -32,11 +32,6 @@ char              input_buffer[MAX_BUFFER_LEN]; // Might have to use OS malloc t
 char              esc_buffer[16];               // For esc codes
 int               eb_cursor = 0;                // Escape buffer cursor
 
-// canonical (backup) input:
-// There is a branch for the non-canonical form in the repo,
-// Which needs work!
-
-
 // State machine based on sm_terminal_state enum
 void process_character(char c) {
   switch (current_state) {
