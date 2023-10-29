@@ -36,8 +36,8 @@ int sm_is_unit(char c) {
 
 // Parse a c string into an integer specifying a number of bytes.
 unsigned long long sm_bytelength_parse(char *str, int length) {
-  char buffer[16]; // 16 characters for the numeric value
-  for (int i = 0; i < 16; i++) {
+  char buffer[32]; // 16 characters for the numeric value
+  for (int i = 0; i < 32; i++) {
     char current_char = str[i];
     if (current_char == 0) {
       buffer[i] = 0;
@@ -47,8 +47,6 @@ unsigned long long sm_bytelength_parse(char *str, int length) {
     if (sm_is_digit(current_char) || current_char == '.')
       buffer[i] = current_char;
     else if (sm_is_unit(current_char) != -1) {
-      if (i != length - 1)
-        return -1;
       // 0 means b, 1 means k, etc.
       int unit          = sm_is_unit(current_char);
       int unit_in_bytes = pow(1024, unit);

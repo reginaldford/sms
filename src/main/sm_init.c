@@ -4,7 +4,7 @@
 
 extern sm_heap *sms_heap;
 
-void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
+void sm_init(sm_env *env, int num_args, char **argv) {
   // Default (inner) environment variables
   double mem_bytes   = 64 * 1024 * 1024;
   env->script_fp[0]  = '\0';
@@ -14,7 +14,6 @@ void sm_init(sm_env *env, int num_args, char **argv, bool quiet) {
   env->gc            = true;
   env->num_args      = num_args;
   env->args          = argv;
-  env->quiet_mode    = quiet;
 
   if (env->mem_flag)
     mem_bytes = env->mem_bytes; // mem_bytes overrides

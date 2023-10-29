@@ -14,11 +14,11 @@ void print_intro() {
 }
 
 // Initialize the heap, etc, if necessary
-void check_init(sm_env *env, int num_args, char **argv, bool quiet) {
+void check_init(sm_env *env, int num_args, char **argv) {
   if (env->initialized == false) {
-    if (quiet == false)
+    if (env->quiet_mode == false)
       print_intro();
-    sm_init(env, num_args, argv, quiet);
+    sm_init(env, num_args, argv);
     sm_global_environment(env);
   }
 }
@@ -96,7 +96,7 @@ int main(int num_args, char *argv[]) {
       clean_exit(&env, 0);
       break;
     case 'q':
-      check_init(&env, num_args, argv, true);
+      env.quiet_mode = true;
       break;
     case 'm': {
       if (env.mem_flag) {
@@ -110,7 +110,9 @@ int main(int num_args, char *argv[]) {
         env.mem_str[i] = optarg[i];
       }
       env.mem_bytes = sm_bytelength_parse(env.mem_str, strlen(optarg));
-      if ((env.mem_bytes < 2.5 * 1024) || (env.mem_bytes > pow(1024, 4) * 4)) {
+      // SMS needs at least 2.5k (good luck with that) and might work with up to 4 terrabytes
+      // (untested) For very basic programs, 1m is usually fine.
+      if ((env.mem_bytes < 2.5 * 1024) || (env.mem_bytes >= 4398046511104)) {
         printf("Invalid memory heap size: %s\n", env.mem_str);
         printf("%s\n", valid_values);
         printf("Try -h for help.\n");
@@ -126,7 +128,7 @@ int main(int num_args, char *argv[]) {
     }
     case 'e': {
       int optarg_len = strlen(optarg);
-      check_init(&env, num_args, argv, false);
+      check_init(&env, num_args, argv);
       sm_strncpy(env.eval_cmd, optarg, optarg_len);
       env.eval_cmd[optarg_len++] = ';';
       env.eval_cmd[optarg_len++] = '\0';
@@ -150,12 +152,12 @@ int main(int num_args, char *argv[]) {
       break;
     }
     case 's':
-      check_init(&env, num_args, argv, false);
+      check_init(&env, num_args, argv);
       sm_strncpy(&(env.script_fp[0]), optarg, strlen(optarg));
       run_file(optarg, &env);
       break;
     case 'i':
-      check_init(&env, num_args, argv, false);
+      check_init(&env, num_args, argv);
       sm_strncpy(env.script_fp, optarg, strlen(optarg));
       if (env.quiet_mode == false)
         printf("Loading: %s... \n", optarg);
@@ -180,11 +182,11 @@ int main(int num_args, char *argv[]) {
   }
   if (optind < num_args) { // Assuming the last arg is a filename
     char *input_file = argv[optind];
-    check_init(&env, num_args, argv, false);
+    check_init(&env, num_args, argv);
     sm_strncpy(&(env.script_fp[0]), input_file, strlen(input_file));
     run_file(input_file, &env);
   } else { // No filename provided
-    check_init(&env, num_args, argv, false);
+    check_init(&env, num_args, argv);
     start_repl();
   }
   clean_exit(&env, 0);
