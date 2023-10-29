@@ -5,8 +5,9 @@
 int chapter_1(int test) {
   int           num_fails = 0;
   static sm_env env;
-  env.mem_flag = false;
-  sm_init(&env, 0, NULL, true);
+  env.mem_flag   = false;
+  env.quiet_mode = true;
+  sm_init(&env, 0, NULL);
   printf("Generating 100 empty contexts.\n");
   for (int i = 0; i < 100; i++)
     sm_new_cx(NULL);
