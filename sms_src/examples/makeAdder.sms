@@ -20,6 +20,6 @@
   putln("add5 function: " str+ toStr(add5));
   putln("add5 parent cx: " str+ toStr(fnParent(add5)));
   putln("add5(6) is " str+ toStr(add5(6)));
-  # Grand fanale
+  # Grand finale
   putln("add3(add5(6)) is " str+ toStr(add3(add5(6))));
 };
