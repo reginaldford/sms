@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm 1m
+#!/usr/local/bin/sms -qm 1
 # Demonstrates closures in sms
 # This is a common example, easy to find in javascript
 
