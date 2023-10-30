@@ -3,8 +3,8 @@
 
 void test0() {
   static sm_env env;
-  env.mem_bytes = 1000; // only 1k bytes
-  env.mem_flag  = true;
+  env.mem_bytes  = 1000; // only 1k bytes
+  env.mem_flag   = true;
   env.quiet_mode = true;
   sm_init(&env, 0, NULL);
   printf("Constructing and deallocating 64 objects, 1000 times\n");
