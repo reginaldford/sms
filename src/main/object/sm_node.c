@@ -11,6 +11,7 @@ sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
   node->next     = next;
   node->map      = map;
   node->children = children;
+  node->shortcut = NULL;
   return node;
 }
 
@@ -103,15 +104,18 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
 }
 
 // Define popcountll whether or not we have the built-in instruction.
-#if defined(__x86_64__) || defined(_M_X64)
-// Assuming we have __builtin_popcountll
+#ifdef __x86_64__
 int popcountll(unsigned long long num) { return __builtin_popcountll(num); }
 #else
-// Assuming we do NOT have __builtin_popcountll
+// Manually counting the bits in the long long int, efficiently
 int popcountll(unsigned long long num) {
-  int count;
-  for (count = 0; num > 0; num >>= 1)
-    count += num & 1;
+  int count = 0;
+  for (int byteIndex = 0; num > 0ll && byteIndex < (int)sizeof(long long); byteIndex++) {
+    unsigned char byte = num;
+    for (; byte > 0; byte >>= 1)
+      count += byte & 1;
+    num >>= 8;
+  }
   return count;
 }
 #endif
