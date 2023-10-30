@@ -110,9 +110,9 @@ int popcountll(unsigned long long num) { return __builtin_popcountll(num); }
 // Manually counting the bits in the long long int, efficiently
 int popcountll(unsigned long long num) {
   int count = 0;
-  for (int byteIndex = 0; num > 0ll && byteIndex < (int)sizeof(long long); byteIndex++) {
+  while (num) {
     unsigned char byte = num;
-    for (; byte > 0; byte >>= 1)
+    for (; byte; byte >>= 1)
       count += byte & 1;
     num >>= 8;
   }
