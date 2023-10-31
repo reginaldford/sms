@@ -82,6 +82,8 @@ void sm_inflate_heap() {
       // Meet the children
       if (node->children != NULL)
         node->children = (struct sm_node *)sm_meet_object((sm_object *)node->children);
+      if (node->shortcut != NULL)
+        node->shortcut = (struct sm_object *)sm_meet_object((sm_object *)node->shortcut);
       break;
     }
     case SM_EXPR_TYPE: {
