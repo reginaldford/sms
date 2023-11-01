@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -q
+#!/usr/local/bin/sms -qm128
 # Uses tput to get terminal dimensions, 
 # Then runs a for loop to fill up the screen with numbers
 {
