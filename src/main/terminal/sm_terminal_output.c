@@ -91,5 +91,8 @@ char *sm_terminal_bg_color(sm_terminal_color color) {
 // v100 code to reset
 char *sm_terminal_reset() {
   static char *reset_code = "\x1b[0m";
-  return reset_code;
+  if (sm_terminal_has_color())
+    return reset_code;
+  else
+    return "";
 }
