@@ -17,7 +17,6 @@ void sm_terminal_print_prompt() {
   fflush(stdout);
 }
 
-
 bool sm_terminal_has_color() {
   // Only call getenv once
   static char *term = NULL;
@@ -35,8 +34,7 @@ bool sm_terminal_has_color() {
 char *sm_terminal_fg_color(sm_terminal_color color) {
   // We must provide this sequence so that printf adds nothing for color commands
   // in a non-color terminal
-  static char *nothing_cstr = " \b";
-  static char *codes[]      = {
+  static char *codes[] = {
     "\x1b[30m",   // SM_TERM_BLACK
     "\x1b[31m",   // SM_TERM_RED
     "\x1b[32m",   // SM_TERM_GREEN
@@ -56,7 +54,7 @@ char *sm_terminal_fg_color(sm_terminal_color color) {
   };
 
   if (!sm_terminal_has_color())
-    return nothing_cstr;
+    return "";
 
   if (color >= SM_TERM_BLACK && color <= SM_TERM_B_WHITE)
     return codes[color];
@@ -83,7 +81,7 @@ char *sm_terminal_bg_color(sm_terminal_color color) {
     "\x1b[46;1m", // SM_TERM_B_CYAN
     "\x1b[47;1m"  // SM_TERM_B_WHITE
   };
-  if (color >= SM_TERM_BLACK && color <= SM_TERM_B_WHITE)
+  if (sm_terminal_has_color() && color >= SM_TERM_BLACK && color <= SM_TERM_B_WHITE)
     return codes[color];
   return "";
 }
