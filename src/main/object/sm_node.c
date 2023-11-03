@@ -110,12 +110,8 @@ int popcountll(unsigned long long num) { return __builtin_popcountll(num); }
 // Manually counting the bits in the long long int, efficiently
 int popcountll(unsigned long long num) {
   int count = 0;
-  while (num) {
-    unsigned char byte = num;
-    for (; byte; byte >>= 1)
-      count += byte & 1;
-    num >>= 8;
-  }
+  for (int count = 0; num; count++)
+    num &= (num - 1);
   return count;
 }
 #endif
@@ -339,7 +335,6 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
 
   return collection;
 }
-
 
 // Returns the keys under this node(recursive)
 sm_expr *sm_node_values(sm_node *node, sm_expr *collection) {
