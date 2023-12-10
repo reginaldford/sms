@@ -110,7 +110,7 @@ int popcountll(unsigned long long num) { return __builtin_popcountll(num); }
 // Manually counting the bits in the long long int, efficiently
 int popcountll(unsigned long long num) {
   int count = 0;
-  for (int count = 0; num; count++)
+  for (count = 0; num; count++)
     num &= (num - 1);
   return count;
 }
@@ -279,7 +279,7 @@ int sm_node_size(sm_node *node) {
     size++;
   unsigned long long map = node->map; // Get the bitmap
   while (map != 0) {
-    unsigned long long bit = map & -map;    // Using two's complement trick
+    unsigned long long bit = map & -map;    // Using two's compliment trick
     int bit_index   = __builtin_ctzll(bit); // Using built-in ctzll (count trailing zeros) function
     int child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here = (sm_node *)sm_node_nth(node->children, child_index);
