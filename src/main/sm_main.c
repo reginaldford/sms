@@ -10,7 +10,7 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.201%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.202%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
@@ -106,7 +106,7 @@ int main(int num_args, char *argv[]) {
       env.mem_flag = true;
       const char *valid_values =
         "Value must be within range 2.5k to 4t (2.5 kilobytes to 4 terrabytes).";
-      for (long unsigned int i = 0; i < strlen(optarg); i++) {
+      for (uint64_t i = 0; i < strlen(optarg); i++) {
         env.mem_str[i] = optarg[i];
       }
       env.mem_bytes = sm_bytelength_parse(env.mem_str, strlen(optarg));

@@ -15,6 +15,6 @@ int sm_is_unit(char c);
 /// @note Example: "123m" would be interpretted as 123 * 1024 ^ 2 bytes
 /// @note Example: "123g" would be interpretted as 123 * 1024 ^ 3 bytes
 /// @note Example: "123t" would be interpretted as 123 * 1024 ^ 4 bytes
-unsigned long long sm_bytelength_parse(char *str, int length);
+uint64_t sm_bytelength_parse(char *str, int length);
 /// Prints to stdout the number of bytes with a reasonable unit
-void sm_print_fancy_bytelength(unsigned long long bytelength);
+void sm_print_fancy_bytelength(uint64_t bytelength);

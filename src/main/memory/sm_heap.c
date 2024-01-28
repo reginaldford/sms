@@ -11,7 +11,7 @@ extern sm_symbol *sms_false;
 int sm_round_size(int size) { return ((size) + 3) & ~3; }
 
 // Create a new heap of some capacity
-sm_heap *sm_new_heap(unsigned int capacity) {
+sm_heap *sm_new_heap(uint32_t capacity) {
   sm_heap *new_heap  = (sm_heap *)malloc(sizeof(sm_heap));
   new_heap->capacity = capacity;
   new_heap->used     = 0;
@@ -21,9 +21,9 @@ sm_heap *sm_new_heap(unsigned int capacity) {
 
 // Check for adequate space size
 // If it is acceptable,  remove it from the space array and return the space, else return NULL
-sm_space *check_space(unsigned int size, unsigned int index) {
+sm_space *check_space(uint32_t size, uint32_t index) {
   if (index + 1 <= sm_global_space_array(NULL)->size) {
-    unsigned int space_size =
+    uint32_t space_size =
       sm_get_space_array(sm_global_space_array(NULL))[index]->my_type - SM_SPACE_TYPE;
     if (space_size >= size) {
       sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[index];
@@ -35,11 +35,11 @@ sm_space *check_space(unsigned int size, unsigned int index) {
 }
 
 // Binary search for space in a size ordered space array
-sm_search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size,
-                                          unsigned int lower_limit, unsigned int upper_limit) {
-  sm_space   **space_array = sm_get_space_array(ssa);
-  int          comparison  = 1;
-  unsigned int guess_point = (upper_limit + lower_limit) / 2.0;
+sm_search_result find_space_within_bounds(sm_space_array *ssa, uint32_t size, uint32_t lower_limit,
+                                          uint32_t upper_limit) {
+  sm_space **space_array = sm_get_space_array(ssa);
+  int        comparison  = 1;
+  uint32_t   guess_point = (upper_limit + lower_limit) / 2.0;
   while (lower_limit < upper_limit && comparison != 0) {
     comparison = space_array[guess_point]->my_type - SM_SPACE_TYPE - size;
     if (comparison == 0)
@@ -60,23 +60,23 @@ sm_search_result find_space_within_bounds(sm_space_array *ssa, unsigned int size
 }
 
 // Sort the space array that is unsorted by the 1 space at off_index
-void sort_1_off(sm_space_array *ssa, unsigned int off_index) {
-  unsigned int space_size = sm_get_space_array(ssa)[off_index]->my_type - SM_SPACE_TYPE;
+void sort_1_off(sm_space_array *ssa, uint32_t off_index) {
+  uint32_t space_size = sm_get_space_array(ssa)[off_index]->my_type - SM_SPACE_TYPE;
   // Now, to binary search the remaining portion of the array
   sm_search_result sr = find_space_within_bounds(ssa, space_size, 0, off_index - 1);
   // Use search result to sort this 1-off array
-  sm_space   **space_array = sm_get_space_array(ssa);
-  sm_space    *off_space   = space_array[off_index];
-  unsigned int upper_index = off_index;
-  unsigned int lower_index = sr.index;
-  for (unsigned int i = upper_index; i > lower_index; i--) {
+  sm_space **space_array = sm_get_space_array(ssa);
+  sm_space  *off_space   = space_array[off_index];
+  uint32_t   upper_index = off_index;
+  uint32_t   lower_index = sr.index;
+  for (uint32_t i = upper_index; i > lower_index; i--) {
     space_array[i] = space_array[i - 1];
   }
   space_array[lower_index] = off_space;
 }
 
 // Find a space from the global space array or NULL
-void *sm_malloc_from_spaces(unsigned int size) {
+void *sm_malloc_from_spaces(uint32_t size) {
   if (sm_global_space_array(NULL)->size > 0) {
     sm_search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
     // sr.found is true for exact matches
@@ -88,7 +88,7 @@ void *sm_malloc_from_spaces(unsigned int size) {
     }
     sm_space *result_space = check_space(size, sr.index);
     if (result_space != NULL) {
-      unsigned int remaining_size = (result_space->my_type - SM_SPACE_TYPE) - size;
+      uint32_t remaining_size = (result_space->my_type - SM_SPACE_TYPE) - size;
       if (remaining_size >= sizeof(sm_space)) {
         sm_space *new_space = (sm_space *)((char *)result_space) + size;
         new_space->my_type  = SM_SPACE_TYPE + remaining_size;
@@ -104,9 +104,9 @@ void *sm_malloc_from_spaces(unsigned int size) {
 }
 
 // Internal 'malloc'. Checks space array first, else move the 'used' integer up
-void *sm_malloc(unsigned int size) {
+void *sm_malloc(uint32_t size) {
   // void        *space_search = sm_malloc_from_spaces(size);
-  unsigned int bytes_used = sms_heap->used;
+  uint32_t bytes_used = sms_heap->used;
   // Try space array, where we kept deallocated space
   // if (space_search != NULL)
   // return space_search;
@@ -118,7 +118,7 @@ void *sm_malloc(unsigned int size) {
 }
 
 // Reallocate memory space for resizing or recreating objects
-void *sm_realloc(void *obj, unsigned int size) {
+void *sm_realloc(void *obj, uint32_t size) {
   sm_object *new_space = sm_malloc(size);
   return memcpy(new_space, obj, size);
 }
@@ -165,11 +165,11 @@ void sm_mem_cleanup() {
 void sm_sprint_dump() {
   char *scan_cursor = (char *)sms_heap->storage;
   while (scan_cursor < ((char *)sms_heap->storage) + sms_heap->used) {
-    sm_object   *current_obj = (sm_object *)scan_cursor;
-    unsigned int len         = sm_object_sprint(current_obj, NULL, true);
-    char         buf[len];
-    unsigned int real_len = sm_object_sprint(current_obj, buf, false);
-    buf[real_len]         = '\0';
+    sm_object *current_obj = (sm_object *)scan_cursor;
+    uint32_t   len         = sm_object_sprint(current_obj, NULL, true);
+    char       buf[len];
+    uint32_t   real_len = sm_object_sprint(current_obj, buf, false);
+    buf[real_len]       = '\0';
     printf("%s\n", buf);
     if (current_obj->my_type <= SM_SPACE_TYPE)
       scan_cursor += sm_sizeof(current_obj);

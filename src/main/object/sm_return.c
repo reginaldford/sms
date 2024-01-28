@@ -13,7 +13,7 @@ sm_return *sm_new_return(sm_object *address) {
 }
 
 // Print to c string buffer a description of this sm_return
-unsigned int sm_return_sprint(sm_return *return_obj, char *buffer, bool fake) {
+uint32_t sm_return_sprint(sm_return *return_obj, char *buffer, bool fake) {
   if (!fake)
     snprintf(buffer, 8, "return(");
   int cursor = 7;

@@ -453,7 +453,7 @@ FUN : FUN_INTRO EXPR {
 FUN_INTRO : PARAM_LIST ARROW {
   sm_cx * parent_cx = *(sm_global_lex_stack(NULL)->top);
   sm_fun *new_fun = sm_new_fun(parent_cx, ($1)->size, (sm_object *)NULL);
-  for (unsigned int i = 0; i < ($1)->size; i++) {
+  for (uint32_t i = 0; i < ($1)->size; i++) {
     sm_fun_param_obj *po = (sm_fun_param_obj *)sm_expr_get_arg($1, i);
     sm_fun_set_param(new_fun, i, po->name, po->default_val, po->known_expr);
   }

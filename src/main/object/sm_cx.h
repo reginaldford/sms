@@ -2,7 +2,7 @@
 
 /// Contexts are data trees that map symbol names to values
 typedef struct sm_cx {
-  short int     my_type;
+  int16_t       my_type;
   struct sm_cx *parent;
   sm_node      *content;
 } sm_cx;
@@ -27,11 +27,11 @@ bool sm_cx_set(sm_cx *context, char *needle, int len, sm_object *val);
 bool sm_cx_rm(sm_cx *self, char *needle, int len);
 /// If fake is false, print self into buffer.
 /// @return The length of text printed.
-unsigned int sm_cx_sprint(sm_cx *self, char *buffer, bool fake);
+uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake);
 /// Construct a new context node, to store value (which may be NULL)
 sm_node *sm_new_cx_node(sm_object *value);
 /// Get the number of key-value pairs in this context
-unsigned int sm_cx_size(sm_cx *self);
+uint32_t sm_cx_size(sm_cx *self);
 /// Remove all key-value pairs from this context
 void sm_cx_clear(sm_cx *self);
 /// Import all key-value pairs from cxFrom to cxTo

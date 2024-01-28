@@ -2,7 +2,7 @@
 
 /// Object for a symbol which references a value in a context if evaluated
 typedef struct sm_symbol {
-  short int  my_type;
+  int16_t    my_type;
   sm_string *name;
 } sm_symbol;
 
@@ -13,4 +13,4 @@ sm_symbol *sm_new_symbol(sm_string *sym_name);
 /// Returns the symbol name
 sm_string *sm_symbol_to_string(sm_symbol *self);
 /// Print the symbol name to string buffer
-unsigned int sm_symbol_sprint(sm_symbol *self, char *buffer, bool fake);
+uint32_t sm_symbol_sprint(sm_symbol *self, char *buffer, bool fake);

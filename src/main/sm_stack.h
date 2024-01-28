@@ -4,12 +4,12 @@
 /// Instead of an integer for the top location, it uses a pointer
 /// Therefore, size = stack->top - &(stack[1])
 typedef struct sm_stack {
-  unsigned int capacity;
-  void       **top;
+  uint32_t capacity;
+  void   **top;
 } sm_stack;
 
 /// Create a new stack
-sm_stack *sm_new_stack(unsigned int capacity);
+sm_stack *sm_new_stack(uint32_t capacity);
 /// Return first element of the stack
 void **sm_stack_content(sm_stack *self);
 /// Push a pointer onto the stack
@@ -17,6 +17,6 @@ sm_stack *sm_stack_push(sm_stack *self, void *ptr);
 /// Push a pointer onto the stack
 sm_stack *sm_stack_pop(sm_stack *self);
 /// Push a pointer onto the stack
-unsigned int sm_stack_size(sm_stack *self);
+uint32_t sm_stack_size(sm_stack *self);
 /// If the stack was empty, the top is a special pointer that goes into the stack's struct
 void **sm_stack_empty_top(sm_stack *self);
