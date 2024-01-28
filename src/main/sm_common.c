@@ -35,14 +35,14 @@ int sm_is_unit(char c) {
 }
 
 // Parse a c string into an integer specifying a number of bytes.
-unsigned long long sm_bytelength_parse(char *str, int length) {
+uint64_t sm_bytelength_parse(char *str, int length) {
   char buffer[32]; // 16 characters for the numeric value
   for (int i = 0; i < 32; i++) {
     char current_char = str[i];
     if (current_char == 0) {
       buffer[i] = 0;
       // If no unit is given, assume megabytes (m)
-      return (unsigned long long)atof(buffer) * 1024 * 1024;
+      return (uint64_t)atof(buffer) * 1024 * 1024;
     }
     if (sm_is_digit(current_char) || current_char == '.')
       buffer[i] = current_char;
@@ -54,15 +54,15 @@ unsigned long long sm_bytelength_parse(char *str, int length) {
       return unit_in_bytes * atof(buffer);
     } else if (current_char == 0) {
       buffer[i] = 0;
-      return (unsigned long long)atof(buffer);
+      return (uint64_t)atof(buffer);
     } else
       break;
   }
   return -1;
 }
 
-void sm_print_fancy_bytelength(unsigned long long bytelength) {
-  const unsigned long long KB = 1024;
+void sm_print_fancy_bytelength(uint64_t bytelength) {
+  const uint64_t KB = 1024;
   if (bytelength < KB)
     printf("%.3gB", (double)bytelength);
   else if (bytelength < KB * KB)

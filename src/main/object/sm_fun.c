@@ -3,7 +3,7 @@
 #include "../sms.h"
 
 // new sm_fun structure
-sm_fun *sm_new_fun(sm_cx *parent, unsigned short int num_params, sm_object *content) {
+sm_fun *sm_new_fun(sm_cx *parent, uint16_t num_params, sm_object *content) {
   sm_fun *self     = sm_malloc(sizeof(sm_fun) + num_params * sizeof(sm_fun_param));
   self->my_type    = SM_FUN_TYPE;
   self->parent     = parent;
@@ -24,14 +24,14 @@ sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val,
 }
 
 // Return the i'th element of the array of sm_fun_param objects following the sm_fun struct
-sm_fun_param *sm_fun_get_param(sm_fun *self, unsigned short int i) {
+sm_fun_param *sm_fun_get_param(sm_fun *self, uint16_t i) {
   sm_fun_param *arr = (sm_fun_param *)&(self[1]);
   return &(arr[i]);
 }
 
 // Set the i'th element of the array of sm_fun_param objects following the sm_fun struct
-void sm_fun_set_param(sm_fun *self, unsigned short int i, sm_string *name, sm_object *default_val,
-                      short int known_expr) {
+void sm_fun_set_param(sm_fun *self, uint16_t i, sm_string *name, sm_object *default_val,
+                      int16_t known_expr) {
   sm_fun_param *arr  = (sm_fun_param *)&(self[1]);
   arr[i].name        = name;
   arr[i].default_val = default_val;
@@ -42,7 +42,7 @@ void sm_fun_set_param(sm_fun *self, unsigned short int i, sm_string *name, sm_ob
 int sm_fun_param_sprint(sm_fun_param *self, char *buffer, bool fake) {
   if (!fake)
     sm_strncpy(buffer, &(self->name->content), self->name->size);
-  unsigned int cursor = self->name->size;
+  uint32_t cursor = self->name->size;
   if (self->default_val != NULL) {
     if (!fake)
       buffer[cursor] = '=';
@@ -55,11 +55,11 @@ int sm_fun_param_sprint(sm_fun_param *self, char *buffer, bool fake) {
 // Example: add(a,b)=>a+b;
 // If fake is false, the buffer will be affected.
 // Otherwise, only length calculation is performed.
-unsigned int sm_fun_sprint(sm_fun *self, char *buffer, bool fake) {
+uint32_t sm_fun_sprint(sm_fun *self, char *buffer, bool fake) {
   if (!fake)
     buffer[0] = '(';
-  unsigned int cursor = 1;
-  for (unsigned short int i = 0; i + 1 < self->num_params; i++) {
+  uint32_t cursor = 1;
+  for (uint16_t i = 0; i + 1 < self->num_params; i++) {
     sm_fun_param *fp = sm_fun_get_param(self, i);
     cursor += sm_fun_param_sprint(fp, &(buffer[cursor]), fake);
     if (!fake)

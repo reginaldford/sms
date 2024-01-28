@@ -153,8 +153,7 @@ int perform_specific_test(sm_cx *test_env, sm_expr *test_list, int chapter, int 
 // Run an sms file with tests
 // If test == -1, do all tests
 // Else, run the specified test
-int perform_test_subchapter(unsigned int chapter, unsigned int subchapter, int test,
-                            char *test_zone_path) {
+int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, char *test_zone_path) {
   int num_fails = 0;
   if (chapter >= num_chapters()) {
     printf("Test chapter: %i out of range.\n", chapter);
@@ -199,7 +198,7 @@ int perform_test_subchapter(unsigned int chapter, unsigned int subchapter, int t
 
     if (test == -1) {
       global_num_tests(test_list->size);
-      for (unsigned int i = 0; i < test_list->size; i++) {
+      for (uint32_t i = 0; i < test_list->size; i++) {
         num_fails += perform_specific_test(test_env, test_list, chapter, subchapter, i);
       }
     } else {
@@ -262,11 +261,11 @@ int main(int num_args, char **argv) {
   // passing -1 means to test all.
   if (chapter == -1) {
     printf("Testing all %i Chapters\n", num_chapters());
-    for (unsigned int ch = 0; ch < num_chapters(); ch++) {
+    for (uint32_t ch = 0; ch < num_chapters(); ch++) {
       if (num_subchapters(ch) > 0) {
         printf("Testing Chapter %i, which has %i subchapters ( from %i.0 to %i.%i )\n", ch,
                num_subchapters(ch), ch, ch, num_subchapters(ch) - 1);
-        for (unsigned int sub_ch = 0; sub_ch < num_subchapters(ch); sub_ch++) {
+        for (uint32_t sub_ch = 0; sub_ch < num_subchapters(ch); sub_ch++) {
           printf("Testing Subchapter %i.%i\n", ch, sub_ch);
           int test_result =
             perform_test_subchapter(ch, sub_ch, -1, global_test_outline(NULL)->test_zone_path);

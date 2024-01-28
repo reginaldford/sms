@@ -42,7 +42,7 @@ test_outline *parse_test_outline(char *filepath) {
     graceful_exit(result_outline, -1);
   }
   sm_expr *chapters_array = (sm_expr *)chapters_obj;
-  for (unsigned int i = 0; i < chapters_array->size; i++) {
+  for (uint32_t i = 0; i < chapters_array->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(chapters_array, i);
     if (current_obj->my_type != SM_CX_TYPE) {
       printf("Each element in the chapters array must be a context.\n");

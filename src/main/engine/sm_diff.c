@@ -30,7 +30,7 @@ bool has_symbol(sm_expr *self, sm_symbol *sym) {
     case SM_CSCH_EXPR:
     case SM_SECH_EXPR:
     case SM_COTH_EXPR: {
-      for (unsigned int i = 0; i < self->size; i++) {
+      for (uint32_t i = 0; i < self->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(self, i);
         switch (current_obj->my_type) {
         case SM_SYMBOL_TYPE: {
@@ -118,16 +118,16 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
     case SM_PLUS_EXPR:
     case SM_MINUS_EXPR: {
       sm_expr *output = sm_new_expr_n(expr->op, expr->size, expr->size);
-      for (unsigned int i = 0; i < expr->size; i++) {
+      for (uint32_t i = 0; i < expr->size; i++) {
         output = sm_expr_set_arg(output, i, sm_diff(sm_expr_get_arg(expr, i), wrt));
       }
       return (sm_object *)output;
     }
     case SM_TIMES_EXPR: {
       sm_expr *sum = sm_new_expr_n(SM_PLUS_EXPR, 0, expr->size);
-      for (unsigned int i = 0; i < expr->size; i++) {
+      for (uint32_t i = 0; i < expr->size; i++) {
         sm_expr *product = sm_new_expr_n(SM_TIMES_EXPR, 0, expr->size);
-        for (unsigned int j = 0; j < expr->size; j++) {
+        for (uint32_t j = 0; j < expr->size; j++) {
           sm_object *current_obj = sm_expr_get_arg(expr, j);
           if (j == i) {
             sm_object *diff = sm_diff(current_obj, wrt);

@@ -16,8 +16,7 @@ extern sm_symbol *sms_false;
 // and the next function will complain about type mismatch,
 // going up the callstack, until we hit a try or not
 // the checker is the type number of the function which is checking
-bool expect_type(sm_object *arg_n, unsigned int arg_num, unsigned short int arg_type,
-                 unsigned short int checker) {
+bool expect_type(sm_object *arg_n, uint32_t arg_num, uint16_t arg_type, uint16_t checker) {
   if (arg_n->my_type != arg_type) {
     sm_string  *str  = sm_object_to_string(arg_n);
     const char *cstr = &(str->content);
@@ -134,13 +133,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_LS_EXPR: {
-      DIR               *dir;
-      struct dirent     *entry;
-      struct stat        file_stat;
-      const unsigned int MAX_ENTRIES = 1000;
-      sm_string         *entry_names[MAX_ENTRIES];
-      bool               entry_types[MAX_ENTRIES];
-      unsigned int       i = 0;
+      DIR           *dir;
+      struct dirent *entry;
+      struct stat    file_stat;
+      const uint32_t MAX_ENTRIES = 1000;
+      sm_string     *entry_names[MAX_ENTRIES];
+      bool           entry_types[MAX_ENTRIES];
+      uint32_t       i = 0;
 
       char cwd[1024];
       if (getcwd(cwd, sizeof(cwd))) {
@@ -155,8 +154,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sm_new_double(0);
       }
       while ((entry = readdir(dir)) && i < MAX_ENTRIES) {
-        unsigned int path_length = strlen(cwd) + strlen(entry->d_name) + 1;
-        char         full_path[path_length + 1];
+        uint32_t path_length = strlen(cwd) + strlen(entry->d_name) + 1;
+        char     full_path[path_length + 1];
         snprintf(full_path, path_length + 1, "%s/%s", cwd, entry->d_name);
         stat(full_path, &file_stat);
         entry_names[i] = sm_new_string(strlen(entry->d_name), entry->d_name);
@@ -167,7 +166,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       closedir(dir);
       sm_expr *names_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i);
       sm_expr *types_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i);
-      for (unsigned int names_i = 0; names_i < i; names_i++) {
+      for (uint32_t names_i = 0; names_i < i; names_i++) {
         sm_expr_set_arg(names_arr, names_i, (sm_object *)entry_names[names_i]);
         if (entry_types[names_i] != 0)
           sm_expr_set_arg(types_arr, names_i, (sm_object *)sms_true);
@@ -507,7 +506,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARAMS_EXPR))
         return (sm_object *)sms_false;
       sm_expr *result = sm_new_expr_n(SM_PARAM_LIST_EXPR, fun->num_params, fun->num_params);
-      for (unsigned int i = 0; i < fun->num_params; i++) {
+      for (uint32_t i = 0; i < fun->num_params; i++) {
         sm_string *fn_name = sm_fun_get_param(fun, i)->name;
         sm_expr_set_arg(result, i, (sm_object *)sm_new_symbol(fn_name));
       }
@@ -522,7 +521,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       sm_fun *new_fun = sm_new_fun(fun->parent, fun->num_params, fun->content);
       // Setting the parameters of a new function
-      for (unsigned int i = 0; i < params->size; i++) {
+      for (uint32_t i = 0; i < params->size; i++) {
         sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(params, i);
         if (!expect_type((sm_object *)sym, i, SM_SYMBOL_TYPE, SM_FN_SETPARAMS_EXPR))
           break;
@@ -699,7 +698,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       const int CHUNK_SIZE = 128;
       fwrite(content_cstr, CHUNK_SIZE, content_str->size / CHUNK_SIZE, fptr);
       if (fmod(content_str->size, CHUNK_SIZE)) {
-        unsigned int cursor = (content_str->size / CHUNK_SIZE) * CHUNK_SIZE;
+        uint32_t cursor = (content_str->size / CHUNK_SIZE) * CHUNK_SIZE;
         fwrite(&content_cstr[cursor], 1, content_str->size - cursor, fptr);
       }
 
@@ -914,7 +913,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUT_EXPR))
         return (sm_object *)sms_false;
       str = (sm_string *)evaluated;
-      for (unsigned int i = 0; i < str->size; i++)
+      for (uint32_t i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
       putchar('\0');
       fflush(stdout);
@@ -927,7 +926,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(evaluated, 0, SM_STRING_TYPE, SM_PUTLN_EXPR))
         return (sm_object *)sms_false;
       str = (sm_string *)evaluated;
-      for (unsigned int i = 0; i < str->size; i++)
+      for (uint32_t i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
       putchar('\n');
       putchar('\0');
@@ -1008,7 +1007,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       arr             = (sm_expr *)obj1;
       sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size);
-      for (unsigned int i = 0; i < arr->size; i++) {
+      for (uint32_t i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj);
 
@@ -1040,7 +1039,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *result = initial;
       // Evaluating with a reusable stack frame: ( result , current_ob )
       sm_expr *reusable = sm_new_expr_2(SM_PARAM_LIST_EXPR, result, NULL);
-      for (unsigned int i = 0; i < arr->size; i++) {
+      for (uint32_t i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr_set_arg(reusable, 1, current_obj);
         result = sm_engine_eval(fun->content, fun->parent, reusable);
@@ -1058,8 +1057,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_double *index_double;
       if (!expect_type(index_obj, 1, SM_DOUBLE_TYPE, SM_INDEX_EXPR))
         return (sm_object *)sm_new_string(0, "");
-      index_double       = (sm_double *)index_obj;
-      unsigned int index = (int)index_double->value;
+      index_double   = (sm_double *)index_obj;
+      uint32_t index = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
         printf("Error: Index out of range: %i . Array size is %i\n", index, arr->size);
         return (sm_object *)sms_false;
@@ -1118,9 +1117,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_fun    *fun     = (sm_fun *)obj0;
         sm_object *content = fun->content;
         if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
-          sm_cx       *new_cx      = sm_new_cx(fun->parent);
-          unsigned int i           = 1;
-          sm_expr     *content_sme = (sm_expr *)fun->content;
+          sm_cx   *new_cx      = sm_new_cx(fun->parent);
+          uint32_t i           = 1;
+          sm_expr *content_sme = (sm_expr *)fun->content;
           while (i < content_sme->size) {
             result = sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, new_args);
             if (result->my_type == SM_RETURN_TYPE)
@@ -1138,9 +1137,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_BLOCK_EXPR: {
-      unsigned int i      = 1;
-      sm_object   *result = (sm_object *)sms_true;
-      sm_cx       *new_cx = sm_new_cx(current_cx);
+      uint32_t   i      = 1;
+      sm_object *result = (sm_object *)sms_true;
+      sm_cx     *new_cx = sm_new_cx(current_cx);
       while (i < sme->size) {
         result = sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);
         if (result->my_type == SM_RETURN_TYPE)
@@ -1447,7 +1446,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_ARRAY_EXPR: {
       sm_expr *new_arr = sm_new_expr_n(SM_ARRAY_EXPR, sme->size, sme->size);
-      for (unsigned int i = 0; i < sme->size; i++) {
+      for (uint32_t i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
         sm_expr_set_arg(new_arr, i, new_val);
       }
@@ -1455,7 +1454,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_PARAM_LIST_EXPR: {
       sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size);
-      for (unsigned int i = 0; i < sme->size; i++) {
+      for (uint32_t i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
         sm_expr_set_arg(new_arr, i, new_val);
       }

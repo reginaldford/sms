@@ -15,4 +15,4 @@ sm_meta *sm_new_meta(sm_object *address, sm_cx *context);
 /// Convert this meta to a string (ignores data field for now)
 sm_string *sm_meta_to_string(sm_meta *meta);
 /// Print this meta to the string buffer
-unsigned int sm_meta_sprint(sm_meta *self, char *buffer, bool fake);
+uint32_t sm_meta_sprint(sm_meta *self, char *buffer, bool fake);

@@ -4,7 +4,7 @@
 
 // Return true if the object is a literal
 // This means the object evaluates to itself
-bool sm_object_is_literal(unsigned short int t) {
+bool sm_object_is_literal(uint16_t t) {
   switch (t) {
   case SM_DOUBLE_TYPE:
   case SM_STRING_TYPE:
@@ -16,15 +16,15 @@ bool sm_object_is_literal(unsigned short int t) {
 
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
-  sm_string   *new_str     = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));
-  unsigned int len         = sm_object_sprint(obj1, &(new_str->content), false);
+  sm_string *new_str       = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));
+  uint32_t   len           = sm_object_sprint(obj1, &(new_str->content), false);
   (&new_str->content)[len] = '\0';
   return new_str;
 }
 
 // Print to a string buffer the object description
 // Return the length of the string
-unsigned int sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
+uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   switch (obj1->my_type) {
   case SM_DOUBLE_TYPE:
     return sm_double_sprint((sm_double *)obj1, buffer, fake);
@@ -127,7 +127,7 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
     sm_expr *other_expr = (sm_expr *)other;
     if (self_expr->op != other_expr->op || self_expr->size != other_expr->size)
       return false;
-    for (unsigned int i = 0; i < self_expr->size; i++) {
+    for (uint32_t i = 0; i < self_expr->size; i++) {
       if (!sm_object_eq(sm_expr_get_arg(self_expr, i), sm_expr_get_arg(other_expr, i)))
         return false;
     }

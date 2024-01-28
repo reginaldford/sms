@@ -12,7 +12,7 @@ sm_object *sm_copy(sm_object *obj) {
 sm_object *sm_deep_copy(sm_object *obj) {
   if (obj->my_type == SM_EXPR_TYPE) {
     sm_expr *expr = (sm_expr *)sm_copy(obj);
-    for (unsigned int i = 0; i < expr->size; i++) {
+    for (uint32_t i = 0; i < expr->size; i++) {
       sm_expr_set_arg(expr, i, sm_deep_copy(sm_expr_get_arg(expr, i)));
     }
     return obj;
@@ -34,7 +34,7 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 // If obj is an sm_pointer, the object was already moved to the new heap
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
-  unsigned short int obj_type = obj->my_type;
+  uint16_t obj_type = obj->my_type;
   if (obj_type == SM_POINTER_TYPE)
     return ((sm_pointer *)obj)->address;
   else
@@ -88,7 +88,7 @@ void sm_inflate_heap() {
     }
     case SM_EXPR_TYPE: {
       sm_expr *expr = (sm_expr *)current_obj;
-      for (unsigned int i = 0; i < expr->size; i++) {
+      for (uint32_t i = 0; i < expr->size; i++) {
         sm_object *new_obj = sm_meet_object(sm_expr_get_arg(expr, i));
         sm_expr_set_arg(expr, i, (sm_object *)new_obj);
       }
@@ -109,7 +109,7 @@ void sm_inflate_heap() {
       fun->content = sm_meet_object((sm_object *)fun->content);
       if (fun->parent != NULL)
         fun->parent = (sm_cx *)sm_meet_object((sm_object *)fun->parent);
-      for (unsigned short int i = 0; i < fun->num_params; i++) {
+      for (uint16_t i = 0; i < fun->num_params; i++) {
         sm_fun_param *param = sm_fun_get_param(fun, i);
         param->name         = (sm_string *)sm_meet_object((sm_object *)param->name);
         if (param->default_val != NULL) {
@@ -180,7 +180,7 @@ void sm_garbage_collect() {
   }
   // This will be a global variable
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
-    const unsigned int KB = 1024;
+    const uint32_t KB = 1024;
     putc('\n', stdout);
     printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
     putc('(', stdout);

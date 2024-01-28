@@ -4,7 +4,7 @@
 
 // New expression object with n arguments
 // Make sure to fill in the arguments afterward
-sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op, unsigned int size, unsigned int capacity) {
+sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op, uint32_t size, uint32_t capacity) {
   sm_expr *new_expr  = (sm_expr *)sm_malloc(sizeof(sm_expr) + sizeof(void *) * capacity);
   new_expr->my_type  = SM_EXPR_TYPE;
   new_expr->op       = op;
@@ -47,9 +47,9 @@ sm_expr *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, s
 // Append another object to this expression.
 sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg) {
   if (expr->size == expr->capacity) {
-    unsigned int new_capacity = ((int)(expr->capacity * sm_global_growth_factor(0))) + 1;
-    sm_expr     *new_expr     = sm_new_expr_n(expr->op, expr->size + 1, new_capacity);
-    for (unsigned int i = 0; i < expr->size; i++) {
+    uint32_t new_capacity = ((int)(expr->capacity * sm_global_growth_factor(0))) + 1;
+    sm_expr *new_expr     = sm_new_expr_n(expr->op, expr->size + 1, new_capacity);
+    for (uint32_t i = 0; i < expr->size; i++) {
       sm_expr_set_arg(new_expr, i, sm_expr_get_arg(expr, i));
     }
     return sm_expr_set_arg(new_expr, new_expr->size - 1, arg);
@@ -62,7 +62,7 @@ sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg) {
 // Shallow copy
 sm_expr *sm_expr_copy(sm_expr *self) {
   sm_expr *result = sm_new_expr_n(self->op, 0, self->size);
-  for (unsigned int i = 0; i < self->size; i++) {
+  for (uint32_t i = 0; i < self->size; i++) {
     sm_expr_append(result, sm_expr_get_arg(self, i));
   }
   return result;
@@ -71,21 +71,21 @@ sm_expr *sm_expr_copy(sm_expr *self) {
 // Concatenate collections, assume the type of the left expression
 sm_expr *sm_expr_concat(sm_expr *expr1, sm_expr *expr2) {
   sm_expr *result = sm_new_expr_n(expr1->op, 0, expr1->size + expr2->size);
-  for (unsigned int i = 0; i < expr2->size; i++) {
+  for (uint32_t i = 0; i < expr2->size; i++) {
     sm_expr_append(result, sm_expr_get_arg(expr2, i));
   }
   return result;
 }
 
 // Set an argument of an expression
-sm_expr *sm_expr_set_arg(sm_expr *expr, unsigned int index, sm_object *value) {
+sm_expr *sm_expr_set_arg(sm_expr *expr, uint32_t index, sm_object *value) {
   sm_object **ptr_array = (sm_object **)&(expr[1]);
   ptr_array[index]      = value;
   return expr;
 }
 
 // Get an argument of an expression
-sm_object *sm_expr_get_arg(sm_expr *expr, unsigned int index) {
+sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index) {
   sm_object **ptr_array = (sm_object **)&(expr[1]);
   return ptr_array[index];
 }
@@ -111,7 +111,7 @@ bool sm_is_infix(enum SM_EXPR_TYPE op) {
 }
 
 // Useful for making decisions about parenthesis
-unsigned short int op_level(enum SM_EXPR_TYPE op_expr) {
+uint16_t op_level(enum SM_EXPR_TYPE op_expr) {
   switch (op_expr) {
   case SM_PLUS_EXPR:
   case SM_MINUS_EXPR:

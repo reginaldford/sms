@@ -59,7 +59,7 @@ sm_stack *sm_global_lex_stack(sm_stack *replacement) {
 
 // Return the name of this type.
 // Must be synchronized with enum sm_object_type
-char *sm_global_type_name(unsigned short int which) {
+char *sm_global_type_name(uint16_t which) {
   static char *response[] = {"num",   "xpr", "prm",   "str", "sym", "cx",  "node", "ptr",    "meta",
                              "space", "fun", "param", "lcl", "l",   "err", "self", "return", "?"};
   return response[which];
@@ -67,14 +67,14 @@ char *sm_global_type_name(unsigned short int which) {
 
 // Return the length of the name of this type.
 // Must be synchronized with enum sm_object_type
-unsigned short int sm_global_type_name_len(unsigned short int which) {
-  static unsigned short int response_len[] = {3, 3, 3, 3, 3, 3, 3, 4, 5, 3, 5, 3, 3, 1};
+uint16_t sm_global_type_name_len(uint16_t which) {
+  static uint16_t response_len[] = {3, 3, 3, 3, 3, 3, 3, 4, 5, 3, 5, 3, 3, 1};
   return response_len[which];
 }
 
 // Primitive_names
-char *sm_global_fn_name(unsigned short int which) {
-  const unsigned short int num_functions = sm_global_num_fns();
+char *sm_global_fn_name(uint16_t which) {
+  const uint16_t num_functions = sm_global_num_fns();
   // Should be syncronized with enum SM_EXPR_TYPE
   static char *response[] = {
     "exit",         // SM_EXIT_EXPR
@@ -265,8 +265,8 @@ char *sm_global_fn_name(unsigned short int which) {
 }
 
 // corresponding string length of the string that would come from the sm_global_fn_name(which)
-unsigned int sm_global_fn_name_len(unsigned short int which) {
-  static long unsigned int response_len[] = {
+uint32_t sm_global_fn_name_len(uint16_t which) {
+  static uint64_t response_len[] = {
     4,  4, 5,  4, 2, 2,  3, 3, 1, 1, 1, 1,  1,  2, 1, 1, 1,  1, 1, 1, 3, 3, 3, 4, 4,  4,
     4,  4, 4,  5, 5, 5,  3, 3, 3, 4, 4, 4,  4,  4, 4, 5, 5,  5, 2, 3, 3, 4, 3, 4, 4,  3,
     2,  2, 3,  6, 6, 5,  3, 7, 6, 4, 6, 8,  12, 5, 5, 4, 2,  2, 2, 1, 1, 2, 2, 0, 0,  0,
@@ -279,8 +279,8 @@ unsigned int sm_global_fn_name_len(unsigned short int which) {
   return response_len[which];
 }
 
-unsigned int sm_global_num_fns() {
-  static const unsigned short int num_fns = 176;
+uint32_t sm_global_num_fns() {
+  static const uint16_t num_fns = 176;
   return num_fns;
 }
 

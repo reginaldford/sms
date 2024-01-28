@@ -2,7 +2,7 @@
 
 // linked list node
 struct sm_link {
-  short int         my_type;
+  int16_t           my_type;
   struct sm_object *value;
   struct sm_link   *next;
 };

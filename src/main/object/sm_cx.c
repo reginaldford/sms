@@ -141,7 +141,7 @@ bool sm_cx_rm(sm_cx *self, char *needle, int len) {
 
 // Print the contents of this cx to buffer and return the length
 // If fake is true, just return the hypothetical string length
-unsigned int sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
+uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
   if (!fake)
     buffer[0] = '{';
   int cursor = 1;
@@ -160,7 +160,7 @@ unsigned int sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
 void sm_cx_clear(sm_cx *self) { self->content = NULL; }
 
 // Clear the contents of the cx
-unsigned int sm_cx_size(sm_cx *self) {
+uint32_t sm_cx_size(sm_cx *self) {
   if (self->content != NULL)
     return sm_node_size(self->content);
   return 0;
@@ -171,7 +171,7 @@ void sm_cx_import(sm_cx *cxFrom, sm_cx *cxTo) {
   sm_expr *keys =
     sm_node_keys(cxFrom->content, sm_new_stack(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
   sm_expr *values = sm_node_values(cxFrom->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
-  for (unsigned int i = 0; i < keys->size; i++) {
+  for (uint32_t i = 0; i < keys->size; i++) {
     sm_symbol *keySym  = (sm_symbol *)sm_expr_get_arg(keys, i);
     sm_string *keyStr  = keySym->name;
     char      *cKeyStr = &keyStr->content;
@@ -203,10 +203,10 @@ void sm_cx_contextualize(sm_object *input, sm_cx *cx) {
     if (input_expr->op == SM_BLOCK_EXPR) {
       sm_cx *block_cx  = (sm_cx *)sm_expr_get_arg(input_expr, 0);
       block_cx->parent = cx;
-      for (unsigned int i = 1; i < input_expr->size; i++)
+      for (uint32_t i = 1; i < input_expr->size; i++)
         sm_cx_contextualize(sm_expr_get_arg(input_expr, i), cx);
     } else
-      for (unsigned int i = 0; i < input_expr->size; i++)
+      for (uint32_t i = 0; i < input_expr->size; i++)
         sm_cx_contextualize(sm_expr_get_arg(input_expr, i), cx);
   }
   }

@@ -13,15 +13,15 @@ sm_meta *sm_new_meta(sm_object *address, sm_cx *context) {
 
 // New string with description of this meta
 sm_string *sm_meta_to_string(sm_meta *meta) {
-  const unsigned int final_len = sm_meta_sprint(meta, NULL, true);
-  sm_string         *new_str   = sm_new_string_manual(final_len);
+  const uint32_t final_len = sm_meta_sprint(meta, NULL, true);
+  sm_string     *new_str   = sm_new_string_manual(final_len);
   sm_meta_sprint(meta, &(new_str->content), false);
   (&new_str->content)[final_len] = '\0';
   return new_str;
 }
 
 // Print to c string buffer a description of this meta
-unsigned int sm_meta_sprint(sm_meta *meta, char *buffer, bool fake) {
+uint32_t sm_meta_sprint(sm_meta *meta, char *buffer, bool fake) {
   if (!fake)
     buffer[0] = ':';
   if (meta->address->my_type == SM_EXPR_TYPE) {
@@ -29,13 +29,13 @@ unsigned int sm_meta_sprint(sm_meta *meta, char *buffer, bool fake) {
       if (((sm_expr *)meta->address)->size < 3) {
         if (!fake)
           buffer[1] = '(';
-        unsigned int len = sm_object_sprint(meta->address, &(buffer[2]), fake);
+        uint32_t len = sm_object_sprint(meta->address, &(buffer[2]), fake);
         if (!fake)
           buffer[2 + len] = ')';
         return len + 3;
       }
     }
   }
-  unsigned int len = sm_object_sprint(meta->address, &(buffer[1]), fake);
+  uint32_t len = sm_object_sprint(meta->address, &(buffer[1]), fake);
   return len + 1;
 }

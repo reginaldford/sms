@@ -105,10 +105,10 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
 
 // Define popcountll whether or not we have the built-in instruction.
 #ifdef __x86_64__
-int popcountll(unsigned long long num) { return __builtin_popcountll(num); }
+int popcountll(uint64_t num) { return __builtin_popcountll(num); }
 #else
 // Manually counting the bits in the long long int, efficiently
-int popcountll(unsigned long long num) {
+int popcountll(uint64_t num) {
   int count = 0;
   for (count = 0; num; count++)
     num &= (num - 1);
@@ -117,7 +117,7 @@ int popcountll(unsigned long long num) {
 #endif
 
 // Return the number of set bits to the left of map_index'th bit in map
-int sm_node_map_left_count(unsigned long long map, int bit_index) {
+int sm_node_map_left_count(uint64_t map, int bit_index) {
   return popcountll(map & ((1LL << bit_index) - 1));
 }
 
@@ -126,9 +126,9 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
   sm_node *curr_node  = self;
   int      char_index = 0;
   while (char_index < len && curr_node != NULL) {
-    int                map_index = sm_node_map_index(needle[char_index]);
-    unsigned long long map       = curr_node->map;
-    unsigned long long bit       = 1ULL << map_index;
+    int      map_index = sm_node_map_index(needle[char_index]);
+    uint64_t map       = curr_node->map;
+    uint64_t bit       = 1ULL << map_index;
     if ((map & bit) == 0) {
       return NULL;
     }
@@ -197,7 +197,7 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack)
   int cursor = 0;
   if (node->value != NULL) {
     // var name
-    for (unsigned int i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
+    for (uint32_t i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
       sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
       if (!fake)
         buffer[i] = sm_node_bit_unindex(num_obj->value);
@@ -236,10 +236,10 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack)
 }
 
 // Return the number of children
-int sm_node_map_size(unsigned long long map) { return popcountll(map); }
+int sm_node_map_size(uint64_t map) { return popcountll(map); }
 
 // Set a bit of map to 1 or 0 depending on the provided boolean
-void sm_node_map_set(unsigned long long *map, int index, bool on) {
+void sm_node_map_set(uint64_t *map, int index, bool on) {
   if (on) {
     *map |= (1LL << index);
   } else {
@@ -248,13 +248,13 @@ void sm_node_map_set(unsigned long long *map, int index, bool on) {
 }
 
 // Return whether a bit is 1
-bool sm_node_map_get(unsigned long long map, int i) {
-  unsigned long long mask = 1ULL << i;
+bool sm_node_map_get(uint64_t map, int i) {
+  uint64_t mask = 1ULL << i;
   return (map & mask) != 0;
 }
 
 // Return the correlating child index to this bit in the map
-int sm_node_child_index(unsigned long long map, int map_index) {
+int sm_node_child_index(uint64_t map, int map_index) {
   return popcountll(map & ((1LL << map_index) - 1));
 }
 
@@ -277,9 +277,9 @@ int sm_node_size(sm_node *node) {
   int size = 0;
   if (node->value != NULL)
     size++;
-  unsigned long long map = node->map; // Get the bitmap
+  uint64_t map = node->map; // Get the bitmap
   while (map != 0) {
-    unsigned long long bit = map & -map;    // Using two's compliment trick
+    uint64_t bit    = map & -map;           // Using two's compliment trick
     int bit_index   = __builtin_ctzll(bit); // Using built-in ctzll (count trailing zeros) function
     int child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here = (sm_node *)sm_node_nth(node->children, child_index);
@@ -302,7 +302,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
     char buffer[len + 1]; // Increase the buffer size to accommodate the null terminator
     buffer[len] = '\0';   // Add the null terminator at the end
 
-    for (unsigned int i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
+    for (uint32_t i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
       sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
       buffer[i]          = sm_node_bit_unindex(num_obj->value);
     }
@@ -316,11 +316,11 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
     return collection;
   }
 
-  unsigned long long map = node->map; // Get the bitmap
+  uint64_t map = node->map; // Get the bitmap
 
   while (map != 0) {
-    unsigned long long bit = map & -map; // Get the rightmost set bit using two's complement trick
-    int                bit_index = __builtin_ctzll(
+    uint64_t bit       = map & -map; // Get the rightmost set bit using two's complement trick
+    int      bit_index = __builtin_ctzll(
       bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
 
     int      child_index = sm_node_child_index(node->map, bit_index);

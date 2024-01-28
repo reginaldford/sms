@@ -3,7 +3,7 @@
 /// These mapped trie nodes make up trees rooted in sm_cx structs
 typedef struct sm_node {
   /// The type of this object (SM_NODE_TYPE)
-  short int my_type;
+  int16_t my_type;
   /// The value is null or some object
   struct sm_object *value;
   /// Go to the next sibling node
@@ -11,7 +11,7 @@ typedef struct sm_node {
   /// Shortcut ptr
   sm_object *shortcut;
   /// a 64 bit map with 1's for existing children of this node
-  unsigned long long map;
+  uint64_t map;
   /// Children nodes form a linked list
   struct sm_node *children;
 } sm_node;
@@ -55,7 +55,7 @@ sm_node *sm_node_parent_node(sm_node *self, char *needle, int len);
 /// Remove a particular node from this tree
 struct sm_node *sm_node_rm(struct sm_node *root, struct sm_node *nodeToRemove);
 /// Return the number of set bits to the left of map_index'th bit in map
-int sm_node_map_left_count(unsigned long long map, int map_index);
+int sm_node_map_left_count(uint64_t map, int map_index);
 /// Remove the nth node in the linked list started at root
 bool sm_node_rm_nth(struct sm_node *root, int n);
 /// Returns the number of non-NULL values in nodes under this node (including this node)
@@ -67,10 +67,10 @@ sm_expr *sm_node_values(sm_node *node, sm_expr *collection);
 /// A node is empty if is has NULL as value and 0LL as map
 bool sm_node_is_empty(sm_node *node);
 /// Return the number of children to this node
-int sm_node_map_size(unsigned long long map);
+int sm_node_map_size(uint64_t map);
 /// Set a bit of map to 1 or 0 depending on the provided boolean
-void sm_node_map_set(unsigned long long *map, int index, bool on);
+void sm_node_map_set(uint64_t *map, int index, bool on);
 /// Return whether the bit at i is set in the map
-bool sm_node_map_get(unsigned long long map, int i);
+bool sm_node_map_get(uint64_t map, int i);
 /// Return the correlating child index to this bit in the map
-int sm_node_child_index(unsigned long long map, int map_index);
+int sm_node_child_index(uint64_t map, int map_index);

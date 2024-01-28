@@ -2,10 +2,10 @@
 
 /// Newly implemented bytecode block. incomplete
 typedef struct sm_bc_block {
-  unsigned short int my_type;
-  sm_cx             *metadata;
-  unsigned int       size;
-  char               content;
+  uint16_t my_type;
+  sm_cx   *metadata;
+  uint32_t size;
+  char     content;
 } sm_bc_block;
 
 sm_bc_block *sm_new_bc_block(sm_cx *meta, int size, char *content);
