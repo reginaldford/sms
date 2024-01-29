@@ -129,6 +129,12 @@ void sm_inflate_heap() {
       local->name     = (sm_string *)sm_meet_object((sm_object *)local->name);
       break;
     }
+    case SM_SHORTCUT_TYPE: {
+      sm_shortcut *sc = (sm_shortcut *)current_obj;
+      sc->value       = sm_meet_object(sc->value);
+      sc->key         = (sm_string *)sm_meet_object((sm_object *)sc->value);
+      break;
+    }
     case SM_RETURN_TYPE: {
       sm_return *return_obj = (sm_return *)current_obj;
       return_obj->address   = sm_meet_object((sm_object *)return_obj->address);
