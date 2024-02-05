@@ -1,6 +1,6 @@
 #backup your code before you do this
-str="s/short int/int16_t/g";
-find ../src/ -name "*.c" -print -exec sed -i "$str" {} +
-find ../src/ -name "*.h" -print -exec sed -i "$str" {} +
-find ../src/ -name "*.y" -print -exec sed -i "$str" {} +
-find ../src/ -name "*.l" -print -exec sed -i "$str" {} +
+str='s/ugly/pretty/g';
+find ../src/ -name *.c -exec sed -i $str {} +
+find ../src/ -name *.h -exec sed -i $str {} +
+find ../src/ -name *.y -exec sed -i $str {} +
+find ../src/ -name *.l -exec sed -i $str {} +
