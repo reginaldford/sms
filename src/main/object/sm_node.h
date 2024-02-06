@@ -8,8 +8,6 @@ typedef struct sm_node {
   struct sm_object *value;
   /// Go to the next sibling node
   struct sm_node *next;
-  /// Shortcut ptr
-  sm_object *shortcut;
   /// a 64 bit map with 1's for existing children of this node
   uint64_t map;
   /// Children nodes form a linked list

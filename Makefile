@@ -2,9 +2,9 @@
 
 # Seems to work with zig cc, clang, gcc, egcc (OpenBSD)
 INSTALL_DIR     := /usr/local/bin
-CC              := clang
-CC_DEBUG        := clang
-CC_PROF         := clang
+CC              := cc
+CC_DEBUG        := cc
+CC_PROF         := cc
 CC_UNIFIED      := zig cc
 # CC_UNIFIED      := zig cc -target x86_64-windows-gnu #doesnt work
 CFLAGS          := -fshort-enums -O3
