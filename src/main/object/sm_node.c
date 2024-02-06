@@ -11,7 +11,6 @@ sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
   node->next     = next;
   node->map      = map;
   node->children = children;
-  node->shortcut = NULL;
   return node;
 }
 
