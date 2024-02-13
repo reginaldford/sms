@@ -24,7 +24,7 @@ typedef struct sm_env {
   /// Whether -q was specified
   bool quiet_mode;
   /// Number of args passed to the main function
-  int num_args;
+  int32_t num_args;
   /// Args passed to the main function
   char **args;
 } sm_env;

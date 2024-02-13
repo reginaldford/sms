@@ -4,7 +4,7 @@
 /// @note The data field has not been used for anything yet.
 /// @note When evaluated, the field is returned.
 typedef struct sm_meta {
-  int        my_type;
+  int32_t    my_type;
   sm_object *address;
   sm_cx     *scope;
   sm_cx     *data;

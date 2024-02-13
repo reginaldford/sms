@@ -44,9 +44,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       struct tm *timeinfo;
       time(&rawtime);
       timeinfo            = localtime(&rawtime);
-      int     *time_array = (int *)timeinfo;
+      int32_t *time_array = (int32_t *)timeinfo;
       sm_expr *result     = sm_new_expr_n(SM_ARRAY_EXPR, 9, 9);
-      for (int i = 0; i < 9; i++)
+      for (int32_t i = 0; i < 9; i++)
         sm_expr_set_arg(result, i, (sm_object *)sm_new_double(time_array[i]));
       return (sm_object *)result;
       break;
@@ -60,18 +60,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_SLEEP_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      int        tms;
+      int32_t    tms;
       if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_SLEEP_EXPR))
         return (sm_object *)sm_new_double(0);
 
-      tms = (int)((sm_double *)obj0)->value;
+      tms = (int32_t)((sm_double *)obj0)->value;
 
       if (tms < 0) {
         printf("ERROR: sleep function was provided a negative value.\n");
         return (sm_object *)sm_new_double(0);
       }
       struct timespec ts;
-      int             ret;
+      int32_t         ret;
       ts.tv_sec  = tms / 1000;
       ts.tv_nsec = (tms % 1000) * 1000000;
       do {
@@ -85,9 +85,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_new_double(pid);
     }
     case SM_WAIT_EXPR: {
-      int status;
-      int child_pid = wait(&status);
-      status        = WEXITSTATUS(status);
+      int32_t status;
+      int32_t child_pid = wait(&status);
+      status            = WEXITSTATUS(status);
       if (child_pid == -1)
         status = 1;
       return (sm_object *)sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)sm_new_double(child_pid),
@@ -101,7 +101,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       path = (sm_string *)obj0;
       // The system command leaves 8 bits for extra information
       // We do not need it, so we shift away the 8 bits
-      int result = system(&path->content) >> 8;
+      int32_t result = system(&path->content) >> 8;
       return (sm_object *)sm_new_double(result);
       break;
     }
@@ -127,8 +127,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       key = (sm_string *)obj0;
       if (!expect_type(obj1, 1, SM_STRING_TYPE, SM_OS_SETENV_EXPR))
         return (sm_object *)sms_false;
-      value      = (sm_string *)obj1;
-      int result = setenv(&key->content, &value->content, 1);
+      value          = (sm_string *)obj1;
+      int32_t result = setenv(&key->content, &value->content, 1);
       return (sm_object *)sm_new_double(result);
       break;
     }
@@ -269,17 +269,17 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       desired_len = (sm_double *)obj2;
       if (start->value < 0 || start->value >= str0->size) {
         printf("Error: Calling %s with out of range start value: %i.\n",
-               sm_global_fn_name(SM_STR_PART_EXPR), (int)start->value);
+               sm_global_fn_name(SM_STR_PART_EXPR), (int32_t)start->value);
         return (sm_object *)sm_new_string(0, "");
       }
       if (desired_len->value > str0->size - start->value) {
         printf("Error: Calling %s with out of range length value: %i.\n",
-               sm_global_fn_name(SM_STR_PART_EXPR), (int)desired_len->value);
+               sm_global_fn_name(SM_STR_PART_EXPR), (int32_t)desired_len->value);
         return (sm_object *)sm_new_string(0, "");
       }
-      sm_string *new_str = sm_new_string_manual((int)desired_len->value);
+      sm_string *new_str = sm_new_string_manual((int32_t)desired_len->value);
       char      *content = &(new_str->content);
-      sm_strncpy(content, &(str0->content) + (int)start->value, (int)desired_len->value);
+      sm_strncpy(content, &(str0->content) + (int32_t)start->value, (int32_t)desired_len->value);
       return (sm_object *)new_str;
       break;
     }
@@ -315,8 +315,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_double *num0;
       if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_EXIT_EXPR))
         return (sm_object *)sm_new_string(0, "");
-      num0          = (sm_double *)obj0;
-      int exit_code = num0->value;
+      num0              = (sm_double *)obj0;
+      int32_t exit_code = num0->value;
       sm_signal_exit(exit_code);
       break;
     }
@@ -445,7 +445,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SIZE_EXPR))
         return (sm_object *)sms_false;
-      int size = sm_cx_size(cx);
+      int32_t size = sm_cx_size(cx);
       return (sm_object *)sm_new_double(size);
     }
     case SM_RM_EXPR: {
@@ -567,7 +567,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr *expression = (sm_expr *)obj0;
       expression          = (sm_expr *)sm_copy((sm_object *)expression);
       sm_double *given_op = (sm_double *)obj1;
-      expression->op      = (int)((sm_double *)given_op)->value;
+      expression->op      = (int32_t)((sm_double *)given_op)->value;
       return (sm_object *)expression;
     }
     case SM_XP_OP_STR_EXPR: {
@@ -575,8 +575,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_XP_OP_STR_EXPR))
         return (sm_object *)sms_false;
       sm_double *op_num = (sm_double *)obj0;
-      return (sm_object *)sm_new_string(sm_global_fn_name_len((int)op_num->value),
-                                        sm_global_fn_name((int)op_num->value));
+      return (sm_object *)sm_new_string(sm_global_fn_name_len((int32_t)op_num->value),
+                                        sm_global_fn_name((int32_t)op_num->value));
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -625,8 +625,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         number = (sm_double *)obj0;
       else
         return (sm_object *)sm_new_string(0, "");
-      double val       = number->value;
-      int    floor_val = val > 0 ? val + 0.5 : val - 0.5;
+      double  val       = number->value;
+      int32_t floor_val = val > 0 ? val + 0.5 : val - 0.5;
       return (sm_object *)sm_new_double(floor_val);
     }
     case SM_FLOOR_EXPR: {
@@ -668,10 +668,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_double *number;
       if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_SEED_EXPR))
         return (sm_object *)sms_false;
-      number           = (sm_double *)obj0;
-      double val       = number->value;
-      int    floor_val = val > 0 ? val + 0.5 : val - 0.5;
-      srand((int)floor_val);
+      number            = (sm_double *)obj0;
+      double  val       = number->value;
+      int32_t floor_val = val > 0 ? val + 0.5 : val - 0.5;
+      srand((int32_t)floor_val);
       return (sm_object *)sms_true;
     }
     case SM_FILE_WRITE_EXPR: {
@@ -695,7 +695,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         printf("fileWrite failed to open: %s\n", fname_cstr);
         return (sm_object *)sms_false;
       }
-      const int CHUNK_SIZE = 128;
+      const int32_t CHUNK_SIZE = 128;
       fwrite(content_cstr, CHUNK_SIZE, content_str->size / CHUNK_SIZE, fptr);
       if (fmod(content_str->size, CHUNK_SIZE)) {
         uint32_t cursor = (content_str->size / CHUNK_SIZE) * CHUNK_SIZE;
@@ -779,13 +779,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
 
       if (file_length < length->value) {
         fclose(fptr);
-        printf("filePart failed because part length is out of range: %i\n", (int)length->value);
+        printf("filePart failed because part length is out of range: %i\n", (int32_t)length->value);
       }
       fseek(fptr, start_pos->value, SEEK_SET);
-      sm_string *output = sm_new_string_manual((int)length->value);
-      fread(&(output->content), 1, (int)length->value, fptr);
+      sm_string *output = sm_new_string_manual((int32_t)length->value);
+      fread(&(output->content), 1, (int32_t)length->value, fptr);
       fclose(fptr);
-      *(&output->content + ((int)length->value)) = '\0';
+      *(&output->content + ((int32_t)length->value)) = '\0';
       return (sm_object *)output;
     }
     case SM_FILE_EXISTS_EXPR: {
@@ -811,7 +811,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       fname_str        = (sm_string *)evaluated;
       char *fname_cstr = &(fname_str->content);
 
-      int result = remove(fname_cstr);
+      int32_t result = remove(fname_cstr);
       if (result != 0) {
         printf("fileRm failed: Could not rm file: %s\n", fname_cstr);
         return (sm_object *)sms_false;
@@ -1058,7 +1058,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(index_obj, 1, SM_DOUBLE_TYPE, SM_INDEX_EXPR))
         return (sm_object *)sm_new_string(0, "");
       index_double   = (sm_double *)index_obj;
-      uint32_t index = (int)index_double->value;
+      uint32_t index = (int32_t)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
         printf("Error: Index out of range: %i . Array size is %i\n", index, arr->size);
         return (sm_object *)sms_false;
@@ -1167,8 +1167,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       sm_expr *dot_expr = (sm_expr *)obj0;
       if (dot_expr->op != SM_DOT_EXPR) {
-        char *error_msg = "Error: Incorrectly formatted AST.";
-        int   len       = strlen(error_msg);
+        char   *error_msg = "Error: Incorrectly formatted AST.";
+        int32_t len       = strlen(error_msg);
         printf("%s\n", error_msg);
         return (sm_object *)sm_new_error(sm_new_string(len, error_msg), sm_new_string(0, ""), 0);
       }
@@ -1203,7 +1203,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       sm_double *index = (sm_double *)obj1;
       if (index->value >= arr->size || index->value < -0) {
-        printf("Error: Index out of range: %i\n", (int)index->value);
+        printf("Error: Index out of range: %i\n", (int32_t)index->value);
         return (sm_object *)sm_new_error(sm_new_string(19, "Index out of range"),
                                          sm_new_string(1, "?"), 0);
       }

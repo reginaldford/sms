@@ -58,7 +58,7 @@ sm_search_result sm_space_array_find(sm_space_array *table, uint32_t size) {
 
   uint32_t lower_limit = 0;
   uint32_t upper_limit = table->size == 0 ? 0 : table->size - 1;
-  int      comparison  = 1;
+  int32_t  comparison  = 1;
   uint32_t guess_point = (upper_limit + lower_limit) / 2.0;
 
   while (lower_limit < upper_limit && comparison != 0) {
@@ -89,8 +89,8 @@ sm_space_array *sm_space_add(sm_space *space, sm_space_array *table) {
   sm_space       **table_entries = sm_get_space_array(table);
 
   if (table->size == table->capacity) {
-    int new_capacity = ((int)(table->capacity * sm_global_growth_factor(0))) + 1;
-    table            = sm_resize_space_array(table, new_capacity);
+    int32_t new_capacity = ((int32_t)(table->capacity * sm_global_growth_factor(0))) + 1;
+    table                = sm_resize_space_array(table, new_capacity);
   }
 
   table->size += 1;

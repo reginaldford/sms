@@ -8,7 +8,7 @@ struct sm_self *sm_new_self() {
   return new_self;
 }
 
-int sm_self_sprint(sm_self *self, char *buffer, bool fake) {
+int32_t sm_self_sprint(sm_self *self, char *buffer, bool fake) {
   if (!fake)
     sm_strncpy(buffer, "self", 4);
   return 4;

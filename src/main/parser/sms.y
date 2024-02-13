@@ -8,13 +8,13 @@
 #include <string.h>
 #include "../main/sms.h"
 
-extern int yylex();
-extern int yylineno;
+extern int32_t yylex();
+extern int32_t yylineno;
 void       yyerror(const char *msg);
 
 FILE* _lex_file(char *fpath);
 void _done_lexing_file(FILE* f);
-void _lex_cstr(char * cstr,int len);
+void _lex_cstr(char * cstr,int32_t len);
 
 %}
 
@@ -648,7 +648,7 @@ void done_lexing_file(FILE* f){
   _done_lexing_file(f);
 }
 
-void lex_cstr(char * cstr,int len){
+void lex_cstr(char * cstr,int32_t len){
   _lex_cstr(cstr,len);
 }
 

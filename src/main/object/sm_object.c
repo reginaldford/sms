@@ -49,7 +49,7 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_SELF_TYPE:
     return sm_self_sprint((sm_self *)obj1, buffer, fake);
   default: {
-    int len = 5 + log(obj1->my_type) / log(10);
+    int32_t len = 5 + log(obj1->my_type) / log(10);
     if (!fake)
       snprintf(buffer, len, "?(%i)", obj1->my_type);
     return len;
@@ -57,7 +57,7 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   }
 }
 // Return the size of the object in bytes
-int sm_sizeof(sm_object *obj1) {
+int32_t sm_sizeof(sm_object *obj1) {
   // printf("type: %i\n",obj1->my_type); fflush(stdout);
   switch (obj1->my_type) {
   case SM_DOUBLE_TYPE:
@@ -142,8 +142,8 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
 
 // prints the object by using a buffer allocated from OS
 void sm_object_dbg_print(sm_object *obj) {
-  int   len = sm_object_sprint(obj, NULL, true);
-  char *buf = malloc(len + 1);
+  int32_t len = sm_object_sprint(obj, NULL, true);
+  char   *buf = malloc(len + 1);
   sm_object_sprint(obj, buf, false);
   buf[len] = '\0';
   printf("%s\n", buf);

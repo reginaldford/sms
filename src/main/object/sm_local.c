@@ -13,7 +13,7 @@ sm_local *sm_new_local(uint16_t index, sm_string *name) {
 
 // If this symbol matches a parameter of the function, return which.
 // Else, return -1
-int sym_matches_param(sm_symbol *sym, sm_fun *fun) {
+int32_t sym_matches_param(sm_symbol *sym, sm_fun *fun) {
   for (uint16_t i = 0; i < fun->num_params; i++) {
     sm_fun_param *param       = sm_fun_get_param(fun, i);
     sm_string    *param_str   = param->name;
@@ -35,7 +35,7 @@ sm_object *sm_localize(sm_object *obj, sm_fun *fun) {
     sm_expr *sme = (sm_expr *)obj;
 
     if (sme->op == SM_ASSIGN_EXPR) {
-      int which_param = sym_matches_param((sm_symbol *)sm_expr_get_arg(sme, 0), fun);
+      int32_t which_param = sym_matches_param((sm_symbol *)sm_expr_get_arg(sme, 0), fun);
       if (which_param != -1) {
         sme->op        = SM_ASSIGN_LOCAL_EXPR;
         sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
@@ -50,7 +50,7 @@ sm_object *sm_localize(sm_object *obj, sm_fun *fun) {
     }
   } else if (obj->my_type == SM_SYMBOL_TYPE) {
     sm_symbol *sym         = (sm_symbol *)obj;
-    int        which_param = sym_matches_param(sym, fun);
+    int32_t    which_param = sym_matches_param(sym, fun);
     if (which_param != -1)
       return (sm_object *)sm_new_local(which_param, sym->name);
   }

@@ -11,4 +11,4 @@ typedef struct sm_error {
 } sm_error;
 
 sm_error *sm_new_error(sm_string *message, sm_string *source, uint32_t line);
-int       sm_error_sprint(sm_error *self, char *buffer, bool fake);
+int32_t   sm_error_sprint(sm_error *self, char *buffer, bool fake);
