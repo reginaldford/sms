@@ -92,7 +92,6 @@ enum sm_object_type {
 #include "memory/sm_space.h"
 #include "memory/sm_gc.h"
 #include "sm_global.h"
-#include "terminal/sm_terminal_input.h"
 #include "terminal/sm_terminal_output.h"
 #include "engine/str.h"
 #include "engine/sm_diff.h"
