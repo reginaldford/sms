@@ -13,7 +13,7 @@ sm_cx *sm_new_cx(sm_cx *parent) {
 
 // Search through this cx and ancestry for this key.
 // Return the containing CX if the key is found, else return false.
-sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int len) {
+sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int32_t len) {
   sm_cx *current_loc = self;
   while (current_loc) {
     sm_object *result = sm_node_get(current_loc->content, needle, len);
@@ -26,7 +26,7 @@ sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int len) {
 
 // Searches for an existing value and sets it to the given value and returns True.
 // Returns false if the value cannot be found. Traverses parent ptrs to find the value.
-bool sm_cx_set(sm_cx *self, char *needle, int len, sm_object *value) {
+bool sm_cx_set(sm_cx *self, char *needle, int32_t len, sm_object *value) {
   sm_cx *cx = self;
   while (cx != NULL) {
     sm_node *node = cx->content;
@@ -42,7 +42,7 @@ bool sm_cx_set(sm_cx *self, char *needle, int len, sm_object *value) {
 
 // Get this value from the current context.
 // Return Null if there is no such key.
-sm_object *sm_cx_get(sm_cx *self, char *needle, int len) {
+sm_object *sm_cx_get(sm_cx *self, char *needle, int32_t len) {
   sm_node *node = self->content;
   if (node != NULL) {
     sm_node *leaf = sm_node_subnode(node, needle, len);
@@ -54,7 +54,7 @@ sm_object *sm_cx_get(sm_cx *self, char *needle, int len) {
 
 // Like sm_cx_get, but
 // traverses the context ancestry to find the result, or returns NULL
-sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len) {
+sm_object *sm_cx_get_far(sm_cx *self, char *needle, int32_t len) {
   sm_cx *curr_cx = self;
   while (curr_cx != NULL) {
     if (curr_cx->content != NULL) {
@@ -68,14 +68,14 @@ sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len) {
 }
 
 // Add a key_value with this key and value
-bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
+bool sm_cx_let(sm_cx *self, char *needle, int32_t len, sm_object *val) {
   sm_node *current_node;
   if (self->content == NULL)
     self->content = sm_new_node(NULL, NULL, 0LL, NULL);
   current_node = self->content;
-  for (int i = 0; i < len; i++) {
-    int             index       = sm_node_map_index(needle[i]);
-    int             child_index = sm_node_child_index(current_node->map, index);
+  for (int32_t i = 0; i < len; i++) {
+    int32_t         index       = sm_node_map_index(needle[i]);
+    int32_t         child_index = sm_node_child_index(current_node->map, index);
     struct sm_node *next_node;
     if (sm_node_map_get(current_node->map, index) == false) {
       sm_node_map_set(&current_node->map, index, true);
@@ -96,14 +96,14 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
 // We return the last node in the path to the node addressed by needle
 // which has a map size more than 1.
 // If there is no map size more than 1 in the path, then the root node is returned.
-bool sm_cx_rm(sm_cx *self, char *needle, int len) {
+bool sm_cx_rm(sm_cx *self, char *needle, int32_t len) {
   // First, determine that the node exists
   // While tracking the node_path for later
   sm_node *node_path[len + 1]; // we include the root node which has no letter associated
   sm_node *curr_node   = self->content;
-  int      map_index   = 0;
-  int      child_index = 0;
-  int      char_index  = 0;
+  int32_t  map_index   = 0;
+  int32_t  child_index = 0;
+  int32_t  char_index  = 0;
   node_path[0]         = curr_node;
   for (; char_index < len && curr_node != NULL; char_index++) {
     map_index = sm_node_map_index(needle[char_index]);
@@ -121,7 +121,7 @@ bool sm_cx_rm(sm_cx *self, char *needle, int len) {
   curr_node->value = NULL;
   // The rest is garbage collection
   // For nodes addressed by subsets of needle from beginning to all other letters
-  for (int i = len; i > 0; i--) {
+  for (int32_t i = len; i > 0; i--) {
     curr_node                        = node_path[i];
     struct sm_node *curr_node_parent = node_path[i - 1];
     if (curr_node->map == 0LL && curr_node->value == NULL) {
@@ -144,7 +144,7 @@ bool sm_cx_rm(sm_cx *self, char *needle, int len) {
 uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
   if (!fake)
     buffer[0] = '{';
-  int cursor = 1;
+  int32_t cursor = 1;
   if (self->content != NULL) {
     sm_stack *letter_stack = sm_new_stack(32);
     cursor += sm_node_sprint(self->content, &(buffer[cursor]), fake, letter_stack);

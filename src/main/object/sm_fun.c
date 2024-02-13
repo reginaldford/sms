@@ -39,7 +39,7 @@ void sm_fun_set_param(sm_fun *self, uint16_t i, sm_string *name, sm_object *defa
 }
 
 // Print to c str buffer a description of this parameter
-int sm_fun_param_sprint(sm_fun_param *self, char *buffer, bool fake) {
+int32_t sm_fun_param_sprint(sm_fun_param *self, char *buffer, bool fake) {
   if (!fake)
     sm_strncpy(buffer, &(self->name->content), self->name->size);
   uint32_t cursor = self->name->size;

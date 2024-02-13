@@ -305,8 +305,8 @@ sm_expr *apply_constants11(sm_expr *e) {
         sm_double *d0 = (sm_double *)obj0;
         if (obj1->my_type == SM_DOUBLE_TYPE) {
           sm_double *d1 = (sm_double *)obj1;
-          int        i0 = (int)d0->value;
-          int        i1 = (int)d1->value;
+          int32_t    i0 = (int32_t)d0->value;
+          int32_t    i1 = (int32_t)d1->value;
           if (i0 == d0->value && i1 == d1->value && i0 % i1 == 0) {
             return (sm_expr *)((sm_object *)sm_new_double(i0 / i1));
           } else

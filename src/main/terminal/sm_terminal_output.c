@@ -3,7 +3,7 @@
 #include "../sms.h"
 
 // bison generated parser's global line number :-(
-extern int yylineno;
+extern int32_t yylineno;
 
 // Print the prompt
 void sm_terminal_print_prompt() {

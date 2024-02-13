@@ -2,14 +2,14 @@
 #include "macros.h"
 
 // Generating many objects and then collecting the garbage.
-int chapter_1(int test) {
-  int           num_fails = 0;
+int32_t chapter_1(int32_t test) {
+  int32_t       num_fails = 0;
   static sm_env env;
   env.mem_flag   = false;
   env.quiet_mode = true;
   sm_init(&env, 0, NULL);
   printf("Generating 100 empty contexts.\n");
-  for (int i = 0; i < 100; i++)
+  for (int32_t i = 0; i < 100; i++)
     sm_new_cx(NULL);
   printf("Running GC.\n");
   sm_garbage_collect();

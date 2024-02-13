@@ -5,7 +5,7 @@
 #include "sm_test_outline.h"
 #include <ctype.h>
 
-extern int yylineno;
+extern int32_t yylineno;
 #define DISPLAY_WIDTH 65
 
 // Global for the test outline structure
@@ -20,17 +20,17 @@ test_outline *global_test_outline(test_outline *replacement) {
 }
 
 // To track how many tests are performed
-int global_num_tests(int inc) {
-  static int num = 0;
+int32_t global_num_tests(int32_t inc) {
+  static int32_t num = 0;
   num += inc;
   return num;
 }
 
 // Return the total number of chapters in this outline
-int num_chapters() { return global_test_outline(NULL)->num_chapters; }
+int32_t num_chapters() { return global_test_outline(NULL)->num_chapters; }
 
 // Return the name of this chapter
-char *chapter_name(int chapter) {
+char *chapter_name(int32_t chapter) {
   char **names = global_test_outline(NULL)->chapter_names;
   if (chapter < 0 || chapter >= num_chapters()) {
     printf("Invalid chapter: %i\n", chapter);
@@ -40,8 +40,8 @@ char *chapter_name(int chapter) {
 }
 
 // Return the number of subchapters of this chapter
-int num_subchapters(int chapter) {
-  int *values = global_test_outline(NULL)->num_subchapters;
+int32_t num_subchapters(int32_t chapter) {
+  int32_t *values = global_test_outline(NULL)->num_subchapters;
   if (chapter >= 0 && chapter <= num_chapters() - 1) {
     return values[chapter];
   } else {
@@ -50,14 +50,14 @@ int num_subchapters(int chapter) {
 }
 
 // Announce which test is being performed
-void test_intro(int chapter, int subchapter, int test, char *desc) {
+void test_intro(int32_t chapter, int32_t subchapter, int32_t test, char *desc) {
   printf("Test: %i.%i.%i : %s ...", chapter, subchapter, test, desc);
 }
 
 // For text alignment
-char *spaces(int len) {
+char *spaces(int32_t len) {
   static char str[DISPLAY_WIDTH];
-  for (int i = 0; i < len; i++) {
+  for (int32_t i = 0; i < len; i++) {
     str[i] = ' ';
   }
   str[len] = '\0';
@@ -65,8 +65,8 @@ char *spaces(int len) {
 }
 
 // Counts 2-digit values among provided integers to help text alignment
-int get_alignment(int chapter, int subchapter, int test) {
-  int alignment = 0;
+int32_t get_alignment(int32_t chapter, int32_t subchapter, int32_t test) {
+  int32_t alignment = 0;
   if (chapter >= 10)
     alignment++;
   if (subchapter >= 10)
@@ -100,9 +100,9 @@ sm_cx *check_parsed_object(sm_parse_result pr) {
 }
 
 // Return 0 if there are no problems
-int check_specific_test(sm_expr *test_list, int test) {
+int32_t check_specific_test(sm_expr *test_list, int32_t test) {
   sm_object *obj;
-  if (test >= 0 && test < (int)test_list->size) {
+  if (test >= 0 && test < (int32_t)test_list->size) {
     obj = sm_expr_get_arg(test_list, test);
   } else {
     printf("Error: No such test number: %i. Max valid test number is %i.\n", test,
@@ -121,8 +121,8 @@ int check_specific_test(sm_expr *test_list, int test) {
   return 0;
 }
 
-int perform_specific_test(sm_cx *test_env, sm_expr *test_list, int chapter, int subchapter,
-                          int test) {
+int32_t perform_specific_test(sm_cx *test_env, sm_expr *test_list, int32_t chapter,
+                              int32_t subchapter, int32_t test) {
   if (check_specific_test(test_list, test) != 0) {
     printf("Something was wrong with the format of the test.\n");
     return -1;
@@ -135,8 +135,8 @@ int perform_specific_test(sm_cx *test_env, sm_expr *test_list, int chapter, int 
   sm_string *outcome_str  = sm_object_to_string(outcome);
   sm_object *expected     = sm_expr_get_arg(test_triplet, 1);
   sm_string *expected_str = sm_object_to_string(expected);
-  int        diff         = strcmp(&(expected_str->content), &(outcome_str->content));
-  int        alignment    = get_alignment(chapter, subchapter, test);
+  int32_t    diff         = strcmp(&(expected_str->content), &(outcome_str->content));
+  int32_t    alignment    = get_alignment(chapter, subchapter, test);
   if (diff != 0) {
     // -8 for exact display width
     printf("\n%sFailed.\n", spaces(DISPLAY_WIDTH - 8));
@@ -153,8 +153,9 @@ int perform_specific_test(sm_cx *test_env, sm_expr *test_list, int chapter, int 
 // Run an sms file with tests
 // If test == -1, do all tests
 // Else, run the specified test
-int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, char *test_zone_path) {
-  int num_fails = 0;
+int32_t perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int32_t test,
+                                char *test_zone_path) {
+  int32_t num_fails = 0;
   if (chapter >= num_chapters()) {
     printf("Test chapter: %i out of range.\n", chapter);
     printf("Valid test chapters are from 0 to %i.\n", num_chapters() - 1);
@@ -166,8 +167,8 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
     env.mem_flag   = false;
     env.quiet_mode = true;
     sm_init(&env, 0, NULL);
-    char buf[64];
-    int  len = 0;
+    char    buf[64];
+    int32_t len = 0;
     if (subchapter != 0)
       len =
         7 + strlen(test_zone_path) + strlen(chapter_name(chapter)) + 1 + log(subchapter) / log(10);
@@ -177,7 +178,7 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
     snprintf(buf, len, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
     // If test_zone_path is empty string, then we need to remove the leading "/" from buf
     if (test_zone_path[0] == '\0') {
-      for (int i = 0; buf[i] != '\0' && i <= 62; i++) {
+      for (int32_t i = 0; buf[i] != '\0' && i <= 62; i++) {
         buf[i] = buf[i + 1];
       }
     }
@@ -213,12 +214,12 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
 // User can pass 3 integers to main: chapter, subchapter, and test number
 // User can also pass 2 integers: chapter and subchapter
 // User can also just specify a chapter
-int main(int num_args, char **argv) {
-  int chapter    = -1;
-  int subchapter = -1;
-  int test       = -1;
-  int num_fails  = 0;
-  int arg_shift  = 0; // depends on whether the first arg is a filepath
+int32_t main(int32_t num_args, char **argv) {
+  int32_t chapter    = -1;
+  int32_t subchapter = -1;
+  int32_t test       = -1;
+  int32_t num_fails  = 0;
+  int32_t arg_shift  = 0; // depends on whether the first arg is a filepath
 
   // If the first arg starts with a letter or period,
   // we assume first arg is a file path for the outline file
@@ -267,7 +268,7 @@ int main(int num_args, char **argv) {
                num_subchapters(ch), ch, ch, num_subchapters(ch) - 1);
         for (uint32_t sub_ch = 0; sub_ch < num_subchapters(ch); sub_ch++) {
           printf("Testing Subchapter %i.%i\n", ch, sub_ch);
-          int test_result =
+          int32_t test_result =
             perform_test_subchapter(ch, sub_ch, -1, global_test_outline(NULL)->test_zone_path);
           if (test_result == -1) {
             printf("Testing Error.\n");
@@ -282,9 +283,9 @@ int main(int num_args, char **argv) {
     if (num_subchapters(chapter) > 0) {
       printf("Testing Chapter %i, which has %i subchapters ( from %i.0 to %i.%i )\n", chapter,
              num_subchapters(chapter), chapter, chapter, num_subchapters(chapter) - 1);
-      for (int sub_ch = 0; sub_ch < num_subchapters(chapter); sub_ch++) {
+      for (int32_t sub_ch = 0; sub_ch < num_subchapters(chapter); sub_ch++) {
         printf("Testing Subchapter %i.%i\n", chapter, sub_ch);
-        int test_result =
+        int32_t test_result =
           perform_test_subchapter(chapter, sub_ch, -1, global_test_outline(NULL)->test_zone_path);
         if (test_result == -1) {
           printf("Testing Error.\n");
@@ -296,7 +297,7 @@ int main(int num_args, char **argv) {
     }
   } else if (test == -1) {
     printf("Testing Subchapter %i.%i\n", chapter, subchapter);
-    int test_result =
+    int32_t test_result =
       perform_test_subchapter(chapter, subchapter, -1, global_test_outline(NULL)->test_zone_path);
     if (test_result == -1) {
       printf("Testing Error.\n");
@@ -305,7 +306,7 @@ int main(int num_args, char **argv) {
     num_fails += test_result;
   } else {
     printf("Running Test %i.%i.%i\n", chapter, subchapter, test);
-    int test_result =
+    int32_t test_result =
       perform_test_subchapter(chapter, subchapter, test, global_test_outline(NULL)->test_zone_path);
     if (test_result == -1) {
       printf("Testing Error.\n");

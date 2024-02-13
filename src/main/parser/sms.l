@@ -47,7 +47,7 @@ abs          {return ABS;}
 
 diff         {return DIFF;}
 simp         {return SIMP;}
-int          {return INT;}
+int32_t          {return INT;}
 
 if           {return IF;}
 else         {return ELSE;}
@@ -244,8 +244,8 @@ _mem_checkFile {return MEM_CHECKFILE;}
   char *text = &(yytext[1]);
 
   // Replace the escape codes in place
-  int i = 0;       // Index during the scan of input string
-  int final_i = 0; // Index of output
+  int32_t i = 0;       // Index during the scan of input string
+  int32_t final_i = 0; // Index of output
   while (i + 2 < yyleng) {
     if (text[i] == '\\') {
       // This is an escape code. Replace it with the appropriate character.
@@ -268,7 +268,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
         case 'x': {
           // Hex escape code
           char hex[3] = {text[i + 2], text[i + 3], '\0'};
-          int value = (int)strtol(hex, NULL, 16);
+          int32_t value = (int32_t)strtol(hex, NULL, 16);
           text[final_i] = (char)value;
           i += 2;
           break;
@@ -307,6 +307,6 @@ void _done_lexing_file(FILE* f){
   fclose(f);
 }
 
-void _lex_cstr(char * cstr,int len){
+void _lex_cstr(char * cstr,int32_t len){
   yy_scan_bytes(cstr,len);
 }

@@ -21,9 +21,9 @@ struct sm_link *sm_link_find(struct sm_link *root, bool (*f)(struct sm_object *)
 }
 
 // Return the nth node in the list
-struct sm_link *sm_link_nth(struct sm_link *root, int n) {
+struct sm_link *sm_link_nth(struct sm_link *root, int32_t n) {
   struct sm_link *current = root;
-  int             i;
+  int32_t         i;
   for (i = 0; current != NULL && i < n; i++)
     current = current->next;
   if (i == n && current != NULL) {
@@ -55,9 +55,9 @@ struct sm_link *sm_link_rm(struct sm_link *root, struct sm_link *nodeToRemove) {
 }
 
 // Insert this link at position specified by where, else return false
-bool sm_link_insert(struct sm_link *root, struct sm_link *new_node, int where) {
+bool sm_link_insert(struct sm_link *root, struct sm_link *new_node, int32_t where) {
   struct sm_link *cur = root;
-  int             i   = 0;
+  int32_t         i   = 0;
   while (cur && cur->next && i < where - 1) {
     cur = cur->next;
     i++;
@@ -69,9 +69,9 @@ bool sm_link_insert(struct sm_link *root, struct sm_link *new_node, int where) {
   return true;
 }
 
-bool sm_link_rm_nth(struct sm_link *root, int n) {
+bool sm_link_rm_nth(struct sm_link *root, int32_t n) {
   struct sm_link *cur = root;
-  int             i   = 0;
+  int32_t         i   = 0;
   while (cur->next && i < n - 1) {
     cur = cur->next;
     i++;

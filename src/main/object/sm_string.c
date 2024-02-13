@@ -125,7 +125,7 @@ sm_string *sm_string_escape(sm_string *input) {
   uint32_t len = input->size;
   // Replace the escape codes in place
   uint32_t i        = 0; // Index during the scan of input string
-  int      final_i  = 0; // Index of output
+  int32_t  final_i  = 0; // Index of output
   char    *from_str = &input->content;
   char     to_str[input->size];
   while (i < len) {

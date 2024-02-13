@@ -8,7 +8,7 @@ extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
 
 // For rounding up object size to the next multiple of 4 bytes.
-int sm_round_size(int size) { return ((size) + 3) & ~3; }
+int32_t sm_round_size(int32_t size) { return ((size) + 3) & ~3; }
 
 // Create a new heap of some capacity
 sm_heap *sm_new_heap(uint32_t capacity) {
@@ -38,7 +38,7 @@ sm_space *check_space(uint32_t size, uint32_t index) {
 sm_search_result find_space_within_bounds(sm_space_array *ssa, uint32_t size, uint32_t lower_limit,
                                           uint32_t upper_limit) {
   sm_space **space_array = sm_get_space_array(ssa);
-  int        comparison  = 1;
+  int32_t    comparison  = 1;
   uint32_t   guess_point = (upper_limit + lower_limit) / 2.0;
   while (lower_limit < upper_limit && comparison != 0) {
     comparison = space_array[guess_point]->my_type - SM_SPACE_TYPE - size;
@@ -129,9 +129,9 @@ bool sm_is_within_heap(void *obj, sm_heap *heap) {
 }
 
 // For advanced debugging, run this at any point and examine the heap snapshot as a file
-int sm_mem_dump(sm_heap *heap, char *name) {
-  void *buffer        = heap->storage;
-  int   buffer_length = heap->used;
+int32_t sm_mem_dump(sm_heap *heap, char *name) {
+  void   *buffer        = heap->storage;
+  int32_t buffer_length = heap->used;
   // Open a file for writing
   FILE *fp = fopen(name, "wb");
   // Write the data to the file
@@ -143,9 +143,9 @@ int sm_mem_dump(sm_heap *heap, char *name) {
 
 // Take multiple snapshots of both heaps for inflation debugging
 void sm_dump_and_count() {
-  char       fname[20];
-  static int index     = 1;
-  int        index_len = log(index) / log(10);
+  char           fname[20];
+  static int32_t index     = 1;
+  int32_t        index_len = log(index) / log(10);
   snprintf(fname, 12 + index_len, "current_%i.mem", index);
   sm_mem_dump(sms_heap, fname);
   snprintf(fname, 10 + index_len, "other_%i.mem", index);

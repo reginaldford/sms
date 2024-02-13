@@ -19,11 +19,11 @@
   }                                                                                                \
   current_chapter++;
 
-int main(int num_args, char **argv) {
-  int chosen_chapter  = -1;
-  int chosen_test     = -1;
-  int current_chapter = 0;
-  int num_fails       = 0;
+int32_t main(int32_t num_args, char **argv) {
+  int32_t chosen_chapter  = -1;
+  int32_t chosen_test     = -1;
+  int32_t current_chapter = 0;
+  int32_t num_fails       = 0;
 
   if (num_args > 1) {
     // isalpha returns nonzero if the character is alpha

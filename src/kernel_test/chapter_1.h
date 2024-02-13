@@ -1,1 +1,1 @@
-int chapter_1(int test);
+int32_t chapter_1(int32_t test);

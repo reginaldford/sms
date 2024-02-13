@@ -2,8 +2,8 @@
 #include "macros.h"
 
 // This chapter checks that contexts can scope and that memory is managed correctly
-int chapter_3(int test) {
-  int num_fails = 0;
+int32_t chapter_3(int32_t test) {
+  int32_t num_fails = 0;
   if (test != -1)
     printf("This chapter does not take a test number.\n");
 
