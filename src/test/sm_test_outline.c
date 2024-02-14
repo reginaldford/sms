@@ -4,7 +4,7 @@
 #include "sm_test_outline.h"
 
 // All allocated memory is in the test outline
-void graceful_exit(test_outline *to_free, int32_t val) {
+void graceful_exit(test_outline *to_free, int val) {
   free(to_free);
   exit(val);
 }
@@ -70,7 +70,7 @@ test_outline *parse_test_outline(char *filepath) {
     result_outline->chapter_names[i]   = &(ch_name_str->content);
   }
   // store the path of the outline file as the test zone path
-  int32_t path_length = (char *)last_slash - (char *)filepath;
+  int path_length = (char *)last_slash - (char *)filepath;
   sm_strncpy(result_outline->test_zone_path, filepath, path_length);
   return result_outline;
 }

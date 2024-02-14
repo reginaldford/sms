@@ -22,8 +22,8 @@ sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
 // _   is 95      1
 // a-z is 98-122  26
 // Total: 64
-int32_t sm_node_map_index(char c) {
-  int32_t code = (int32_t)c;
+int sm_node_map_index(char c) {
+  int code = (int)c;
   if (code == 39)
     return 0;
   if (code >= 48 && code <= 57)
@@ -39,7 +39,7 @@ int32_t sm_node_map_index(char c) {
 
 // Inverse of sm_map_index
 // Expects 0-63, else, returns NULL
-char sm_node_bit_unindex(int32_t i) {
+char sm_node_bit_unindex(int i) {
   if (i == 0)
     return '\'';
   if (i >= 1 && i <= 10)
@@ -54,7 +54,7 @@ char sm_node_bit_unindex(int32_t i) {
 }
 
 // Return the child node, specified by index
-sm_node *sm_node_nth(sm_node *self, int32_t index) {
+sm_node *sm_node_nth(sm_node *self, int index) {
   sm_node *current = self;
   while (index > 0 && current != NULL) {
     current = current->next;
@@ -87,10 +87,10 @@ struct sm_node *sm_node_rm(struct sm_node *root, struct sm_node *nodeToRemove) {
   return root;
 }
 
-// Insert this node at position specified by int32_t where, else return false
-bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int32_t where) {
+// Insert this node at position specified by int where, else return false
+bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
   struct sm_node *cur = root;
-  int32_t         i   = 0;
+  int             i   = 0;
   while (cur && cur->next && i < where - 1) {
     cur = cur->next;
     i++;
@@ -104,11 +104,11 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int32_t wher
 
 // Define popcountll whether or not we have the built-in instruction.
 #ifdef __x86_64__
-int32_t popcountll(uint64_t num) { return __builtin_popcountll(num); }
+int popcountll(uint64_t num) { return __builtin_popcountll(num); }
 #else
-// Manually counting the bits in the long long int32_t, efficiently
-int32_t popcountll(uint64_t num) {
-  int32_t count = 0;
+// Manually counting the bits in the long long int, efficiently
+int popcountll(uint64_t num) {
+  int count = 0;
   for (count = 0; num; count++)
     num &= (num - 1);
   return count;
@@ -116,23 +116,23 @@ int32_t popcountll(uint64_t num) {
 #endif
 
 // Return the number of set bits to the left of map_index'th bit in map
-int32_t sm_node_map_left_count(uint64_t map, int32_t bit_index) {
+int sm_node_map_left_count(uint64_t map, int bit_index) {
   return popcountll(map & ((1LL << bit_index) - 1));
 }
 
 // Return the node of the trie addressed by needle, or return NULL
-sm_node *sm_node_subnode(sm_node *self, char *needle, int32_t len) {
+sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
   sm_node *curr_node  = self;
-  int32_t  char_index = 0;
+  int      char_index = 0;
   while (char_index < len && curr_node != NULL) {
-    int32_t  map_index = sm_node_map_index(needle[char_index]);
+    int      map_index = sm_node_map_index(needle[char_index]);
     uint64_t map       = curr_node->map;
     uint64_t bit       = 1ULL << map_index;
     if ((map & bit) == 0) {
       return NULL;
     }
-    int32_t child_index = sm_node_map_left_count(map, map_index);
-    curr_node           = (sm_node *)sm_node_nth(curr_node->children, child_index);
+    int child_index = sm_node_map_left_count(map, map_index);
+    curr_node       = (sm_node *)sm_node_nth(curr_node->children, child_index);
     char_index++;
   }
   if (curr_node && !curr_node->value)
@@ -141,12 +141,12 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int32_t len) {
 }
 
 // Return the parent node of the node addressed by needle, or return NULL
-sm_node *sm_node_parent_node(sm_node *self, char *needle, int32_t len) {
+sm_node *sm_node_parent_node(sm_node *self, char *needle, int len) {
   sm_node *curr_node   = self;
   sm_node *last_node   = NULL;
-  int32_t  map_index   = 0;
-  int32_t  child_index = 0;
-  int32_t  char_index  = 0;
+  int      map_index   = 0;
+  int      child_index = 0;
+  int      char_index  = 0;
   for (; char_index < len && curr_node != NULL; char_index++) {
     map_index = sm_node_map_index(needle[char_index]);
     if (sm_node_map_get(curr_node->map, map_index) == false)
@@ -164,7 +164,7 @@ sm_node *sm_node_parent_node(sm_node *self, char *needle, int32_t len) {
 
 // Get this value from the current context.
 // Return Null if there is no such key.
-sm_object *sm_node_get(sm_node *self, char *needle, int32_t len) {
+sm_object *sm_node_get(sm_node *self, char *needle, int len) {
   sm_node *node = self;
   if (node != NULL) {
     sm_node *leaf = sm_node_subnode(node, needle, len);
@@ -176,7 +176,7 @@ sm_object *sm_node_get(sm_node *self, char *needle, int32_t len) {
 
 // Get container of this value from the current context.
 // Return Null if there is no such key.
-sm_node *sm_node_get_container(sm_node *self, char *needle, int32_t len) {
+sm_node *sm_node_get_container(sm_node *self, char *needle, int len) {
   sm_node *node = self;
   if (node != NULL) {
     sm_node *leaf = sm_node_subnode(node, needle, len);
@@ -192,8 +192,8 @@ bool sm_node_is_empty(sm_node *node) { return node->value == NULL && node->map =
 
 // Print all of the key-value pairs in this node recursively
 // Uses the stack to recall path to current node, for full key name
-int32_t sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack) {
-  int32_t cursor = 0;
+int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack) {
+  int cursor = 0;
   if (node->value != NULL) {
     // var name
     for (uint32_t i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
@@ -215,14 +215,14 @@ int32_t sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_st
       buffer[cursor] = ';';
     cursor++;
   }
-  int32_t items_to_do = sm_node_map_size(node->map);
-  for (int32_t i = 0; items_to_do > 0 && i < 8; i++) {
+  int items_to_do = sm_node_map_size(node->map);
+  for (int i = 0; items_to_do > 0 && i < 8; i++) {
     char current_byte = ((char *)&(node->map))[i];
     if (current_byte != '\0')
-      for (int32_t j = 0; items_to_do > 0 && j < 8; j++) {
-        int32_t current_bit = 8 * i + j;
+      for (int j = 0; items_to_do > 0 && j < 8; j++) {
+        int current_bit = 8 * i + j;
         if (sm_node_map_get(node->map, current_bit) == true) {
-          int32_t  child_index = sm_node_child_index(node->map, current_bit);
+          int      child_index = sm_node_child_index(node->map, current_bit);
           sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
           sm_stack_push(char_stack, sm_new_double(current_bit));
           cursor += sm_node_sprint(child_here, &(buffer[cursor]), fake, char_stack);
@@ -235,10 +235,10 @@ int32_t sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_st
 }
 
 // Return the number of children
-int32_t sm_node_map_size(uint64_t map) { return popcountll(map); }
+int sm_node_map_size(uint64_t map) { return popcountll(map); }
 
 // Set a bit of map to 1 or 0 depending on the provided boolean
-void sm_node_map_set(uint64_t *map, int32_t index, bool on) {
+void sm_node_map_set(uint64_t *map, int index, bool on) {
   if (on) {
     *map |= (1LL << index);
   } else {
@@ -247,19 +247,19 @@ void sm_node_map_set(uint64_t *map, int32_t index, bool on) {
 }
 
 // Return whether a bit is 1
-bool sm_node_map_get(uint64_t map, int32_t i) {
+bool sm_node_map_get(uint64_t map, int i) {
   uint64_t mask = 1ULL << i;
   return (map & mask) != 0;
 }
 
 // Return the correlating child index to this bit in the map
-int32_t sm_node_child_index(uint64_t map, int32_t map_index) {
+int sm_node_child_index(uint64_t map, int map_index) {
   return popcountll(map & ((1LL << map_index) - 1));
 }
 
-bool sm_node_rm_nth(struct sm_node *root, int32_t n) {
+bool sm_node_rm_nth(struct sm_node *root, int n) {
   struct sm_node *cur = root;
-  int32_t         i   = 0;
+  int             i   = 0;
   while (cur->next && i < n - 1) {
     cur = cur->next;
     i++;
@@ -272,17 +272,16 @@ bool sm_node_rm_nth(struct sm_node *root, int32_t n) {
 }
 
 // Returns the number of values under this node (recursive)
-int32_t sm_node_size(sm_node *node) {
-  int32_t size = 0;
+int sm_node_size(sm_node *node) {
+  int size = 0;
   if (node->value != NULL)
     size++;
   uint64_t map = node->map; // Get the bitmap
   while (map != 0) {
-    uint64_t bit = map & -map; // Using two's compliment trick
-    int32_t  bit_index =
-      __builtin_ctzll(bit); // Using built-in ctzll (count trailing zeros) function
-    int32_t  child_index = sm_node_child_index(node->map, bit_index);
-    sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
+    uint64_t bit    = map & -map;           // Using two's compliment trick
+    int bit_index   = __builtin_ctzll(bit); // Using built-in ctzll (count trailing zeros) function
+    int child_index = sm_node_child_index(node->map, bit_index);
+    sm_node *child_here = (sm_node *)sm_node_nth(node->children, child_index);
     size += sm_node_size(child_here);
     map ^= bit; // Clear the bit
   }
@@ -298,9 +297,9 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
 
   if (node->value != NULL) {
     // Build the key string
-    int32_t len = sm_stack_size(char_stack);
-    char    buffer[len + 1]; // Increase the buffer size to accommodate the null terminator
-    buffer[len] = '\0';      // Add the null terminator at the end
+    int  len = sm_stack_size(char_stack);
+    char buffer[len + 1]; // Increase the buffer size to accommodate the null terminator
+    buffer[len] = '\0';   // Add the null terminator at the end
 
     for (uint32_t i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
       sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
@@ -320,10 +319,10 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
 
   while (map != 0) {
     uint64_t bit       = map & -map; // Get the rightmost set bit using two's complement trick
-    int32_t  bit_index = __builtin_ctzll(
+    int      bit_index = __builtin_ctzll(
       bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
 
-    int32_t  child_index = sm_node_child_index(node->map, bit_index);
+    int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
 
     sm_stack_push(char_stack, sm_new_double(bit_index));
@@ -348,10 +347,10 @@ sm_expr *sm_node_values(sm_node *node, sm_expr *collection) {
   if (sm_node_is_empty(node)) {
     return collection;
   }
-  int32_t items_to_do = sm_node_map_size(node->map);
-  for (int32_t i = 0; items_to_do > 0 && i < 64; i++) {
+  int items_to_do = sm_node_map_size(node->map);
+  for (int i = 0; items_to_do > 0 && i < 64; i++) {
     if (sm_node_map_get(node->map, i) == true) {
-      int32_t  child_index = sm_node_child_index(node->map, i);
+      int      child_index = sm_node_child_index(node->map, i);
       sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
       collection           = sm_node_values(child_here, collection);
       items_to_do--;

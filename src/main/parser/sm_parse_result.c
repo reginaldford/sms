@@ -3,17 +3,17 @@
 #include "../sms.h"
 #include "../../bison_flex/y.tab.h"
 
-void    scan_str(const char *cstr, int32_t len);
-void    end_scan_str(void);
-FILE   *lex_file(char *filepath);
-void    lex_cstr(char *cstr, int32_t len);
-void    _done_lexing_file(FILE *f);
-int32_t yyparse(void);
+void  scan_str(const char *cstr, int len);
+void  end_scan_str(void);
+FILE *lex_file(char *filepath);
+void  lex_cstr(char *cstr, int len);
+void  _done_lexing_file(FILE *f);
+int   yyparse(void);
 
 // Parse a string with known length
-sm_parse_result sm_parse_cstr(char *cstr, int32_t len) {
+sm_parse_result sm_parse_cstr(char *cstr, int len) {
   lex_cstr(cstr, len);
-  int32_t result = yyparse();
+  int result = yyparse();
   return (sm_parse_result){.return_val = result, .parsed_object = sm_global_parser_output(NULL)};
 }
 
@@ -24,7 +24,7 @@ sm_parse_result sm_parse_file(char *fname) {
     printf("Error: There was a problem with opening the file: %s\n", fname);
     return (sm_parse_result){.return_val = -1, .parsed_object = (sm_object *)sm_new_double(0)};
   }
-  int32_t result = yyparse();
+  int result = yyparse();
   _done_lexing_file(success);
   return (sm_parse_result){.return_val = result, .parsed_object = sm_global_parser_output(NULL)};
 }

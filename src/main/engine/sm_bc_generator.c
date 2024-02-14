@@ -16,7 +16,7 @@ extern sm_symbol *sms_false;
 sm_bc_block *sm_bc_generate(sm_object *input) {
   sm_string *bc_str = sm_new_string_manual(16);
   char      *bc     = &bc_str->content;
-  int32_t    pos    = 0;
+  int        pos    = 0;
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;

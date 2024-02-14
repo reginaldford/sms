@@ -15,7 +15,7 @@ extern sm_symbol *sms_false;
 #endif /* SMS_GLOBALS */
 
 /// Increase the global garbage collection count by 1, report the result
-int32_t sm_gc_count(int32_t increase);
+int sm_gc_count(int increase);
 /// If replacement is non-zero, stores the new value. Returns the previous value regardless
 double sm_global_growth_factor(double replacement);
 /// Global space array for memory management

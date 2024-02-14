@@ -2,7 +2,7 @@
 
 #include "sms.h"
 
-void sm_signal_handler(int32_t signal_number) {
+void sm_signal_handler(int signal_number) {
   char    *signal_name = "";
   uint16_t exit_code;
   switch (signal_number) {
@@ -45,7 +45,7 @@ void sm_signal_handler(int32_t signal_number) {
   printf("%s", sm_terminal_reset());
   sm_mem_cleanup();
   // Reset the terminal attributes to their default values
-  int32_t        stdin_fd = fileno(stdin);
+  int            stdin_fd = fileno(stdin);
   struct termios term_attr;
   tcgetattr(stdin_fd, &term_attr);
   term_attr.c_lflag |= ICANON | ECHO;
@@ -74,10 +74,10 @@ void sm_register_signals() {
 }
 
 // Exit SMS with this exit code
-void sm_signal_exit(int32_t exit_code) {
+void sm_signal_exit(int exit_code) {
   sm_mem_cleanup();
   // Reset the terminal attributes to their default values
-  int32_t        stdin_fd = fileno(stdin);
+  int            stdin_fd = fileno(stdin);
   struct termios term_attr;
   tcgetattr(stdin_fd, &term_attr);
   term_attr.c_lflag |= ICANON | ECHO;

@@ -9,7 +9,7 @@ struct sm_link {
 
 struct sm_link *sm_new_link(sm_object *value, struct sm_link *next);
 struct sm_link *sm_link_find(struct sm_link *root, bool (*f)(struct sm_object *));
-struct sm_link *sm_link_nth(struct sm_link *root, int32_t n);
-bool            sm_link_insert(struct sm_link *root, struct sm_link *new_node, int32_t where);
-bool            sm_link_rm_nth(struct sm_link *root, int32_t n);
+struct sm_link *sm_link_nth(struct sm_link *root, int n);
+bool            sm_link_insert(struct sm_link *root, struct sm_link *new_node, int where);
+bool            sm_link_rm_nth(struct sm_link *root, int n);
 struct sm_link *sm_link_rm(struct sm_link *root, struct sm_link *nodeToRemove);

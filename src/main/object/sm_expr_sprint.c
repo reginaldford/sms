@@ -30,7 +30,7 @@ uint32_t sm_expr_array_sprint(sm_expr *expr, char *buffer, bool fake) {
       buffer[1] = ']';
     return 2;
   }
-  int32_t len = sm_expr_contents_sprint(expr, &(buffer[1]), expr->op, fake);
+  int len = sm_expr_contents_sprint(expr, &(buffer[1]), expr->op, fake);
   if (!fake)
     buffer[1 + len] = ']';
   return 2 + len;
@@ -92,7 +92,7 @@ uint32_t sm_ifelse_sprint(sm_expr *expr, char *buffer, bool fake) {
   cursor += sm_object_sprint(sm_expr_get_arg(expr, 1), &(buffer[cursor]), fake);
 
   static char *else_str = " else ";
-  for (int32_t i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++) {
     if (!fake)
       buffer[cursor] = else_str[i];
     cursor++;
@@ -197,7 +197,7 @@ uint32_t sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
   sm_object *o2 = sm_expr_get_arg(expr, 1);
 
   // left op right
-  int32_t cursor = sm_object_sprint(o1, buffer, fake);
+  int cursor = sm_object_sprint(o1, buffer, fake);
   if (!fake)
     sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
   cursor += sm_global_fn_name_len(expr->op);

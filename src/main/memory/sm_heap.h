@@ -20,9 +20,9 @@ void *sm_realloc(void *ptr, uint32_t size);
 /// Returns whether the object is contained in the specified heap.
 bool sm_is_within_heap(void *obj, sm_heap *heap);
 /// Rounds the number of bytes up to the nearest multiple of 4
-int32_t sm_round_size(int32_t size);
+int sm_round_size(int size);
 /// Dump the current memory heap to the specified file
-int32_t sm_mem_dump(sm_heap *heap, char *fname);
+int sm_mem_dump(sm_heap *heap, char *fname);
 /// Frees all heaps to prepare for exiting the program
 void sm_mem_cleanup();
 /// Prints every object in the current heap to stdout
