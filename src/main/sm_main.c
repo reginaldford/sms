@@ -4,17 +4,17 @@
 #include "unistd.h"
 #include "../bison_flex/y.tab.h"
 
-extern int32_t yylineno;
+extern int yylineno;
 
 // Prints intro
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.203%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.202%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
-void check_init(sm_env *env, int32_t num_args, char **argv) {
+void check_init(sm_env *env, int num_args, char **argv) {
   if (env->initialized == false) {
     if (env->quiet_mode == false)
       print_intro();
@@ -24,7 +24,7 @@ void check_init(sm_env *env, int32_t num_args, char **argv) {
 }
 
 // Proper way to exit
-void clean_exit(sm_env *env, int32_t code) {
+void clean_exit(sm_env *env, int code) {
   if (env->initialized == true)
     sm_signal_exit(code);
   exit(code);
@@ -74,10 +74,10 @@ void run_file(char *file_path, sm_env *env) {
 }
 
 // Main function uses getopt from unistd.h
-int32_t main(int32_t num_args, char *argv[]) {
+int main(int num_args, char *argv[]) {
   static struct sm_env env = {0}; // global environment structure
   opterr                   = 0;   // Disable error messages for unknown options
-  int32_t opt;
+  int opt;
   while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:")) != -1) {
     switch (opt) {
     case 'h':
@@ -127,7 +127,7 @@ int32_t main(int32_t num_args, char *argv[]) {
       break;
     }
     case 'e': {
-      int32_t optarg_len = strlen(optarg);
+      int optarg_len = strlen(optarg);
       check_init(&env, num_args, argv);
       sm_strncpy(env.eval_cmd, optarg, optarg_len);
       env.eval_cmd[optarg_len++] = ';';

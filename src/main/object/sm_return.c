@@ -16,7 +16,7 @@ sm_return *sm_new_return(sm_object *address) {
 uint32_t sm_return_sprint(sm_return *return_obj, char *buffer, bool fake) {
   if (!fake)
     snprintf(buffer, 8, "return(");
-  int32_t cursor = 7;
+  int cursor = 7;
   cursor += sm_object_sprint(return_obj->address, &(buffer[cursor]), fake);
   if (!fake)
     buffer[cursor] = ')';

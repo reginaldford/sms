@@ -5,4 +5,4 @@
 @param num_args The argument count from the main function
 @param argv The arguments from the main function
 */
-void sm_init(sm_env *options, int32_t num_args, char **argv);
+void sm_init(sm_env *options, int num_args, char **argv);

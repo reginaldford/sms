@@ -47,7 +47,7 @@ sm_expr *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, s
 // Append another object to this expression.
 sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg) {
   if (expr->size == expr->capacity) {
-    uint32_t new_capacity = ((int32_t)(expr->capacity * sm_global_growth_factor(0))) + 1;
+    uint32_t new_capacity = ((int)(expr->capacity * sm_global_growth_factor(0))) + 1;
     sm_expr *new_expr     = sm_new_expr_n(expr->op, expr->size + 1, new_capacity);
     for (uint32_t i = 0; i < expr->size; i++) {
       sm_expr_set_arg(new_expr, i, sm_expr_get_arg(expr, i));

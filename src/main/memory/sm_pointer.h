@@ -2,7 +2,7 @@
 
 /// Copying GC's pointer, notifying where an object has been moved to
 typedef struct sm_pointer {
-  int32_t    my_type;
+  int        my_type;
   sm_object *address;
 } sm_pointer;
 

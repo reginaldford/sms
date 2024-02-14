@@ -16,8 +16,8 @@ This allows us to use a breakpoint or printf to detect reads/writes to the globa
 */
 
 // Tracking number of garbage collections
-int32_t sm_gc_count(int32_t increase) {
-  static int32_t gc_count = 0;
+int sm_gc_count(int increase) {
+  static int gc_count = 0;
   gc_count += increase;
   return gc_count;
 }
@@ -28,8 +28,8 @@ int32_t sm_gc_count(int32_t increase) {
 double sm_global_growth_factor(double replacement) {
   static double factor = 1.25;
   if (replacement >= 1.0) {
-    int32_t previous_factor = factor;
-    factor                  = replacement;
+    int previous_factor = factor;
+    factor              = replacement;
     return previous_factor;
   }
   return factor;
@@ -128,7 +128,7 @@ char *sm_global_fn_name(uint16_t which) {
     "abs",          // SM_ABS_EXPR
     "diff",         // SM_DIFF_EXPR
     "simp",         // SM_SIMP_EXPR
-    "int32_t",      // SM_INT_EXPR
+    "int",          // SM_INT_EXPR
     "if",           // SM_IF_EXPR
     "if",           // SM_IF_ELSE_EXPR
     "map",          // SM_MAP_EXPR

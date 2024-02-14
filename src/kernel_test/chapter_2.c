@@ -3,8 +3,8 @@
 
 // Since the sms_test system only checks that to_string(evaluated)==to_string(literal)
 // Proving that literals print to what they should to verify expression printing mechanics.
-int32_t chapter_2(int32_t test) {
-  int32_t       num_fails = 0;
+int chapter_2(int test) {
+  int           num_fails = 0;
   static sm_env env;
   env.mem_flag   = false;
   env.quiet_mode = true;

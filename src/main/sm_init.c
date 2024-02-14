@@ -4,7 +4,7 @@
 
 extern sm_heap *sms_heap;
 
-void sm_init(sm_env *env, int32_t num_args, char **argv) {
+void sm_init(sm_env *env, int num_args, char **argv) {
   // Default (inner) environment variables
   double mem_bytes   = 64 * 1024 * 1024;
   env->script_fp[0]  = '\0';
@@ -39,7 +39,7 @@ void sm_init(sm_env *env, int32_t num_args, char **argv) {
   // Add program args if available
   if (env) {
     sm_expr *args = sm_new_expr_n(SM_ARRAY_EXPR, env->num_args, env->num_args);
-    for (int32_t i = 0; i < env->num_args; i++) {
+    for (int i = 0; i < env->num_args; i++) {
       sm_expr_set_arg(args, i, (sm_object *)sm_new_string(strlen(env->args[i]), env->args[i]));
     }
     sm_cx_let(parent_cx, "_args", 5, (sm_object *)args);

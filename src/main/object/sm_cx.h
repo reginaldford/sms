@@ -14,17 +14,17 @@ sm_cx *sm_new_cx(sm_cx *parent);
 /// @param self the context used in the lookup
 /// @param needle The key value to find
 /// @param len the string length of needle
-sm_object *sm_cx_get(sm_cx *self, char *needle, int32_t len);
+sm_object *sm_cx_get(sm_cx *self, char *needle, int len);
 /// If the value is not found in self, search in parent(self), and so on
-sm_object *sm_cx_get_far(sm_cx *self, char *needle, int32_t len);
+sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len);
 /// Same as get_far, but returns the context which contains the key
-sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int32_t len);
+sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int len);
 /// Create a new key-value association in context
-bool sm_cx_let(sm_cx *context, char *needle, int32_t len, sm_object *val);
+bool sm_cx_let(sm_cx *context, char *needle, int len, sm_object *val);
 /// Set an existing value in context
-bool sm_cx_set(sm_cx *context, char *needle, int32_t len, sm_object *val);
+bool sm_cx_set(sm_cx *context, char *needle, int len, sm_object *val);
 /// Remove a key-value pair identified by needle
-bool sm_cx_rm(sm_cx *self, char *needle, int32_t len);
+bool sm_cx_rm(sm_cx *self, char *needle, int len);
 /// If fake is false, print self into buffer.
 /// @return The length of text printed.
 uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake);

@@ -7,7 +7,7 @@ extern sm_symbol *sms_false;
 
 sm_object *sm_bc_eval(sm_bc_block *block) {
   // The bytecode block is assumed to be safely designed
-  int32_t pos = 0;
+  int pos = 0;
   for (;;) {
     switch ((&block->content)[pos++]) {}
   }
