@@ -5,7 +5,7 @@
 {
   let in = "";
   let ans = [];
-  let env = {};
+  let env = _scratch;
   while(true){
     put("> ");
     in = input();
