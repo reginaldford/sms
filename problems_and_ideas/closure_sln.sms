@@ -1,7 +1,0 @@
-let makeMult = ( x ) => {
-  let cx = {
-    let a = x;
-    return self;
-  };
-  return closure(y => y * a, cx);
-};

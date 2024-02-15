@@ -1,8 +1,0 @@
-{
-  let fib = (x) => if( x < 2) 1 else {
-    let a = fib(x - 1);
-    let b = fib(x - 2);
-    return a+b;
-  };
-  putln(toStr(fib(22)));
-};
