@@ -10,15 +10,15 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.191%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.202%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
-void check_init(sm_env *env, int num_args, char **argv, bool quiet) {
+void check_init(sm_env *env, int num_args, char **argv) {
   if (env->initialized == false) {
-    if (quiet == false)
+    if (env->quiet_mode == false)
       print_intro();
-    sm_init(env, num_args, argv, quiet);
+    sm_init(env, num_args, argv);
     sm_global_environment(env);
   }
 }
@@ -83,20 +83,20 @@ int main(int num_args, char *argv[]) {
     case 'h':
       printf("SMS Help\n");
       printf("Running sms with no flags will start the command line.\n");
-      printf(" Flag:                                      Example:\n");
-      printf("-h Help.                                     sms -h\n");
-      printf("-q Quiet mode, does not print intro/outro.   sms -q -s script.sms\n");
-      printf("-m Set the heap size in MB. Default: 50.     sms -m 150\n");
-      printf("-e Print the evaluation of an expression.    sms -e \"2*sin(PI/4)\"\n");
-      printf("-s Run Script file.                          sms -s script.sms\n");
-      printf("-i Run a file, then start the REPL.          sms -i script.sms\n");
-      printf("-c Custom argument. Accessed via _args       sms -c \"a single string\"\n");
-      printf("\nIf the -m flag is used, it must be first.  sms -m 4 -s x1.sms -i x2.sms\n");
+      printf(" Flag:                                           Example:\n");
+      printf("-h Help.                                          sms -h\n");
+      printf("-q Quiet mode, does not print intro/outro.        sms -q -s script.sms\n");
+      printf("-m Set memory usage. Units: kmgt. Default is 64m. sms -m 150m\n");
+      printf("-e Print the evaluation of an expression.         sms -e \"2*sin(PI/4)\"\n");
+      printf("-s Run Script file.                               sms -s script.sms\n");
+      printf("-i Run a file, then start the REPL.               sms -i script.sms\n");
+      printf("-c Custom argument. Accessed via _args            sms -c \"a single string\"\n");
+      printf("\nIf the -m flag is used, it must be first.       sms -m 4 -s x1.sms -i x2.sms\n");
       printf("Some flags can be repeated and all flags are executed in order.\n");
       clean_exit(&env, 0);
       break;
     case 'q':
-      check_init(&env, num_args, argv, true);
+      env.quiet_mode = true;
       break;
     case 'm': {
       if (env.mem_flag) {
@@ -105,34 +105,30 @@ int main(int num_args, char *argv[]) {
       }
       env.mem_flag = true;
       const char *valid_values =
-        "Value must be in the range 0.01 to 4000000 inclusively (Units are Megabytes)";
-      for (long unsigned int i = 0; i < strlen(optarg); i++) {
+        "Value must be within range 2.5k to 4t (2.5 kilobytes to 4 terrabytes).";
+      for (uint64_t i = 0; i < strlen(optarg); i++) {
         env.mem_str[i] = optarg[i];
       }
-      env.mem_mbytes = atof(optarg);
-      if (env.mem_mbytes < 0.01 || env.mem_mbytes > 1000 * 4000) {
+      env.mem_bytes = sm_bytelength_parse(env.mem_str, strlen(optarg));
+      // SMS needs at least 2.5k (good luck with that) and might work with up to 4 terrabytes
+      // (untested) For very basic programs, 1m is usually fine.
+      if ((env.mem_bytes < 2.5 * 1024) || (env.mem_bytes >= 4398046511104)) {
         printf("Invalid memory heap size: %s\n", env.mem_str);
         printf("%s\n", valid_values);
         printf("Try -h for help.\n");
         clean_exit(&env, 1);
       }
       if (env.quiet_mode == false) {
-        const int KB = 1024;
         printf("Custom Heap Size: ");
-        if (env.mem_mbytes < 1)
-          printf("%.4g KB\n", env.mem_mbytes * KB);
-        else if (env.mem_mbytes < (KB))
-          printf("%.4g MB\n", env.mem_mbytes);
-        else if (env.mem_mbytes >= (KB) && env.mem_mbytes < (KB * KB))
-          printf("%.4g GB\n", env.mem_mbytes / KB);
-        else if (env.mem_mbytes >= (KB * KB))
-          printf("%.4g TB\n", env.mem_mbytes / (KB * KB));
+        printf("%lld Bytes (", (long long)env.mem_bytes);
+        sm_print_fancy_bytelength((long long)env.mem_bytes);
+        printf(")\n");
       }
       break;
     }
     case 'e': {
       int optarg_len = strlen(optarg);
-      check_init(&env, num_args, argv, false);
+      check_init(&env, num_args, argv);
       sm_strncpy(env.eval_cmd, optarg, optarg_len);
       env.eval_cmd[optarg_len++] = ';';
       env.eval_cmd[optarg_len++] = '\0';
@@ -156,12 +152,12 @@ int main(int num_args, char *argv[]) {
       break;
     }
     case 's':
-      check_init(&env, num_args, argv, false);
+      check_init(&env, num_args, argv);
       sm_strncpy(&(env.script_fp[0]), optarg, strlen(optarg));
       run_file(optarg, &env);
       break;
     case 'i':
-      check_init(&env, num_args, argv, false);
+      check_init(&env, num_args, argv);
       sm_strncpy(env.script_fp, optarg, strlen(optarg));
       if (env.quiet_mode == false)
         printf("Loading: %s... \n", optarg);
@@ -186,11 +182,11 @@ int main(int num_args, char *argv[]) {
   }
   if (optind < num_args) { // Assuming the last arg is a filename
     char *input_file = argv[optind];
-    check_init(&env, num_args, argv, false);
+    check_init(&env, num_args, argv);
     sm_strncpy(&(env.script_fp[0]), input_file, strlen(input_file));
     run_file(input_file, &env);
   } else { // No filename provided
-    check_init(&env, num_args, argv, false);
+    check_init(&env, num_args, argv);
     start_repl();
   }
   clean_exit(&env, 0);

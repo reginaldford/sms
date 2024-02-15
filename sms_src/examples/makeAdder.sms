@@ -1,0 +1,25 @@
+#!/usr/local/bin/sms -qm1
+# Demonstrates closures in sms
+# This is a common example, easy to find in javascript
+
+{
+  # makeAdder returns a function that adds x to the function's input
+  let makeAdder = x => {
+    let b=x;
+    return (a) => a+b;
+  };
+  # We show the function generator
+  putln("makeAdder function: " str+ toStr(makeAdder));
+  # We generate one, designed to add 3
+  let add3 = makeAdder(3);
+  putln("add3 function: " str+ toStr(add3));
+  putln("add3 parent cx: " str+ toStr(fnParent(add3)));
+  putln("add3(5) is " str+ toStr(add3(5)));
+  # We generate one, designed to add 5
+  let add5 = makeAdder(5);
+  putln("add5 function: " str+ toStr(add5));
+  putln("add5 parent cx: " str+ toStr(fnParent(add5)));
+  putln("add5(6) is " str+ toStr(add5(6)));
+  # Grand finale
+  putln("add3(add5(6)) is " str+ toStr(add3(add5(6))));
+};

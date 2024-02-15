@@ -30,21 +30,15 @@ atan         {return ATAN;}
 sinh         {return SINH;}
 cosh         {return COSH;}
 tanh         {return TANH;}
-asin         {return ASINH;}
-acos         {return ACOSH;}
-atan         {return ATANH;}
 sec          {return SEC;}
 csc          {return CSC;}
 cot          {return COT;}
-sec          {return ASEC;}
-csc          {return ACSC;}
-cot          {return ACOT;}
-sec          {return SECH;}
-csc          {return CSCH;}
-cot          {return COTH;}
-sech         {return ASECH;}
-csch         {return ACSCH;}
-coth         {return ACOTH;}
+asec          {return ASEC;}
+acsc          {return ACSC;}
+acot          {return ACOT;}
+asech         {return ASECH;}
+acsch         {return ACSCH;}
+acoth         {return ACOTH;}
 exp          {return EXP;}
 ln           {return LN;}
 log          {return LOG;}
@@ -155,8 +149,8 @@ fnSetParent {return FN_SETPARENT;}
 
 newXp       {return NEW_XP;}
 xpOp        {return XP_OP;}
-xpSetop     {return XP_SETOP;}
-xpOpstr     {return XP_OPSTR;}
+xpSetOp     {return XP_SETOP;}
+xpOpStr     {return XP_OPSTR;}
 
 newMem     {return NEW_MEM;}
 memSet     {return MEM_SET;}
@@ -232,7 +226,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
    yylval.num = sm_new_double(atof(yytext));
    return NUM;
   }
-[\<\>]\= { return yytext[0]; }
+[\<\>\=] { return yytext[0]; }
 
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
 

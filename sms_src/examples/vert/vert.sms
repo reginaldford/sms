@@ -1,4 +1,9 @@
 #!/usr/local/bin/sms -qi
+# The vert tool allows you to use a vert function.
+# example: let houseWidth = vert(20,:m,:yd);
+# This stores 20 meters, converted to yards
+# If you call this with sms, use sms -i vert.sms
+
 cxLet(parent(_scratch), :vert, (x,u1,u2)=>{
     # Import the tools for each dimension if necessary
     if(not(cxHasFar(self,:mratios))){

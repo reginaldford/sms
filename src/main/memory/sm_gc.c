@@ -12,7 +12,7 @@ sm_object *sm_copy(sm_object *obj) {
 sm_object *sm_deep_copy(sm_object *obj) {
   if (obj->my_type == SM_EXPR_TYPE) {
     sm_expr *expr = (sm_expr *)sm_copy(obj);
-    for (unsigned int i = 0; i < expr->size; i++) {
+    for (uint32_t i = 0; i < expr->size; i++) {
       sm_expr_set_arg(expr, i, sm_deep_copy(sm_expr_get_arg(expr, i)));
     }
     return obj;
@@ -34,7 +34,7 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 // If obj is an sm_pointer, the object was already moved to the new heap
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
-  unsigned short int obj_type = obj->my_type;
+  uint16_t obj_type = obj->my_type;
   if (obj_type == SM_POINTER_TYPE)
     return ((sm_pointer *)obj)->address;
   else
@@ -86,7 +86,7 @@ void sm_inflate_heap() {
     }
     case SM_EXPR_TYPE: {
       sm_expr *expr = (sm_expr *)current_obj;
-      for (unsigned int i = 0; i < expr->size; i++) {
+      for (uint32_t i = 0; i < expr->size; i++) {
         sm_object *new_obj = sm_meet_object(sm_expr_get_arg(expr, i));
         sm_expr_set_arg(expr, i, (sm_object *)new_obj);
       }
@@ -107,7 +107,7 @@ void sm_inflate_heap() {
       fun->content = sm_meet_object((sm_object *)fun->content);
       if (fun->parent != NULL)
         fun->parent = (sm_cx *)sm_meet_object((sm_object *)fun->parent);
-      for (unsigned short int i = 0; i < fun->num_params; i++) {
+      for (uint16_t i = 0; i < fun->num_params; i++) {
         sm_fun_param *param = sm_fun_get_param(fun, i);
         param->name         = (sm_string *)sm_meet_object((sm_object *)param->name);
         if (param->default_val != NULL) {
@@ -156,7 +156,7 @@ void sm_garbage_collect() {
     sms_heap->used = 0;
 
     // Reset the space array
-    sm_global_space_array(NULL)->size = 0;
+    // sm_global_space_array(NULL)->size = 0;
 
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
@@ -178,31 +178,13 @@ void sm_garbage_collect() {
   }
   // This will be a global variable
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
-    const unsigned int KB = 1024;
+    const uint32_t KB = 1024;
     putc('\n', stdout);
     printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
     putc('(', stdout);
-    if (sms_heap->used < KB)
-      printf("%.3gB", (double)sms_heap->used);
-    else if (sms_heap->used < KB * KB)
-      printf("%.3gKB", (double)sms_heap->used / KB);
-    else if (sms_heap->used < (KB * KB * KB))
-      printf("%.3gMB", (double)sms_heap->used / (KB * KB));
-    else if (sms_heap->used >= (KB * KB * KB * KB) && sms_heap->used < (KB * KB))
-      printf("%.3gGB", (double)sms_heap->used / (KB * KB * KB));
-    else if (sms_heap->used >= (KB * KB * KB * KB * KB))
-      printf("%.3gTB", (double)sms_heap->used / (KB * KB * KB * KB));
+    sm_print_fancy_bytelength((long long)sms_heap->used);
     printf(" / ");
-    if (sms_heap->capacity < KB)
-      printf("%.3gB", (double)sms_heap->capacity);
-    else if (sms_heap->capacity < KB * KB)
-      printf("%.3gKB", (double)sms_heap->capacity / KB);
-    else if (sms_heap->capacity < (KB * KB * KB))
-      printf("%.3gMB", (double)sms_heap->capacity / (KB * KB));
-    else if (sms_heap->capacity >= (KB * KB * KB * KB) && sms_heap->capacity < (KB * KB))
-      printf("%.3gGB", (double)sms_heap->capacity / (KB * KB * KB));
-    else if (sms_heap->capacity >= (KB * KB * KB * KB * KB))
-      printf("%.3gTB", (double)sms_heap->capacity / (KB * KB * KB * KB));
+    sm_print_fancy_bytelength((long long)sms_heap->capacity);
     putc(')', stdout);
     printf("%s", sm_terminal_reset());
   }

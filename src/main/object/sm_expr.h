@@ -145,6 +145,10 @@ enum SM_EXPR_TYPE {
   SM_FN_PARENT_EXPR,
   SM_FN_SETPARENT_EXPR,
 
+  SM_XP_OP_EXPR,
+  SM_XP_SET_OP_EXPR,
+  SM_XP_OP_STR_EXPR,
+
   SM_STR_SIZE_EXPR,
   SM_STR_GET_EXPR,
   SM_STR_SET_EXPR,
@@ -199,26 +203,26 @@ enum SM_EXPR_TYPE {
 // Assumed to have pointers following the structure for each argument
 // Size denotes the number of trailing pointers.
 typedef struct sm_expr {
-  short int         my_type;
+  int16_t           my_type;
   enum SM_EXPR_TYPE op;
-  unsigned int      capacity;
-  unsigned int      size;
+  uint32_t          capacity;
+  uint32_t          size;
   short             filler;
 } sm_expr;
 
-sm_expr *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg);
-sm_expr *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2);
-sm_expr *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
-sm_expr *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
-                       sm_object *arg4);
-sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op1, unsigned int size, unsigned int capacity);
-sm_expr *sm_expr_append(sm_expr *expr, sm_object *arg);
-unsigned int sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);
-unsigned int sm_infix_sprint(sm_expr *expr, char *buffer, bool fake);
-sm_string   *sm_expr_to_string(sm_expr *expr);
-unsigned int sm_expr_sprint(sm_expr *self, char *buffer, bool fake);
-sm_expr     *sm_expr_set_arg(sm_expr *expr, unsigned int index, sm_object *num);
-sm_object   *sm_expr_get_arg(sm_expr *expr, unsigned int index);
-bool         sm_is_infix(enum SM_EXPR_TYPE op);
-sm_object   *sm_expr_pop(sm_expr *sme);
-sm_object   *sm_expr_pop_recycle(sm_expr *sme);
+sm_expr   *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg);
+sm_expr   *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2);
+sm_expr   *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
+sm_expr   *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
+                         sm_object *arg4);
+sm_expr   *sm_new_expr_n(enum SM_EXPR_TYPE op1, uint32_t size, uint32_t capacity);
+sm_expr   *sm_expr_append(sm_expr *expr, sm_object *arg);
+uint32_t   sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);
+uint32_t   sm_infix_sprint(sm_expr *expr, char *buffer, bool fake);
+sm_string *sm_expr_to_string(sm_expr *expr);
+uint32_t   sm_expr_sprint(sm_expr *self, char *buffer, bool fake);
+sm_expr   *sm_expr_set_arg(sm_expr *expr, uint32_t index, sm_object *num);
+sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index);
+bool       sm_is_infix(enum SM_EXPR_TYPE op);
+sm_object *sm_expr_pop(sm_expr *sme);
+sm_object *sm_expr_pop_recycle(sm_expr *sme);

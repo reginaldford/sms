@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -q
+#!/usr/local/bin/sms -qm1
 # Demonstrates fnSetParent
 # fnSetParent sets the parent scope of a function,
 # overriding the lexical scope.
@@ -8,7 +8,7 @@
   # Build a function
   let f = ( ) => counter = counter + 1;
   # Change the parent from self to env
-  fnSetParent(f,env);
+  f = fnSetParent(f,env);
   # Run f 10 times
   for(let i = 0; i < 10 ; i = i + 1)
     putln(toStr(f()));

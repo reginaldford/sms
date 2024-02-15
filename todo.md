@@ -1,12 +1,10 @@
 # full silence with -q, for pipes
 
 # precedence issue: 
-{let x= let y=5;
-  {
-    let f=(x,y)=>{ return x + y + parent(self).x + parent(self).y};
-  }
+{ let x= let y=5;
+  { let f=(x,y)=>{ return x + y + parent(self).x + parent(self).y}; }
 }
-should work
+should work, but we are getting x+(y+parent(self)).x + ...
 
 # strSize/strCapacity
 
@@ -26,12 +24,7 @@ should work
 # add semicolon for convenience for parse cmds
 
 # cx
-- cxSetParent
 - save and load
-
-# expression chapter
-- get op symbol from an xp
-- set op symbol for an xp
 
 # active terminal support
 - This code is being developed in the feature/smartput branch
@@ -100,11 +93,10 @@ should work
 - long strings will show as str@<len>
 - long arrays will show as arr@<len>
 - large contexts will show as cx@<len>
-- large byte array: byteArr@<len>
+:- large byte array: byteArr@<len>
 - large numArray: numArr@<len>
 - toStr does full mode, no prettyprinting
 - toStrPretty takes an optional cx of options?
-- color mode eventually.
 
 # internal power series engine
 - to cover missing trig functions

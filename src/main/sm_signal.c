@@ -3,8 +3,8 @@
 #include "sms.h"
 
 void sm_signal_handler(int signal_number) {
-  char              *signal_name = "";
-  unsigned short int exit_code;
+  char    *signal_name = "";
+  uint16_t exit_code;
   switch (signal_number) {
   case SIGQUIT:
     signal_name = "SIGQUIT";

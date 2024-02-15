@@ -39,6 +39,7 @@ BIN_NAME_TEST   := sms_test
 BIN_NAME_KT     := sms_kernel_test
 BIN_NAME_PROF   := sms_prof
 THREADS         := 8 #match the number of threads on your machine
+DOCS_CONFIG     := docs/docs.conf
 
 # sms executable
 main:
@@ -46,8 +47,8 @@ main:
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME)
 
-bin/$(BIN_NAME): $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
-	$(CC_DEBUG) -lm $(CFLAGS_DEBUG) $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
+bin/$(BIN_NAME): $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
+	$(CC) $(CFLAGS) -lm $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
 
 
 # Not files
@@ -93,7 +94,7 @@ $(BUILD_DIR)/%.c.prof.o: %.c
 	$(CC_PROF) $(CFLAGS_PROF) -c $< -o $@
 
 # Artificial BIN_NAMEs (not file destinations)
-.PHONY: all clean install
+.PHONY: all clean install docs
 
 # Reset file state
 clean:
@@ -108,7 +109,8 @@ clean:
 		$(BUILD_DIR)/$(SRC_ENGINE)/*.o\
 		$(BUILD_DIR)/$(SRC_MEM)/*.o\
 		$(BUILD_DIR)/$(SRC_TERMINAL)/*.o\
-		bin/sms*
+		bin/sms*\
+		docs/html
 
 # Install the binary to a unix-like system
 install: main
@@ -135,6 +137,10 @@ check: dev
 	./bin/$(BIN_NAME_KT) &&\
 	./bin/$(BIN_NAME_TEST) test_zone/outline.sms &&\
 	echo Kernel Tests and SMS Tests Passed.
+
+# Generate html for docs with doxygen
+docs:
+	doxygen $(DOCS_CONFIG)
 
 # sms unified binary will be faster
 unified:

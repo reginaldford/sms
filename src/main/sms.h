@@ -13,43 +13,61 @@
 #include <termios.h>
 
 // We use __builtin_popcount_ll in sm_node.c
-#if defined(__x86_64__) || defined(_M_X64)
+#if defined(__x86_64__)
 #include <x86intrin.h>
 #endif
 
-// These are the major object types of SMS
-// Keep syncronized with function sm_object_type_str
+/// These are the major object types of SMS
+/// @note Must remain syncronized with function sm_object_type_str
 enum sm_object_type {
-  SM_DOUBLE_TYPE,    // 0
-  SM_EXPR_TYPE,      // 1
-  SM_PRIMITIVE_TYPE, // 2
-  SM_STRING_TYPE,    // 3
-  SM_SYMBOL_TYPE,    // 4
-  SM_CX_TYPE,        // 5
-  SM_NODE_TYPE,      // 6
-  SM_POINTER_TYPE,   // 7
-  SM_META_TYPE,      // 8
-  SM_SPACE_TYPE,     // 9
-  SM_FUN_TYPE,       // 10
-  SM_FUN_PARAM_TYPE, // 11
-  SM_LOCAL_TYPE,     // 12
-  SM_LINK_TYPE,      // 13
-  SM_ERROR_TYPE,     // 14
-  SM_SELF_TYPE,      // 15
-  SM_RETURN_TYPE,    // 16
-  SM_BC_BLOCK_TYPE,  // 17
-  SM_UNKNOWN_TYPE    // 18
+  /// 0: double precision floating point (sm_double.h)
+  SM_DOUBLE_TYPE,
+  /// 1: Expression (sm_expr.h)
+  SM_EXPR_TYPE,
+  /// 2: Primitive is not used yet
+  SM_PRIMITIVE_TYPE,
+  /// 3: Strings (sm_string.h)
+  SM_STRING_TYPE,
+  /// 4: Symbols (sm_symbol.h)
+  SM_SYMBOL_TYPE,
+  /// 5: Contexts (sm_cx.h)
+  SM_CX_TYPE,
+  /// 6: Nodes (sm_node.h)
+  SM_NODE_TYPE,
+  /// 7: Pointers (for gc) (sm_pointer.h)
+  SM_POINTER_TYPE,
+  /// 8: Meta objects (sm_meta.h)
+  SM_META_TYPE,
+  /// 9: Space objects (sm_space.h)
+  SM_SPACE_TYPE,
+  /// 10: Functions (sm_fun.h)
+  SM_FUN_TYPE,
+  /// 11: Function parameters (sm_fun.h)
+  SM_FUN_PARAM_TYPE,
+  /// 12: Local variable reference (sm_local.h)
+  SM_LOCAL_TYPE,
+  /// 13: Linked list objects (not used yet) (sm_link.h)
+  SM_LINK_TYPE,
+  /// 14: Error objects (not (really) used yet) (sm_error.h)
+  SM_ERROR_TYPE,
+  /// 15: Reference to current scope. (sm_self.h)
+  SM_SELF_TYPE,
+  /// 16: Acts as return statement. (sm_return.h)
+  SM_RETURN_TYPE,
+  /// 17: Bytecode block. (note used yet) (sm_return.h)
+  SM_BC_BLOCK_TYPE,
+  /// 18: Unrecognized
+  SM_UNKNOWN_TYPE
 };
 
 // Useful macros
-#define ABS(x) (x < 0 ? -1 * x : x)
 #define MIN(x, y) (x < y ? x : y)
 #define MAX(x, y) (x > y ? x : y)
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x))
 #define DEBUG_HERE(note)                                                                           \
   printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
   fflush(stdout);
 
+#include "sm_common.h"
 #include "memory/sm_heap.h"
 #include "sm_env.h"
 #include "sm_signal.h"
@@ -74,7 +92,6 @@ enum sm_object_type {
 #include "memory/sm_space.h"
 #include "memory/sm_gc.h"
 #include "sm_global.h"
-#include "terminal/sm_terminal_input.h"
 #include "terminal/sm_terminal_output.h"
 #include "engine/str.h"
 #include "engine/sm_diff.h"

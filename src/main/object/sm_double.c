@@ -19,7 +19,7 @@ sm_string *sm_double_to_string(sm_double *self) {
 
 // Adds a c string describing the double to the buffer
 // Returns the length
-unsigned int sm_double_sprint(sm_double *self, char *buffer, bool fake) {
+uint32_t sm_double_sprint(sm_double *self, char *buffer, bool fake) {
   char internal_buf[24];
   if (!fake)
     snprintf(buffer, 23, "%.16g", self->value);
@@ -27,7 +27,7 @@ unsigned int sm_double_sprint(sm_double *self, char *buffer, bool fake) {
     snprintf(internal_buf, 23, "%.16g", self->value);
     buffer = internal_buf;
   }
-  unsigned short int count = 0;
+  uint16_t count = 0;
   for (; count < 24 && buffer[count] != '\0'; count++)
     ;
   return count;

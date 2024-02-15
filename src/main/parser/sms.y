@@ -18,8 +18,6 @@ void _lex_cstr(char * cstr,int len);
 
 %}
 
-%define parse.error verbose
-
 %union {
   sm_double        *num;
   sm_symbol        *sym;
@@ -402,6 +400,10 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | FN_SETPARAMS '(' EXPR ','  EXPR ')' {$$ = sm_new_expr_2(SM_FN_SETPARAMS_EXPR,(sm_object *)$3,(sm_object*)$5);}
 | FN_PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_FN_PARENT_EXPR,(sm_object *)$3);}
 | FN_SETPARENT '(' EXPR ','  EXPR ')' {$$ = sm_new_expr_2(SM_FN_SETPARENT_EXPR,(sm_object *)$3,(sm_object*)$5);}
+| XP_OP '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_EXPR,(sm_object*)$3);}
+| XP_SETOP '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_XP_SET_OP_EXPR,(sm_object*)$3,(sm_object*)$5);}
+| XP_OPSTR '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_STR_EXPR,(sm_object*)$3);}
+
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3);}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3);}
 | FILE_RUN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_READ_EXPR,(sm_object*)$3,(sm_object*)$5);}
@@ -451,7 +453,7 @@ FUN : FUN_INTRO EXPR {
 FUN_INTRO : PARAM_LIST ARROW {
   sm_cx * parent_cx = *(sm_global_lex_stack(NULL)->top);
   sm_fun *new_fun = sm_new_fun(parent_cx, ($1)->size, (sm_object *)NULL);
-  for (unsigned int i = 0; i < ($1)->size; i++) {
+  for (uint32_t i = 0; i < ($1)->size; i++) {
     sm_fun_param_obj *po = (sm_fun_param_obj *)sm_expr_get_arg($1, i);
     sm_fun_set_param(new_fun, i, po->name, po->default_val, po->known_expr);
   }

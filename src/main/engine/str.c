@@ -21,10 +21,10 @@ sm_double *sm_str_find(sm_string *str, sm_string *to_find) {
 sm_expr *sm_str_split(sm_string *str, sm_string *needle) {
   if (needle->size == 0 || str->size == 0)
     return sm_new_expr(SM_ARRAY_EXPR, (sm_object *)sm_new_string(str->size, &str->content));
-  unsigned int i, j, num_needles = 0;
-  unsigned int needles[str->size / needle->size + 1];
-  char        *str_cstr    = &(str->content);
-  char        *needle_cstr = &(needle->content);
+  uint32_t i, j, num_needles = 0;
+  uint32_t needles[str->size / needle->size + 1];
+  char    *str_cstr    = &(str->content);
+  char    *needle_cstr = &(needle->content);
   // find all the occurrences of the needle in the string
   for (i = 0; i <= str->size - needle->size; i++) {
     for (j = 0; j < needle->size; j++) {
@@ -41,24 +41,24 @@ sm_expr *sm_str_split(sm_string *str, sm_string *needle) {
   if (num_needles == 0)
     return sm_new_expr(SM_ARRAY_EXPR, (sm_object *)sm_new_string(str->size, &str->content));
   // Count the number of adjacent needles
-  unsigned int num_adjacents = 0;
-  for (unsigned int i = 0; i + 1 < num_needles; i++) {
+  uint32_t num_adjacents = 0;
+  for (uint32_t i = 0; i + 1 < num_needles; i++) {
     if (needles[i] + needle->size == needles[i + 1])
       num_adjacents++;
   }
   // Totaling the string parts outside of the outtermost needles in the string
-  unsigned int border_chunks = 0;
+  uint32_t border_chunks = 0;
   if (needles[0] != 0)
     border_chunks++;
   if (needles[num_needles - 1] + needle->size != str->size)
     border_chunks++;
   // This should be the exact capacity necessary to store the string parts
-  unsigned int capacity = num_needles * 2 - 1 + border_chunks - num_adjacents;
+  uint32_t capacity = num_needles * 2 - 1 + border_chunks - num_adjacents;
   // Create and return the resulting array expression
-  sm_expr     *result         = sm_new_expr_n(SM_ARRAY_EXPR, 0, capacity);
-  unsigned int current_needle = 0;
-  unsigned int current_result = 0;
-  i                           = 0;
+  sm_expr *result         = sm_new_expr_n(SM_ARRAY_EXPR, 0, capacity);
+  uint32_t current_needle = 0;
+  uint32_t current_result = 0;
+  i                       = 0;
   while (i < str->size) {
     if (i == needles[current_needle]) {
       sm_expr_set_arg(result, current_result, (sm_object *)needle);
@@ -67,7 +67,7 @@ sm_expr *sm_str_split(sm_string *str, sm_string *needle) {
       current_result++;
       continue;
     }
-    unsigned int len;
+    uint32_t len;
     if (current_needle < num_needles)
       len = needles[current_needle] - i;
     else

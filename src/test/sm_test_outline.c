@@ -20,8 +20,9 @@ test_outline *parse_test_outline(char *filepath) {
   }
   sm_strncpy(result_outline->test_zone_path, filepath, strlen(filepath));
   sm_env env;
-  env.mem_flag = false;
-  sm_init(&env, 0, NULL, true);
+  env.mem_flag   = false;
+  env.quiet_mode = true;
+  sm_init(&env, 0, NULL);
   printf("Parsing test outline file: %s ...\n", filepath);
   sm_parse_result pr = sm_parse_file(filepath);
   if (pr.return_val != 0) {
@@ -41,7 +42,7 @@ test_outline *parse_test_outline(char *filepath) {
     graceful_exit(result_outline, -1);
   }
   sm_expr *chapters_array = (sm_expr *)chapters_obj;
-  for (unsigned int i = 0; i < chapters_array->size; i++) {
+  for (uint32_t i = 0; i < chapters_array->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(chapters_array, i);
     if (current_obj->my_type != SM_CX_TYPE) {
       printf("Each element in the chapters array must be a context.\n");

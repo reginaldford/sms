@@ -8,8 +8,9 @@ int chapter_3(int test) {
     printf("This chapter does not take a test number.\n");
 
   sm_env env;
-  env.mem_flag = false;
-  sm_init(&env, 0, NULL, false);
+  env.mem_flag   = false;
+  env.quiet_mode = true;
+  sm_init(&env, 0, NULL);
 
   sm_cx *test_parent_cx = sm_new_cx(NULL);
   sm_cx *test_cx        = sm_new_cx(test_parent_cx);

@@ -3,24 +3,38 @@
 #ifndef SMS_GLOBALS
 #define SMS_GLOBALS
 
-extern sm_heap   *sms_heap;
-extern sm_heap   *sms_other_heap;
+/// The currently used memory heap
+extern sm_heap *sms_heap;
+/// The next heap to jump to for copying gc
+extern sm_heap *sms_other_heap;
+/// The singleton for true
 extern sm_symbol *sms_true;
+/// The singleton for false
 extern sm_symbol *sms_false;
 
 #endif /* SMS_GLOBALS */
 
-int                sm_gc_count(int increase);
-double             sm_global_growth_factor(double replacement);
-sm_space_array    *sm_global_space_array(sm_space_array *replacement);
-sm_expr           *sm_global_obj_stack(sm_expr *replacement);
-char              *sm_global_fn_name(unsigned short int which);
-unsigned int       sm_global_fn_name_len(unsigned short int which);
-unsigned int       sm_global_num_fns();
-sm_stack          *sm_global_lex_stack(sm_stack *replacement);
-sm_expr           *sm_global_parents(sm_expr *replacement);
-sm_object         *sm_global_parser_output(sm_object *replacement);
-sm_env            *sm_global_environment(sm_env *replacement);
-char              *sm_global_type_name(unsigned short int which);
-unsigned short int sm_global_type_name_len(unsigned short int which);
-struct termios    *sm_global_term_attrs();
+/// Increase the global garbage collection count by 1, report the result
+int sm_gc_count(int increase);
+/// If replacement is non-zero, stores the new value. Returns the previous value regardless
+double sm_global_growth_factor(double replacement);
+/// Global space array for memory management
+sm_space_array *sm_global_space_array(sm_space_array *replacement);
+/// Global (primitive) function names
+char *sm_global_fn_name(uint16_t which);
+/// Global function name lengths
+uint32_t sm_global_fn_name_len(uint16_t which);
+/// Global number of primitive functions
+uint32_t sm_global_num_fns();
+/// Global lexical stack used during parsing. Before and after parsing, the top is _scratch
+sm_stack *sm_global_lex_stack(sm_stack *replacement);
+/// Global parser output, from the bison-generated parser
+sm_object *sm_global_parser_output(sm_object *replacement);
+/// Global env struct from initialization
+sm_env *sm_global_environment(sm_env *replacement);
+/// Global names of types
+char *sm_global_type_name(uint16_t which);
+/// Global lengths of the type names
+uint16_t sm_global_type_name_len(uint16_t which);
+/// Global terminal io struct for vt100 functions
+struct termios *sm_global_term_attrs();

@@ -9,7 +9,6 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/reginaldford/sms)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/reginaldford/sms/make-check.yml)
 
-
 # Introduction:
 SMS (Symbolic Math System) is a math-focused scripting language for POSIX friendly operating systems. SMS has built-in functions for arithmetic, trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
 
@@ -270,6 +269,14 @@ Line comments start with `#`.
 
 </details>
 
+<details>
+  <summary>Expressions</summary>
+    1. xpOp(:(a+b)); # Returns the id of the operation in the expression
+
+    2. xpSetOp(:(a+b),17) # Set the operator
+
+    3. xpOpStr(17) # Get the string for an operator
+</details>
 
 
 # How to Download and Run/Install a Release

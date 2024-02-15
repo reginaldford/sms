@@ -1,8 +1,8 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 typedef struct sm_bstack {
-  unsigned int capacity;
-  unsigned int top;
+  uint32_t capacity;
+  uint32_t top;
   char *data;
 } sm_bstack;
 

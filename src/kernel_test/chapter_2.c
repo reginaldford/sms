@@ -6,23 +6,24 @@
 int chapter_2(int test) {
   int           num_fails = 0;
   static sm_env env;
-  env.mem_flag = false;
-  sm_init(&env, 0, NULL, true);
-  unsigned short int num_fns = sm_global_num_fns();
-  for (unsigned short int i = 0; i < num_fns; i++) {
-    char        *op_name   = sm_global_fn_name(i);
-    sm_object   *test_obj1 = (sm_object *)sm_new_string(5, "Hello");
-    sm_object   *test_obj2 = (sm_object *)sm_new_string(5, "World");
-    sm_object   *test_obj3 = (sm_object *)sm_new_string(6, "3rdArg");
-    sm_object   *test_obj4 = (sm_object *)sm_new_string(6, "4thArg");
-    unsigned int len       = sm_global_fn_name_len(i);
-    sm_expr     *expr      = sm_new_expr_4(i, test_obj1, test_obj2, test_obj3, test_obj4);
-    char        *to_str    = &(sm_object_to_string((sm_object *)expr)->content);
+  env.mem_flag   = false;
+  env.quiet_mode = true;
+  sm_init(&env, 0, NULL);
+  uint16_t num_fns = sm_global_num_fns();
+  for (uint16_t i = 0; i < num_fns; i++) {
+    char      *op_name   = sm_global_fn_name(i);
+    sm_object *test_obj1 = (sm_object *)sm_new_string(5, "Hello");
+    sm_object *test_obj2 = (sm_object *)sm_new_string(5, "World");
+    sm_object *test_obj3 = (sm_object *)sm_new_string(6, "3rdArg");
+    sm_object *test_obj4 = (sm_object *)sm_new_string(6, "4thArg");
+    uint32_t   len       = sm_global_fn_name_len(i);
+    sm_expr   *expr      = sm_new_expr_4(i, test_obj1, test_obj2, test_obj3, test_obj4);
+    char      *to_str    = &(sm_object_to_string((sm_object *)expr)->content);
     printf("%i: expression: %s is %i characters long and prints as %s\n", i, op_name, len, to_str);
     fflush(stdout);
     if (strlen(sm_global_fn_name(i)) != len) {
       printf("string length mismatch: the counted length is %lu but the global setting is %i\n",
-             (long unsigned int)strlen(sm_global_fn_name(i)), len);
+             (uint64_t)strlen(sm_global_fn_name(i)), len);
       fflush(stdout);
       num_fails++;
     }
