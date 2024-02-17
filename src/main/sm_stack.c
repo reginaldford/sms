@@ -40,8 +40,4 @@ sm_stack *sm_stack_pop(sm_stack *self) {
 // which means that the stack is empty.
 void **sm_stack_empty_top(sm_stack *self) { return ((void **)&(self[1])) - 1; }
 
-uint32_t sm_stack_size(sm_stack *self) {
-  if (self->top == sm_stack_empty_top(self))
-    return 0;
-  return ((void **)self->top) - (void **)&(self[1]) + 1;
-}
+uint32_t sm_stack_size(sm_stack *self) { return ((void **)self->top) - sm_stack_empty_top(self); }
