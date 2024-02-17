@@ -148,7 +148,6 @@ uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
   if (self->content != NULL) {
     sm_stack_obj *letter_stack = sm_new_stack_obj(32);
     cursor += sm_node_sprint(self->content, &(buffer[cursor]), fake, letter_stack);
-    free(letter_stack);
   }
   if (!fake)
     buffer[cursor] = '}';
