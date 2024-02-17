@@ -60,15 +60,16 @@ sm_stack *sm_global_lex_stack(sm_stack *replacement) {
 // Return the name of this type.
 // Must be synchronized with enum sm_object_type
 char *sm_global_type_name(uint16_t which) {
-  static char *response[] = {"num",   "xpr", "prm",   "str", "sym", "cx",  "node", "ptr",    "meta",
-                             "space", "fun", "param", "lcl", "l",   "err", "self", "return", "?"};
+  static char *response[] = {"float", "expr", "prim",   "str",   "sym",   "cx",  "node",
+                             "ptr",   "meta", "space",  "fun",   "param", "lcl", "l",
+                             "err",   "self", "return", "block", "stack", "?"};
   return response[which];
 }
 
 // Return the length of the name of this type.
 // Must be synchronized with enum sm_object_type
 uint16_t sm_global_type_name_len(uint16_t which) {
-  static uint16_t response_len[] = {3, 3, 3, 3, 3, 3, 3, 4, 5, 3, 5, 3, 3, 1};
+  static uint16_t response_len[] = {5, 4, 4, 3, 3, 2, 4, 3, 4, 5, 3, 5, 3, 1, 3, 4, 6, 5, 5, 1};
   return response_len[which];
 }
 
