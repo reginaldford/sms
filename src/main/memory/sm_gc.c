@@ -134,6 +134,12 @@ void sm_inflate_heap() {
       return_obj->address   = sm_meet_object((sm_object *)return_obj->address);
       break;
     }
+    case SM_STACK_OBJ_TYPE: {
+      sm_stack_obj *stack = (sm_stack_obj *)current_obj;
+      // return_obj->address   = sm_meet_object((sm_object *)return_obj->address);
+      //  YOU ARE HERE
+      break;
+    }
     default:
       break;
     }

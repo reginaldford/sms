@@ -474,7 +474,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_KEYS_EXPR))
         return (sm_object *)sms_false;
       sm_expr *success =
-        sm_node_keys(cx->content, sm_new_stack(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
+        sm_node_keys(cx->content, sm_new_stack_obj(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
       if (success)
         return (sm_object *)success;
       return (sm_object *)sms_false;
