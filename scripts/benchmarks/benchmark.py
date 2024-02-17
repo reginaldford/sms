@@ -6,7 +6,7 @@ num_to_fib=31;
 
 def fibonacci_recursive(n):
     if n <= 1:
-        return n
+        return 1
     return fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2)
 
 def benchmark_fibonacci_recursive():

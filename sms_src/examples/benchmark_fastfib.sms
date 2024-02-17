@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm 1800 
+#!/usr/local/bin/sms
 # Use this to benchmark something
 # I came up with a faster fib that doesn't memoize
 
