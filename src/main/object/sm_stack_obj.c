@@ -44,5 +44,5 @@ void **sm_stack_obj_empty_top(sm_stack_obj *self) { return ((void **)&(self[1]))
 uint32_t sm_stack_obj_size(sm_stack_obj *self) {
   if (self->top == sm_stack_obj_empty_top(self))
     return 0;
-  return ((void **)self->top) - sm_stack_empty_top(self);
+  return ((void **)self->top) - sm_stack_obj_empty_top(self);
 }
