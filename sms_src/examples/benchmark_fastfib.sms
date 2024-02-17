@@ -23,11 +23,7 @@
   let f = (n) => {
     if(n<5)
         return first5[n];
-    let s2= f(n-2);
-    let s3= f(n-3);
-    let s4= f(n-4);
-
-    return 2*s3+s4+s2 ;
+    return 2  *f(n-3) + f(n-4) + f(n-2) ;
   };
 
   benchmark(:f(31));
