@@ -56,7 +56,9 @@ enum sm_object_type {
   SM_RETURN_TYPE,
   /// 17: Bytecode block. (note used yet) (sm_return.h)
   SM_BC_BLOCK_TYPE,
-  /// 18: Unrecognized
+  /// 18: Stack (sm_stack_obj.h)
+  SM_STACK_OBJ_TYPE,
+  /// 19: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -76,6 +78,7 @@ enum sm_object_type {
 #include "object/sm_object.h"
 #include "object/sm_expr.h"
 #include "sm_stack.h"
+#include "object/sm_stack_obj.h"
 #include "object/sm_node.h"
 #include "object/sm_cx.h"
 #include "parser/sm_parse_result.h"

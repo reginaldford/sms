@@ -47,7 +47,7 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int len);
 /// Get the containing node (parent) of the node addressed by needle
 sm_node *sm_node_get_container(sm_node *self, char *needle, int len);
 /// If !fake, print this node into buffer. Return the string length regardlessly.
-int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack);
+int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_stack);
 /// Get the parent node of this node. May be NULL.
 sm_node *sm_node_parent_node(sm_node *self, char *needle, int len);
 /// Remove a particular node from this tree
@@ -59,7 +59,7 @@ bool sm_node_rm_nth(struct sm_node *root, int n);
 /// Returns the number of non-NULL values in nodes under this node (including this node)
 int sm_node_size(sm_node *node);
 /// Return an array of the keys (as string objects) under this node
-sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection);
+sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collection);
 /// Return an array of the values (as string objects) under this node
 sm_expr *sm_node_values(sm_node *node, sm_expr *collection);
 /// A node is empty if is has NULL as value and 0LL as map

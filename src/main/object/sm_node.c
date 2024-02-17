@@ -189,19 +189,18 @@ sm_node *sm_node_get_container(sm_node *self, char *needle, int len) {
 // Report of the node has not value and no children
 bool sm_node_is_empty(sm_node *node) { return node->value == NULL && node->map == 0LL; }
 
-
 // Print all of the key-value pairs in this node recursively
 // Uses the stack to recall path to current node, for full key name
-int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack) {
+int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_stack) {
   int cursor = 0;
   if (node->value != NULL) {
     // var name
-    for (uint32_t i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
-      sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
+    for (uint32_t i = sm_stack_obj_size(char_stack) - 1; i + 1 > 0; i--) {
+      sm_double *num_obj = *((sm_stack_obj_empty_top(char_stack) + i + 1));
       if (!fake)
         buffer[i] = sm_node_bit_unindex(num_obj->value);
     }
-    cursor = sm_stack_size(char_stack);
+    cursor = sm_stack_obj_size(char_stack);
     // equals sign
     if (!fake) {
       buffer[cursor]     = '-';
@@ -224,9 +223,9 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack)
         if (sm_node_map_get(node->map, current_bit) == true) {
           int      child_index = sm_node_child_index(node->map, current_bit);
           sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
-          sm_stack_push(char_stack, sm_new_double(current_bit));
+          sm_stack_obj_push(char_stack, sm_new_double(current_bit));
           cursor += sm_node_sprint(child_here, &(buffer[cursor]), fake, char_stack);
-          sm_stack_pop(char_stack);
+          sm_stack_obj_pop(char_stack);
           items_to_do--;
         }
       }
@@ -291,18 +290,18 @@ int sm_node_size(sm_node *node) {
 
 
 // Returns the keys under this node(recursive)
-sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) {
+sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collection) {
   if (node == NULL)
     return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
 
   if (node->value != NULL) {
     // Build the key string
-    int  len = sm_stack_size(char_stack);
+    int  len = sm_stack_obj_size(char_stack);
     char buffer[len + 1]; // Increase the buffer size to accommodate the null terminator
     buffer[len] = '\0';   // Add the null terminator at the end
 
-    for (uint32_t i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
-      sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
+    for (uint32_t i = sm_stack_obj_size(char_stack) - 1; i + 1 > 0; i--) {
+      sm_double *num_obj = *((sm_stack_obj_empty_top(char_stack) + i + 1));
       buffer[i]          = sm_node_bit_unindex(num_obj->value);
     }
 
@@ -325,10 +324,9 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
 
-    sm_stack_push(char_stack, sm_new_double(bit_index));
+    sm_stack_obj_push(char_stack, sm_new_double(bit_index));
     collection = sm_node_keys(child_here, char_stack, collection);
-    sm_stack_pop(char_stack);
-
+    sm_stack_obj_pop(char_stack);
     map ^= bit; // Clear the current bit
   }
 

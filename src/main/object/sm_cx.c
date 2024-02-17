@@ -146,7 +146,7 @@ uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
     buffer[0] = '{';
   int cursor = 1;
   if (self->content != NULL) {
-    sm_stack *letter_stack = sm_new_stack(32);
+    sm_stack_obj *letter_stack = sm_new_stack_obj(32);
     cursor += sm_node_sprint(self->content, &(buffer[cursor]), fake, letter_stack);
     free(letter_stack);
   }
@@ -169,7 +169,7 @@ uint32_t sm_cx_size(sm_cx *self) {
 // Uses cxLet to import key/value pairs from cxFrom to cxTo
 void sm_cx_import(sm_cx *cxFrom, sm_cx *cxTo) {
   sm_expr *keys =
-    sm_node_keys(cxFrom->content, sm_new_stack(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
+    sm_node_keys(cxFrom->content, sm_new_stack_obj(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
   sm_expr *values = sm_node_values(cxFrom->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
   for (uint32_t i = 0; i < keys->size; i++) {
     sm_symbol *keySym  = (sm_symbol *)sm_expr_get_arg(keys, i);
