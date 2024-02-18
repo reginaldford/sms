@@ -88,6 +88,7 @@ parent       {return PARENT;}
 rm           {return RM;}
 
 newCx        {return NEW_CX;}
+cxSetParent  {return CX_SETPARENT;}
 cxDot        {return CX_DOT;}
 cxLet        {return CX_LET;}
 cxGet        {return CX_GET;}

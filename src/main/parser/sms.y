@@ -208,6 +208,7 @@ void _lex_cstr(char * cstr,int len);
 %token <expr> XOR
 
 %token <expr> NEW_CX
+%token <expr> CX_SETPARENT
 %token <expr> CX_DOT
 %token <expr> CX_KEYS
 %token <expr> CX_VALUES
@@ -380,6 +381,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | PUT '(' EXPR ')' {$$ = sm_new_expr(SM_PUT_EXPR,(sm_object*)$3);}
 | PUTLN '(' EXPR ')' {$$ = sm_new_expr(SM_PUTLN_EXPR,(sm_object*)$3);}
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0);}
+| CX_SETPARENT '(' EXPR ','  EXPR ')' {$$ = sm_new_expr_2(SM_CX_SETPARENT_EXPR,(sm_object *)$3,(sm_object*)$5);}
 | CX_DOT '(' EXPR ',' EXPR ')' {$$=sm_new_expr_2(SM_CX_DOT_EXPR, (sm_object *)$3,(sm_object*)$5);}
 | CX_CONTAINING '(' EXPR ',' EXPR ')' {$$=sm_new_expr_2(SM_CX_CONTAINING_EXPR, (sm_object *)$3,(sm_object*)$5);}
 | CX_CLEAR '(' EXPR ')' {$$=sm_new_expr(SM_CX_CLEAR_EXPR, (sm_object *)$3);}
