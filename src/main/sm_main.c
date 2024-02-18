@@ -149,6 +149,7 @@ int main(int num_args, char *argv[]) {
       sm_string *response = sm_object_to_string(evaluated);
       printf("%s\n", &(response->content));
       fflush(stdout);
+      clean_exit(&env, 0);
       break;
     }
     case 's':
