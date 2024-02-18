@@ -288,7 +288,6 @@ int sm_node_size(sm_node *node) {
   return size;
 }
 
-
 // Returns the keys under this node(recursive)
 sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collection) {
   if (node == NULL)
@@ -317,7 +316,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
   uint64_t map = node->map; // Get the bitmap
 
   while (map != 0) {
-    uint64_t bit       = map & -map; // Get the rightmost set bit using two's complement trick
+    uint64_t bit       = map & -map; // Get the rightmost set bit using two's compliment
     int      bit_index = __builtin_ctzll(
       bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
 

@@ -1,8 +1,8 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 // Implements a pointer stack that lives in OS malloc space.
-// The stack will grow arbitrarily large upon continuos pushing.
-// New capacity is sm_global_growth_factor*old_capacity + 1
+// The stack will grow arbitrarily large upon continuous pushing.
+// New capacity at growth is sm_global_growth_factor * old_capacity + 1
 
 #include "sms.h"
 
