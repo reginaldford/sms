@@ -96,8 +96,6 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(sm_return);
   case SM_STACK_OBJ_TYPE:
     return sm_stack_obj_size((sm_stack_obj *)obj1);
-
-
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
     // sm_sprint_dump();
@@ -138,6 +136,29 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
   }
   case SM_PRIMITIVE_TYPE:
     return (void *)self == (void *)other;
+  case SM_CX_TYPE: {
+    sm_cx *self_cx    = (sm_cx *)self;
+    sm_cx *other_cx   = (sm_cx *)other;
+    int    my_size    = sm_cx_size(self_cx);
+    int    their_size = sm_cx_size(other_cx);
+    if (my_size != their_size)
+      return false;
+    // TODO: create iterators, to avoid allocating heap memory just to compute equality
+    sm_expr *my_keys   = sm_node_keys(self_cx->content, sm_new_stack_obj(32),
+                                      sm_new_expr_n(SM_ARRAY_EXPR, 0, my_size));
+    sm_expr *my_values = sm_node_values(self_cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, my_size));
+    sm_expr *their_keys = sm_node_keys(other_cx->content, sm_new_stack_obj(32),
+                                       sm_new_expr_n(SM_ARRAY_EXPR, 0, their_size));
+    sm_expr *their_values =
+      sm_node_values(other_cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, their_size));
+    for (int i = 0; i < my_size; i++) {
+      if (!sm_object_eq(sm_expr_get_arg(my_keys, i), sm_expr_get_arg(their_keys, i)))
+        return false;
+      if (!sm_object_eq(sm_expr_get_arg(my_values, i), sm_expr_get_arg(their_values, i)))
+        return false;
+    }
+    return true;
+  }
   default:
     return self == other;
   }
