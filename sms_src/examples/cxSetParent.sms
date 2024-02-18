@@ -1,6 +1,6 @@
 #!/usr/local/bin/sms -qm1
 # Demonstrates cxSetParent
-# fnSetParent sets the parent scope of a context,
+# cxSetParent sets the parent scope of a context,
 # overriding the lexical scope.
 {
   # Making a person
