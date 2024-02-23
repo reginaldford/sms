@@ -10,7 +10,7 @@ should work, but we are getting x+(y+parent(self)).x + ...
 
 # osExec alternative where the output is returned as a string
 
-# bytes and byte ops
+# bytes and byte ops build in
 - sm_mem object
 - m
 - \x00 etc
@@ -27,30 +27,23 @@ should work, but we are getting x+(y+parent(self)).x + ...
 - save and load
 
 # active terminal support
-- This code is being developed in the feature/smartput branch
-- if non-canonical input is supported, we use smartput()
-- non-canonical form allows keyboard shortcuts
-  - ctrl+left, ctrl+right to jump 1 token left,right
-  - up and down to scroll through previous commands
-  - home, end to go to beginning/end
-  - alt+left, alt+right to go to beginning/end
-  - tab completion
+- Will use linenoise eventually
 
-# data structures
+# data structures built in sms
 - `let myType = struct({
     age -> 5;        # no decimal means int. 64 bits for now
     height -> 171.5;  # 64 bit float
     name -> "none";  # varlen types use ptrs
   });`
 - yields `struct(myType)`
-- let x = <myType>{ ... nondefaults and additions ... }
+- `let x = <myType>{ ... nondefaults and additions ... }`
 
-# vert.sms
+# vert.sms upgrades
 - vvert.sms for volume conversions
 - dvert.sms for data conversions
 - rvert for rate conversions
 
-# array ops
+# vectormath lib
 - arr+ !! etc for parallel tuple add
 - numArr+ etc for parallel vec add
 - byteArr+ etc for parallel vec add
@@ -66,11 +59,12 @@ should work, but we are getting x+(y+parent(self)).x + ...
 
 # break statement
 - to end a while
+- can just make a block around the loop and return early though
 
 # switch cases
 - evaluate the nth element of an array
 
-# memoized functions
+# memoized functions library
 - allow for:
   - `let x = memoize((input) => (
       # your code here;
@@ -98,39 +92,37 @@ should work, but we are getting x+(y+parent(self)).x + ...
 - toStr does full mode, no prettyprinting
 - toStrPretty takes an optional cx of options?
 
-# internal power series engine
+# power series engine library (mostly in C)
 - to cover missing trig functions
 - offer functions to carry out the ps method
 - build the aux var funcs, reusing internal parts
 
 # last moment gc
 - requires explicit stack. use sm_stack.c
-- implement tail call opt
-- option to move objects outside of heap. malloc(obj)
+- Now we have stack tracing inside sms
+
+# mark and sweep gc
+- because we eventually want generational, and this is a step.
+- involves making a high order function for tracing 
+- since every object is on a mod 4 byte in memory, we have 2 bits to signify special meaning.
+- one bit is for fixnums, the other is for marking
+- sweep is a state machine that builds spaces for allocation later.
+- spaces are a set of 64 pointer stacks, to 4, 8, 12,... 256 bytes.
+- If the sweep machine passes over 256 bytes of garbage, it will make a space for 256, and start a new one.
+
+# external memory library
+- option to evaluate code, instantiate/move objects outside of heap.
   - bigSpace = malloc(byteArr@34);
-  - bigSpace = !malloc(newByteArr(34,0x33)); # build in outterspace in parser time
   - for large objects, they can be in malloc space
   - gc will not move these objects.
-  - if you process the object, it will come back to heap. use malloc(:newStr(...,...)); which will change the allocator for the evaluation of the expression.
-    if you use !malloc(:expr) , you can build a large object outside of the heap, and the gc will clear malloc'd objects accordingly
+  - Allow for evaluating code with a specified external heap: eval_in_heap(:(code),heap1)
 
 # dynamic heap size
 - allow min, max, max_emptiness, growth factor options
 - no gc means static heap size bc heap size changes after gc to
   satisfy max_emptiness by growing heap by growth factor.
 
-# typed heaps
-- object locations are s.t. type info is in leading bits of object's location as a ptr
-- so we have n objects, which need log(2,n) bits to address.
-- Heap sizes are set at 2^n bytes from a known ptr,
-- size of heap starts at 2^8 = 256 bytes.
-- size of the heap doubles if necessary (with realloc)
-- speed critical apps can set the size of each heap
-- each heap would have their own gc
-- each heap can have destination gc, which is set to itself for now
-- later, we can have 3-gen typed heaps. That's (num*types)*3 heaps.
-
-# types, typed arrays
+# types, typed arrays (will be implemented as a library)
 - str[ ...] makes a single string , concatenating the strings
 with an array of integers for their start locations.
 - similar tools for other types of arrays
@@ -144,37 +136,37 @@ with an array of integers for their start locations.
 - type casting # only state desired type, like toStr=(str), so deprecate toStr
 - num array is 1d
 
-# matrices
+# matrices lib (std lib that offers c bindings for fast matrix ops in sms)
 - convert to array
 - m is 2d:
-k = m[1, 2, 3;
+`k = m[1, 2, 3;
       2, 3, 4;
-      3, 4, 5];
+      3, 4, 5];`
 - elements of a matrix are accessed with underscore:
-k_2,3
+`k_2,3`
 - another choice is a tuple of num arrays.
 - mOne(x,y);
-- k m*3 ;   #matrix multiplication
-- k me/ 3 ;  #inversion, solving.
-- mInvert(matix) #
-- k me*3 ;  #elementwise operations for
+- `k m*3 ;   #matrix multiplication`
+- `k me/ 3 ;  #inversion, solving.`
+- `mInvert(matix)` #
+- `k me*3 ;`  #elementwise operations for
   + - * / ^ exp ln log trigs abs etc
   mabs(matrix) for unary funcs
   m+(a,b,c) and a m+ b for binary funcs. no need for me+
   m* me* is multiplication and elementwise, respectively
-- mmap( fn(x,y), m) # elementwise map
-- mRow(m,r);
-- mCol(m,r);
-- mapCols( fn(c), m) # column mapping
-- mapRows( fn(r), m) # row mapping
-- mdet( m ) #determinant
-- mToStr is for speed, compared to toStr
-- m== is for speed, compared to ==
-- mToArr is tuple form output
-- mToNumArr    is 1d
-- mToNumArrArr is 2d
-- mToByteArr
-- mToByteArrArr
+- `mmap( fn(x,y), m)` # elementwise map
+- `mRow(m,r);`
+- `mCol(m,r);`
+- `mapCols( fn(c), m)` # column mapping
+- `mapRows( fn(r), m)` # row mapping
+- `mdet( m )` #determinant
+- `mToStr` is for speed, compared to toStr
+- `m==` is for speed, compared to ==
+- `mToArr` is tuple form output
+- `mToNumArr`    is 1d
+- `mToNumArrArr` is 2d
+- `mToByteArr`
+- `mToByteArrArr`
 
 # multimedia libs
 - tgaMaker library
@@ -182,10 +174,11 @@ k_2,3
 - sdl2 bindings
 
 # bison/flex independance plan
-- write an sms parser in sms
-- parse the parser
-- save the image
-- will be part of compilation/bootstrap plan
+- Write a parser combinator lib in C for sms syntax
+- Instead of hardcoding the standard library, 
+- require `import std;`
+- parser will look up words for std functions, just like any function. through `sm_cx_get` , etcS
+
 
 #compilation and cross compilation
 - aiming for llvm IR
