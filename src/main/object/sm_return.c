@@ -6,7 +6,7 @@
 // Signifying that a then-block is to return this value without continuing.
 // Functions will unwrap this object.
 sm_return *sm_new_return(sm_object *address) {
-  sm_return *smr = sm_malloc(sizeof(sm_return));
+  sm_return *smr = sm_malloc(sms_heap,sizeof(sm_return));
   smr->my_type   = SM_RETURN_TYPE;
   smr->address   = address;
   return smr;

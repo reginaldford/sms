@@ -519,7 +519,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr *result = sm_new_expr_n(SM_PARAM_LIST_EXPR, fun->num_params, fun->num_params);
       for (uint32_t i = 0; i < fun->num_params; i++) {
         sm_string *fn_name = sm_fun_get_param(fun, i)->name;
-        sm_expr_set_arg(result, i, (sm_object *)sm_new_symbol(fn_name));
+        sm_expr_set_arg(result, i, (sm_object *)sm_new_symbol(&(fn_name->content), fn_name->size));
       }
       return (sm_object *)result;
     } break;
@@ -892,7 +892,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       str                = (sm_string *)evaluated;
       char *cstr         = &(str->content);
-      cstr[str->size]    = ';'; // Temporarily replacing the NULL char
+      cstr[str->size]    = ';';  // Temporarily replacing the NULL char
       sm_parse_result pr = sm_parse_cstr(cstr, str->size + 1);
       cstr[str->size]    = '\0'; // Place the null char back
       if (pr.return_val != 0) {
