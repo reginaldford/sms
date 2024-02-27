@@ -4,7 +4,7 @@
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
-  sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
+  sm_object *new_obj = sm_realloc(sms_heap, obj, sm_sizeof(obj));
   return new_obj;
 }
 
@@ -17,7 +17,7 @@ sm_object *sm_deep_copy(sm_object *obj) {
     }
     return obj;
   } else {
-    sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
+    sm_object *new_obj = sm_realloc(sms_heap, obj, sm_sizeof(obj));
     return new_obj;
   }
 }
@@ -25,7 +25,7 @@ sm_object *sm_deep_copy(sm_object *obj) {
 // Copy the object to the new heap
 // Leave an sm_pointer in the old space
 sm_object *sm_move_to_new_heap(sm_object *obj) {
-  sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
+  sm_object *new_obj = sm_realloc(sms_heap, obj, sm_sizeof(obj));
   // Overwrite the old object. sm_pointer is NOT larger
   sm_new_pointer(obj, new_obj);
   return new_obj;

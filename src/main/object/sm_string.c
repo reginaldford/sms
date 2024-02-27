@@ -2,6 +2,8 @@
 
 #include "../sms.h"
 
+extern struct sm_heap* sms_heap;
+
 // Safe string copy
 char *sm_strncpy(char *dest, const char *src, uint32_t n) {
   uint32_t i;
@@ -12,8 +14,16 @@ char *sm_strncpy(char *dest, const char *src, uint32_t n) {
   return dest;
 }
 
-// Create a new string, automatically null terminated
+// Create a new string in specified heap, automatically null terminated
 sm_string *sm_new_string(uint32_t size, char *str) {
+  // We add a null character that is not included in the size
+  struct sm_string *newstr = sm_new_string_manual_at(sms_heap,size);
+  sm_strncpy(&(newstr->content), str, size);
+  return newstr;
+}
+
+// Create a new string in specified heap, automatically null terminated
+sm_string *sm_new_string_at(struct sm_heap* heap,uint32_t size, char *str) {
   // We add a null character that is not included in the size
   struct sm_string *newstr = sm_new_string_manual(size);
   sm_strncpy(&(newstr->content), str, size);
@@ -21,8 +31,16 @@ sm_string *sm_new_string(uint32_t size, char *str) {
 }
 
 // Return a new empty string (does not nullify contents)
+sm_string *sm_new_string_manual_at(struct sm_heap* heap,uint32_t size) {
+  struct sm_string *newstr = (sm_string *)sm_malloc(heap,sm_round_size(sizeof(sm_string) + size));
+  newstr->my_type          = SM_STRING_TYPE;
+  newstr->size             = size;
+  return newstr;
+}
+
+// Return a new empty string (does not nullify contents)
 sm_string *sm_new_string_manual(uint32_t size) {
-  struct sm_string *newstr = (sm_string *)sm_malloc(sm_round_size(sizeof(sm_string) + size));
+  struct sm_string *newstr = (sm_string *)sm_malloc(sms_heap,sm_round_size(sizeof(sm_string) + size));
   newstr->my_type          = SM_STRING_TYPE;
   newstr->size             = size;
   return newstr;

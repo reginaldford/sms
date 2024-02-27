@@ -7,12 +7,16 @@ sm_heap   *sms_heap;
 sm_heap   *sms_other_heap;
 sm_symbol *sms_true;
 sm_symbol *sms_false;
+// Symbols including the 2 above live in a symbol heap
+sm_heap *sms_symbol_heap;
+// Symbol names are in alpabetical order, correlating with the symbol
+sm_heap *sms_symbol_name_heap;
 
 /* GLOBALS as functions
-The following globals use functions f(x):
-- If x is NULL, the static field is returned.
-- If x is not NULL, the old field value is returned and x replaces the field.
-This allows us to use a breakpoint or printf to detect reads/writes to the global.
+ The following globals use functions f(x):
+  - If x is NULL, the static field is returned.
+  - If x is not NULL, the old field value is returned and x replaces the field.
+ This allows us to use a breakpoint or printf to detect reads/writes to the global.
 */
 
 // Tracking number of garbage collections
@@ -35,7 +39,7 @@ double sm_global_growth_factor(double replacement) {
   return factor;
 }
 
-// the global space array sorted by size
+// The global space array sorted by size
 sm_space_array *sm_global_space_array(sm_space_array *replacement) {
   static sm_space_array *spaces = NULL;
   if (replacement != NULL) {
@@ -266,7 +270,7 @@ char *sm_global_fn_name(uint16_t which) {
   return response[which];
 }
 
-// corresponding string length of the string that would come from the sm_global_fn_name(which)
+// Corresponding string length of the string that would come from the sm_global_fn_name(which)
 uint32_t sm_global_fn_name_len(uint16_t which) {
   static uint64_t response_len[] = {
     4, 4,  5, 4,  2, 2,  3,  3, 1, 1, 1, 1, 1,  2, 1, 1, 1, 1,  1, 1, 3, 3, 3, 4, 4, 4,
