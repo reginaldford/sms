@@ -2,7 +2,7 @@
 
 // Create a new sm_link, a part of a linked list
 struct sm_link *sm_new_link(sm_object *value, struct sm_link *next) {
-  struct sm_link *new_link = sm_malloc(sms_heap,sizeof(struct sm_link));
+  struct sm_link *new_link = sm_malloc(sms_heap, sizeof(struct sm_link));
   new_link->my_type        = SM_LINK_TYPE;
   new_link->value          = value;
   new_link->next           = next;

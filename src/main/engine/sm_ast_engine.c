@@ -892,7 +892,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       str                = (sm_string *)evaluated;
       char *cstr         = &(str->content);
-      cstr[str->size]    = ';';  // Temporarily replacing the NULL char
+      cstr[str->size]    = ';'; // Temporarily replacing the NULL char
       sm_parse_result pr = sm_parse_cstr(cstr, str->size + 1);
       cstr[str->size]    = '\0'; // Place the null char back
       if (pr.return_val != 0) {
