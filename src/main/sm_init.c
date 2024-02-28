@@ -48,12 +48,12 @@ void sm_init(sm_env *env, int num_args, char **argv) {
     sm_cx_let(parent_cx, "_args", 5, (sm_object *)args);
   }
   // true singleton
-  sm_symbol *true_sym = sm_new_symbol_manual("true", 4);
+  sm_symbol *true_sym = sm_new_symbol("true", 4);
   sm_cx_let(parent_cx, "true", 4, (sm_object *)true_sym);
   sms_true = true_sym;
 
   // false singleton
-  sm_symbol *false_sym = sm_new_symbol_manual("false", 5);
+  sm_symbol *false_sym = sm_new_symbol("false", 5);
   sm_cx_let(parent_cx, "false", 5, (sm_object *)false_sym);
   sms_false = false_sym;
 
