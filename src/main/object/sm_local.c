@@ -4,7 +4,7 @@
 
 // A local variable stores the index of the 'stack frame' array.
 sm_local *sm_new_local(uint16_t index, sm_string *name) {
-  sm_local *new_local = sm_malloc(sms_heap,sizeof(sm_local));
+  sm_local *new_local = sm_malloc(sms_heap, sizeof(sm_local));
   new_local->my_type  = SM_LOCAL_TYPE;
   new_local->index    = index;
   new_local->name     = name;
@@ -67,7 +67,7 @@ sm_object *sm_unlocalize(sm_object *obj) {
     if (sme->op == SM_ASSIGN_LOCAL_EXPR) {
       sme->op         = SM_ASSIGN_EXPR;
       sm_local *local = (sm_local *)sm_expr_get_arg(sme, 0);
-      return (sm_object *)sm_new_symbol(&(local->name->content),local->name->size);
+      return (sm_object *)sm_new_symbol(&(local->name->content), local->name->size);
     }
     for (uint32_t i = 0; i < sme->size; i++) {
       sm_object *current_obj   = sm_expr_get_arg(sme, i);
@@ -76,7 +76,7 @@ sm_object *sm_unlocalize(sm_object *obj) {
     }
   } else if (obj->my_type == SM_LOCAL_TYPE) {
     sm_local  *local  = (sm_local *)obj;
-    sm_symbol *symbol = sm_new_symbol(&(local->name->content),local->name->size);
+    sm_symbol *symbol = sm_new_symbol(&(local->name->content), local->name->size);
     return (sm_object *)symbol;
   }
   return obj;
