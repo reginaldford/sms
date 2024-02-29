@@ -11,6 +11,7 @@ sm_symbol *sms_false;
 sm_heap *sms_symbol_heap;
 // Symbol names are in alpabetical order, correlating with the symbol
 sm_heap *sms_symbol_name_heap;
+uint32_t sms_num_symbols;
 
 /* GLOBALS as functions
  The following globals use functions f(x):

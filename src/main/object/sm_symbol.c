@@ -5,12 +5,21 @@
 extern struct sm_heap *sms_heap;
 extern struct sm_heap *sms_symbol_heap;
 extern struct sm_heap *sms_symbol_name_heap;
+extern uint32_t        sms_num_symbols;
 
-// Returns a new symbol unless it's true or false
+// Returns a new or existing symbol from the symbol heap
 sm_symbol *sm_new_symbol(char *name, int len) {
+  // sm_symbol *current_sym = (sm_symbol *)sms_symbol_heap->storage;
+  sm_symbol *current_sym = sms_true;
+  for (uint32_t i = 0; i < sms_num_symbols; i++) {
+    if (!strncmp(name, &current_sym->name->content, len))
+      return current_sym;
+    current_sym = current_sym + 1;
+  }
   sm_symbol *sym = (sm_symbol *)sm_malloc(sms_symbol_heap, sizeof(sm_symbol));
   sym->my_type   = SM_SYMBOL_TYPE;
   sym->name      = sm_new_string_at(sms_symbol_name_heap, len, name);
+  sms_num_symbols++;
   return sym;
 }
 
