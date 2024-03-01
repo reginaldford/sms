@@ -5,6 +5,7 @@
 extern struct sm_heap *sms_heap;
 extern struct sm_heap *sms_symbol_heap;
 extern struct sm_heap *sms_symbol_name_heap;
+extern uint32_t        sms_num_symbols;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Register the signal handler
@@ -26,12 +27,10 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   // Symbol related heap allocations
   sms_symbol_heap      = sm_new_heap(1024 * 512);
   sms_symbol_name_heap = sm_new_heap(1024 * 1024);
+  sms_num_symbols      = 0;
   // Initialize the current memory heap
   // During first gc, a second heap of the same size will be allocated.
   sms_heap = sm_new_heap(mem_bytes / 2);
-
-  // Initialize the global space arrays
-  // sm_global_space_array(sm_new_space_array(0, 1024));
 
   // Initialize the lexical stack
   sm_global_lex_stack(sm_new_stack(128));
