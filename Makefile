@@ -11,8 +11,6 @@ CFLAGS          := -O3
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 BUILD_DIR       := build
-SRC_KERN_TEST   := src/kernel_test
-SRC_TEST        := src/test
 SRC_BISON_FLEX  := src/bison_flex
 SRC_MAIN        := src/main
 SRC_PARSER      := src/main/parser
@@ -20,18 +18,23 @@ SRC_OBJECT      := src/main/object
 SRC_ENGINE      := src/main/engine
 SRC_MEM         := src/main/memory
 SRC_TERMINAL    := src/main/terminal
+SRC_TEST        := src/test
+SRC_KERN_TEST   := src/kernel_test
+SRC_BOUNCE      := submodules/bounce/src 
 SRCS_MAIN       := $(filter-out $(SRC_MAIN)/sm_main.c, $(shell find $(SRC_MAIN) -name '*.c'))
 SRCS_TEST       := $(shell find $(SRC_TEST) -name '*.c')
 SRCS_KT         := $(shell find $(SRC_KERN_TEST) -name '*.c')
+SRCS_BOUNCE     := $(filter-out submodules/bounce/src/main.c, $(shell find $(SRC_BOUNCE) -name '*.c'))
 OBJS_PARSER     := $(BUILD_DIR)/$(SRC_BISON_FLEX)/y.tab.c.o $(BUILD_DIR)/$(SRC_BISON_FLEX)/lex.yy.c.o
 OBJS_PARSER_DBG := $(BUILD_DIR)/$(SRC_BISON_FLEX)/y.tab.c.dbg.o $(BUILD_DIR)/$(SRC_BISON_FLEX)/lex.yy.c.dbg.o
 OBJS_PARSER_PROF:= $(BUILD_DIR)/$(SRC_BISON_FLEX)/y.tab.c.prof.o $(BUILD_DIR)/$(SRC_BISON_FLEX)/lex.yy.c.prof.o
-OBJS_BASE       := $(SRCS_MAIN:%=$(BUILD_DIR)/%.o)     # base files
-OBJS_BASE_DBG   := $(SRCS_MAIN:%=$(BUILD_DIR)/%.dbg.o) # dbg version of base files
-OBJS_BASE_PROF  := $(SRCS_MAIN:%=$(BUILD_DIR)/%.prof.o)# prof version of base files
-OBJS_TEST       := $(SRCS_TEST:%=$(BUILD_DIR)/%.dbg.o) # sms tests
-OBJS_KT         := $(SRCS_KT:%=$(BUILD_DIR)/%.dbg.o)   # sms kernel tests
-INCLUDE         := include
+OBJS_BASE       := $(SRCS_MAIN:%=$(BUILD_DIR)/%.o)       # base files
+OBJS_BASE_DBG   := $(SRCS_MAIN:%=$(BUILD_DIR)/%.dbg.o)   # dbg version of base files
+OBJS_BASE_PROF  := $(SRCS_MAIN:%=$(BUILD_DIR)/%.prof.o)  # prof version of base files
+OBJS_TEST       := $(SRCS_TEST:%=$(BUILD_DIR)/%.dbg.o)   # sms tests
+OBJS_KT         := $(SRCS_KT:%=$(BUILD_DIR)/%.dbg.o)     # sms kernel tests
+OBJS_BOUNCE     := $(SRCS_BOUNCE:%=$(BUILD_DIR)/%.o)     # bounce encryption functions
+
 BIN_NAME        := sms
 BIN_NAME_UNIFIED:= sms_unified
 BIN_NAME_DBG    := sms_dbg
@@ -47,8 +50,8 @@ main:
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME)
 
-bin/$(BIN_NAME): $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
-	$(CC) $(CFLAGS) -lm $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
+bin/$(BIN_NAME): $(OBJS_BOUNCE) $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
+	$(CC) $(CFLAGS) -lm $(OBJS_BOUNCE) $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
 
 
 # Not files
@@ -109,6 +112,7 @@ clean:
 		$(BUILD_DIR)/$(SRC_ENGINE)/*.o\
 		$(BUILD_DIR)/$(SRC_MEM)/*.o\
 		$(BUILD_DIR)/$(SRC_TERMINAL)/*.o\
+		$(BUILD_DIR)/$(SRC_BOUNCE)/*.o\
 		bin/sms*\
 		docs/html
 
