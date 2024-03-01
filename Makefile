@@ -112,7 +112,7 @@ clean:
 		$(BUILD_DIR)/$(SRC_ENGINE)/*.o\
 		$(BUILD_DIR)/$(SRC_MEM)/*.o\
 		$(BUILD_DIR)/$(SRC_TERMINAL)/*.o\
-		$(BUILD_DIR)/$(SRC_BOUNCE)/*.o\
+		$(OBJS_BOUNCE)\
 		bin/sms*\
 		docs/html
 
