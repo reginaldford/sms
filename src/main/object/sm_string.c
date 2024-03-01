@@ -25,7 +25,7 @@ sm_string *sm_new_string(uint32_t size, char *str) {
 // Create a new string in specified heap, automatically null terminated
 sm_string *sm_new_string_at(struct sm_heap *heap, uint32_t size, char *str) {
   // We add a null character that is not included in the size
-  struct sm_string *newstr = sm_new_string_manual(size);
+  struct sm_string *newstr = sm_new_string_manual_at(heap, size);
   sm_strncpy(&(newstr->content), str, size);
   return newstr;
 }
