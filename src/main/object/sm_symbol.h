@@ -7,9 +7,13 @@ typedef struct sm_symbol {
 } sm_symbol;
 
 /// Create a new symbol without checking for true/false singletons
-sm_symbol *sm_new_symbol_manual(sm_string *sym_name);
+sm_symbol *sm_new_symbol_manual(char *name, int name_len);
+/// Create a new symbol without checking for true/false singletons
+sm_symbol *sm_new_symbol_manual_at(char *name, int name_len);
 /// Create a new symbol. If sym_name is "true" or "false", return correlating singletons
-sm_symbol *sm_new_symbol(sm_string *sym_name);
+sm_symbol *sm_new_symbol(char *name, int name_len);
+/// New symbol at specific heap. If sym_name is "true" or "false", return correlating singletons
+sm_symbol *sm_new_symbol_at(sm_heap *heap, char *name, int name_len);
 /// Returns the symbol name
 sm_string *sm_symbol_to_string(sm_symbol *self);
 /// Print the symbol name to string buffer

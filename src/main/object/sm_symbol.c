@@ -2,22 +2,25 @@
 
 #include "../sms.h"
 
-// Just create a symbol
-sm_symbol *sm_new_symbol_manual(sm_string *sym_name) {
-  sm_symbol *sym = (sm_symbol *)sm_malloc(sizeof(sm_symbol));
-  sym->my_type   = SM_SYMBOL_TYPE;
-  sym->name      = sym_name;
-  return sym;
-}
+extern struct sm_heap *sms_heap;
+extern struct sm_heap *sms_symbol_heap;
+extern struct sm_heap *sms_symbol_name_heap;
+extern uint32_t        sms_num_symbols;
 
-// Returns a new symbol
-sm_symbol *sm_new_symbol(sm_string *sym_name) {
-  if (strncmp(&sym_name->content, "true", 4) == 0)
-    return sms_true;
-  else if (strncmp(&sym_name->content, "false", 5) == 0)
-    return sms_false;
-  else
-    return sm_new_symbol_manual(sym_name);
+// Returns a new or existing symbol from the symbol heap
+sm_symbol *sm_new_symbol(char *name, int len) {
+  sm_symbol *current_sym = (sm_symbol *)sms_symbol_heap->storage;
+  for (uint32_t i = 0; i < sms_num_symbols; i++) {
+    int current_sym_len = current_sym->name->size;
+    if (!strncmp(name, &current_sym->name->content, len < current_sym_len ? len : current_sym_len))
+      return current_sym;
+    current_sym = current_sym + 1;
+  }
+  sm_symbol *sym = (sm_symbol *)sm_malloc(sms_symbol_heap, sizeof(sm_symbol));
+  sym->my_type   = SM_SYMBOL_TYPE;
+  sym->name      = sm_new_string_at(sms_symbol_name_heap, len, name);
+  sms_num_symbols++;
+  return sym;
 }
 
 sm_string *sm_symbol_to_string(sm_symbol *self) { return self->name; }

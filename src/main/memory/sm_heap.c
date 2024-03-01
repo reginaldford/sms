@@ -6,16 +6,19 @@ extern sm_heap   *sms_heap;
 extern sm_heap   *sms_other_heap;
 extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
+extern sm_heap   *sms_symbol_heap;
+extern sm_heap   *sms_symbol_name_heap;
+
 
 // For rounding up object size to the next multiple of 4 bytes.
 int sm_round_size(int size) { return ((size) + 3) & ~3; }
 
 // Create a new heap of some capacity
 sm_heap *sm_new_heap(uint32_t capacity) {
-  sm_heap *new_heap  = (sm_heap *)malloc(sizeof(sm_heap));
+  sm_heap *new_heap  = (sm_heap *)malloc(sizeof(sm_heap) + capacity);
   new_heap->capacity = capacity;
   new_heap->used     = 0;
-  new_heap->storage  = malloc(capacity);
+  new_heap->storage  = (char *)(new_heap + 1);
   return new_heap;
 }
 
@@ -103,23 +106,17 @@ void *sm_malloc_from_spaces(uint32_t size) {
   return NULL;
 }
 
-// Internal 'malloc'. Checks space array first, else move the 'used' integer up
-void *sm_malloc(uint32_t size) {
-  // void        *space_search = sm_malloc_from_spaces(size);
-  uint32_t bytes_used = sms_heap->used;
-  // Try space array, where we kept deallocated space
-  // if (space_search != NULL)
-  // return space_search;
-  // If no spaces were found, default to classic copy gc allocation
-  // else {
-  sms_heap->used += size;
-  return (void *)(((char *)sms_heap->storage) + bytes_used);
-  // }
+// Internal 'malloc'
+// TODO rename this sm_malloc_at, and leave old sm_malloc
+void *sm_malloc(struct sm_heap *heap, uint32_t size) {
+  uint32_t bytes_used = heap->used;
+  heap->used += size;
+  return (void *)(((char *)heap->storage) + bytes_used);
 }
 
 // Reallocate memory space for resizing or recreating objects
-void *sm_realloc(void *obj, uint32_t size) {
-  sm_object *new_space = sm_malloc(size);
+void *sm_realloc(struct sm_heap *dest, void *obj, uint32_t size) {
+  sm_object *new_space = sm_malloc(dest, size);
   return memcpy(new_space, obj, size);
 }
 
@@ -159,6 +156,12 @@ void sm_mem_cleanup() {
     free(sms_heap);
   if (sms_other_heap != NULL)
     free(sms_other_heap);
+  if (sms_symbol_heap != NULL)
+    free(sms_symbol_heap);
+  if (sms_symbol_name_heap != NULL)
+    free(sms_symbol_name_heap);
+  if (sm_global_lex_stack(NULL))
+    free(sm_global_lex_stack(NULL));
 }
 
 // Print every object in current heap

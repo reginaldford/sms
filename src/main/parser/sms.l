@@ -232,7 +232,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
 
 ({alpha}?+{digit}?+_?+)?+\'?+ {
-    yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
+    yylval.sym = sm_new_symbol(yytext,yyleng);
     return SYM;
   }
 

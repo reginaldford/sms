@@ -14,6 +14,10 @@ typedef struct sm_string {
 char *sm_strncpy(char *dest, const char *src, uint32_t n);
 /// Construct a new sms string from a c string of known length
 sm_string *sm_new_string(uint32_t size, char *str);
+/// Construct a new sms string in given heap from a c string of known length
+sm_string *sm_new_string_at(struct sm_heap *heap, uint32_t size, char *str);
+/// Construct a new sms string in given heap from a c string of known length
+sm_string *sm_new_string_manual_at(struct sm_heap *heap, uint32_t size);
 /// Create a new string that is the concatenation of str1 and str2
 sm_string *sm_string_add(sm_string *str1, sm_string *str2);
 /// Destroys the original 2 strings after concatenation
