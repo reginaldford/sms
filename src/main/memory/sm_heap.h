@@ -13,10 +13,10 @@ typedef struct sm_heap {
 /// Create a new heap
 struct sm_heap *sm_new_heap(uint32_t capacity);
 /// Provide a pointer to a newly allocated space (size specified in bytes) in the current heap.
-void *sm_malloc(uint32_t size);
+void *sm_malloc(struct sm_heap *heap, uint32_t size);
 /// Provide a pointer to a newly allocated space of the specified size and copy the data specified
 /// by ptr to the new space.
-void *sm_realloc(void *ptr, uint32_t size);
+void *sm_realloc(struct sm_heap *dest, void *ptr, uint32_t size);
 /// Returns whether the object is contained in the specified heap.
 bool sm_is_within_heap(void *obj, sm_heap *heap);
 /// Rounds the number of bytes up to the nearest multiple of 4

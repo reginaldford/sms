@@ -4,7 +4,7 @@
 
 // Create a new context, an array of key_values sorted by key
 sm_cx *sm_new_cx(sm_cx *parent) {
-  sm_cx *new_cx   = (sm_cx *)sm_malloc(sizeof(sm_cx));
+  sm_cx *new_cx   = (sm_cx *)sm_malloc(sms_heap, sizeof(sm_cx));
   new_cx->my_type = SM_CX_TYPE;
   new_cx->parent  = parent;
   new_cx->content = NULL;

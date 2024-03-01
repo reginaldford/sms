@@ -5,7 +5,7 @@
 // Create a new sm_node
 sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
                      struct sm_node *children) {
-  sm_node *node  = sm_malloc(sizeof(sm_node));
+  sm_node *node  = sm_malloc(sms_heap, sizeof(sm_node));
   node->my_type  = SM_NODE_TYPE;
   node->value    = value;
   node->next     = next;
@@ -305,7 +305,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
     }
 
     // Add the key to the collection
-    collection = sm_expr_append(collection, (sm_object *)sm_new_symbol(sm_new_string(len, buffer)));
+    collection = sm_expr_append(collection, (sm_object *)sm_new_symbol(buffer, len));
   }
 
   // If there are no more children, we are done

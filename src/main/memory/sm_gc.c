@@ -4,7 +4,7 @@
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
-  sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
+  sm_object *new_obj = sm_realloc(sms_heap, obj, sm_sizeof(obj));
   return new_obj;
 }
 
@@ -17,7 +17,7 @@ sm_object *sm_deep_copy(sm_object *obj) {
     }
     return obj;
   } else {
-    sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
+    sm_object *new_obj = sm_realloc(sms_heap, obj, sm_sizeof(obj));
     return new_obj;
   }
 }
@@ -25,7 +25,7 @@ sm_object *sm_deep_copy(sm_object *obj) {
 // Copy the object to the new heap
 // Leave an sm_pointer in the old space
 sm_object *sm_move_to_new_heap(sm_object *obj) {
-  sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
+  sm_object *new_obj = sm_realloc(sms_heap, obj, sm_sizeof(obj));
   // Overwrite the old object. sm_pointer is NOT larger
   sm_new_pointer(obj, new_obj);
   return new_obj;
@@ -34,11 +34,15 @@ sm_object *sm_move_to_new_heap(sm_object *obj) {
 // If obj is an sm_pointer, the object was already moved to the new heap
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
-  uint16_t obj_type = obj->my_type;
-  if (obj_type == SM_POINTER_TYPE)
-    return ((sm_pointer *)obj)->address;
-  else
-    return sm_move_to_new_heap(obj);
+  // Only gc objects from sms_other_heap, which used to be sms_heap
+  if (sm_is_within_heap(obj, sms_other_heap)) {
+    uint32_t obj_type = obj->my_type;
+    if (obj_type == SM_POINTER_TYPE)
+      return ((sm_pointer *)obj)->address;
+    else
+      return sm_move_to_new_heap(obj);
+  } else
+    return obj;
 }
 
 // Copy the objects referenced by the current_obj into the new heap
@@ -107,7 +111,7 @@ void sm_inflate_heap() {
       fun->content = sm_meet_object((sm_object *)fun->content);
       if (fun->parent != NULL)
         fun->parent = (sm_cx *)sm_meet_object((sm_object *)fun->parent);
-      for (uint16_t i = 0; i < fun->num_params; i++) {
+      for (uint32_t i = 0; i < fun->num_params; i++) {
         sm_fun_param *param = sm_fun_get_param(fun, i);
         param->name         = (sm_string *)sm_meet_object((sm_object *)param->name);
         if (param->default_val != NULL) {
@@ -136,8 +140,8 @@ void sm_inflate_heap() {
     }
     case SM_STACK_OBJ_TYPE: {
       sm_stack_obj *stack = (sm_stack_obj *)current_obj;
-      // return_obj->address   = sm_meet_object((sm_object *)return_obj->address);
-      //  YOU ARE HERE
+      for (uint32_t i = 0; i < sm_stack_obj_size(stack); i++)
+        ((sm_object **)&stack[1])[i] = sm_meet_object(((sm_object **)&stack[1])[i]);
       break;
     }
     default:
@@ -161,16 +165,9 @@ void sm_garbage_collect() {
     // Consider this heap empty now
     sms_heap->used = 0;
 
-    // Reset the space array
-    // sm_global_space_array(NULL)->size = 0;
-
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
       (sm_cx *)sm_move_to_new_heap((sm_object *)*sm_global_lex_stack(NULL)->top);
-
-    // Copy root (true and false singletons)
-    sms_true  = (sm_symbol *)sm_meet_object((sm_object *)sms_true);
-    sms_false = (sm_symbol *)sm_meet_object((sm_object *)sms_false);
 
     // Parser output is a root
     if (sm_global_parser_output(NULL))
