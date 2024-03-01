@@ -107,6 +107,7 @@ void *sm_malloc_from_spaces(uint32_t size) {
 }
 
 // Internal 'malloc'
+// TODO rename this sm_malloc_at, and leave old sm_malloc
 void *sm_malloc(struct sm_heap *heap, uint32_t size) {
   uint32_t bytes_used = heap->used;
   heap->used += size;
