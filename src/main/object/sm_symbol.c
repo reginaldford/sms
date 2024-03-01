@@ -9,10 +9,10 @@ extern uint32_t        sms_num_symbols;
 
 // Returns a new or existing symbol from the symbol heap
 sm_symbol *sm_new_symbol(char *name, int len) {
-  // sm_symbol *current_sym = (sm_symbol *)sms_symbol_heap->storage;
-  sm_symbol *current_sym = sms_true;
+  sm_symbol *current_sym = (sm_symbol *)sms_symbol_heap->storage;
   for (uint32_t i = 0; i < sms_num_symbols; i++) {
-    if (!strncmp(name, &current_sym->name->content, len))
+    int current_sym_len = current_sym->name->size;
+    if (!strncmp(name, &current_sym->name->content, len < current_sym_len ? len : current_sym_len))
       return current_sym;
     current_sym = current_sym + 1;
   }

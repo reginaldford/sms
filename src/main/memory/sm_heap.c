@@ -159,6 +159,8 @@ void sm_mem_cleanup() {
     free(sms_symbol_heap);
   if (sms_symbol_name_heap != NULL)
     free(sms_symbol_name_heap);
+  if (sm_global_lex_stack(NULL))
+    free(sm_global_lex_stack(NULL));
 }
 
 // Print every object in current heap

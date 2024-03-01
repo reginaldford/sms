@@ -21,9 +21,9 @@ double sm_global_growth_factor(double replacement);
 /// Global space array for memory management
 sm_space_array *sm_global_space_array(sm_space_array *replacement);
 /// Global (primitive) function names
-char *sm_global_fn_name(uint16_t which);
+char *sm_global_fn_name(uint32_t which);
 /// Global function name lengths
-uint32_t sm_global_fn_name_len(uint16_t which);
+uint32_t sm_global_fn_name_len(uint32_t which);
 /// Global number of primitive functions
 uint32_t sm_global_num_fns();
 /// Global lexical stack used during parsing. Before and after parsing, the top is _scratch
@@ -33,8 +33,8 @@ sm_object *sm_global_parser_output(sm_object *replacement);
 /// Global env struct from initialization
 sm_env *sm_global_environment(sm_env *replacement);
 /// Global names of types
-char *sm_global_type_name(uint16_t which);
+char *sm_global_type_name(uint32_t which);
 /// Global lengths of the type names
-uint16_t sm_global_type_name_len(uint16_t which);
+uint32_t sm_global_type_name_len(uint32_t which);
 /// Global terminal io struct for vt100 functions
 struct termios *sm_global_term_attrs();
