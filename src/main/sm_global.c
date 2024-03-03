@@ -13,10 +13,10 @@ sm_heap *sms_symbol_heap;
 sm_heap *sms_symbol_name_heap;
 uint32_t sms_num_symbols;
 // Bounce prereqs
-uint8_t * sms_key;
+uint8_t *sms_key;
 uint32_t sms_ks1;
 uint32_t sms_ks2;
-uint8_t sms_sub_table[256];
+uint8_t  sms_sub_table[256];
 
 /* GLOBALS as functions
  The following globals use functions f(x):
