@@ -1582,13 +1582,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   }
   case SM_SYMBOL_TYPE: {
     sm_symbol *sym      = (sm_symbol *)input;
-    sm_string *var_name = sym->crypt_id; //cryptmap nickname optimization
+    sm_string *var_name = sym->crypt_id; // cryptmap nickname optimization
     sm_object *sr       = sm_cx_get_far(current_cx, &(var_name->content), var_name->size);
     if (sr)
       return sr;
     else {
       sm_string *base_str = sm_object_to_string((sm_object *)current_cx);
-      printf("Error: Could not find variable: %s within %s\n", &(var_name->content),
+      printf("Error: Could not find variable: %s within %s\n", &(sym->name->content),
              &(base_str->content));
       return (sm_object *)sm_new_double(0);
     }

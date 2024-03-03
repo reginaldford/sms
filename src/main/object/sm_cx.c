@@ -152,10 +152,10 @@ uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
   int cursor = 1;
   if (self->content != NULL) {
     sm_stack_obj *letter_stack = sm_new_stack_obj(32);
-    char          tmp_buffer[32];
-    int           len = sm_node_sprint(self->content, tmp_buffer, fake, letter_stack);
-    if(!fake)
-      bounce_decrypt((uint8_t*)tmp_buffer, len, sms_key, sms_ks1, sms_ks2, sms_sub_table, (uint8_t*)(&buffer[cursor]));
+    int           len          = sm_node_sprint(self->content, &buffer[cursor], fake, letter_stack);
+    // if(!fake)
+    // bounce_decrypt((uint8_t*)tmp_buffer, len, sms_key, sms_ks1, sms_ks2, sms_sub_table,
+    // (uint8_t*)(&buffer[cursor]));
     cursor += len;
   }
   if (!fake)

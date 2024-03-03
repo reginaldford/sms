@@ -16,17 +16,17 @@ extern uint8_t         sms_sub_table[256];
 // id is the array index of the symbol in the symbol heap
 sm_string *sm_symbol_encrypt_id(sm_symbol *sym) {
   int     sym_id       = sym - (sm_symbol *)sms_symbol_heap->storage;
-  uint8_t enc_buffer[] = {0, 0, 0, 0,0};
- fflush(stdout);
+  uint8_t enc_buffer[] = {0, 0, 0, 0, 0};
+  fflush(stdout);
   bounce_encrypt((uint8_t *)&sym_id, 4, sms_key, sms_ks1, sms_ks2, sms_sub_table, enc_buffer);
   int null_streak;
   for (null_streak = 0; null_streak < 4; null_streak++)
     if (enc_buffer[3 - null_streak] != 0)
       break;
-  int  enc_buffer_used = 4 - null_streak;
-  char output_str[12];
+  int      enc_buffer_used = 4 - null_streak;
+  char     output_str[12];
   uint32_t chunk       = *enc_buffer;
-  uint8_t out_str_len = ceil(enc_buffer_used * 3.0 / 4.0) - 1;
+  uint8_t  out_str_len = ceil(enc_buffer_used * 3.0 / 4.0) - 1;
   for (uint8_t i = 0; i < out_str_len; i++) {
     char zeroTo63 = ((char)(chunk >> i * 6)) & 63;
     output_str[i] = sm_node_bit_unindex(zeroTo63);

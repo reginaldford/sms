@@ -7,11 +7,11 @@ extern struct sm_heap *sms_heap;
 extern struct sm_heap *sms_symbol_heap;
 extern struct sm_heap *sms_symbol_name_heap;
 extern uint32_t        sms_num_symbols;
-extern uint8_t * sms_key;
-extern uint32_t sms_ks1;
-extern uint32_t sms_ks2;
-extern uint8_t sms_sub_table[256];
- 
+extern uint8_t        *sms_key;
+extern uint32_t        sms_ks1;
+extern uint32_t        sms_ks2;
+extern uint8_t         sms_sub_table[256];
+
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Register the signal handler
   sm_register_signals();
@@ -38,7 +38,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   sms_heap = sm_new_heap(mem_bytes / 2);
   // Store bounce encryption prereqs
   // Globals: sms_key, sms_ks1, sms_ks2, and sms_sub_table
-  bounceReadFileResult brfr         = bounceReadFile("sms_key");
+  bounceReadFileResult brfr = bounceReadFile("sms_key");
   if (!brfr.fileExists) {
     printf("SMS key file not found!\n");
     exit(1);
