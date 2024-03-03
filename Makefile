@@ -65,16 +65,16 @@ all:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_DBG)
 
 # sms_dbg executable
-bin/$(BIN_NAME_DBG): $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
-	$(CC_DEBUG) -lm $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
+bin/$(BIN_NAME_DBG): $(OBJS_BOUNCE) $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
+	$(CC_DEBUG) -lm $(OBJS_BOUNCE) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
 
 # sms_test executable
-bin/$(BIN_NAME_TEST): $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(OBJS_TEST)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@
+bin/$(BIN_NAME_TEST): $(OBJS_BOUNCE)  $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(OBJS_TEST)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS_BOUNCE) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@
 
 # sms_kernel_test executable
-bin/$(BIN_NAME_KT): $(OBJS_PARSER) $(OBJS_BASE_DBG) $(OBJS_KT)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@
+bin/$(BIN_NAME_KT): $(OBJS_BOUNCE) $(OBJS_PARSER) $(OBJS_BASE_DBG) $(OBJS_KT)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS_BOUNCE)  $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@
 
 # Bison generates the parser
 $(SRC_BISON_FLEX)/y.tab.c: $(SRC_MAIN)/parser/sms.y
