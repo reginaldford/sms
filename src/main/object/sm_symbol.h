@@ -4,16 +4,15 @@
 typedef struct sm_symbol {
   int16_t    my_type;
   sm_string *name;
+  sm_string *crypt_id;
 } sm_symbol;
 
-/// Create a new symbol without checking for true/false singletons
-sm_symbol *sm_new_symbol_manual(char *name, int name_len);
-/// Create a new symbol without checking for true/false singletons
-sm_symbol *sm_new_symbol_manual_at(char *name, int name_len);
-/// Create a new symbol. If sym_name is "true" or "false", return correlating singletons
+/// Encrypts the id of the symbol and returns a string
+/// The string will be stored in sms_symbol_name_heap
+/// Acts as a nickname for the symbol, speeding up sms mapped tries
+sm_string *sm_symbol_encrypt_id(sm_symbol *sym);
+/// Returns a new or existing symbol from the symbol heap
 sm_symbol *sm_new_symbol(char *name, int name_len);
-/// New symbol at specific heap. If sym_name is "true" or "false", return correlating singletons
-sm_symbol *sm_new_symbol_at(sm_heap *heap, char *name, int name_len);
 /// Returns the symbol name
 sm_string *sm_symbol_to_string(sm_symbol *self);
 /// Print the symbol name to string buffer
