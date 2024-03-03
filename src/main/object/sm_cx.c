@@ -1,6 +1,11 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
+#include "../../../submodules/bounce/src/bounce.h"
+extern uint8_t *sms_key;
+extern uint32_t sms_ks1;
+extern uint32_t sms_ks2;
+extern uint8_t  sms_sub_table[256];
 
 // Create a new context, an array of key_values sorted by key
 sm_cx *sm_new_cx(sm_cx *parent) {
@@ -147,7 +152,11 @@ uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
   int cursor = 1;
   if (self->content != NULL) {
     sm_stack_obj *letter_stack = sm_new_stack_obj(32);
-    cursor += sm_node_sprint(self->content, &(buffer[cursor]), fake, letter_stack);
+    char          tmp_buffer[32];
+    int           len = sm_node_sprint(self->content, tmp_buffer, fake, letter_stack);
+    if(!fake)
+      bounce_decrypt((uint8_t*)tmp_buffer, len, sms_key, sms_ks1, sms_ks2, sms_sub_table, (uint8_t*)(&buffer[cursor]));
+    cursor += len;
   }
   if (!fake)
     buffer[cursor] = '}';

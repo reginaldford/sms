@@ -325,7 +325,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (!expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_LET_EXPR))
         return (sm_object *)sms_false;
-      if (sm_cx_let(current_cx, &sym->name->content, sym->name->size, value))
+      if (sm_cx_let(current_cx, &sym->crypt_id->content, sym->crypt_id->size, value))
         return (sm_object *)value;
     }
     case SM_CX_SETPARENT_EXPR: {
@@ -347,7 +347,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_LET_EXPR))
         return (sm_object *)sms_false;
-      if (sm_cx_let(cx, &sym->name->content, sym->name->size, value))
+      if (sm_cx_let(cx, &sym->crypt_id->content, sym->crypt_id->size, value))
         return (sm_object *)sms_true;
     }
     case SM_CX_GET_EXPR: {
@@ -357,7 +357,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_EXPR))
         return (sm_object *)sms_false;
-      sm_object *result = sm_cx_get(cx, &sym->name->content, sym->name->size);
+      sm_object *result = sm_cx_get(cx, &sym->crypt_id->content, sym->crypt_id->size);
       if (result)
         return result;
       else
@@ -370,7 +370,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_HAS_EXPR))
         return (sm_object *)sms_false;
-      sm_object *result = sm_cx_get(cx, &sym->name->content, sym->name->size);
+      sm_object *result = sm_cx_get(cx, &sym->crypt_id->content, sym->crypt_id->size);
       if (result)
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
@@ -382,7 +382,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR))
         return (sm_object *)sms_false;
-      sm_object *result = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
+      sm_object *result = sm_cx_get_far(cx, &sym->crypt_id->content, sym->crypt_id->size);
       if (!result)
         return (sm_object *)sms_false;
       return result;
@@ -394,7 +394,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR))
         return (sm_object *)sms_false;
-      sm_object *result = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
+      sm_object *result = sm_cx_get_far(cx, &sym->crypt_id->content, sym->crypt_id->size);
       if (!result)
         return (sm_object *)sms_false;
       return (sm_object *)sms_true;
@@ -407,7 +407,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_SET_EXPR))
         return (sm_object *)sms_false;
-      if (sm_cx_set(cx, &sym->name->content, sym->name->size, value))
+      if (sm_cx_set(cx, &sym->crypt_id->content, sym->crypt_id->size, value))
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
     }
@@ -418,7 +418,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_DOT_EXPR))
         return (sm_object *)sms_false;
-      sm_object *retrieved = sm_cx_get_far(cx, &sym->name->content, sym->name->size);
+      sm_object *retrieved = sm_cx_get_far(cx, &sym->crypt_id->content, sym->crypt_id->size);
       if (retrieved)
         return retrieved;
       return (sm_object *)sms_false;
@@ -447,7 +447,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_CONTAINING_EXPR))
         return (sm_object *)sms_false;
-      sm_cx *retrieved = sm_cx_get_container(cx, &sym->name->content, sym->name->size);
+      sm_cx *retrieved = sm_cx_get_container(cx, &sym->crypt_id->content, sym->crypt_id->size);
       if (retrieved)
         return (sm_object *)retrieved;
       return (sm_object *)sms_false;
@@ -463,7 +463,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (!expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_RM_EXPR))
         return (sm_object *)sms_false;
-      bool success = sm_cx_rm(current_cx, &sym->name->content, sym->name->size);
+      bool success = sm_cx_rm(current_cx, &sym->crypt_id->content, sym->crypt_id->size);
       if (success == true)
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
@@ -475,7 +475,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_RM_EXPR))
         return (sm_object *)sms_false;
-      bool success = sm_cx_rm(cx, &sym->name->content, sym->name->size);
+      bool success = sm_cx_rm(cx, &sym->crypt_id->content, sym->crypt_id->size);
       if (success == true)
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
@@ -1167,7 +1167,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(obj0, 0, SM_SYMBOL_TYPE, SM_ASSIGN_EXPR))
         return (sm_object *)sms_false;
       sym = (sm_symbol *)obj0;
-      if (!sm_cx_set(current_cx, &sym->name->content, sym->name->size, value))
+      if (!sm_cx_set(current_cx, &sym->crypt_id->content, sym->crypt_id->size, value))
         return (sm_object *)sms_false;
       return value;
     }
@@ -1582,7 +1582,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   }
   case SM_SYMBOL_TYPE: {
     sm_symbol *sym      = (sm_symbol *)input;
-    sm_string *var_name = sym->name;
+    sm_string *var_name = sym->crypt_id; //cryptmap nickname optimization
     sm_object *sr       = sm_cx_get_far(current_cx, &(var_name->content), var_name->size);
     if (sr)
       return sr;
