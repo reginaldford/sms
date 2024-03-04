@@ -1,6 +1,13 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
+#include "../../../submodules/bounce/src/bounce.h"
+extern sm_heap *sms_symbol_heap;
+extern uint32_t sms_num_symbols;
+extern uint8_t *sms_key;
+extern uint32_t sms_ks1;
+extern uint32_t sms_ks2;
+extern uint8_t  sms_sub_table[256];
 
 // Create a new sm_node
 sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
@@ -193,14 +200,11 @@ bool sm_node_is_empty(sm_node *node) { return node->value == NULL && node->map =
 int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_stack) {
   int cursor = 0;
   if (node->value != NULL) {
-    // var name
-    for (uint32_t i = sm_stack_obj_size(char_stack) - 1; i + 1 > 0; i--) {
-      sm_double *num_obj = *((sm_stack_obj_empty_top(char_stack) + i + 1));
-      if (!fake)
-        buffer[i] = sm_node_bit_unindex(num_obj->value);
-    }
-    cursor = sm_stack_obj_size(char_stack);
-    // equals sign
+    sm_symbol *sym = &((sm_symbol *)&sms_symbol_heap->storage)[node->symbol_id];
+    // !!!! symbol id is not set yet.
+    // YOU ARE HERE
+    cursor += sm_object_sprint(sms_true, &(buffer[cursor]), fake); // all is true for now
+    // arrow sign
     if (!fake) {
       buffer[cursor]     = '-';
       buffer[cursor + 1] = '>';
@@ -212,6 +216,7 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_st
     if (!fake)
       buffer[cursor] = ';';
     cursor++;
+    return cursor;
   }
   int items_to_do = sm_node_map_size(node->map);
   for (int i = 0; items_to_do > 0 && i < 8; i++) {
