@@ -80,8 +80,8 @@ bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
   if (self->content == NULL)
     self->content = sm_new_node(NULL, NULL, 0LL, NULL);
   current_node = self->content;
-  for (int i = 0; i < sym->name->size; i++) {
-    int             index       = sm_node_map_index((&sym->name->content)[i]);
+  for (int i = 0; i < sym->crypt_id->size; i++) {
+    int             index       = sm_node_map_index((&sym->crypt_id->content)[i]);
     int             child_index = sm_node_child_index(current_node->map, index);
     struct sm_node *next_node;
     if (sm_node_map_get(current_node->map, index) == false) {
