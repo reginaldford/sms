@@ -73,6 +73,9 @@ sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len) {
 }
 
 // Add a key_value with this key and value
+// node.sym_name is not managed by gc, so should be from sms_symbol_name_heap
+// YOU ARE HERE
+// bool sm_cx_let(sm_cx *self, sm_symbol* sym, sm_object *val) {
 bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
   sm_node *current_node;
   if (self->content == NULL)
@@ -95,6 +98,7 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
     current_node = (sm_node *)next_node;
   }
   current_node->value = (sm_object *)val;
+  // current_node->symbol_id = sym_id;
   return val;
 }
 
@@ -153,9 +157,6 @@ uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
   if (self->content != NULL) {
     sm_stack_obj *letter_stack = sm_new_stack_obj(32);
     int           len          = sm_node_sprint(self->content, &buffer[cursor], fake, letter_stack);
-    // if(!fake)
-    // bounce_decrypt((uint8_t*)tmp_buffer, len, sms_key, sms_ks1, sms_ks2, sms_sub_table,
-    // (uint8_t*)(&buffer[cursor]));
     cursor += len;
   }
   if (!fake)

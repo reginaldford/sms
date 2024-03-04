@@ -8,10 +8,12 @@ typedef struct sm_node {
   struct sm_object *value;
   /// Go to the next sibling node
   struct sm_node *next;
-  /// a 64 bit map with 1's for existing children of this node
+  /// A 64 bit map with 1's for existing children of this node
   uint64_t map;
   /// Children nodes form a linked list
   struct sm_node *children;
+  /// If a value is there, a sym_id should be there
+  uint32_t symbol_id;
 } sm_node;
 
 /// Construct a new node
