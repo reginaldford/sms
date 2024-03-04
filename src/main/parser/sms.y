@@ -594,17 +594,15 @@ CONTEXT : CONTEXT_LIST '}' {
 | '{' ASSOCIATION ';' '}' {
   sm_cx *parent_cx         = *(sm_global_lex_stack(NULL)->top);
   sm_cx *new_cx            = sm_new_cx(parent_cx);
-  sm_string  *name              = ((sm_symbol *)sm_expr_get_arg($2, 0))->name;
-  sm_object  *value             = (sm_object *)sm_expr_get_arg($2, 1);
-  sm_cx_let(new_cx,&name->content,name->size,value);
+  sm_object  *value        = (sm_object *)sm_expr_get_arg($2, 1);
+  sm_cx_let(new_cx, (sm_symbol*)sm_expr_get_arg($2, 0), value);
   $$ = new_cx;
 }
 | '{' ASSOCIATION '}' {
   sm_cx *parent_cx         = *(sm_global_lex_stack(NULL)->top);
   sm_cx *new_cx            = sm_new_cx(parent_cx);
-  sm_string  *name              = ((sm_symbol *)sm_expr_get_arg($2, 0))->name;
-  sm_object  *value             = ((sm_object *)sm_expr_get_arg($2, 1));
-  sm_cx_let(new_cx,&name->content,name->size,value);
+  sm_object  *value        = ((sm_object *)sm_expr_get_arg($2, 1));
+  sm_cx_let(new_cx,(sm_symbol *)sm_expr_get_arg($2, 0),value);
   $$ = new_cx;
 }
 | '{' '}' {
@@ -615,21 +613,19 @@ CONTEXT : CONTEXT_LIST '}' {
 CONTEXT_LIST : '{' ASSOCIATION ';' ASSOCIATION {
   sm_cx *parent_cx = *(sm_global_lex_stack(NULL)->top);
   sm_cx *new_cx    = sm_new_cx(parent_cx);
-  sm_string        *name   = ((sm_symbol *)sm_expr_get_arg($2, 0))->name;
-  sm_string        *name2  = ((sm_symbol *)sm_expr_get_arg($4, 0))->name;
   sm_object        *value  = (sm_object *)sm_expr_get_arg($2, 1);
   sm_object        *value2 = (sm_object *)sm_expr_get_arg($4, 1);
   sm_cx_contextualize(value,new_cx);
   sm_cx_contextualize(value2,new_cx);
-  sm_cx_let(new_cx,&name->content,name->size,value);
-  sm_cx_let(new_cx,&name2->content,name2->size,value2);
+  sm_cx_let(new_cx,(sm_symbol*)sm_expr_get_arg($2,0),value);
+  sm_cx_let(new_cx,(sm_symbol*)sm_expr_get_arg($4,0),value2);
   sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL), new_cx));
   $$ = new_cx;
 }
 | CONTEXT_LIST ';' ASSOCIATION {
   sm_string  *name   = ((sm_symbol *)sm_expr_get_arg($3, 0))->name;
   sm_object  *value  = (sm_object *)sm_expr_get_arg($3, 1);
-  sm_cx_let($1, &name->content,name->size, value);
+  sm_cx_let($1,(sm_symbol*)sm_expr_get_arg($3,0),value);
   $$                 = $1;
 }
 

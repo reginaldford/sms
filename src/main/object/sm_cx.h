@@ -20,7 +20,7 @@ sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len);
 /// Same as get_far, but returns the context which contains the key
 sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int len);
 /// Create a new key-value association in context
-bool sm_cx_let(sm_cx *context, char *needle, int len, sm_object *val);
+bool sm_cx_let(sm_cx *context, sm_symbol *sym, sm_object *val);
 /// Set an existing value in context
 bool sm_cx_set(sm_cx *context, char *needle, int len, sm_object *val);
 /// Remove a key-value pair identified by needle

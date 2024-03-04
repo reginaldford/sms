@@ -56,34 +56,29 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   // Build the global context's parent
   sm_cx     *parent_cx = sm_new_cx(NULL);
   sm_symbol *pi_sym    = sm_new_symbol("PI", 2);
-  sm_cx_let(parent_cx, &pi_sym->crypt_id->content, pi_sym->crypt_id->size,
-            (sm_object *)sm_new_double(3.14159265358979323846));
+  sm_cx_let(parent_cx, pi_sym, (sm_object *)sm_new_double(3.14159265358979323846));
   // Add program args if available
   if (env) {
     sm_expr *args = sm_new_expr_n(SM_ARRAY_EXPR, env->num_args, env->num_args);
     // Note that strlen is unavoidable here
     for (int i = 0; i < env->num_args; i++)
       sm_expr_set_arg(args, i, (sm_object *)sm_new_string(strlen(env->args[i]), env->args[i]));
-    sm_cx_let(parent_cx, "_args", 5, (sm_object *)args);
+    sm_cx_let(parent_cx, sm_new_symbol("_args", 5), (sm_object *)args);
   }
   // true singleton
-  sm_symbol *true_sym = sm_new_symbol("true", 4);
-  sm_cx_let(parent_cx, &true_sym->crypt_id->content, true_sym->crypt_id->size,
-            (sm_object *)true_sym);
-  sms_true = true_sym;
+  sms_true = sm_new_symbol("true", 4);
+  sm_cx_let(parent_cx, sms_true, (sm_object *)sms_true);
 
   // false singleton
-  sm_symbol *false_sym = sm_new_symbol("false", 5);
-  sm_cx_let(parent_cx, &false_sym->crypt_id->content, false_sym->crypt_id->size,
-            (sm_object *)false_sym);
-  sms_false = false_sym;
+  sms_false = sm_new_symbol("false", 5);
+  sm_cx_let(parent_cx, sms_false, (sm_object *)sms_false);
 
   // Initialize the global context
   sm_cx *scratch = sm_new_cx(parent_cx);
   sm_stack_push(sm_global_lex_stack(NULL), scratch);
 
   // _scratch global cx variable
-  sm_cx_let(parent_cx, "_scratch", 8, (sm_object *)scratch);
+  sm_cx_let(parent_cx, sm_new_symbol("_scratch", 8), (sm_object *)scratch);
 
   // Done
   env->initialized = true;

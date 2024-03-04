@@ -325,7 +325,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (!expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_LET_EXPR))
         return (sm_object *)sms_false;
-      if (sm_cx_let(current_cx, &sym->crypt_id->content, sym->crypt_id->size, value))
+      if (sm_cx_let(current_cx, sym, value))
         return (sm_object *)value;
     }
     case SM_CX_SETPARENT_EXPR: {
@@ -347,7 +347,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_LET_EXPR))
         return (sm_object *)sms_false;
-      if (sm_cx_let(cx, &sym->crypt_id->content, sym->crypt_id->size, value))
+      if (sm_cx_let(cx, sym, value))
         return (sm_object *)sms_true;
     }
     case SM_CX_GET_EXPR: {
@@ -1187,7 +1187,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(dot_expr, 1);
       if (!expect_type((sm_object *)predot, 0, SM_CX_TYPE, SM_ASSIGN_DOT_EXPR))
         return (sm_object *)sms_false;
-      if (!sm_cx_let(predot, &postdot->name->content, postdot->name->size, value))
+      if (!sm_cx_let(predot, postdot, value))
         return (sm_object *)sms_false;
       return (sm_object *)sms_true;
     }
