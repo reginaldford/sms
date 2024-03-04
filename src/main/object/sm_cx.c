@@ -2,6 +2,7 @@
 
 #include "../sms.h"
 #include "../../../submodules/bounce/src/bounce.h"
+extern sm_heap *sms_symbol_heap;
 extern uint8_t *sms_key;
 extern uint32_t sms_ks1;
 extern uint32_t sms_ks2;
@@ -73,16 +74,14 @@ sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len) {
 }
 
 // Add a key_value with this key and value
-// node.sym_name is not managed by gc, so should be from sms_symbol_name_heap
-// YOU ARE HERE
-// bool sm_cx_let(sm_cx *self, sm_symbol* sym, sm_object *val) {
-bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
+// sym_name is not managed by gc, so should be from sms_symbol_name_heap
+bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
   sm_node *current_node;
   if (self->content == NULL)
     self->content = sm_new_node(NULL, NULL, 0LL, NULL);
   current_node = self->content;
-  for (int i = 0; i < len; i++) {
-    int             index       = sm_node_map_index(needle[i]);
+  for (int i = 0; i < sym->name->size; i++) {
+    int             index       = sm_node_map_index((&sym->name->content)[i]);
     int             child_index = sm_node_child_index(current_node->map, index);
     struct sm_node *next_node;
     if (sm_node_map_get(current_node->map, index) == false) {
@@ -97,8 +96,8 @@ bool sm_cx_let(sm_cx *self, char *needle, int len, sm_object *val) {
       next_node = sm_node_nth(current_node->children, child_index);
     current_node = (sm_node *)next_node;
   }
-  current_node->value = (sm_object *)val;
-  // current_node->symbol_id = sym_id;
+  current_node->value     = (sm_object *)val;
+  current_node->symbol_id = sym - ((sm_symbol *)sms_symbol_heap->storage);
   return val;
 }
 
@@ -181,10 +180,8 @@ void sm_cx_import(sm_cx *cxFrom, sm_cx *cxTo) {
     sm_node_keys(cxFrom->content, sm_new_stack_obj(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
   sm_expr *values = sm_node_values(cxFrom->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
   for (uint32_t i = 0; i < keys->size; i++) {
-    sm_symbol *keySym  = (sm_symbol *)sm_expr_get_arg(keys, i);
-    sm_string *keyStr  = keySym->name;
-    char      *cKeyStr = &keyStr->content;
-    sm_cx_let(cxTo, cKeyStr, keyStr->size, sm_expr_get_arg(values, i));
+    sm_symbol *keySym = (sm_symbol *)sm_expr_get_arg(keys, i);
+    sm_cx_let(cxTo, keySym, sm_expr_get_arg(values, i));
   }
 }
 

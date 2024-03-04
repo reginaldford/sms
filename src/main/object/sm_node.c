@@ -200,10 +200,9 @@ bool sm_node_is_empty(sm_node *node) { return node->value == NULL && node->map =
 int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_stack) {
   int cursor = 0;
   if (node->value != NULL) {
-    sm_symbol *sym = &((sm_symbol *)&sms_symbol_heap->storage)[node->symbol_id];
-    // !!!! symbol id is not set yet.
-    // YOU ARE HERE
-    cursor += sm_object_sprint(sms_true, &(buffer[cursor]), fake); // all is true for now
+    uint32_t  id  = node->symbol_id;
+    sm_symbol sym = ((sm_symbol *)sms_symbol_heap->storage)[id];
+    cursor += sm_object_sprint((sm_object *)&sym, &(buffer[cursor]), fake); // all is true for now
     // arrow sign
     if (!fake) {
       buffer[cursor]     = '-';
