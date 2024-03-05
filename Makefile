@@ -150,7 +150,7 @@ docs:
 unified:
 	$(MAKE) $(SRC_BISON_FLEX)/y.tab.c
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
-	$(CC_UNIFIED) -lm $(OBJS_BOUNCE) $(CFLAGS) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED)
+	$(CC_UNIFIED) -lm $(SRCS_BOUNCE) $(CFLAGS) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED)
 
 # install the unified version
 install_unified: unified
