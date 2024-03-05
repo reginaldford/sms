@@ -297,18 +297,9 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
     return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
 
   if (node->value != NULL) {
-    // Build the key string
-    int  len = sm_stack_obj_size(char_stack);
-    char buffer[len + 1]; // Increase the buffer size to accommodate the null terminator
-    buffer[len] = '\0';   // Add the null terminator at the end
-
-    for (uint32_t i = sm_stack_obj_size(char_stack) - 1; i + 1 > 0; i--) {
-      sm_double *num_obj = *((sm_stack_obj_empty_top(char_stack) + i + 1));
-      buffer[i]          = sm_node_bit_unindex(num_obj->value);
-    }
-
+    sm_symbol *found_sym = &((sm_symbol *)sms_symbol_heap->storage)[node->symbol_id];
     // Add the key to the collection
-    collection = sm_expr_append(collection, (sm_object *)sm_new_symbol(buffer, len));
+    collection = sm_expr_append(collection, (sm_object *)found_sym);
   }
 
   // If there are no more children, we are done
@@ -321,7 +312,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
   while (map != 0) {
     uint64_t bit       = map & -map; // Get the rightmost set bit using two's compliment
     int      bit_index = __builtin_ctzll(
-           bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
+      bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
 
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
