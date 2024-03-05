@@ -84,14 +84,14 @@ sm_cx *check_parsed_object(sm_parse_result pr) {
     printf("Top level object is not a context. Aborting.\n");
     return NULL;
   }
-  sm_cx     *test_env = (sm_cx *)pr.parsed_object;
-  sm_object *sr       = sm_cx_get(test_env, "tests", 5);
+  sm_cx     *test_env  = (sm_cx *)pr.parsed_object;
+  sm_symbol *tests_sym = sm_new_symbol("tests", 5);
+  sm_object *sr = sm_cx_get(test_env, &tests_sym->crypt_id->content, tests_sym->crypt_id->size);
   if (sr == NULL) {
     printf("Top level context must contain a key 'tests' associated to a nested array.");
     printf("Aborting.\n");
     return NULL;
   }
-  // sm_object *found = sm_cx_get(src.context,);
   if (sr->my_type != SM_EXPR_TYPE) {
     printf("Value under 'test' should be an array.\n");
     return NULL;
@@ -194,7 +194,9 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
       printf("Something was wrong with the format of the file.\n");
       return -1;
     }
-    sm_expr *test_list = (sm_expr *)sm_cx_get(test_env, "tests", 5);
+    sm_symbol *tests_sym = sm_new_symbol("tests", 5);
+    sm_expr   *test_list =
+      (sm_expr *)sm_cx_get(test_env, &tests_sym->crypt_id->content, tests_sym->crypt_id->size);
 
     if (test == -1) {
       global_num_tests(test_list->size);

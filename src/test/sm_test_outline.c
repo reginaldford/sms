@@ -35,7 +35,10 @@ test_outline *parse_test_outline(char *filepath) {
     graceful_exit(result_outline, -1);
   }
   sm_cx     *outline_cx   = (sm_cx *)parsed_object;
-  sm_object *chapters_obj = sm_cx_get(outline_cx, "chapters", 8);
+  sm_symbol *chapters_sym = sm_new_symbol("chapters", 8);
+
+  sm_object *chapters_obj =
+    sm_cx_get(outline_cx, &chapters_sym->crypt_id->content, chapters_sym->crypt_id->size);
   if (chapters_obj == NULL || chapters_obj->my_type != SM_EXPR_TYPE) {
     printf("Top level context in outline file must contain a key associating 'chapters' with an "
            "array of contexts.\n");
@@ -49,7 +52,9 @@ test_outline *parse_test_outline(char *filepath) {
       graceful_exit(result_outline, -1);
     }
     sm_cx     *current_ch_cx = (sm_cx *)current_obj;
-    sm_object *ch_name_obj   = sm_cx_get(current_ch_cx, "name", 4);
+    sm_symbol *name_sym      = sm_new_symbol("name", 4);
+    sm_object *ch_name_obj =
+      sm_cx_get(current_ch_cx, &name_sym->crypt_id->content, name_sym->crypt_id->size);
     if (ch_name_obj->my_type != SM_STRING_TYPE) {
       printf("Each context in the chapters array must associate 'name' with a string for the name "
              "of the chapter.\n");
@@ -57,7 +62,10 @@ test_outline *parse_test_outline(char *filepath) {
     }
     // successfully collected name
     sm_string *ch_name_str         = (sm_string *)ch_name_obj;
-    sm_object *num_subchapters_obj = sm_cx_get(current_ch_cx, "num_subchapters", 15);
+    sm_symbol *num_subchapters_sym = sm_new_symbol("num_subchapters", 15);
+
+    sm_object *num_subchapters_obj = sm_cx_get(
+      current_ch_cx, &num_subchapters_sym->crypt_id->content, num_subchapters_sym->crypt_id->size);
     if (num_subchapters_obj->my_type != SM_DOUBLE_TYPE) {
       printf("In addition to the chapter name, the context must associate 'num_subchapters' with a "
              "number.\n");
