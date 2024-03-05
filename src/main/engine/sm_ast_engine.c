@@ -1079,7 +1079,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_DOT_EXPR: {
       sm_object *base_obj   = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
-      sm_string *field_name = field_sym->name;
+      sm_string *field_name = field_sym->crypt_id; // cryptmap opt
       sm_cx     *base_cx;
       if (!expect_type(base_obj, 0, SM_CX_TYPE, SM_DOT_EXPR))
         return (sm_object *)sms_false;
