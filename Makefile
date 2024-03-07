@@ -20,11 +20,9 @@ SRC_MEM         := src/main/memory
 SRC_TERMINAL    := src/main/terminal
 SRC_TEST        := src/test
 SRC_KERN_TEST   := src/kernel_test
-SRC_BOUNCE      := submodules/bounce/src 
 SRCS_MAIN       := $(filter-out $(SRC_MAIN)/sm_main.c, $(shell find $(SRC_MAIN) -name '*.c'))
 SRCS_TEST       := $(shell find $(SRC_TEST) -name '*.c')
 SRCS_KT         := $(shell find $(SRC_KERN_TEST) -name '*.c')
-SRCS_BOUNCE     := $(filter-out submodules/bounce/src/main.c, $(shell find $(SRC_BOUNCE) -name '*.c'))
 OBJS_PARSER     := $(BUILD_DIR)/$(SRC_BISON_FLEX)/y.tab.c.o $(BUILD_DIR)/$(SRC_BISON_FLEX)/lex.yy.c.o
 OBJS_PARSER_DBG := $(BUILD_DIR)/$(SRC_BISON_FLEX)/y.tab.c.dbg.o $(BUILD_DIR)/$(SRC_BISON_FLEX)/lex.yy.c.dbg.o
 OBJS_PARSER_PROF:= $(BUILD_DIR)/$(SRC_BISON_FLEX)/y.tab.c.prof.o $(BUILD_DIR)/$(SRC_BISON_FLEX)/lex.yy.c.prof.o
@@ -33,7 +31,6 @@ OBJS_BASE_DBG   := $(SRCS_MAIN:%=$(BUILD_DIR)/%.dbg.o)   # dbg version of base f
 OBJS_BASE_PROF  := $(SRCS_MAIN:%=$(BUILD_DIR)/%.prof.o)  # prof version of base files
 OBJS_TEST       := $(SRCS_TEST:%=$(BUILD_DIR)/%.dbg.o)   # sms tests
 OBJS_KT         := $(SRCS_KT:%=$(BUILD_DIR)/%.dbg.o)     # sms kernel tests
-OBJS_BOUNCE     := $(SRCS_BOUNCE:%=$(BUILD_DIR)/%.o)     # bounce encryption functions
 
 BIN_NAME        := sms
 BIN_NAME_UNIFIED:= sms_unified
@@ -50,8 +47,8 @@ main:
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME)
 
-bin/$(BIN_NAME): $(OBJS_BOUNCE) $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
-	$(CC) $(CFLAGS) -lm $(OBJS_BOUNCE) $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
+bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
+	$(CC) $(CFLAGS) -lm  $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
 
 
 # Not files
@@ -65,16 +62,16 @@ all:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_DBG)
 
 # sms_dbg executable
-bin/$(BIN_NAME_DBG): $(OBJS_BOUNCE) $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
-	$(CC_DEBUG) -lm $(OBJS_BOUNCE) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
+bin/$(BIN_NAME_DBG):  $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
+	$(CC_DEBUG) -lm  $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
 
 # sms_test executable
-bin/$(BIN_NAME_TEST): $(OBJS_BOUNCE)  $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(OBJS_TEST)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS_BOUNCE) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@
+bin/$(BIN_NAME_TEST):   $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(OBJS_TEST)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm  $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@
 
 # sms_kernel_test executable
-bin/$(BIN_NAME_KT): $(OBJS_BOUNCE) $(OBJS_PARSER) $(OBJS_BASE_DBG) $(OBJS_KT)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm $(OBJS_BOUNCE)  $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@
+bin/$(BIN_NAME_KT):  $(OBJS_PARSER) $(OBJS_BASE_DBG) $(OBJS_KT)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm   $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@
 
 # Bison generates the parser
 $(SRC_BISON_FLEX)/y.tab.c: $(SRC_MAIN)/parser/sms.y
@@ -112,7 +109,6 @@ clean:
 		$(BUILD_DIR)/$(SRC_ENGINE)/*.o\
 		$(BUILD_DIR)/$(SRC_MEM)/*.o\
 		$(BUILD_DIR)/$(SRC_TERMINAL)/*.o\
-		$(OBJS_BOUNCE)\
 		bin/sms*\
 		docs/html
 
@@ -150,7 +146,7 @@ docs:
 unified:
 	$(MAKE) $(SRC_BISON_FLEX)/y.tab.c
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
-	$(CC_UNIFIED) -lm $(SRCS_BOUNCE) $(CFLAGS) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED)
+	$(CC_UNIFIED) -lm $(CFLAGS) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED)
 
 # install the unified version
 install_unified: unified

@@ -1,7 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
-#include "../../../submodules/bounce/src/bounce.h"
+
 extern sm_heap *sms_symbol_heap;
 extern uint32_t sms_num_symbols;
 extern uint8_t *sms_key;
@@ -22,11 +22,12 @@ sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
 }
 
 // Return the sm_node child index correlating to this character
+// The index is the ASCII value, the value is a number from 0 to 63.
 // Input  ASCII   Group_Size  output
-// '   is 39      1           0
+// _   is 95      1           0
 // 0-9 is 48-57   10          1-10
 // A-Z is 65-90   26          11-36
-// _   is 95      1           37
+// '   is 39      1           37
 // a-z is 98-122  26          38-63
 // Total: 64
 int sm_node_map_index(char c) {
@@ -48,9 +49,9 @@ int sm_node_map_index(char c) {
 // Inverse of sm_map_index
 // Expects 0-63, else, returns NULL
 char sm_node_bit_unindex(int i) {
-  static const int output[] = {39,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  65,  66,
+  static const int output[] = {95,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  65,  66,
                                67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
-                               80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  95,  97,
+                               80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  39,  97,
                                98,  99,  100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
                                111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122};
   if (i < 64)
