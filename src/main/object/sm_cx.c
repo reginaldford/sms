@@ -1,7 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
-#include "../../../submodules/bounce/src/bounce.h"
+
 extern sm_heap *sms_symbol_heap;
 extern uint8_t *sms_key;
 extern uint32_t sms_ks1;

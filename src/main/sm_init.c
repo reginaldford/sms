@@ -1,7 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
-#include "../../submodules/bounce/src/bounce.h"
 
 extern struct sm_heap *sms_heap;
 extern struct sm_heap *sms_symbol_heap;
@@ -33,22 +32,10 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   sms_symbol_heap      = sm_new_heap(1024 * 512);
   sms_symbol_name_heap = sm_new_heap(1024 * 1024);
   sms_num_symbols      = 0;
+
   // Initialize the current memory heap
   // During first gc, a second heap of the same size will be allocated.
   sms_heap = sm_new_heap(mem_bytes / 2);
-  // Store bounce encryption prereqs
-  // Globals: sms_key, sms_ks1, sms_ks2, and sms_sub_table
-  bounceReadFileResult brfr = bounceReadFile("sms_key");
-  if (!brfr.fileExists) {
-    printf("SMS key file not found!\n");
-    exit(1);
-  }
-  sms_key = brfr.fileContent;
-  // Calculate and store the keySum
-  sms_ks1 = bounceProcKeySum(sms_key);
-  sms_ks2 = bounceProcKeySum(sms_key + 128);
-  // Invertable Swap table generated from key
-  bounceTableInit(sms_key, sms_sub_table);
 
   // Initialize the lexical stack
   sm_global_lex_stack(sm_new_stack(128));
