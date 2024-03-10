@@ -23,11 +23,11 @@ int chapter_3(int test) {
   sm_cx_let(test_cx, sm_new_symbol("b", 1), (sm_object *)sm_new_double(8));
   sm_cx_let(test_cx, sm_new_symbol("ab", 2), (sm_object *)sm_new_double(9));
 
-  sm_object *a = sm_cx_get(test_cx, "a", 1);
+  sm_object *a = sm_cx_get(test_cx, sm_new_symbol("a", 1));
 
   sm_garbage_collect();
 
-  sm_cx_rm(test_cx, "b", 1);
+  sm_cx_rm(test_cx, sm_new_symbol("b", 1));
 
   return num_fails;
 }
