@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -m 1300
+#!/usr/local/bin/sms -m300
 
 # Requires lots of RAM until last moment gc is implemented.
 # We run fib twice simultaneously with different size jobs
