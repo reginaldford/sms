@@ -64,19 +64,19 @@ uint64_t sm_bytelength_parse(char *str, int length) {
 void sm_print_fancy_bytelength(uint64_t bytelength) {
   const uint64_t KB = 1024;
   if (bytelength < KB)
-    printf("%.3gB", (double)bytelength);
+    printf("%.4gB", (double)bytelength);
   else if (bytelength < KB * KB)
-    printf("%.3gKB", (double)bytelength / KB);
+    printf("%.4gKB", (double)bytelength / KB);
   else if (bytelength < (KB * KB * KB))
-    printf("%.3gMB", (double)bytelength / (KB * KB));
+    printf("%.4gMB", (double)bytelength / (KB * KB));
   else if (bytelength < (KB * KB * KB * KB))
-    printf("%.3gGB", (double)bytelength / (KB * KB * KB));
+    printf("%.4gGB", (double)bytelength / (KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB))
-    printf("%.3gTB", (double)bytelength / (KB * KB * KB * KB * KB));
+    printf("%.4gTB", (double)bytelength / (KB * KB * KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB * KB))
-    printf("%.3gEB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
+    printf("%.4gEB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB * KB * KB))
-    printf("%.3gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB * KB));
+    printf("%.4gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB * KB));
   else
     printf("lots");
 }
