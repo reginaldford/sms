@@ -91,7 +91,6 @@ int main(int num_args, char *argv[]) {
       printf("-s Run Script file.                               sms -s script.sms\n");
       printf("-i Run a file, then start the REPL.               sms -i script.sms\n");
       printf("-c Custom argument. Accessed via _args.           sms -c \"a single string\"\n");
-      printf("\nDo not put a space after the m flag.            sms -m4.4 -s x1.sms -i x2.sms\n");
       clean_exit(&env, 0);
       break;
     case 'q':
@@ -111,7 +110,7 @@ int main(int num_args, char *argv[]) {
       env.mem_bytes = sm_bytelength_parse(env.mem_str, strlen(optarg));
       // SMS needs at least 2.5k (good luck with that) and might work with up to 4 terrabytes
       // (untested) For very basic programs, 1m is usually fine.
-      if ((env.mem_bytes < 2.5 * 1024) || (env.mem_bytes >= 4398046511104)) {
+      if ((env.mem_bytes < 2.5 * 1024) || (env.mem_bytes > 4 * 10E12)) {
         printf("Invalid memory heap size: %s\n", env.mem_str);
         printf("%s\n", valid_values);
         printf("Try -h for help.\n");
@@ -120,7 +119,7 @@ int main(int num_args, char *argv[]) {
       if (env.quiet_mode == false) {
         printf("Custom Heap Size: ");
         printf("%lld Bytes (", (long long)env.mem_bytes);
-        sm_print_fancy_bytelength((long long)env.mem_bytes);
+        sm_print_fancy_bytelength(env.mem_bytes);
         printf(")\n");
       }
       break;
@@ -133,7 +132,7 @@ int main(int num_args, char *argv[]) {
       env.eval_cmd[optarg_len++] = '\0';
       env.eval_cmd_len           = optarg_len;
       if (env.quiet_mode == false)
-        printf("parsing: %s\n", env.eval_cmd);
+        printf("Parsing: %s\n", env.eval_cmd);
       sm_parse_result pr = sm_parse_cstr(env.eval_cmd, env.eval_cmd_len);
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i\n", pr.return_val);
