@@ -24,7 +24,7 @@ char sm_to_lowercase(char c) {
 }
 
 // Returns -1 if lowercase(c) is not found within the string "bkmgt"
-// Otherwise, returns the index of
+// Otherwise, returns the index of c in the string
 int sm_is_unit(char c) {
   c                 = sm_to_lowercase(c);
   const char *units = "bkmgt"; // memory units
@@ -50,10 +50,11 @@ uint64_t sm_bytelength_parse(char *str, int length) {
       buffer[j] = current_char;
       j++;
     } else if (sm_is_unit(current_char) != -1) {
+      printf("detected unit: %i\n", sm_is_unit(current_char));
       // 0 means b, 1 means k, etc.
-      int unit          = sm_is_unit(current_char);
-      int unit_in_bytes = pow(1024, unit);
-      buffer[j]         = 0;
+      int  unit          = sm_is_unit(current_char);
+      long unit_in_bytes = pow(1024, unit);
+      buffer[j]          = 0;
       j++;
       return unit_in_bytes * atof(buffer);
     } else if (current_char == ' ')
@@ -75,11 +76,11 @@ void sm_print_fancy_bytelength(uint64_t bytelength) {
   else if (bytelength < (KB * KB * KB * KB))
     printf("%.4gGB", (double)bytelength / (KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB))
-    printf("%.4gTB", (double)bytelength / (KB * KB * KB * KB * KB));
+    printf("%.4gTB", (double)bytelength / (KB * KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB * KB))
-    printf("%.4gEB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
+    printf("%.4gEB", (double)bytelength / (KB * KB * KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB * KB * KB))
-    printf("%.4gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB * KB));
+    printf("%.4gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
   else
     printf("lots");
 }
