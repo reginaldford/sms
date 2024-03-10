@@ -107,16 +107,28 @@ void *sm_malloc_from_spaces(uint32_t size) {
 }
 
 // Internal 'malloc'
-// TODO rename this sm_malloc_at, and leave old sm_malloc
-void *sm_malloc(struct sm_heap *heap, uint32_t size) {
+void *sm_malloc(uint32_t size) {
+  uint32_t bytes_used = sms_heap->used;
+  sms_heap->used += size;
+  return (void *)(((char *)sms_heap->storage) + bytes_used);
+}
+
+// Internal 'malloc' with alternative heap
+void *sm_malloc_at(struct sm_heap *heap, uint32_t size) {
   uint32_t bytes_used = heap->used;
   heap->used += size;
   return (void *)(((char *)heap->storage) + bytes_used);
 }
 
 // Reallocate memory space for resizing or recreating objects
-void *sm_realloc(struct sm_heap *dest, void *obj, uint32_t size) {
-  sm_object *new_space = sm_malloc(dest, size);
+void *sm_realloc(void *obj, uint32_t size) {
+  sm_object *new_space = sm_malloc(size);
+  return memcpy(new_space, obj, sm_sizeof(obj));
+}
+
+// Reallocate memory space for resizing or recreating objects, at specified heap
+void *sm_realloc_at(struct sm_heap *dest, void *obj, uint32_t size) {
+  sm_object *new_space = sm_malloc_at(dest, size);
   return memcpy(new_space, obj, size);
 }
 

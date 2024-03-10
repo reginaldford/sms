@@ -32,7 +32,7 @@ sm_symbol *sm_new_symbol(char *name, int len) {
     current_sym = current_sym + 1;
   }
   // Was not found. Creating a new symbol
-  sm_symbol *sym = (sm_symbol *)sm_malloc(sms_symbol_heap, sizeof(sm_symbol));
+  sm_symbol *sym = (sm_symbol *)sm_malloc_at(sms_symbol_heap, sizeof(sm_symbol));
   sym->my_type   = SM_SYMBOL_TYPE;
   sym->name      = sm_new_string_at(sms_symbol_name_heap, len, name);
   sym->code_id   = sm_symbol_encode_id(sym);
