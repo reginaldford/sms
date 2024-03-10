@@ -48,6 +48,7 @@ int sm_node_map_index(char c) {
 
 // Inverse of sm_map_index
 // Expects 0-63, else, returns NULL
+// Returns a displayable character
 char sm_node_bit_unindex(int i) {
   static const int output[] = {95,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  65,  66,
                                67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
@@ -113,7 +114,7 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
 #ifdef __x86_64__
 int popcountll(uint64_t num) { return __builtin_popcountll(num); }
 #else
-// Manually counting the bits in the long long int, efficiently
+// Manually counting the bits in the 64 bit int, efficiently
 int popcountll(uint64_t num) {
   int count = 0;
   for (count = 0; num; count++)
@@ -201,9 +202,12 @@ bool sm_node_is_empty(sm_node *node) { return node->value == NULL && node->map =
 int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_stack) {
   int cursor = 0;
   if (node->value != NULL) {
-    uint32_t  id  = node->symbol_id;
-    sm_symbol sym = ((sm_symbol *)sms_symbol_heap->storage)[id];
-    cursor += sm_object_sprint((sm_object *)&sym, &(buffer[cursor]), fake); // all is true for now
+    // first, write the symbol name
+    int        sym_id = node->symbol_id;
+    sm_symbol *sym    = &(((sm_symbol *)sms_symbol_heap->storage)[sym_id]);
+    if (!fake)
+      sm_strncpy(buffer, &sym->name->content, sym->name->size);
+    cursor = sym->name->size;
     // arrow sign
     if (!fake) {
       buffer[cursor]     = '-';
@@ -216,7 +220,6 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_st
     if (!fake)
       buffer[cursor] = ';';
     cursor++;
-    return cursor;
   }
   int items_to_do = sm_node_map_size(node->map);
   for (int i = 0; items_to_do > 0 && i < 8; i++) {

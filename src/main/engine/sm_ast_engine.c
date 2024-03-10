@@ -327,15 +327,17 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (sm_cx_let(current_cx, sym, value))
         return (sm_object *)value;
+      else
+        return (sm_object *)sms_false;
     }
     case SM_CX_SETPARENT_EXPR: {
       sm_cx *cx         = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_cx *new_parent = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      cx                = (sm_cx *)sm_copy((sm_object *)cx);
       if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_SETPARENT_EXPR))
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)new_parent, 1, SM_CX_TYPE, SM_CX_SETPARENT_EXPR))
         return (sm_object *)sms_false;
+      cx         = (sm_cx *)sm_copy((sm_object *)cx);
       cx->parent = new_parent;
       return (sm_object *)cx;
     }
@@ -357,7 +359,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_EXPR))
         return (sm_object *)sms_false;
-      sm_object *result = sm_cx_get(cx, &sym->code_id->content, sym->code_id->size);
+      sm_object *result = sm_cx_get(cx, sym);
       if (result)
         return result;
       else
@@ -370,7 +372,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_HAS_EXPR))
         return (sm_object *)sms_false;
-      sm_object *result = sm_cx_get(cx, &sym->code_id->content, sym->code_id->size);
+      sm_object *result = sm_cx_get(cx, sym);
       if (result)
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
@@ -382,7 +384,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR))
         return (sm_object *)sms_false;
-      sm_object *result = sm_cx_get_far(cx, &sym->code_id->content, sym->code_id->size);
+      sm_object *result = sm_cx_get_far(cx, sym);
       if (!result)
         return (sm_object *)sms_false;
       return result;
@@ -394,7 +396,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_GET_FAR_EXPR))
         return (sm_object *)sms_false;
-      sm_object *result = sm_cx_get_far(cx, &sym->code_id->content, sym->code_id->size);
+      sm_object *result = sm_cx_get_far(cx, sym);
       if (!result)
         return (sm_object *)sms_false;
       return (sm_object *)sms_true;
@@ -407,7 +409,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_SET_EXPR))
         return (sm_object *)sms_false;
-      if (sm_cx_set(cx, &sym->code_id->content, sym->code_id->size, value))
+      if (sm_cx_set(cx, sym, value))
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
     }
@@ -418,7 +420,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_DOT_EXPR))
         return (sm_object *)sms_false;
-      sm_object *retrieved = sm_cx_get_far(cx, &sym->code_id->content, sym->code_id->size);
+      sm_object *retrieved = sm_cx_get_far(cx, sym);
       if (retrieved)
         return retrieved;
       return (sm_object *)sms_false;
@@ -447,7 +449,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_CONTAINING_EXPR))
         return (sm_object *)sms_false;
-      sm_cx *retrieved = sm_cx_get_container(cx, &sym->code_id->content, sym->code_id->size);
+      sm_cx *retrieved = sm_cx_get_container(cx, sym);
       if (retrieved)
         return (sm_object *)retrieved;
       return (sm_object *)sms_false;
@@ -463,7 +465,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (!expect_type((sm_object *)sym, 0, SM_SYMBOL_TYPE, SM_RM_EXPR))
         return (sm_object *)sms_false;
-      bool success = sm_cx_rm(current_cx, &sym->code_id->content, sym->code_id->size);
+      bool success = sm_cx_rm(current_cx, sym);
       if (success == true)
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
@@ -475,7 +477,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)sym, 1, SM_SYMBOL_TYPE, SM_CX_RM_EXPR))
         return (sm_object *)sms_false;
-      bool success = sm_cx_rm(cx, &sym->code_id->content, sym->code_id->size);
+      bool success = sm_cx_rm(cx, sym);
       if (success == true)
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
@@ -553,11 +555,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FN_SETPARENT_EXPR: {
       sm_fun *fun        = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_cx  *new_parent = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      fun                = (sm_fun *)sm_copy((sm_object *)fun);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETPARENT_EXPR))
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)new_parent, 1, SM_CX_TYPE, SM_FN_SETPARENT_EXPR))
         return (sm_object *)sms_false;
+      fun         = (sm_fun *)sm_copy((sm_object *)fun);
       fun->parent = new_parent;
       return (sm_object *)fun;
     }
@@ -1084,7 +1086,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(base_obj, 0, SM_CX_TYPE, SM_DOT_EXPR))
         return (sm_object *)sms_false;
       base_cx       = (sm_cx *)base_obj;
-      sm_object *sr = sm_cx_get_far(base_cx, &field_name->content, field_name->size);
+      sm_object *sr = sm_cx_get_far(base_cx, field_sym);
       if (sr == NULL) {
         sm_string *base_str = sm_object_to_string(base_obj);
         printf("Error: Could not find variable: %s within %s\n", &(field_name->content),
@@ -1167,7 +1169,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(obj0, 0, SM_SYMBOL_TYPE, SM_ASSIGN_EXPR))
         return (sm_object *)sms_false;
       sym = (sm_symbol *)obj0;
-      if (!sm_cx_set(current_cx, &sym->code_id->content, sym->code_id->size, value))
+      if (!sm_cx_set(current_cx, sym, value))
         return (sm_object *)sms_false;
       return value;
     }
@@ -1583,7 +1585,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   case SM_SYMBOL_TYPE: {
     sm_symbol *sym      = (sm_symbol *)input;
     sm_string *var_name = sym->code_id; // codemap nickname optimization
-    sm_object *sr       = sm_cx_get_far(current_cx, &(var_name->content), var_name->size);
+    sm_object *sr       = sm_cx_get_far(current_cx, sym);
     if (sr)
       return sr;
     else {

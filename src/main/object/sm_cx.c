@@ -8,7 +8,7 @@ extern uint32_t sms_ks1;
 extern uint32_t sms_ks2;
 extern uint8_t  sms_sub_table[256];
 
-// Create a new context, an array of key_values sorted by key
+// Create a new ConteXt
 sm_cx *sm_new_cx(sm_cx *parent) {
   sm_cx *new_cx   = (sm_cx *)sm_malloc(sms_heap, sizeof(sm_cx));
   new_cx->my_type = SM_CX_TYPE;
@@ -19,7 +19,9 @@ sm_cx *sm_new_cx(sm_cx *parent) {
 
 // Search through this cx and ancestry for this key.
 // Return the containing CX if the key is found, else return false.
-sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int len) {
+sm_cx *sm_cx_get_container(sm_cx *self, sm_symbol *sym) {
+  char  *needle      = &sym->code_id->content;
+  int    len         = sym->code_id->size;
   sm_cx *current_loc = self;
   while (current_loc) {
     sm_object *result = sm_node_get(current_loc->content, needle, len);
@@ -32,13 +34,14 @@ sm_cx *sm_cx_get_container(sm_cx *self, char *needle, int len) {
 
 // Searches for an existing value and sets it to the given value and returns True.
 // Returns false if the value cannot be found. Traverses parent ptrs to find the value.
-bool sm_cx_set(sm_cx *self, char *needle, int len, sm_object *value) {
+bool sm_cx_set(sm_cx *self, sm_symbol *sym, sm_object *value) {
   sm_cx *cx = self;
   while (cx != NULL) {
     sm_node *node = cx->content;
-    sm_node *leaf = sm_node_subnode(node, needle, len);
+    sm_node *leaf = sm_node_subnode(node, &sym->code_id->content, sym->code_id->size);
     if (leaf != NULL) {
-      leaf->value = value;
+      leaf->value     = value;
+      leaf->symbol_id = sym - ((sm_symbol *)sms_symbol_heap->storage);
       return true;
     }
     cx = cx->parent;
@@ -48,10 +51,12 @@ bool sm_cx_set(sm_cx *self, char *needle, int len, sm_object *value) {
 
 // Get this value from the current context.
 // Return Null if there is no such key.
-sm_object *sm_cx_get(sm_cx *self, char *needle, int len) {
+sm_object *sm_cx_get(sm_cx *self, sm_symbol *sym) {
   sm_node *node = self->content;
   if (node != NULL) {
-    sm_node *leaf = sm_node_subnode(node, needle, len);
+    char    *needle = &sym->code_id->content;
+    int      len    = sym->code_id->size;
+    sm_node *leaf   = sm_node_subnode(node, needle, len);
     if (leaf != NULL)
       return leaf->value;
   }
@@ -60,7 +65,9 @@ sm_object *sm_cx_get(sm_cx *self, char *needle, int len) {
 
 // Like sm_cx_get, but
 // traverses the context ancestry to find the result, or returns NULL
-sm_object *sm_cx_get_far(sm_cx *self, char *needle, int len) {
+sm_object *sm_cx_get_far(sm_cx *self, sm_symbol *sym) {
+  char  *needle  = &sym->code_id->content;
+  int    len     = sym->code_id->size;
   sm_cx *curr_cx = self;
   while (curr_cx != NULL) {
     if (curr_cx->content != NULL) {
@@ -104,7 +111,9 @@ bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
 // We return the last node in the path to the node addressed by needle
 // which has a map size more than 1.
 // If there is no map size more than 1 in the path, then the root node is returned.
-bool sm_cx_rm(sm_cx *self, char *needle, int len) {
+bool sm_cx_rm(sm_cx *self, sm_symbol *sym) {
+  char *needle = &sym->code_id->content;
+  int   len    = sym->code_id->size;
   // First, determine that the node exists
   // While tracking the node_path for later
   sm_node *node_path[len + 1]; // we include the root node which has no letter associated
@@ -154,7 +163,7 @@ uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
     buffer[0] = '{';
   int cursor = 1;
   if (self->content != NULL) {
-    sm_stack_obj *letter_stack = sm_new_stack_obj(32);
+    sm_stack_obj *letter_stack = sm_new_stack_obj(7);
     int           len          = sm_node_sprint(self->content, &buffer[cursor], fake, letter_stack);
     cursor += len;
   }
@@ -167,7 +176,7 @@ uint32_t sm_cx_sprint(sm_cx *self, char *buffer, bool fake) {
 // Clear the contents of the cx
 void sm_cx_clear(sm_cx *self) { self->content = NULL; }
 
-// Clear the contents of the cx
+// Number of elements in the cx
 uint32_t sm_cx_size(sm_cx *self) {
   if (self->content != NULL)
     return sm_node_size(self->content);
