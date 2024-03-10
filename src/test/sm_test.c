@@ -86,7 +86,7 @@ sm_cx *check_parsed_object(sm_parse_result pr) {
   }
   sm_cx     *test_env  = (sm_cx *)pr.parsed_object;
   sm_symbol *tests_sym = sm_new_symbol("tests", 5);
-  sm_object *sr = sm_cx_get(test_env,tests_sym);
+  sm_object *sr        = sm_cx_get(test_env, tests_sym);
   if (sr == NULL) {
     printf("Top level context must contain a key 'tests' associated to a nested array.");
     printf("Aborting.\n");
@@ -195,8 +195,7 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
       return -1;
     }
     sm_symbol *tests_sym = sm_new_symbol("tests", 5);
-    sm_expr   *test_list =
-      (sm_expr *)sm_cx_get(test_env, tests_sym);
+    sm_expr   *test_list = (sm_expr *)sm_cx_get(test_env, tests_sym);
 
     if (test == -1) {
       global_num_tests(test_list->size);
