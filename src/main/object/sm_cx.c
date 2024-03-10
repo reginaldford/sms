@@ -88,7 +88,7 @@ bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
     self->content = sm_new_node(NULL, NULL, 0LL, NULL);
   current_node = self->content;
   for (int i = 0; i < sym->code_id->size; i++) {
-    int             index       = sm_node_map_index((&sym->code_id->content)[i]);
+    int             index       = (&sym->code_id->content)[i];
     int             child_index = sm_node_child_index(current_node->map, index);
     struct sm_node *next_node;
     if (sm_node_map_get(current_node->map, index) == false) {
@@ -123,7 +123,7 @@ bool sm_cx_rm(sm_cx *self, sm_symbol *sym) {
   int      char_index  = 0;
   node_path[0]         = curr_node;
   for (; char_index < len && curr_node != NULL; char_index++) {
-    map_index = sm_node_map_index(needle[char_index]);
+    map_index = needle[char_index];
     if (sm_node_map_get(curr_node->map, map_index) == false)
       return false;
     child_index               = sm_node_map_left_count(curr_node->map, map_index);
@@ -142,7 +142,7 @@ bool sm_cx_rm(sm_cx *self, sm_symbol *sym) {
     curr_node                        = node_path[i];
     struct sm_node *curr_node_parent = node_path[i - 1];
     if (curr_node->map == 0LL && curr_node->value == NULL) {
-      map_index   = sm_node_map_index(needle[i - 1]);
+      map_index   = needle[i - 1];
       child_index = sm_node_map_left_count(curr_node_parent->map, map_index);
       sm_node_map_set(&curr_node_parent->map, map_index, false);
       curr_node_parent->children = sm_node_rm(curr_node_parent->children, curr_node);

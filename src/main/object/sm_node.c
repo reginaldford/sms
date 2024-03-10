@@ -21,46 +21,6 @@ sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
   return node;
 }
 
-// Return the sm_node child index correlating to this character
-// The index is the ASCII value, the value is a number from 0 to 63.
-// Input  ASCII   Group_Size  output
-// _   is 95      1           0
-// 0-9 is 48-57   10          1-10
-// A-Z is 65-90   26          11-36
-// '   is 39      1           37
-// a-z is 98-122  26          38-63
-// Total: 64
-int sm_node_map_index(char c) {
-  static const int result[] = {
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,  -1, -1, -1, -1, -1, -1, -1, -1,
-    1,  2,  3,  4,  5,  6,  7,  8,  9,  10, -1, -1, -1, -1, -1, -1, -1, 11, 12, 13, 14, 15, 16, 17,
-    18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, -1, -1, -1, -1, 37,
-    -1, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-    61, 62, 63, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-  return result[c];
-}
-
-// Inverse of sm_map_index
-// Expects 0-63, else, returns NULL
-// Returns a displayable character
-char sm_node_bit_unindex(int i) {
-  static const int output[] = {95,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  65,  66,
-                               67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
-                               80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  39,  97,
-                               98,  99,  100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
-                               111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122};
-  if (i < 64)
-    return output[i];
-  else
-    return '\0';
-}
-
 // Return the child node, specified by index
 sm_node *sm_node_nth(sm_node *self, int index) {
   sm_node *current = self;
@@ -133,7 +93,7 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
   sm_node *curr_node  = self;
   int      char_index = 0;
   while (char_index < len && curr_node != NULL) {
-    int      map_index = sm_node_map_index(needle[char_index]);
+    int      map_index = needle[char_index];
     uint64_t map       = curr_node->map;
     uint64_t bit       = 1ULL << map_index;
     if ((map & bit) == 0) {
@@ -156,7 +116,7 @@ sm_node *sm_node_parent_node(sm_node *self, char *needle, int len) {
   int      child_index = 0;
   int      char_index  = 0;
   for (; char_index < len && curr_node != NULL; char_index++) {
-    map_index = sm_node_map_index(needle[char_index]);
+    map_index = needle[char_index];
     if (sm_node_map_get(curr_node->map, map_index) == false)
       return NULL;
     child_index = sm_node_map_left_count(curr_node->map, map_index);
