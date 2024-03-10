@@ -171,6 +171,9 @@ Line comments start with `#`.
     17. cxRm(cx, :var); # Remove this entry from the context
 
     18. cxImport(cx1, cx2); # import the key/value pairs from cx1 into cx2. Overwrites existing key values
+
+    19. cxSetParent(cx1, cx2); # Set the parent of cx1 to cx2.
+
 </details>
 
 <details>
@@ -332,8 +335,8 @@ This command builds the executable and copies it to /usr/local/bin/sms
 
 
 # Plans:
-- [ ] Support for booting from a serialized memory heap.
-- [ ] Support for matices. Inversion, solving, eigenvalues, etc.
+- [ ] Library for booting from and manipulating a serialized memory heap.
+- [ ] Library for matrices. Inversion, solving, eigenvalues, etc.
 - [ ] 'Last moment' garbage collection.
 - [ ] Tail call optimization.
 - [ ] Modern terminal support
