@@ -25,20 +25,6 @@ sm_object *sm_node_get(sm_node *self, char *needle, int len);
 sm_node *sm_node_get_leaf(sm_node *root, char *needle, int len);
 /// Set the value of the leaf node addressed by value
 void sm_node_set(sm_node *node, int which, sm_object *value);
-/** @brief Return the sm_node child index correlating to this character
-@param c A-Z,a-z,_, or single quote ("calculus prime symbol")
-@note Char   ASCII
-@note '   is 39
-@note 0-9 is 48-57
-@note A-Z is 65-90
-@note _   is 95
-@note a-z is 98-122
-@note Total: 64 */
-int sm_node_map_index(char c);
-/** @brief Inverse of sm_map_index.
-@return A letter , underscore, or single quote
-@param i Integer from 0 to 63 **/
-char sm_node_bit_unindex(int i);
 /// Add a child node to root node (parent node)
 /// @param where Specifies which character this node represents
 bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where);

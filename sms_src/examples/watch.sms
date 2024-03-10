@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm 0.1
+#!/usr/local/bin/sms -qm 1.1
 # Tiny rendition of the linux 'watch' program
 {
   let cmd = _args[size(_args) - 1];
