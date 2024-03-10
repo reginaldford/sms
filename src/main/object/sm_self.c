@@ -3,7 +3,7 @@
 #include "../sms.h"
 
 struct sm_self *sm_new_self() {
-  sm_self *new_self = sm_malloc(sms_heap, sizeof(sm_self));
+  sm_self *new_self = sm_malloc(sizeof(sm_self));
   new_self->my_type = SM_SELF_TYPE;
   return new_self;
 }
