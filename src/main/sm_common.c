@@ -36,29 +36,32 @@ int sm_is_unit(char c) {
 
 // Parse a c string into an integer specifying a number of bytes.
 uint64_t sm_bytelength_parse(char *str, int length) {
-  char buffer[32]; // 16 characters for the numeric value
-  for (int i = 0; i < 32; i++) {
+  char buffer[length]; // 16 characters for the numeric value
+  int  j = 0;          // j is index, skipping spaces
+  for (int i = 0; i <= length; i++) {
     char current_char = str[i];
     if (current_char == 0) {
-      buffer[i] = 0;
+      buffer[j] = 0;
       // If no unit is given, assume megabytes (m)
-      return (uint64_t)atof(buffer) * 1024 * 1024;
+      uint64_t l = atof(buffer) * 1024 * 1024;
+      return (double)atof(buffer) * 1024 * 1024;
     }
-    if (sm_is_digit(current_char) || current_char == '.')
-      buffer[i] = current_char;
-    else if (sm_is_unit(current_char) != -1) {
+    if (sm_is_digit(current_char) || current_char == '.') {
+      buffer[j] = current_char;
+      j++;
+    } else if (sm_is_unit(current_char) != -1) {
       // 0 means b, 1 means k, etc.
       int unit          = sm_is_unit(current_char);
       int unit_in_bytes = pow(1024, unit);
-      buffer[i]         = 0;
+      buffer[j]         = 0;
+      j++;
       return unit_in_bytes * atof(buffer);
-    } else if (current_char == 0) {
-      buffer[i] = 0;
-      return (uint64_t)atof(buffer);
-    } else
-      break;
+    } else if (current_char == ' ')
+      continue;
+    else
+      continue;
   }
-  return -1;
+  return atof(buffer);
 }
 
 void sm_print_fancy_bytelength(uint64_t bytelength) {

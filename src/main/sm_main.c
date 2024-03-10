@@ -90,9 +90,8 @@ int main(int num_args, char *argv[]) {
       printf("-e Print the evaluation of an expression.         sms -e \"2*sin(PI/4)\"\n");
       printf("-s Run Script file.                               sms -s script.sms\n");
       printf("-i Run a file, then start the REPL.               sms -i script.sms\n");
-      printf("-c Custom argument. Accessed via _args            sms -c \"a single string\"\n");
-      printf("\nIf the -m flag is used, it must be first.       sms -m 4 -s x1.sms -i x2.sms\n");
-      printf("Some flags can be repeated and all flags are executed in order.\n");
+      printf("-c Custom argument. Accessed via _args.           sms -c \"a single string\"\n");
+      printf("\nDo not put a space after the m flag.            sms -m4.4 -s x1.sms -i x2.sms\n");
       clean_exit(&env, 0);
       break;
     case 'q':
