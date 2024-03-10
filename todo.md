@@ -1,12 +1,3 @@
-# full silence with -q, for pipes
-
-# precedence issue: 
-{ let x= let y=5;
-  { let f=(x,y)=>{ return x + y + parent(self).x + parent(self).y}; }
-}
-should work, but we are getting x+(y+parent(self)).x + ...
-
-# strSize/strCapacity
 
 # osExec alternative where the output is returned as a string
 
