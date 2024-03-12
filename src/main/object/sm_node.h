@@ -18,7 +18,7 @@ typedef struct sm_node {
 
 /// Construct a new node
 sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
-                     struct sm_node *children);
+                     struct sm_node *children, uint32_t symbol_id);
 /// Get the value inside the node addressed by needle
 sm_object *sm_node_get(sm_node *self, char *needle, int len);
 /// Get the node addressed by needle

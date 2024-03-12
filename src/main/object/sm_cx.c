@@ -81,7 +81,7 @@ sm_object *sm_cx_get_far(sm_cx *self, sm_symbol *sym) {
 bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
   sm_node *current_node;
   if (self->content == NULL)
-    self->content = sm_new_node(NULL, NULL, 0LL, NULL);
+    self->content = sm_new_node(NULL, NULL, 0LL, NULL, 0);
   current_node = self->content;
   for (int i = 0; i < sym->code_id->size; i++) {
     int             index       = (&sym->code_id->content)[i];
@@ -89,7 +89,7 @@ bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
     struct sm_node *next_node;
     if (sm_node_map_get(current_node->map, index) == false) {
       sm_node_map_set(&current_node->map, index, true);
-      next_node = sm_new_node(NULL, NULL, 0LL, NULL);
+      next_node = sm_new_node(NULL, NULL, 0LL, NULL, 0);
       if (child_index == 0) {
         next_node->next        = current_node->children;
         current_node->children = next_node;
