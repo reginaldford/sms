@@ -3,10 +3,6 @@
 #include "../sms.h"
 
 extern sm_heap *sms_symbol_heap;
-extern uint8_t *sms_key;
-extern uint32_t sms_ks1;
-extern uint32_t sms_ks2;
-extern uint8_t  sms_sub_table[256];
 
 // Create a new ConteXt
 sm_cx *sm_new_cx(sm_cx *parent) {

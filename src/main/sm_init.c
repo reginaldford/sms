@@ -6,10 +6,6 @@ extern struct sm_heap *sms_heap;
 extern struct sm_heap *sms_symbol_heap;
 extern struct sm_heap *sms_symbol_name_heap;
 extern uint32_t        sms_num_symbols;
-extern uint8_t        *sms_key;
-extern uint32_t        sms_ks1;
-extern uint32_t        sms_ks2;
-extern uint8_t         sms_sub_table[256];
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Register the signal handler
