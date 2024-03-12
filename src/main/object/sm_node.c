@@ -3,11 +3,6 @@
 #include "../sms.h"
 
 extern sm_heap *sms_symbol_heap;
-extern uint32_t sms_num_symbols;
-extern uint8_t *sms_key;
-extern uint32_t sms_ks1;
-extern uint32_t sms_ks2;
-extern uint8_t  sms_sub_table[256];
 
 // Create a new sm_node
 sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
