@@ -159,7 +159,7 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_st
   int cursor = 0;
   if (node->value != NULL) {
     // first, write the symbol name
-    int        sym_id = node->symbol_id;
+    uint32_t   sym_id = node->symbol_id;
     sm_symbol *sym    = &(((sm_symbol *)sms_symbol_heap->storage)[sym_id]);
     if (!fake)
       sm_strncpy(buffer, &sym->name->content, sym->name->size);
