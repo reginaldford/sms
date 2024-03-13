@@ -58,7 +58,6 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 }
 // Return the size of the object in bytes
 int sm_sizeof(sm_object *obj1) {
-  // printf("type: %i\n",obj1->my_type); fflush(stdout);
   switch (obj1->my_type) {
   case SM_DOUBLE_TYPE:
     return sizeof(sm_double);
@@ -98,7 +97,6 @@ int sm_sizeof(sm_object *obj1) {
     return sm_stack_obj_size((sm_stack_obj *)obj1);
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
-    // sm_sprint_dump();
     exit(1);
   }
 }
