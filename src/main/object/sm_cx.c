@@ -99,8 +99,9 @@ bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
       next_node = sm_node_nth(current_node->children, child_index);
     current_node = (sm_node *)next_node;
   }
-  current_node->value     = (sm_object *)val;
-  current_node->symbol_id = sym - ((sm_symbol *)sms_symbol_heap->storage);
+  current_node->value = (sm_object *)val;
+  // printf("symbol %i: %s\n", sym - (sm_symbol *)sms_symbol_heap->storage, &sym->name->content);
+  current_node->symbol_id = (uint32_t)(sym - (sm_symbol *)sms_symbol_heap->storage);
   return val;
 }
 

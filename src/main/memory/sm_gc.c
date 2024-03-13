@@ -96,11 +96,6 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case SM_SYMBOL_TYPE: {
-      sm_symbol *sym = (sm_symbol *)current_obj;
-      sym->name      = (sm_string *)sm_meet_object((sm_object *)sym->name);
-      break;
-    }
     case SM_META_TYPE: {
       sm_meta *meta = (sm_meta *)current_obj;
       meta->address = (sm_object *)sm_meet_object(meta->address);
