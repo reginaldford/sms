@@ -20,7 +20,7 @@ SRC_MEM         := src/main/memory
 SRC_TERMINAL    := src/main/terminal
 SRC_TEST        := src/test
 SRC_KERN_TEST   := src/kernel_test
-SRCS_MAIN       := $(filter-out $(SRC_MAIN)/sm_main.c, $(shell find $(SRC_MAIN) -name '*.c'))
+SRCS_MAIN := $(filter-out $(SRC_MAIN)/sm_main.c $(SRC_MAIN)/linenoise/example.c, $(shell find $(SRC_MAIN) -name '*.c'))
 SRCS_TEST       := $(shell find $(SRC_TEST) -name '*.c')
 SRCS_KT         := $(shell find $(SRC_KERN_TEST) -name '*.c')
 OBJS_PARSER     := $(BUILD_DIR)/$(SRC_BISON_FLEX)/y.tab.c.o $(BUILD_DIR)/$(SRC_BISON_FLEX)/lex.yy.c.o
@@ -109,6 +109,7 @@ clean:
 		$(BUILD_DIR)/$(SRC_ENGINE)/*.o\
 		$(BUILD_DIR)/$(SRC_MEM)/*.o\
 		$(BUILD_DIR)/$(SRC_TERMINAL)/*.o\
+		$(BUILD_DIR)/$(SRC_MAIN)/linenoise/*.o\
 		bin/sms*\
 		docs/html
 
