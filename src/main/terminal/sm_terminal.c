@@ -6,15 +6,20 @@
 extern int yylineno;
 
 // Print the prompt
-void sm_terminal_print_prompt() {
-  if (yylineno > 1)
-    putc('\n', stdout);
-  printf("%s", sm_terminal_fg_color(SM_TERM_B_GREEN));
-  printf("%i", yylineno);
-  putc('>', stdout);
-  printf("%s", sm_terminal_reset());
-  putc(' ', stdout);
-  fflush(stdout);
+sm_parse_result sm_terminal_prompt() {
+  linenoiseHistoryLoad("/home/rex/.sms_history");
+  char prompt[17];
+  int  cursor = 0;
+  if (yylineno > 1) {
+    printf("\n");
+    fflush(stdout);
+  }
+  cursor += sprintf(prompt + cursor, "%i> ", yylineno);
+  char *line = linenoise(prompt);
+  int   len  = strlen(line);
+  linenoiseHistoryAdd(line);
+  linenoiseHistorySave("home/rex/.sms_history");
+  return sm_parse_cstr(line, len);
 }
 
 bool sm_terminal_has_color() {

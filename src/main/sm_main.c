@@ -37,8 +37,7 @@ void start_repl() {
   // Read, Evaluate, Print Loop
   while (true) {
     // Prompt
-    sm_terminal_print_prompt();
-    sm_parse_result pr = sm_parse_file("/dev/stdin");
+    sm_parse_result pr = sm_terminal_prompt();
     // Read
     if (pr.return_val == 0 && pr.parsed_object != NULL) {
       // Evaluate
@@ -49,6 +48,7 @@ void start_repl() {
              sm_terminal_reset());
       // Cleanup
       sm_garbage_collect();
+      fflush(stdout);
       // Count this as a line
       yylineno++;
     } else {
