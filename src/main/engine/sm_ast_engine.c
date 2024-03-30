@@ -598,10 +598,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_string_escape(str0);
     }
     case SM_INPUT_EXPR: {
-      char input_str[500];
-      fgets(input_str, sizeof(input_str), stdin);
+      // fgets(input_str, sizeof(input_str), stdin);
+      char *line = linenoise("");
       // we remove the trailing newline character
-      return (sm_object *)sm_new_string(strlen(input_str) - 1, input_str);
+      return (sm_object *)sm_new_string(strlen(line), line);
     }
     case SM_OR_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);

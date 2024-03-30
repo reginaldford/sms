@@ -20,8 +20,8 @@ typedef enum sm_terminal_color {
   SM_TERM_B_WHITE
 } sm_terminal_color;
 
-void  sm_terminal_print_prompt();
-bool  sm_terminal_has_color();
-char *sm_terminal_fg_color(sm_terminal_color color);
-char *sm_terminal_bg_color(sm_terminal_color color);
-char *sm_terminal_reset();
+sm_parse_result sm_terminal_prompt();
+bool            sm_terminal_has_color();
+char           *sm_terminal_fg_color(sm_terminal_color color);
+char           *sm_terminal_bg_color(sm_terminal_color color);
+char           *sm_terminal_reset();
