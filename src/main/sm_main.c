@@ -10,7 +10,7 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.21%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.211%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
@@ -37,7 +37,8 @@ void start_repl() {
   // Read, Evaluate, Print Loop
   while (true) {
     // Prompt
-    sm_parse_result pr = sm_terminal_prompt();
+    sm_string      *prompt_str = sm_terminal_prompt();
+    sm_parse_result pr         = sm_parse_cstr(&prompt_str->content, prompt_str->size);
     // Read
     if (pr.return_val == 0 && pr.parsed_object != NULL) {
       // Evaluate

@@ -312,3 +312,19 @@ sm_env *sm_global_environment(sm_env *replacement) {
   } else
     return environment;
 }
+
+// Read only sm_string for home directory, or NULL
+sm_string *sm_global_home_directory() {
+  static char home_dir[257];
+  if (!*home_dir) {
+    uid_t          uid = getuid();      // Get the user ID of the current process
+    struct passwd *pw  = getpwuid(uid); // Get passwd struct for the user
+    if (pw == NULL)
+      return NULL; // Error
+    sm_string *str = (sm_string *)home_dir;
+    str->my_type   = SM_STRING_TYPE;
+    str->size      = strlen(pw->pw_dir);
+    sm_strncpy(&(str->content), pw->pw_dir, str->size);
+  }
+  return (sm_string *)home_dir;
+}

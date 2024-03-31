@@ -38,3 +38,5 @@ char *sm_global_type_name(uint32_t which);
 uint32_t sm_global_type_name_len(uint32_t which);
 /// Global terminal io struct for vt100 functions
 struct termios *sm_global_term_attrs();
+/// Read-only for user home directory
+struct sm_string *sm_global_home_directory();

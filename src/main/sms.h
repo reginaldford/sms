@@ -11,6 +11,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <termios.h>
+#include <pwd.h>
 
 // We use __builtin_popcount_ll in sm_node.c
 #if defined(__x86_64__)
