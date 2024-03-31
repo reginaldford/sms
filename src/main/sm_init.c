@@ -1,6 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
+#include <pwd.h>
 
 extern struct sm_heap *sms_heap;
 extern struct sm_heap *sms_symbol_heap;

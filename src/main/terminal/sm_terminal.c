@@ -6,8 +6,8 @@
 extern int yylineno;
 
 // Print the prompt
-sm_parse_result sm_terminal_prompt() {
-  linenoiseHistoryLoad("/home/rex/.sms_history");
+sm_string *sm_terminal_prompt() {
+  linenoiseSetMultiLine(1);
   char prompt[17];
   int  cursor = 0;
   if (yylineno > 1) {
@@ -15,11 +15,19 @@ sm_parse_result sm_terminal_prompt() {
     fflush(stdout);
   }
   cursor += sprintf(prompt + cursor, "%i> ", yylineno);
+  sm_string *home_dir = sm_global_home_directory();
+  char       history_path[256];
+  if (home_dir) {
+    sprintf(history_path, "%s/.sms_history", &home_dir->content);
+    linenoiseHistoryLoad(history_path);
+  }
   char *line = linenoise(prompt);
   int   len  = strlen(line);
   linenoiseHistoryAdd(line);
-  linenoiseHistorySave("home/rex/.sms_history");
-  return sm_parse_cstr(line, len);
+  char historyFilePath;
+  if (home_dir)
+    linenoiseHistorySave(history_path);
+  return sm_new_string(len, line);
 }
 
 bool sm_terminal_has_color() {
