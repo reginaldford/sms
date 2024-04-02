@@ -27,4 +27,10 @@ typedef struct sm_env {
   int num_args;
   /// Args passed to the main function
   char **args;
+  /// -l none will set this to true in sm_init
+  bool no_history_file;
+  /// History file path for linenoise
+  char history_file[256];
+  /// Length of History file path for linenoise
+  int history_file_len;
 } sm_env;

@@ -15,18 +15,16 @@ sm_string *sm_terminal_prompt() {
     fflush(stdout);
   }
   cursor += sprintf(prompt + cursor, "%i> ", yylineno);
-  sm_string *home_dir = sm_global_home_directory();
-  char       history_path[256];
-  if (home_dir) {
-    sprintf(history_path, "%s/.sms_history", &home_dir->content);
-    linenoiseHistoryLoad(history_path);
-  }
+  // YOU ARE HERE
+  sm_env *env = sm_global_environment(NULL);
+  if (!env->no_history_file)
+    linenoiseHistoryLoad(env->history_file);
   char *line = linenoise(prompt);
   int   len  = strlen(line);
   linenoiseHistoryAdd(line);
   char historyFilePath;
-  if (home_dir)
-    linenoiseHistorySave(history_path);
+  if (!env->no_history_file)
+    linenoiseHistorySave(env->history_file);
   return sm_new_string(len, line);
 }
 
