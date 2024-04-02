@@ -24,6 +24,15 @@ void sm_init(sm_env *env, int num_args, char **argv) {
     mem_bytes = env->mem_bytes; // mem_bytes overrides
   else
     env->mem_bytes = mem_bytes;
+  // Using default history file
+  if (!env->no_history_file && !env->history_file_len) {
+    char       history_path[256];
+    sm_string *home_dir = sm_global_home_directory();
+    if (home_dir) {
+      sprintf(env->history_file, "%s/.sms_history", &home_dir->content);
+      env->history_file_len = strlen(env->history_file);
+    }
+  }
 
   // Symbol related heap allocations
   sms_symbol_heap      = sm_new_heap(1024 * 512);

@@ -1,7 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
-#include "unistd.h"
 #include "../bison_flex/y.tab.h"
 
 extern int yylineno;
@@ -79,21 +78,29 @@ int main(int num_args, char *argv[]) {
   static struct sm_env env = {0}; // global environment structure
   opterr                   = 0;   // Disable error messages for unknown options
   int opt;
-  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:")) != -1) {
+  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:l:")) != -1) {
     switch (opt) {
     case 'h':
       printf("SMS Help\n");
       printf("Running sms with no flags will start the command line.\n");
       printf(" Flag:                                           Example:\n");
-      printf("-h Help.                                          sms -h\n");
-      printf("-q Quiet mode, does not print intro/outro.        sms -q -s script.sms\n");
-      printf("-m Set memory usage. Units: kmgt. Default is 64m. sms -m 150m\n");
-      printf("-e Print the evaluation of an expression.         sms -e \"2*sin(PI/4)\"\n");
-      printf("-s Run Script file.                               sms -s script.sms\n");
-      printf("-i Run a file, then start the REPL.               sms -i script.sms\n");
-      printf("-c Custom argument. Accessed via _args.           sms -c \"a single string\"\n");
+      printf("-h Help.                                            sms -h\n");
+      printf("-q Quiet mode, does not print intro/outro.          sms -q -s script.sms\n");
+      printf("-m Set memory usage. Units: kmgt. Default is 64m.   sms -m 150m\n");
+      printf("-e Print the evaluation of an expression.           sms -e \"2*sin(PI/4)\"\n");
+      printf("-s Run Script file.                                 sms -s script.sms\n");
+      printf("-i Run a file, then start the REPL.                 sms -i script.sms\n");
+      printf("-l Set the linenoise history file. Disable with off sms -l history.txt\n");
+      printf("-c Custom argument. Accessed via _args. sms -c \"a single string\"\n");
       clean_exit(&env, 0);
       break;
+    case 'l':
+      if (!strcmp(optarg, "none")) {
+        env.no_history_file = true;
+        break;
+      }
+      env.history_file_len = strlen(optarg);
+      sm_strncpy(env.history_file, optarg, env.history_file_len);
     case 'q':
       env.quiet_mode = true;
       break;

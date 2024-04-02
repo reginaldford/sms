@@ -328,3 +328,17 @@ sm_string *sm_global_home_directory() {
   }
   return (sm_string *)home_dir;
 }
+
+// Read only sm_string for home directory, or NULL
+sm_string *sm_global_hist_file() {
+  static char hist_file_string_space[256];
+  sm_string  *str = (sm_string *)hist_file_string_space;
+  if (!*hist_file_string_space) {
+    sm_env     env = *sm_global_environment(NULL);
+    sm_string *str = (sm_string *)hist_file_string_space;
+    str->my_type   = SM_STRING_TYPE;
+    str->size      = env.history_file_len;
+    sm_strncpy(&(str->content), env.history_file, env.history_file_len);
+  }
+  return (sm_string *)hist_file_string_space;
+}
