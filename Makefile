@@ -43,9 +43,14 @@ DOCS_CONFIG     := docs/docs.conf
 
 # sms executable
 main:
+	$(MAKE) $(SRC_MAIN)/linenoise/linenoise.c
 	$(MAKE) $(SRC_BISON_FLEX)/y.tab.c
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME)
+
+# linenoise
+$(MAKE) $(SRC_MAIN)/linenoise/linenoise.c:
+	git submodule update --recursive --init
 
 bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
 	$(CC) $(CFLAGS) -lm  $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
