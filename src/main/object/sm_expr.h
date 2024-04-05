@@ -211,11 +211,18 @@ typedef struct sm_expr {
   short             filler;
 } sm_expr;
 
-sm_expr   *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg);
-sm_expr   *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2);
-sm_expr   *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
-sm_expr   *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
-                         sm_object *arg4);
+/// New Expression with no args
+sm_expr *sm_new_expr_0(enum SM_EXPR_TYPE op1);
+/// New Expression with 1 arg
+sm_expr *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg);
+/// New Expression with 2 args
+sm_expr *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2);
+/// New Expression with 3 args
+sm_expr *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
+/// New Expression with 4 args
+sm_expr *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
+                       sm_object *arg4);
+/// New Expression with size args
 sm_expr   *sm_new_expr_n(enum SM_EXPR_TYPE op1, uint32_t size, uint32_t capacity);
 sm_expr   *sm_expr_append(sm_expr *expr, sm_object *arg);
 uint32_t   sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);

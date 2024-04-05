@@ -299,6 +299,7 @@ COMMAND : EXPR ';' {
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3); }
+| EXIT '(' ')' { $$ = sm_new_expr_0(SM_EXIT_EXPR); }
 | LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4); }
 | RM SYM {$$ = sm_new_expr(SM_RM_EXPR, (sm_object *)$2); }
 | SYM{}

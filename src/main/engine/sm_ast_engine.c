@@ -311,12 +311,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_EXIT_EXPR: {
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_EXIT_EXPR))
-        return (sm_object *)sm_new_string(0, "");
-      num0          = (sm_double *)obj0;
-      int exit_code = num0->value;
+      int exit_code = 0;
+      if (sme->size != 0) {
+        sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+        sm_double *num0;
+        if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_EXIT_EXPR))
+          return (sm_object *)sm_new_string(0, "");
+        num0      = (sm_double *)obj0;
+        exit_code = num0->value;
+      }
       sm_signal_exit(exit_code);
       break;
     }

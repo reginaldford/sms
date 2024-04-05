@@ -7,6 +7,7 @@ extern int yylineno;
 
 // Print the prompt
 sm_string *sm_terminal_prompt() {
+  static int escape_attempts = 0;
   linenoiseSetMultiLine(1);
   char prompt[17];
   int  cursor = 0;
@@ -15,17 +16,25 @@ sm_string *sm_terminal_prompt() {
     fflush(stdout);
   }
   cursor += sprintf(prompt + cursor, "%i> ", yylineno);
-  // YOU ARE HERE
   sm_env *env = sm_global_environment(NULL);
   if (!env->no_history_file)
     linenoiseHistoryLoad(env->history_file);
   char *line = linenoise(prompt);
-  int   len  = strlen(line);
-  linenoiseHistoryAdd(line);
-  char historyFilePath;
-  if (!env->no_history_file)
-    linenoiseHistorySave(env->history_file);
-  return sm_new_string(len, line);
+  if (line) {
+    escape_attempts = 0;
+    int len         = strlen(line);
+    linenoiseHistoryAdd(line);
+    char historyFilePath;
+    if (!env->no_history_file)
+      linenoiseHistorySave(env->history_file);
+    return sm_new_string(len, line);
+  } else {
+    escape_attempts++;
+    printf("Repeat (ctrl+d/ctrl+c) to exit.\n");
+    if (escape_attempts >= 2)
+      sm_signal_exit(0);
+    return sm_new_string(0, "");
+  }
 }
 
 bool sm_terminal_has_color() {

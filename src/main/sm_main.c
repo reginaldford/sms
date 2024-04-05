@@ -36,25 +36,28 @@ void start_repl() {
   // Read, Evaluate, Print Loop
   while (true) {
     // Prompt
-    sm_string      *prompt_str = sm_terminal_prompt();
-    sm_parse_result pr         = sm_parse_cstr(&prompt_str->content, prompt_str->size);
-    // Read
-    if (pr.return_val == 0 && pr.parsed_object != NULL) {
-      // Evaluate
-      sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-      // Print
-      sm_string *result_str = sm_object_to_string(result);
-      printf("%s%s%s", sm_terminal_fg_color(SM_TERM_B_WHITE), &(result_str->content),
-             sm_terminal_reset());
-      // Cleanup
-      sm_garbage_collect();
-      fflush(stdout);
-      // Count this as a line
-      yylineno++;
-    } else {
-      printf("Error: Parser returned %i\n", pr.return_val);
-      if (!pr.parsed_object)
-        printf("Nothing was parsed.");
+    sm_string *prompt_str = sm_terminal_prompt();
+    if (prompt_str->size > 0) {
+      sm_parse_result pr = sm_parse_cstr(&prompt_str->content, prompt_str->size);
+      // Read
+      if (pr.return_val == 0 && pr.parsed_object != NULL) {
+        // Evaluate
+        sm_object *result =
+          sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+        // Print
+        sm_string *result_str = sm_object_to_string(result);
+        printf("%s%s%s", sm_terminal_fg_color(SM_TERM_B_WHITE), &(result_str->content),
+               sm_terminal_reset());
+        // Cleanup
+        sm_garbage_collect();
+        fflush(stdout);
+        // Count this as a line
+        yylineno++;
+      } else {
+        printf("Error: Parser returned %i\n", pr.return_val);
+        if (!pr.parsed_object)
+          printf("Nothing was parsed.");
+      }
     }
   }
 }
@@ -83,14 +86,14 @@ int main(int num_args, char *argv[]) {
     case 'h':
       printf("SMS Help\n");
       printf("Running sms with no flags will start the command line.\n");
-      printf(" Flag:                                           Example:\n");
+      printf(" FLAG:                                             EXAMPLE:\n");
       printf("-h Help.                                            sms -h\n");
       printf("-q Quiet mode, does not print intro/outro.          sms -q -s script.sms\n");
       printf("-m Set memory usage. Units: kmgt. Default is 64m.   sms -m 150m\n");
       printf("-e Print the evaluation of an expression.           sms -e \"2*sin(PI/4)\"\n");
       printf("-s Run Script file.                                 sms -s script.sms\n");
       printf("-i Run a file, then start the REPL.                 sms -i script.sms\n");
-      printf("-l Set the linenoise history file. Disable with off sms -l history.txt\n");
+      printf("-l Set the command history file. Disable with 'off' sms -l history.txt\n");
       printf("-c Custom argument. Accessed via _args. sms -c \"a single string\"\n");
       clean_exit(&env, 0);
       break;
