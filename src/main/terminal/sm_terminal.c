@@ -30,11 +30,12 @@ sm_string *sm_terminal_prompt() {
     return sm_new_string(len, line);
   } else {
     escape_attempts++;
-    printf("Repeat (ctrl+d/ctrl+c) to exit.\n");
+    printf("Press (Ctrl+d/Ctrl+c) again to exit.\n");
     if (escape_attempts >= 2)
       sm_signal_exit(0);
     return sm_new_string(0, "");
   }
+  free(line);
 }
 
 bool sm_terminal_has_color() {
