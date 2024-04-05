@@ -13,6 +13,9 @@ sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op, uint32_t size, uint32_t capacity) {
   return new_expr;
 }
 
+// New expression object without arguments
+sm_expr *sm_new_expr_0(enum SM_EXPR_TYPE op) { return sm_new_expr_n(op, 0, 0); }
+
 // New expression object with 1 argument
 sm_expr *sm_new_expr(enum SM_EXPR_TYPE op, sm_object *arg) {
   sm_expr *new_expr = sm_new_expr_n(op, 1, 1);
