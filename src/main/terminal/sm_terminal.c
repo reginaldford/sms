@@ -7,7 +7,7 @@ extern int yylineno;
 
 // Print the prompt
 sm_string *sm_terminal_prompt() {
-  static int escape_attempts = 0;
+  static uint8_t escape_attempts = 0;
   linenoiseSetMultiLine(1);
   char prompt[17];
   int  cursor = 0;
@@ -27,15 +27,19 @@ sm_string *sm_terminal_prompt() {
     char historyFilePath;
     if (!env->no_history_file)
       linenoiseHistorySave(env->history_file);
-    return sm_new_string(len, line);
+    sm_string *output = sm_new_string(len, line);
+    free(line);
+    return output;
   } else {
     escape_attempts++;
-    printf("Press (Ctrl+d/Ctrl+c) again to exit.\n");
-    if (escape_attempts >= 2)
+    if (escape_attempts == 1)
+      printf("Press (Ctrl+d/Ctrl+c) again to exit.\n");
+    else {
+      printf("User requested exit.\n");
       sm_signal_exit(0);
-    return sm_new_string(0, "");
+    }
   }
-  free(line);
+  return sm_new_string(0, "");
 }
 
 bool sm_terminal_has_color() {
