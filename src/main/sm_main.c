@@ -9,7 +9,7 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.211%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion 0.212%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
