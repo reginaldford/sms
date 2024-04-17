@@ -1,7 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
-#include <pwd.h>
 
 extern struct sm_heap *sms_heap;
 extern struct sm_heap *sms_symbol_heap;
@@ -72,6 +71,9 @@ void sm_init(sm_env *env, int num_args, char **argv) {
 
   // _scratch global cx variable
   sm_cx_let(parent_cx, sm_new_symbol("_scratch", 8), (sm_object *)scratch);
+
+  // linenoise setup
+  linenoiseSetCompletionCallback(sm_terminal_completion);
 
   // Done
   env->initialized = true;

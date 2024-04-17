@@ -25,3 +25,4 @@ bool       sm_terminal_has_color();
 char      *sm_terminal_fg_color(sm_terminal_color color);
 char      *sm_terminal_bg_color(sm_terminal_color color);
 char      *sm_terminal_reset();
+void       sm_terminal_completion(const char *buf, linenoiseCompletions *lc);
