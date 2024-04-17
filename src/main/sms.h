@@ -69,7 +69,7 @@ enum sm_object_type {
 #define DEBUG_HERE(note)                                                                           \
   printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
   fflush(stdout);
-
+#include "linenoise/linenoise.h"
 #include "sm_common.h"
 #include "memory/sm_heap.h"
 #include "sm_env.h"
@@ -101,6 +101,5 @@ enum sm_object_type {
 #include "engine/sm_diff.h"
 #include "engine/sm_simplify.h"
 #include "object/sm_return.h"
-#include "linenoise/linenoise.h"
 #include "engine/sm_ast_engine.h"
 #include "engine/op/stack.h"
