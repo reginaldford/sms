@@ -5,36 +5,27 @@
 // bison generated parser's global line number :-(
 extern int yylineno;
 
+
+// Adds the keys of cx to linenoise completion set
+void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, linenoiseCompletions *lc) {
+  sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+  keys                = sm_node_keys(cx->content, sm_new_stack_obj(17), empty_expr);
+  if (keys->size > 0) {
+    for (int i = 0; i < keys->size; i++) {
+      sm_symbol *sym = sm_expr_get_arg(keys, i);
+      if (!strncmp(buf, &sym->name->content, MIN(strlen(buf), sym->name->size)))
+        linenoiseAddCompletion(lc, &sym->name->content);
+    }
+  }
+}
+
 // Completion func
 void sm_terminal_completion(const char *buf, linenoiseCompletions *lc) {
   sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
   sm_cx   *scratch    = (sm_cx *)(*sm_global_lex_stack(NULL)->top);
   sm_expr *keys       = sm_node_keys(scratch->content, sm_new_stack_obj(17), empty_expr);
-  if (keys->size > 0) {
-    for (int i = 0; i < keys->size; i++) {
-      sm_symbol *first       = sm_expr_get_arg(keys, i);
-      int        first_index = i;
-      if (first != empty_expr &&
-          strncmp(buf, &first->name->content, MIN(strlen(buf), first->name->size)) == 0) {
-        linenoiseAddCompletion(lc, &first->name->content);
-        sm_expr_set_arg(keys, first_index, empty_expr);
-      }
-    }
-  }
-  // repeating for parent of scratch
-  scratch = scratch->parent;
-  keys    = sm_node_keys(scratch->content, sm_new_stack_obj(17), empty_expr);
-  if (keys->size > 0) {
-    for (int i = 0; i < keys->size; i++) {
-      sm_symbol *first       = sm_expr_get_arg(keys, i);
-      int        first_index = i;
-      if (first != empty_expr &&
-          strncmp(buf, &first->name->content, MIN(strlen(buf), first->name->size)) == 0) {
-        linenoiseAddCompletion(lc, &first->name->content);
-        sm_expr_set_arg(keys, first_index, empty_expr);
-      }
-    }
-  }
+  add_keys(scratch, keys, buf, lc);
+  add_keys(scratch->parent, keys, buf, lc);
 }
 
 
