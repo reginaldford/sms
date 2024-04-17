@@ -2,29 +2,41 @@
 
 #include "../sms.h"
 
-extern sm_cx *sms_scratch;
-
 // bison generated parser's global line number :-(
 extern int yylineno;
 
 // Completion func
 void sm_terminal_completion(const char *buf, linenoiseCompletions *lc) {
-  sm_expr *emptyExpr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
-  sm_cx   *scratch   = (sm_cx *)(*sm_global_lex_stack(NULL)->top);
-  sm_expr *keys      = sm_node_keys(scratch->content, sm_new_stack_obj(17), emptyExpr);
+  sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+  sm_cx   *scratch    = (sm_cx *)(*sm_global_lex_stack(NULL)->top);
+  sm_expr *keys       = sm_node_keys(scratch->content, sm_new_stack_obj(17), empty_expr);
   if (keys->size > 0) {
-    sm_symbol *first = (sm_symbol *)sm_expr_get_arg(keys, 0);
-
-    for (int i = 1; i < keys->size; i++) {
-      sm_symbol *current_key = (sm_symbol *)sm_expr_get_arg(keys, i);
-      if (strncmp(&current_key->name->content, &first->name->content,
-                  MIN(first->name->size, current_key->name->size)) < 0) {
-        first = current_key;
+    for (int i = 0; i < keys->size; i++) {
+      sm_symbol *first       = sm_expr_get_arg(keys, i);
+      int        first_index = i;
+      if (first != empty_expr &&
+          strncmp(buf, &first->name->content, MIN(strlen(buf), first->name->size)) == 0) {
+        linenoiseAddCompletion(lc, &first->name->content);
+        sm_expr_set_arg(keys, first_index, empty_expr);
       }
     }
-    linenoiseAddCompletion(lc, &first->name->content);
+  }
+  // repeating for parent of scratch
+  scratch = scratch->parent;
+  keys    = sm_node_keys(scratch->content, sm_new_stack_obj(17), empty_expr);
+  if (keys->size > 0) {
+    for (int i = 0; i < keys->size; i++) {
+      sm_symbol *first       = sm_expr_get_arg(keys, i);
+      int        first_index = i;
+      if (first != empty_expr &&
+          strncmp(buf, &first->name->content, MIN(strlen(buf), first->name->size)) == 0) {
+        linenoiseAddCompletion(lc, &first->name->content);
+        sm_expr_set_arg(keys, first_index, empty_expr);
+      }
+    }
   }
 }
+
 
 // Print the prompt
 sm_string *sm_terminal_prompt() {
