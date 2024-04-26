@@ -12,7 +12,7 @@ void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, linenoiseCompletions *l
   keys                = sm_node_keys(cx->content, sm_new_stack_obj(17), empty_expr);
   if (keys->size > 0) {
     for (int i = 0; i < keys->size; i++) {
-      sm_symbol *sym = sm_expr_get_arg(keys, i);
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(keys, i);
       if (!strncmp(buf, &sym->name->content, MIN(strlen(buf), sym->name->size)))
         linenoiseAddCompletion(lc, &sym->name->content);
     }
@@ -51,7 +51,9 @@ sm_string *sm_terminal_prompt() {
     char historyFilePath;
     if (!env->no_history_file)
       linenoiseHistorySave(env->history_file);
-    sm_string *output = sm_new_string(len, line);
+    sm_string *output = sm_new_string(len + 1, line);
+    // Automatically add a semicolon !
+    (&output->content)[len] = ';';
     free(line);
     return output;
   } else {
@@ -80,9 +82,8 @@ bool sm_terminal_has_color() {
 }
 
 // v100 code to set the foreground color
+// Provides NULL for bw terminals
 char *sm_terminal_fg_color(sm_terminal_color color) {
-  // We must provide this sequence so that printf adds nothing for color commands
-  // in a non-color terminal
   static char *codes[] = {
     "\x1b[30m",   // SM_TERM_BLACK
     "\x1b[31m",   // SM_TERM_RED
@@ -130,7 +131,9 @@ char *sm_terminal_bg_color(sm_terminal_color color) {
     "\x1b[46;1m", // SM_TERM_B_CYAN
     "\x1b[47;1m"  // SM_TERM_B_WHITE
   };
-  if (sm_terminal_has_color() && color >= SM_TERM_BLACK && color <= SM_TERM_B_WHITE)
+  if (!sm_terminal_has_color())
+    return "";
+  if (color >= SM_TERM_BLACK && color <= SM_TERM_B_WHITE)
     return codes[color];
   return "";
 }
