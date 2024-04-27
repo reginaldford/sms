@@ -50,7 +50,6 @@ uint64_t sm_bytelength_parse(char *str, int length) {
       buffer[j] = current_char;
       j++;
     } else if (sm_is_unit(current_char) != -1) {
-      printf("detected unit: %i\n", sm_is_unit(current_char));
       // 0 means b, 1 means k, etc.
       int  unit          = sm_is_unit(current_char);
       long unit_in_bytes = pow(1024, unit);
