@@ -64,6 +64,7 @@ uint64_t sm_bytelength_parse(char *str, int length) {
   return atof(buffer);
 }
 
+// Prints to screen the byte length, into reasonable units
 void sm_print_fancy_bytelength(uint64_t bytelength) {
   const uint64_t KB = 1024;
   if (bytelength < KB)
@@ -82,4 +83,23 @@ void sm_print_fancy_bytelength(uint64_t bytelength) {
     printf("%.4gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
   else
     printf("lots");
+}
+
+// Reads a file into a string. If there is any issue, returns sms_false
+sm_string *sm_read_file(char *filePath, int filePathLen) {
+  sm_string *fname_str;
+  char      *fname_cstr = filePath;
+  if (access(fname_cstr, F_OK) != 0) {
+    printf("fileReadStr failed because the file, %s ,does not exist.\n", fname_cstr);
+    return (sm_string *)sms_false;
+  }
+  FILE *fptr = fopen(fname_cstr, "r");
+  fseek(fptr, 0, SEEK_END);
+  long       len    = ftell(fptr);
+  sm_string *output = sm_new_string_manual(len);
+  fseek(fptr, 0, SEEK_SET);
+  fread(&(output->content), 1, len, fptr);
+  fclose(fptr);
+  *(&output->content + len) = '\0';
+  return output;
 }
