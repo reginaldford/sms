@@ -5,7 +5,6 @@
 // bison generated parser's global line number :-(
 extern int yylineno;
 
-
 // Adds the keys of cx to linenoise completion set
 void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, linenoiseCompletions *lc) {
   sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
@@ -25,12 +24,30 @@ void sm_terminal_completion(const char *buf, linenoiseCompletions *lc) {
   sm_cx   *scratch    = (sm_cx *)(*sm_global_lex_stack(NULL)->top);
   sm_expr *keys       = sm_node_keys(scratch->content, sm_new_stack_obj(17), empty_expr);
   add_keys(scratch, keys, buf, lc);
-  add_keys(scratch->parent, keys, buf, lc);
+  if (scratch->parent)
+    add_keys(scratch->parent, keys, buf, lc);
 }
 
+// Print the prompt, return an sm_string
+sm_parse_result sm_terminal_prompt(bool plain_mode) {
+  if (plain_mode)
+    return sm_terminal_prompt_plain();
+  else
+    return sm_terminal_prompt_linenoise();
+}
 
-// Print the prompt
-sm_string *sm_terminal_prompt() {
+sm_parse_result sm_terminal_prompt_plain() {
+  printf("\n%i> ", yylineno);
+  char buffer[501];
+  fgets(buffer, sizeof(buffer), stdin);
+  int len = strlen(buffer);
+  // Automatically adding a semicolon
+  buffer[len]     = ';';
+  buffer[len + 1] = '\0';
+  return sm_parse_cstr(buffer, len + 1);
+}
+
+sm_parse_result sm_terminal_prompt_linenoise() {
   static uint8_t escape_attempts = 0;
   linenoiseSetMultiLine(1);
   char prompt[17];
@@ -51,11 +68,12 @@ sm_string *sm_terminal_prompt() {
     char historyFilePath;
     if (!env->no_history_file)
       linenoiseHistorySave(env->history_file);
-    sm_string *output = sm_new_string(len + 1, line);
-    // Automatically add a semicolon !
-    (&output->content)[len] = ';';
+    int        outputLen = len + 1;
+    sm_string *output    = sm_new_string(outputLen, line);
     free(line);
-    return output;
+    // Automatically add a semicolon !
+    (&output->content)[outputLen - 1] = ';';
+    return sm_parse_cstr(&output->content, outputLen);
   } else {
     escape_attempts++;
     if (escape_attempts == 1)
@@ -65,7 +83,8 @@ sm_string *sm_terminal_prompt() {
       sm_signal_exit(0);
     }
   }
-  return sm_new_string(0, "");
+  // nothing was parsed
+  return (sm_parse_result){.return_val = -1, .parsed_object = sm_new_double(0)};
 }
 
 bool sm_terminal_has_color() {

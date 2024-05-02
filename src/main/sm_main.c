@@ -30,34 +30,29 @@ void clean_exit(sm_env *env, int code) {
 }
 
 // Run user command line
-void start_repl() {
+void start_repl(sm_env *env) {
   // Reset the line counter
   yylineno = 1;
   // Read, Evaluate, Print Loop
   while (true) {
-    // Prompt
-    sm_string *prompt_str = sm_terminal_prompt();
-    if (prompt_str->size > 0) {
-      sm_parse_result pr = sm_parse_cstr(&prompt_str->content, prompt_str->size);
-      // Read
-      if (pr.return_val == 0 && pr.parsed_object != NULL) {
-        // Evaluate
-        sm_object *result =
-          sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-        // Print
-        sm_string *result_str = sm_object_to_string(result);
-        printf("%s%s%s", sm_terminal_fg_color(SM_TERM_B_WHITE), &(result_str->content),
-               sm_terminal_reset());
-        // Cleanup
-        sm_garbage_collect();
-        fflush(stdout);
-        // Count this as a line
-        yylineno++;
-      } else {
-        printf("Error: Parser returned %i\n", pr.return_val);
-        if (!pr.parsed_object)
-          printf("Nothing was parsed.");
-      }
+    // Read
+    sm_parse_result pr = sm_terminal_prompt(env->plain_mode);
+    if (!pr.return_val && pr.parsed_object) {
+      // Evaluate
+      sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      // Print
+      sm_string *result_str = sm_object_to_string(result);
+      printf("%s%s%s", sm_terminal_fg_color(SM_TERM_B_WHITE), &(result_str->content),
+             sm_terminal_reset());
+      // Cleanup
+      sm_garbage_collect();
+      fflush(stdout);
+      // Count this as a line
+      yylineno++;
+    } else {
+      printf("Error: Parser returned %i\n", pr.return_val);
+      if (!pr.parsed_object)
+        printf("Nothing was parsed.");
     }
   }
 }
@@ -81,7 +76,7 @@ int main(int num_args, char *argv[]) {
   static struct sm_env env = {0}; // global environment structure
   opterr                   = 0;   // Disable error messages for unknown options
   int opt;
-  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:l:")) != -1) {
+  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:l:p")) != -1) {
     switch (opt) {
     case 'h':
       printf("SMS Help\n");
@@ -96,6 +91,9 @@ int main(int num_args, char *argv[]) {
       printf("-l Set the command history file. Disable with 'off' sms -l history.txt\n");
       printf("-c Custom argument. Accessed via _args. sms -c \"a single string\"\n");
       clean_exit(&env, 0);
+      break;
+    case 'p':
+      env.plain_mode = true;
       break;
     case 'l':
       if (!strcmp(optarg, "none")) {
@@ -172,7 +170,7 @@ int main(int num_args, char *argv[]) {
       if (env.quiet_mode == false)
         printf("Loading: %s... \n", optarg);
       run_file(optarg, &env);
-      start_repl();
+      start_repl(&env);
       break;
     case '?':
       if (optopt == 'm') {
@@ -197,7 +195,7 @@ int main(int num_args, char *argv[]) {
     run_file(input_file, &env);
   } else { // No filename provided
     check_init(&env, num_args, argv);
-    start_repl();
+    start_repl(&env);
   }
   clean_exit(&env, 0);
 }

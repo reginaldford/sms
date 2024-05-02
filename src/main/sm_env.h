@@ -33,4 +33,6 @@ typedef struct sm_env {
   char history_file[256];
   /// Length of History file path for linenoise
   int history_file_len;
+  /// Plain terminal mode
+  bool plain_mode;
 } sm_env;
