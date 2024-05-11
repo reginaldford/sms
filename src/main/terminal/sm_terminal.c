@@ -2,18 +2,34 @@
 
 #include "../sms.h"
 
+extern sm_heap *sms_heap;
 // bison generated parser's global line number :-(
 extern int yylineno;
 
 // Adds the keys of cx to linenoise completion set
-void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, linenoiseCompletions *lc) {
+void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, int buf_len, char *last_word,
+              linenoiseCompletions *lc) {
+  last_word = NULL; // YOU ARE HERE (should work when I rm this line, but doesnt)
+  char concat_space[512];
+  int  last_word_len = 0;
+  if (last_word)
+    last_word_len = last_word - buf;
   sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
   keys                = sm_node_keys(cx->content, sm_new_stack_obj(17), empty_expr);
   if (keys->size > 0) {
     for (int i = 0; i < keys->size; i++) {
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(keys, i);
-      if (!strncmp(buf, &sym->name->content, MIN(strlen(buf), sym->name->size)))
-        linenoiseAddCompletion(lc, &sym->name->content);
+      if (!strncmp(last_word, &sym->name->content, MIN(last_word_len, sym->name->size))) {
+        int completion_len = (sym->name->size) + buf_len;
+        // Adding 4 ensures space for memory misalignment and NULL cstr terminator
+        sm_heap   *concat_heap  = sm_new_heap(completion_len + sizeof(sm_string) + 4);
+        sm_string *concatenated = sm_new_string_manual_at(concat_heap, completion_len);
+
+        sm_strncpy(&concatenated->content, buf, buf_len - last_word_len);
+        sm_strncpy(&concatenated->content + buf_len - last_word_len, &sym->name->content,
+                   sym->name->size);
+        linenoiseAddCompletion(lc, &concatenated->content);
+      }
     }
   }
 }
@@ -23,17 +39,26 @@ void sm_terminal_completion(const char *buf, linenoiseCompletions *lc) {
   sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
   sm_cx   *scratch    = (sm_cx *)(*sm_global_lex_stack(NULL)->top);
   sm_expr *keys       = sm_node_keys(scratch->content, sm_new_stack_obj(17), empty_expr);
-  add_keys(scratch, keys, buf, lc);
+  char    *last_word;
+  int      len = strlen(buf);
+  int      pos = len - 1;
+  while (pos >= 0)
+    if (!sm_is_symbol_char(buf[pos--]))
+      break;
+  if (pos < 0)
+    last_word = NULL;
+  else
+    last_word = &buf[pos + 2];
+  add_keys(scratch, keys, buf, len, last_word, lc);
   if (scratch->parent)
-    add_keys(scratch->parent, keys, buf, lc);
+    add_keys(scratch->parent, keys, buf, len, last_word, lc);
 }
 
-// Print the prompt, return an sm_string
+// Print the prompt, return an sm_parse_result
 sm_parse_result sm_terminal_prompt(bool plain_mode) {
   if (plain_mode)
     return sm_terminal_prompt_plain();
-  else
-    return sm_terminal_prompt_linenoise();
+  return sm_terminal_prompt_linenoise();
 }
 
 sm_parse_result sm_terminal_prompt_plain() {
