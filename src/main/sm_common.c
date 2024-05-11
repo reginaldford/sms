@@ -103,3 +103,7 @@ sm_string *sm_read_file(char *filePath, int filePathLen) {
   *(&output->content + len) = '\0';
   return output;
 }
+
+bool sm_is_symbol_char(char c) {
+  return (sm_is_digit(c) || sm_is_letter(c) || c == '\'' || c == '_');
+}

@@ -20,3 +20,5 @@ uint64_t sm_bytelength_parse(char *str, int length);
 void sm_print_fancy_bytelength(uint64_t bytelength);
 /// Reads a file into a string. If there is any issue, returns NULL
 struct sm_string *sm_read_file(char *filePath, int filePathLen);
+/// Whether a character is allowed in a symbol name
+bool sm_is_symbol_char(char c);
