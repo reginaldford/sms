@@ -107,3 +107,19 @@ sm_string *sm_read_file(char *filePath, int filePathLen) {
 bool sm_is_symbol_char(char c) {
   return (sm_is_digit(c) || sm_is_letter(c) || c == '\'' || c == '_');
 }
+
+void sm_log_message(const char *format, ...) {
+  static uint32_t msg_number = 0;
+  FILE           *fp         = fopen("sms.log", "a");
+  if (!fp) {
+    perror("Failed to open log file");
+    return;
+  }
+  fprintf(fp, "%u: ", msg_number++);
+  va_list args;
+  va_start(args, format);
+  vfprintf(fp, format, args);
+  fflush(fp);
+  va_end(args);
+  fclose(fp);
+}
