@@ -35,17 +35,19 @@ void sm_terminal_completion(const char *buf, linenoiseCompletions *lc) {
   sm_cx      *scratch    = (sm_cx *)(*sm_global_lex_stack(NULL)->top);
   sm_expr    *keys       = sm_node_keys(scratch->content, sm_new_stack_obj(17), empty_expr);
   const char *last_sym;
-  int         len = strlen(buf);
-  int         pos = len - 1;
-  // Determine the position of the beginning of the last symbol
-  while (pos >= 0)
-    if (!sm_is_symbol_char(buf[pos--]))
+  int         len          = strlen(buf);
+  int         last_sym_pos = len;
+  // Determine the last_sym_pos, the beginning of the last symbol
+  while (last_sym_pos >= 0) {
+    if (!sm_is_symbol_char(buf[last_sym_pos - 1]))
       break;
+    last_sym_pos--;
+  }
   // We signify no last sym by setting last_sym to NULL
-  if ((pos + 2) < 0 || !len)
+  if (last_sym_pos < 0)
     last_sym = NULL;
   else
-    last_sym = buf + pos + 2;
+    last_sym = buf + last_sym_pos;
   add_keys(scratch, keys, buf, len, last_sym, lc);
   if (scratch->parent)
     add_keys(scratch->parent, keys, buf, len, last_sym, lc);
@@ -65,7 +67,7 @@ sm_parse_result sm_terminal_prompt_plain() {
   char buffer[501];
   fgets(buffer, sizeof(buffer), stdin);
   int len = strlen(buffer);
-  // Automatically adding a semicolon
+  // Automatically adding a semicolon to user's input
   buffer[len]     = ';';
   buffer[len + 1] = '\0';
   return sm_parse_cstr(buffer, len + 1);
@@ -126,7 +128,7 @@ bool sm_terminal_has_color() {
   return false;
 }
 
-// v100 code to set the foreground color
+// vt100 code to set the foreground color
 // Provides NULL for bw terminals
 char *sm_terminal_fg_color(sm_terminal_color color) {
   static char *codes[] = {
@@ -156,7 +158,7 @@ char *sm_terminal_fg_color(sm_terminal_color color) {
   return "";
 }
 
-// v100 code to set the background color
+// vt100 code to set the background color
 char *sm_terminal_bg_color(sm_terminal_color color) {
   static char *codes[] = {
     "\x1b[40m",   // SM_TERM_BLACK
@@ -183,7 +185,7 @@ char *sm_terminal_bg_color(sm_terminal_color color) {
   return "";
 }
 
-// v100 code to reset
+// vt100 code to reset
 char *sm_terminal_reset() {
   static char *reset_code = "\x1b[0m";
   if (sm_terminal_has_color())
