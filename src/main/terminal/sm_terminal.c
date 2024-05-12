@@ -64,8 +64,11 @@ sm_parse_result sm_terminal_prompt(bool plain_mode) {
 // Uses plain posix fgets on stdin
 sm_parse_result sm_terminal_prompt_plain() {
   printf("\n%i> ", yylineno);
-  char buffer[501];
-  fgets(buffer, sizeof(buffer), stdin);
+  char  buffer[501];
+  char *fgets_val = fgets(buffer, sizeof(buffer), stdin);
+  // Handle EOF case
+  if (!fgets_val)
+    sm_signal_handler(SIGINT);
   int len = strlen(buffer);
   // Automatically adding a semicolon to user's input
   buffer[len]     = ';';
@@ -107,8 +110,7 @@ sm_parse_result sm_terminal_prompt_linenoise() {
     if (escape_attempts == 1)
       printf("Press (Ctrl+d/Ctrl+c) again to exit.\n");
     else {
-      printf("User requested exit.\n");
-      sm_signal_exit(0);
+      sm_signal_handler(SIGINT);
     }
   }
   // nothing was parsed
