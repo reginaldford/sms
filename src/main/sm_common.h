@@ -24,4 +24,4 @@ struct sm_string *sm_read_file(char *filePath, int filePathLen);
 bool sm_is_symbol_char(char c);
 /// Write a log message to sms.log for debugging.
 /// Works just like printf
-void sm_log_message(const char *format, ...);
+void sm_log(const char *format, ...);
