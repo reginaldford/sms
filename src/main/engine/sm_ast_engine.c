@@ -8,7 +8,6 @@
 
 // Globals from sm_global.c
 extern sm_heap   *sms_heap;
-extern sm_heap   *sms_symbol_heap;
 extern sm_heap   *sms_other_heap;
 extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
