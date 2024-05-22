@@ -8,6 +8,7 @@
 
 // Globals from sm_global.c
 extern sm_heap   *sms_heap;
+extern sm_heap   *sms_symbol_heap;
 extern sm_heap   *sms_other_heap;
 extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
@@ -352,6 +353,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (sm_cx_let(cx, sym, value))
         return (sm_object *)sms_true;
+      return (sm_object *)sms_false;
     }
     case SM_CX_GET_EXPR: {
       sm_cx     *cx  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1103,9 +1105,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(base_obj, 0, SM_CX_TYPE, SM_PARENT_EXPR))
         return (sm_object *)sms_false;
       base_cx = (sm_cx *)base_obj;
-      if (base_cx->parent == NULL) {
+      if (base_cx->parent == NULL)
         return (sm_object *)sms_false;
-      }
       return (sm_object *)base_cx->parent;
     }
     case SM_DIFF_EXPR: {

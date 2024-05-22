@@ -37,7 +37,6 @@ bool sm_cx_set(sm_cx *self, sm_symbol *sym, sm_object *value) {
     sm_node *leaf = sm_node_subnode(node, &sym->code_id->content, sym->code_id->size);
     if (leaf != NULL) {
       leaf->value = value;
-      // leaf->symbol_id = sym - ((sm_symbol *)sms_symbol_heap->storage);
       return true;
     }
     cx = cx->parent;
@@ -100,7 +99,7 @@ bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
     current_node = (sm_node *)next_node;
   }
   current_node->value     = (sm_object *)val;
-  current_node->symbol_id = (uint32_t)(sym - (sm_symbol *)sms_symbol_heap->storage);
+  current_node->symbol_id = sym - (sm_symbol *)sms_symbol_heap->storage;
   return val;
 }
 

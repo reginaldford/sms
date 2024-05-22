@@ -37,6 +37,7 @@ sm_symbol *sm_new_symbol(char *name, int len) {
   sym->name      = sm_new_string_at(sms_symbol_name_heap, len, name);
   sym->code_id   = sm_symbol_encode_id(sym);
   sms_num_symbols++;
+  int sym_id = sym - (sm_symbol *)sms_symbol_heap->storage;
   return sym;
 }
 

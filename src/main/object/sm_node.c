@@ -14,6 +14,7 @@ sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
   node->map       = map;
   node->children  = children;
   node->symbol_id = sym_id;
+
   return node;
 }
 
@@ -290,14 +291,11 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
 sm_expr *sm_node_values(sm_node *node, sm_expr *collection) {
   if (node == NULL)
     return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
-  if (node->value != NULL) {
-    // var name
+  if (node->value != NULL)
     collection = sm_expr_append(collection, node->value);
-  }
   // If there are not more children, we are done
-  if (sm_node_is_empty(node)) {
+  if (sm_node_is_empty(node))
     return collection;
-  }
   int items_to_do = sm_node_map_size(node->map);
   for (int i = 0; items_to_do > 0 && i < 64; i++) {
     if (sm_node_map_get(node->map, i) == true) {
