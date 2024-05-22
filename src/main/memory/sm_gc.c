@@ -4,8 +4,10 @@
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
-  sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
-  return new_obj;
+  if (obj->my_type != SM_SYMBOL_TYPE)
+    return sm_realloc(obj, sm_sizeof(obj));
+  else
+    return obj;
 }
 
 // Deep Copy the object
