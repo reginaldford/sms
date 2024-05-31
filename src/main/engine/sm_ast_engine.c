@@ -552,7 +552,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARENT_EXPR))
         return (sm_object *)sms_false;
-      return (sm_object *)fun->parent;
+      if (fun->parent)
+        return (sm_object *)fun->parent;
+      else
+        return (sm_object *)sms_false;
     }
     case SM_FN_SETPARENT_EXPR: {
       sm_fun *fun        = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
