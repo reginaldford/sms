@@ -92,6 +92,8 @@ void sm_inflate_heap() {
     }
     case SM_EXPR_TYPE: {
       sm_expr *expr = (sm_expr *)current_obj;
+      if (expr->notes)
+        expr->notes = sm_meet_object(expr->notes);
       for (uint32_t i = 0; i < expr->size; i++) {
         sm_object *new_obj = sm_meet_object(sm_expr_get_arg(expr, i));
         sm_expr_set_arg(expr, i, (sm_object *)new_obj);

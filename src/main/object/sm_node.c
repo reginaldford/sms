@@ -254,7 +254,7 @@ int sm_node_size(sm_node *node) {
 // Returns the keys under this node(recursive)
 sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collection) {
   if (node == NULL)
-    return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+    return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL);
 
   if (node->value != NULL) {
     sm_symbol *found_sym = &((sm_symbol *)sms_symbol_heap->storage)[node->symbol_id];
@@ -289,7 +289,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
 // Returns the keys under this node(recursive)
 sm_expr *sm_node_values(sm_node *node, sm_expr *collection) {
   if (node == NULL)
-    return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+    return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL);
   if (node->value != NULL)
     collection = sm_expr_append(collection, node->value);
   // If there are not more children, we are done

@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
-
 /// Contexts are data trees that map symbol names to values
+
 typedef struct sm_cx {
   int16_t       my_type;
   struct sm_cx *parent;

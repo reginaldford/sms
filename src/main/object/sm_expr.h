@@ -2,6 +2,8 @@
 
 // Denotes the type of expression
 // Must be in the same order as sm_global_fn_name
+//
+
 enum SM_EXPR_TYPE {
   SM_EXIT_EXPR,
   SM_HELP_EXPR,
@@ -208,22 +210,24 @@ typedef struct sm_expr {
   enum SM_EXPR_TYPE op;
   uint32_t          capacity;
   uint32_t          size;
-  short             filler;
+  // notes would be sm_cx* , but dependancy cycle prevents
+  void *notes;
 } sm_expr;
 
 /// New Expression with no args
-sm_expr *sm_new_expr_0(enum SM_EXPR_TYPE op1);
+sm_expr *sm_new_expr_0(enum SM_EXPR_TYPE op1, void *notes);
 /// New Expression with 1 arg
-sm_expr *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg);
+sm_expr *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg, void *notes);
 /// New Expression with 2 args
-sm_expr *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2);
+sm_expr *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, void *notes);
 /// New Expression with 3 args
-sm_expr *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
+sm_expr *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3,
+                       void *notes);
 /// New Expression with 4 args
 sm_expr *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
-                       sm_object *arg4);
+                       sm_object *arg4, void *notes);
 /// New Expression with size args
-sm_expr   *sm_new_expr_n(enum SM_EXPR_TYPE op1, uint32_t size, uint32_t capacity);
+sm_expr   *sm_new_expr_n(enum SM_EXPR_TYPE op2, uint32_t size, uint32_t capacity, void *notes);
 sm_expr   *sm_expr_append(sm_expr *expr, sm_object *arg);
 uint32_t   sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);
 uint32_t   sm_infix_sprint(sm_expr *expr, char *buffer, bool fake);
@@ -233,4 +237,3 @@ sm_expr   *sm_expr_set_arg(sm_expr *expr, uint32_t index, sm_object *num);
 sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index);
 bool       sm_is_infix(enum SM_EXPR_TYPE op);
 sm_object *sm_expr_pop(sm_expr *sme);
-sm_object *sm_expr_pop_recycle(sm_expr *sme);
