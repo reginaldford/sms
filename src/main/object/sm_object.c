@@ -142,13 +142,14 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
     if (my_size != their_size)
       return false;
     // TODO: create iterators, to avoid allocating heap memory just to compute equality
-    sm_expr *my_keys   = sm_node_keys(self_cx->content, sm_new_stack_obj(32),
-                                      sm_new_expr_n(SM_ARRAY_EXPR, 0, my_size));
-    sm_expr *my_values = sm_node_values(self_cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, my_size));
+    sm_expr *my_keys = sm_node_keys(self_cx->content, sm_new_stack_obj(32),
+                                    sm_new_expr_n(SM_ARRAY_EXPR, 0, my_size, NULL));
+    sm_expr *my_values =
+      sm_node_values(self_cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, my_size, NULL));
     sm_expr *their_keys = sm_node_keys(other_cx->content, sm_new_stack_obj(32),
-                                       sm_new_expr_n(SM_ARRAY_EXPR, 0, their_size));
+                                       sm_new_expr_n(SM_ARRAY_EXPR, 0, their_size, NULL));
     sm_expr *their_values =
-      sm_node_values(other_cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, their_size));
+      sm_node_values(other_cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, their_size, NULL));
     for (int i = 0; i < my_size; i++) {
       if (!sm_object_eq(sm_expr_get_arg(my_keys, i), sm_expr_get_arg(their_keys, i)))
         return false;

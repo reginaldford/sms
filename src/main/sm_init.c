@@ -51,7 +51,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   sm_cx_let(parent_cx, pi_sym, (sm_object *)sm_new_double(3.14159265358979323846));
   // Add program args if available
   if (env) {
-    sm_expr *args = sm_new_expr_n(SM_ARRAY_EXPR, env->num_args, env->num_args);
+    sm_expr *args = sm_new_expr_n(SM_ARRAY_EXPR, env->num_args, env->num_args, NULL);
     // Note that strlen is unavoidable here
     for (int i = 0; i < env->num_args; i++)
       sm_expr_set_arg(args, i, (sm_object *)sm_new_string(strlen(env->args[i]), env->args[i]));

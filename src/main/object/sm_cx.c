@@ -181,8 +181,8 @@ uint32_t sm_cx_size(sm_cx *self) {
 // Uses cxLet to import key/value pairs from cxFrom to cxTo
 void sm_cx_import(sm_cx *cxFrom, sm_cx *cxTo) {
   sm_expr *keys =
-    sm_node_keys(cxFrom->content, sm_new_stack_obj(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
-  sm_expr *values = sm_node_values(cxFrom->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
+    sm_node_keys(cxFrom->content, sm_new_stack_obj(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL));
+  sm_expr *values = sm_node_values(cxFrom->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL));
   for (uint32_t i = 0; i < keys->size; i++) {
     sm_symbol *keySym = (sm_symbol *)sm_expr_get_arg(keys, i);
     sm_cx_let(cxTo, keySym, sm_expr_get_arg(values, i));

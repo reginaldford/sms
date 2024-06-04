@@ -28,6 +28,26 @@ sm_string *sm_new_string_at(struct sm_heap *heap, uint32_t size, char *str) {
   return newstr;
 }
 
+// Make a string with a format spec, like printf, using variable arguments
+struct sm_string *sm_new_fstring_at(struct sm_heap *heap, const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  va_list args_copy;
+  va_copy(args_copy, args);
+  int length = vsnprintf(NULL, 0, format, args_copy);
+  va_end(args_copy);
+  if (length < 0) {
+    va_end(args);
+    return NULL;
+  }
+  struct sm_string *newstr = sm_new_string_manual_at(heap, length + 1);
+  vsnprintf(&newstr->content, length + 1, format, args);
+  va_end(args);
+  newstr->size = length;
+  return newstr;
+}
+
+
 // Return a new empty string (does not nullify contents)
 sm_string *sm_new_string_manual_at(struct sm_heap *heap, uint32_t size) {
   struct sm_string *newstr =
@@ -50,29 +70,6 @@ sm_string *sm_string_add(sm_string *str1, sm_string *str2) {
   uint32_t   size_sum   = str1->size + str2->size;
   sm_string *new_string = sm_new_string(size_sum, &(str1->content));
   sm_strncpy(&(new_string->content) + str1->size, &(str2->content), str2->size);
-  return new_string;
-}
-
-// Return a new string: str1+str2
-// Replace the previous strings with new spaces
-sm_string *sm_string_add_recycle(sm_string *str1, sm_string *str2) {
-  sm_string *new_string = sm_string_add(str1, str2);
-  sm_new_space(str1, sm_sizeof((sm_object *)str1));
-  sm_new_space(str2, sm_sizeof((sm_object *)str2));
-  return new_string;
-}
-
-// Recycle only str1
-sm_string *sm_string_add_recycle_1st(sm_string *str1, sm_string *str2) {
-  sm_string *new_string = sm_string_add(str1, str2);
-  sm_new_space(str1, sm_sizeof((sm_object *)str1));
-  return new_string;
-}
-
-// Recycle only str2
-sm_string *sm_string_add_recycle_2nd(sm_string *str1, sm_string *str2) {
-  sm_string *new_string = sm_string_add(str1, str2);
-  sm_new_space(str2, sm_sizeof((sm_object *)str2));
   return new_string;
 }
 

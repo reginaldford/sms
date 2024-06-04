@@ -13,7 +13,7 @@ void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, int buf_len, const char
   int  last_sym_len = 0;
   if (last_sym)
     last_sym_len = strlen(last_sym);
-  sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+  sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL);
   keys                = sm_node_keys(cx->content, sm_new_stack_obj(17), empty_expr);
   if (keys->size > 0) {
     for (int i = 0; i < keys->size; i++) {
@@ -31,7 +31,7 @@ void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, int buf_len, const char
 // Completion func. This is the interface to linenoise.
 // This is called when the tab key is pressed.
 void sm_terminal_completion(const char *buf, linenoiseCompletions *lc) {
-  sm_expr    *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+  sm_expr    *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL);
   sm_cx      *scratch    = (sm_cx *)(*sm_global_lex_stack(NULL)->top);
   sm_expr    *keys       = sm_node_keys(scratch->content, sm_new_stack_obj(17), empty_expr);
   const char *last_sym;

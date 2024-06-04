@@ -41,14 +41,6 @@ sm_space_array *sm_resize_space_array(sm_space_array *table, uint32_t new_capaci
 // get the c array. we need to work on terminology here
 sm_space **sm_get_space_array(sm_space_array *table) { return (sm_space **)&(table[1]); }
 
-sm_string *sm_space_to_string(sm_space *self) {
-  sm_string *answer = sm_new_string(7, "space(");
-  sm_string *size   = sm_double_to_string(sm_new_double((double)self->my_type - SM_SPACE_TYPE));
-  answer            = sm_string_add_recycle(answer, size);
-  answer            = sm_string_add_recycle(answer, sm_new_string(1, ")"));
-  return answer;
-}
-
 // find a matching space by size in the size sorted array
 sm_search_result sm_space_array_find(sm_space_array *table, uint32_t size) {
   sm_space **table_entries = sm_get_space_array(table);

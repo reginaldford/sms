@@ -20,7 +20,7 @@ sm_double *sm_str_find(sm_string *str, sm_string *to_find) {
 // The needle in the result is the same instance as the one given in the input.
 sm_expr *sm_str_split(sm_string *str, sm_string *needle) {
   if (needle->size == 0 || str->size == 0)
-    return sm_new_expr(SM_ARRAY_EXPR, (sm_object *)sm_new_string(str->size, &str->content));
+    return sm_new_expr(SM_ARRAY_EXPR, (sm_object *)sm_new_string(str->size, &str->content), NULL);
   uint32_t i, j, num_needles = 0;
   uint32_t needles[str->size / needle->size + 1];
   char    *str_cstr    = &(str->content);
@@ -39,7 +39,7 @@ sm_expr *sm_str_split(sm_string *str, sm_string *needle) {
   }
   // Shortcut for no needles
   if (num_needles == 0)
-    return sm_new_expr(SM_ARRAY_EXPR, (sm_object *)sm_new_string(str->size, &str->content));
+    return sm_new_expr(SM_ARRAY_EXPR, (sm_object *)sm_new_string(str->size, &str->content), NULL);
   // Count the number of adjacent needles
   uint32_t num_adjacents = 0;
   for (uint32_t i = 0; i + 1 < num_needles; i++) {
@@ -55,7 +55,7 @@ sm_expr *sm_str_split(sm_string *str, sm_string *needle) {
   // This should be the exact capacity necessary to store the string parts
   uint32_t capacity = num_needles * 2 - 1 + border_chunks - num_adjacents;
   // Create and return the resulting array expression
-  sm_expr *result         = sm_new_expr_n(SM_ARRAY_EXPR, 0, capacity);
+  sm_expr *result         = sm_new_expr_n(SM_ARRAY_EXPR, 0, capacity, NULL);
   uint32_t current_needle = 0;
   uint32_t current_result = 0;
   i                       = 0;

@@ -31,7 +31,6 @@ sm_space_array *sm_new_space_array(uint32_t size, uint32_t capacity);
 sm_space_array *sm_resize_space_array(sm_space_array *table, uint32_t new_capacity);
 /// YOU ARE HERE
 sm_space       **sm_get_space_array(sm_space_array *table);
-sm_string       *sm_space_to_string(sm_space *self);
 sm_space_array  *sm_space_add_by_pos(sm_space *space, sm_space_array *table);
 sm_space_array  *sm_space_add(sm_space *space, sm_space_array *table);
 sm_search_result sm_space_array_find_by_pos(sm_space_array *table, sm_space *space);

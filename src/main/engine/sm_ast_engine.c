@@ -45,7 +45,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       time(&rawtime);
       timeinfo            = localtime(&rawtime);
       int     *time_array = (int *)timeinfo;
-      sm_expr *result     = sm_new_expr_n(SM_ARRAY_EXPR, 9, 9);
+      sm_expr *result     = sm_new_expr_n(SM_ARRAY_EXPR, 9, 9, NULL);
       for (int i = 0; i < 9; i++)
         sm_expr_set_arg(result, i, (sm_object *)sm_new_double(time_array[i]));
       return (sm_object *)result;
@@ -91,7 +91,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (child_pid == -1)
         status = 1;
       return (sm_object *)sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)sm_new_double(child_pid),
-                                        (sm_object *)sm_new_double(status));
+                                        (sm_object *)sm_new_double(status), NULL);
     }
     case SM_EXEC_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -164,8 +164,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         i++;
       }
       closedir(dir);
-      sm_expr *names_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i);
-      sm_expr *types_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i);
+      sm_expr *names_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i, NULL);
+      sm_expr *types_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i, NULL);
       for (uint32_t names_i = 0; names_i < i; names_i++) {
         sm_expr_set_arg(names_arr, names_i, (sm_object *)entry_names[names_i]);
         if (entry_types[names_i] != 0)
@@ -174,7 +174,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           sm_expr_set_arg(types_arr, names_i, (sm_object *)sms_false);
       }
       sm_expr *result =
-        sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)names_arr, (sm_object *)types_arr);
+        sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)names_arr, (sm_object *)types_arr, NULL);
       return (sm_object *)result;
       break;
     }
@@ -217,7 +217,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_TIME_EXPR: {
       struct timeval t;
       gettimeofday(&t, NULL);
-      sm_expr *result = sm_new_expr_n(SM_ARRAY_EXPR, 2, 2);
+      sm_expr *result = sm_new_expr_n(SM_ARRAY_EXPR, 2, 2, NULL);
       sm_expr_set_arg(result, 0, (sm_object *)sm_new_double(t.tv_sec));
       sm_expr_set_arg(result, 1, (sm_object *)sm_new_double(t.tv_usec));
       return (sm_object *)result;
@@ -489,7 +489,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_KEYS_EXPR))
         return (sm_object *)sms_false;
       sm_expr *success =
-        sm_node_keys(cx->content, sm_new_stack_obj(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
+        sm_node_keys(cx->content, sm_new_stack_obj(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL));
       if (success)
         return (sm_object *)success;
       return (sm_object *)sms_false;
@@ -498,7 +498,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)cx, 0, SM_CX_TYPE, SM_CX_VALUES_EXPR))
         return (sm_object *)sms_false;
-      sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0));
+      sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL));
       if (success)
         return (sm_object *)success;
       return (sm_object *)sms_false;
@@ -520,7 +520,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_PARAMS_EXPR))
         return (sm_object *)sms_false;
-      sm_expr *result = sm_new_expr_n(SM_PARAM_LIST_EXPR, fun->num_params, fun->num_params);
+      sm_expr *result = sm_new_expr_n(SM_PARAM_LIST_EXPR, fun->num_params, fun->num_params, NULL);
       for (uint32_t i = 0; i < fun->num_params; i++) {
         sm_string *fn_name = sm_fun_get_param(fun, i)->name;
         sm_expr_set_arg(result, i, (sm_object *)sm_new_symbol(&(fn_name->content), fn_name->size));
@@ -847,7 +847,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr    *output;
       if (stat(fname_cstr, &filestat) == 0) {
         // build an array with stat information.
-        output = sm_new_expr_n(SM_ARRAY_EXPR, 16, 16);
+        output = sm_new_expr_n(SM_ARRAY_EXPR, 16, 16, NULL);
         sm_expr_set_arg(output, 0, (sm_object *)sm_new_double(filestat.st_dev));
         sm_expr_set_arg(output, 1, (sm_object *)sm_new_double(filestat.st_ino));
         sm_expr_set_arg(output, 2, (sm_object *)sm_new_double(filestat.st_mode));
@@ -1024,10 +1024,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(obj1, 1, SM_EXPR_TYPE, SM_MAP_EXPR))
         return (sm_object *)sms_false;
       arr             = (sm_expr *)obj1;
-      sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size);
+      sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size, NULL);
       for (uint32_t i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
-        sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj);
+        sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj, NULL);
 
         sm_object *map_result = sm_engine_eval(fun->content, fun->parent, new_sf);
 
@@ -1056,7 +1056,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       // reducing the expression
       sm_object *result = initial;
       // Evaluating with a reusable stack frame: ( result , current_ob )
-      sm_expr *reusable = sm_new_expr_2(SM_PARAM_LIST_EXPR, result, NULL);
+      sm_expr *reusable = sm_new_expr_2(SM_PARAM_LIST_EXPR, result, NULL, NULL);
       for (uint32_t i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr_set_arg(reusable, 1, current_obj);
@@ -1187,7 +1187,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         char *error_msg = "Error: Incorrectly formatted AST.";
         int   len       = strlen(error_msg);
         printf("%s\n", error_msg);
-        return (sm_object *)sm_new_error(sm_new_string(len, error_msg), sm_new_string(0, ""), 0);
+        return (sm_object *)sm_new_error(sm_new_string(len, error_msg), sm_new_string(0, ""));
       }
       sm_cx     *predot  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(dot_expr, 0), current_cx, sf);
       sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(dot_expr, 1);
@@ -1222,7 +1222,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (index->value >= arr->size || index->value < -0) {
         printf("Error: Index out of range: %i\n", (int)index->value);
         return (sm_object *)sm_new_error(sm_new_string(19, "Index out of range"),
-                                         sm_new_string(1, "?"), 0);
+                                         sm_new_string(1, "?"));
       }
       sm_expr_set_arg(arr, index->value, obj2);
       return (sm_object *)sms_true;
@@ -1234,7 +1234,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_PLUS_EXPR))
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_PLUS_EXPR))
-        return (sm_object *)sms_false;
+        return (sm_object *)sm_new_error(sm_new_string(7, "whoops!"), sm_new_string(1, "."));
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
     }
     case SM_MINUS_EXPR: {
@@ -1462,7 +1462,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
     }
     case SM_ARRAY_EXPR: {
-      sm_expr *new_arr = sm_new_expr_n(SM_ARRAY_EXPR, sme->size, sme->size);
+      sm_expr *new_arr = sm_new_expr_n(SM_ARRAY_EXPR, sme->size, sme->size, NULL);
       for (uint32_t i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
         sm_expr_set_arg(new_arr, i, new_val);
@@ -1470,7 +1470,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)new_arr;
     }
     case SM_PARAM_LIST_EXPR: {
-      sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size);
+      sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size, NULL);
       for (uint32_t i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
         sm_expr_set_arg(new_arr, i, new_val);
