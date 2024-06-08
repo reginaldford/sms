@@ -17,15 +17,7 @@ extern sm_symbol *sms_false;
 // going up the callstack, until we hit a try or not
 // the checker is the type number of the function which is checking
 bool expect_type(sm_object *arg_n, uint32_t arg_num, uint16_t arg_type, uint16_t checker) {
-  if (arg_n->my_type != arg_type) {
-    sm_string  *str  = sm_object_to_string(arg_n);
-    const char *cstr = &(str->content);
-    printf("Type Mismatch: %s requires argument %i to have type %s but %s has type %s\n",
-           sm_global_fn_name(checker), arg_num, sm_global_type_name(arg_type), cstr,
-           sm_global_type_name(arg_n->my_type));
-    return false;
-  }
-  return true;
+  return arg_n->my_type == arg_type;
 }
 
 // Global true symbol
@@ -1187,7 +1179,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         char *error_msg = "Error: Incorrectly formatted AST.";
         int   len       = strlen(error_msg);
         printf("%s\n", error_msg);
-        return (sm_object *)sm_new_error(sm_new_string(len, error_msg), sm_new_string(0, ""));
+        return (sm_object *)sm_new_error(sm_new_string(6, "BadAST"), sm_new_string(len, error_msg),
+                                         sm_new_string(0, ""), 0);
       }
       sm_cx     *predot  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(dot_expr, 0), current_cx, sf);
       sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(dot_expr, 1);
@@ -1208,7 +1201,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return value;
       break;
     }
-    case SM_ASSIGN_INDEX_EXPR: {
+    /*case SM_ASSIGN_INDEX_EXPR: {
+     * Doesnt work well with Bison, will reimplement in CParser
       // expecting a[4]=value=> =index_expr(a,4,value);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1221,20 +1215,25 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_double *index = (sm_double *)obj1;
       if (index->value >= arr->size || index->value < -0) {
         printf("Error: Index out of range: %i\n", (int)index->value);
-        return (sm_object *)sm_new_error(sm_new_string(19, "Index out of range"),
-                                         sm_new_string(1, "?"));
+        return (sm_object *)sm_new_error(sm_new_string(16,"IndexOutOfBounds"),
+            sm_new_string(19, "Index out of range"),
+                                         sm_new_string(1, "?"), 0);
       }
       sm_expr_set_arg(arr, index->value, obj2);
       return (sm_object *)sms_true;
       break;
-    }
+    }*/
     case SM_PLUS_EXPR: {
       sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (!expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_PLUS_EXPR))
         return (sm_object *)sms_false;
-      if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_PLUS_EXPR))
-        return (sm_object *)sm_new_error(sm_new_string(7, "whoops!"), sm_new_string(1, "."));
+      if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
+        //((sm_expr*)input)->notes might be a ptr to a cx
+        return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
+                                         sm_new_string(37, "Wrong type for second operand on plus"),
+                                         sm_new_string(1, ((sm_expr *)input)->notes), 0);
+      }
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
     }
     case SM_MINUS_EXPR: {
