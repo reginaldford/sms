@@ -119,6 +119,13 @@ void sm_inflate_heap() {
       }
       break;
     }
+    case SM_ERROR_TYPE: {
+      sm_error *err = (sm_error *)current_obj;
+      err->title    = (sm_string *)sm_meet_object((sm_object *)err->title);
+      err->message  = (sm_string *)sm_meet_object((sm_object *)err->message);
+      err->source   = (sm_string *)sm_meet_object((sm_object *)err->source);
+      break;
+    }
     case SM_FUN_PARAM_TYPE: {
       sm_fun_param_obj *param = (sm_fun_param_obj *)current_obj;
       param->name             = (sm_string *)sm_meet_object((sm_object *)param->name);

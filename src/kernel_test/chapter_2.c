@@ -17,7 +17,7 @@ int chapter_2(int test) {
     sm_object *test_obj3 = (sm_object *)sm_new_string(6, "3rdArg");
     sm_object *test_obj4 = (sm_object *)sm_new_string(6, "4thArg");
     uint32_t   len       = sm_global_fn_name_len(i);
-    sm_expr   *expr      = sm_new_expr_4(i, test_obj1, test_obj2, test_obj3, test_obj4);
+    sm_expr   *expr      = sm_new_expr_4(i, test_obj1, test_obj2, test_obj3, test_obj4, NULL);
     char      *to_str    = &(sm_object_to_string((sm_object *)expr)->content);
     printf("%i: expression: %s is %i characters long and prints as %s\n", i, op_name, len, to_str);
     fflush(stdout);

@@ -16,8 +16,8 @@ FILE* _lex_file(char *fpath);
 void _done_lexing_file(FILE* f);
 void _lex_cstr(char * cstr,int len);
 sm_cx *_note();
-
-#define SM_NOTE 0
+char parsing_fpath[256];
+int parsing_fpath_len;
 
 %}
 
@@ -640,6 +640,8 @@ FILE* lex_file(char *fpath){
     return false;
   }
   FILE * f = _lex_file(fpath);
+  strcpy(parsing_fpath,fpath);
+  parsing_fpath_len = strlen(fpath);
   return f;
 }
 
@@ -660,11 +662,12 @@ void yyerror(const char *msg) {
 
 // Return a context with source and line info
 // For the parser to quickly create a common type of context
-sm_cx *_note() {
-  // collect filepath and line
-  //YOU ARE HERE
-  sm_cx * note = sm_new_cx(NULL);
-  sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(0,""));
-  sm_cx_let(note,sm_new_symbol("line",4),(sm_object*)sm_new_string(0,""));
+struct sm_cx *_note() {
+  struct sm_cx * note = sm_new_cx(NULL);
+  sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(parsing_fpath_len,parsing_fpath));
+  char buffer[256];
+  sprintf(buffer,"%i",yylineno);
+  int numLen = strlen(buffer);
+  sm_cx_let(note,sm_new_symbol("line",4),(sm_object*)sm_new_string(numLen,buffer));
   return note;
 }
