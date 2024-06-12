@@ -1,0 +1,12 @@
+#!/usr/local/bin/sms
+# Draws a fire-like image.
+# Must be run in the directory with colorPrint.sms
+{
+  eval(fileParse("colorPrint.sms"));
+  let c=colorPrint;
+  let max=(x,y)=>if(x>y)x else y;
+  osExec("clear");
+  for(let i=128;i>=0;i=i-1)
+    for(let j=0;j<200;j=j+1)
+      c.print(max(0,random()*1500/max(1,i^2-j))," ")
+};
