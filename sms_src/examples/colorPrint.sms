@@ -1,4 +1,4 @@
-#!/usr/bin/sms
+#!/usr/local/bin/sms
 # User sms -i colorPrint.sms , then
 # For convenience, let c=colorPrint, and use c.draw(int, msg)
 {
@@ -11,14 +11,14 @@
   let magenta = esc str+ "[45m";
   let cyan = esc str+ "[46m";
   let white = esc str+ "[47m";
-  let bright_black = esc str+ "[90m";
-  let bright_red = esc str+ "[91m";
-  let bright_green = esc str+ "[92m";
-  let bright_yellow = esc str+ "[93m";
-  let bright_blue = esc str+ "[94m";
-  let bright_magenta = esc str+ "[95m";
-  let bright_cyan = esc str+ "[96m";
-  let bright_white = esc str+ "[97m";
+  let fg_black = esc str+ "[90m";
+  let fg_red = esc str+ "[91m";
+  let fg_green = esc str+ "[92m";
+  let fg_yellow = esc str+ "[93m";
+  let fg_blue = esc str+ "[94m";
+  let fg_magenta = esc str+ "[95m";
+  let fg_cyan = esc str+ "[96m";
+  let fg_white = esc str+ "[97m";
   # We want a list of all of the colors, without esc
   rm esc;
   let colors = cxValues(self);
