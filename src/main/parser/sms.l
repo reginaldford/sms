@@ -82,6 +82,7 @@ putln        {return PUTLN;}
 
 let          {return LET;}
 self         {return SELF;}
+_input       {return INPUT;}
 clear        {return CLEAR;}
 "."          {return DOT;}
 parent       {return PARENT;}
@@ -210,6 +211,14 @@ osSetEnv      {return OS_SETENV;}
 pwd          	 {return PWD;}
 ls           	 {return LS;}
 cd           	 {return CD;}
+
+Err           {return ERR_NEW;}
+errTitle      {return ERR_TITLE;}
+errMessage    {return ERR_MESSAGE;}
+errSource     {return ERR_SOURCE;}
+errLine       {return ERR_LINE;}
+errNotes      {return ERR_NOTES;}
+errCase       {return ERR_CASE;}
 
 _thisProcess   {return THISPROCESS;}
 _getOptions    {return GETOPTIONS;}

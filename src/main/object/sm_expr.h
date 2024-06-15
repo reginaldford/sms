@@ -199,7 +199,14 @@ enum SM_EXPR_TYPE {
   SM_OS_GETENV_EXPR,
   SM_OS_SETENV_EXPR,
   SM_GC_EXPR,
-  SM_UNKNOWN_EXPR
+  SM_UNKNOWN_EXPR,
+
+  SM_ERR_EXPR,
+  SM_ERRTITLE_EXPR,
+  SM_ERRMESSAGE_EXPR,
+  SM_ERRSOURCE_EXPR,
+  SM_ERRLINE_EXPR,
+  SM_ERRNOTES_EXPR
 };
 
 // Head of an expression
@@ -210,7 +217,8 @@ typedef struct sm_expr {
   enum SM_EXPR_TYPE op;
   uint32_t          capacity;
   uint32_t          size;
-  // notes would be sm_cx* , but dependancy cycle prevents
+  // ! notes would be sm_cx* , but dependancy cycle prevents
+  // We use NULL to signify no notes.
   void *notes;
 } sm_expr;
 
