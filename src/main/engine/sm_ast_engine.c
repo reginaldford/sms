@@ -1571,6 +1571,30 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_meta(obj0, current_cx);
     }
+    case SM_ERR_EXPR: {
+      // Makes a new err object.
+      // The ordered inputs are all optional, but none can be skipped
+      // YOU ARE HERE
+      // unfortunately, we need type checking here...
+      uint32_t  num_inputs = sme->size;
+      sm_error *newE       = sm_new_error_blank();
+      if (num_inputs < 1)
+        newE->title = sm_new_string(10, "GenericErr");
+      else
+        newE->title = (sm_string *)sm_expr_get_arg(sme, 0);
+      if (num_inputs < 2)
+        newE->message = (sm_string *)sm_new_string(0, "");
+      else
+        newE->message = (sm_string *)sm_expr_get_arg(sme, 1);
+      if (num_inputs < 3)
+        newE->source = (sm_string *)sm_new_string(0, "");
+      else
+        newE->source = (sm_string *)sm_expr_get_arg(sme, 2);
+
+      newE->line  = 0;
+      newE->notes = sm_new_cx(current_cx); // experimental parenting
+      return (sm_object *)newE;
+    }
     default:
       return input;
     } // End of expr case

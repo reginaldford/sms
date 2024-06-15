@@ -14,3 +14,4 @@ typedef struct sm_error {
 sm_error *sm_new_error(sm_string *title, sm_string *message, sm_string *source, uint32_t line,
                        sm_cx *notes);
 int       sm_err_sprint(sm_error *self, char *buffer, bool fake);
+sm_error *sm_new_error_blank();
