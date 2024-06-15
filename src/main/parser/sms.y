@@ -60,6 +60,7 @@ int parsing_fpath_len;
 %type <expr> COMMAND
 
 %token SELF
+%token _INPUT
 %token LS
 %token CD
 %token PWD
@@ -256,6 +257,15 @@ int parsing_fpath_len;
 %token <expr> MEM_READFILE
 %token <expr> MEM_CHECKFILE
 
+
+%token <expr> ERR_NEW
+%token <expr> ERR_TITLE
+%token <expr> ERR_MESSAGE
+%token <expr> ERR_SOURCE
+%token <expr> ERR_LINE
+%token <expr> ERR_NOTES
+%token <expr> ERR_CASE
+
 %token <expr> DATE_STR
 %token <expr> DATE
 %token <expr> TIME
@@ -298,6 +308,7 @@ COMMAND : EXPR ';' {
 | ENDOFFILE { YYACCEPT; }
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
+EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
   | EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3, _note()); }
 | EXIT '(' ')' { $$ = sm_new_expr_0(SM_EXIT_EXPR, _note()); }
 | LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4, _note()); }
@@ -446,6 +457,15 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | PWD '(' ')' { $$ = sm_new_expr_n(SM_PWD_EXPR,0,0, _note());}
 | RUNTIME_META '(' EXPR ')' { $$ = sm_new_expr(SM_RUNTIME_META_EXPR, (sm_object*)$3, _note());}
 | GC '(' ')' { $$ = sm_new_expr_n(SM_GC_EXPR, 0,0, _note()); }
+| ERR_NEW '(' ')' { $$ = sm_new_expr_0(SM_ERR_EXPR,_note());}
+| ERR_NEW '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)3,_note());}
+| ERR_NEW '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_ERR_EXPR,(sm_object*)1,(sm_object*)3,_note());}
+| ERR_NEW '(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_ERR_EXPR,(sm_object*)1,(sm_object*)3,(sm_object*)5,_note());}
+| ERR_TITLE '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)3,_note());}
+| ERR_MESSAGE '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)3,_note());}
+| ERR_SOURCE '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)3,_note());}
+| ERR_LINE '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)3,_note());}
+| ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)3,_note());}
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local

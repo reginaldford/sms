@@ -505,6 +505,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETXP_EXPR))
         return (sm_object *)sms_false;
+      fun          = (sm_fun *)sm_copy((sm_object *)fun);
       fun->content = sm_localize(sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf), fun);
       return (sm_object *)fun;
     }
@@ -1180,7 +1181,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         int   len       = strlen(error_msg);
         printf("%s\n", error_msg);
         return (sm_object *)sm_new_error(sm_new_string(6, "BadAST"), sm_new_string(len, error_msg),
-                                         sm_new_string(0, ""), 0);
+                                         sm_new_string(0, ""), 0, (void *)NULL);
       }
       sm_cx     *predot  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(dot_expr, 0), current_cx, sf);
       sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(dot_expr, 1);
@@ -1230,9 +1231,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
         //((sm_expr*)input)->notes might be a ptr to a cx
-        return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
-                                         sm_new_string(37, "Wrong type for second operand on plus"),
-                                         sm_new_string(1, ((sm_expr *)input)->notes), 0);
+        return (sm_object *)sm_new_error(
+          sm_new_string(9, "TypeError"), sm_new_string(37, "Wrong type for second operand on plus"),
+          sm_new_string(1, ((sm_expr *)input)->notes), 0, (sm_cx *)NULL);
       }
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
     }
@@ -1613,7 +1614,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     cx        = (sm_cx *)sm_copy((sm_object *)cx);
     return (sm_object *)cx;
   }
-  case SM_ERROR_TYPE: {
+  case SM_ERR_TYPE: {
     // TODO: Add callstack info here.
     return input;
   }

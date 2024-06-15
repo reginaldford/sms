@@ -44,7 +44,7 @@ sm_bc_block *sm_bc_generate(sm_object *input) {
   }
   case SM_LOCAL_TYPE: {
   }
-  case SM_ERROR_TYPE: {
+  case SM_ERR_TYPE: {
   }
   default:
     printf("unrecognized object\n");

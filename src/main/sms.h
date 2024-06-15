@@ -50,8 +50,8 @@ enum sm_object_type {
   SM_LOCAL_TYPE,
   /// 13: Linked list objects (not used yet) (sm_link.h)
   SM_LINK_TYPE,
-  /// 14: Error objects (not (really) used yet) (sm_error.h)
-  SM_ERROR_TYPE,
+  /// 14: Error objects
+  SM_ERR_TYPE,
   /// 15: Reference to current scope. (sm_self.h)
   SM_SELF_TYPE,
   /// 16: Acts as return statement. (sm_return.h)

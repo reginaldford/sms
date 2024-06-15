@@ -119,7 +119,7 @@ void sm_inflate_heap() {
       }
       break;
     }
-    case SM_ERROR_TYPE: {
+    case SM_ERR_TYPE: {
       sm_error *err = (sm_error *)current_obj;
       err->title    = (sm_string *)sm_meet_object((sm_object *)err->title);
       err->message  = (sm_string *)sm_meet_object((sm_object *)err->message);
