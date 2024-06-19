@@ -1572,16 +1572,29 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_new_meta(obj0, current_cx);
     }
     case SM_ERR_EXPR: {
-      // Makes a new err object.
-      // The ordered inputs are all optional, but none can be skipped
-      // YOU ARE HERE
-      // unfortunately, we need type checking here...
+      // Makes a new err object. Variable input count
+      sm_object *obj0 = NULL;
+      sm_object *obj1 = NULL;
+      sm_object *obj2 = NULL;
+      // obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      // obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       uint32_t  num_inputs = sme->size;
       sm_error *newE       = sm_new_error_blank();
-      if (num_inputs < 1)
+      if (num_inputs >= 1) {
+        obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+        if (obj0->my_type != SM_STRING_TYPE) {
+          sm_string *str    = sm_object_to_string(obj0);
+          char      *cstr   = &(str->content);
+          sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+          sm_string *line   = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+          return (sm_object *)sm_new_error(
+            sm_new_string(12, "TypeMismatch"),
+            sm_new_string(37, "First argument to Err is not a string"), source,
+            atoi(&line->content), NULL);
+        }
+        newE->title = (sm_string *)obj0;
+      } else
         newE->title = sm_new_string(10, "GenericErr");
-      else
-        newE->title = (sm_string *)sm_expr_get_arg(sme, 0);
       if (num_inputs < 2)
         newE->message = (sm_string *)sm_new_string(0, "");
       else
@@ -1590,10 +1603,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         newE->source = (sm_string *)sm_new_string(0, "");
       else
         newE->source = (sm_string *)sm_expr_get_arg(sme, 2);
-
       newE->line  = 0;
       newE->notes = sm_new_cx(current_cx); // experimental parenting
       return (sm_object *)newE;
+    }
+    case SM_ERRTITLE_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_ERR_TYPE) {
+        // type check..
+        return (sm_object *)sms_false;
+      }
+      sm_error *e = (sm_error *)obj0;
+      return (sm_object *)e->title;
     }
     default:
       return input;

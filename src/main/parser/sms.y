@@ -461,11 +461,11 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | ERR_NEW '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)$3,_note());}
 | ERR_NEW '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_ERR_EXPR,(sm_object*)1,(sm_object*)3,_note());}
 | ERR_NEW '(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_ERR_EXPR,(sm_object*)1,(sm_object*)3,(sm_object*)5,_note());}
-| ERR_TITLE '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)$3,_note());}
-| ERR_MESSAGE '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)$3,_note());}
-| ERR_SOURCE '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)$3,_note());}
-| ERR_LINE '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)$3,_note());}
-| ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)$3,_note());}
+| ERR_TITLE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRTITLE_EXPR,(sm_object*)$3,_note());}
+| ERR_MESSAGE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRMESSAGE_EXPR,(sm_object*)$3,_note());}
+| ERR_SOURCE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRSOURCE_EXPR,(sm_object*)$3,_note());}
+| ERR_LINE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRLINE_EXPR,(sm_object*)$3,_note());}
+| ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERRNOTES_EXPR,(sm_object*)$3,_note());}
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local
