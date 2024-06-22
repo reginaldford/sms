@@ -16,7 +16,7 @@ char *sm_strncpy(char *dest, const char *src, uint32_t n);
 sm_string *sm_new_string(uint32_t size, char *str);
 /// Construct a new sms string in given heap from a c string of known length
 sm_string *sm_new_string_at(struct sm_heap *heap, uint32_t size, char *str);
-/// Make a string with a format spec, like printf, using variable arguments
+/// Make a string with a format spec, like sm_new_fstring. Allows any heap to be used
 struct sm_string *sm_new_fstring_at(struct sm_heap *heap, const char *format, ...);
 /// Construct a new sms string in given heap from a c string of known length
 sm_string *sm_new_string_manual_at(struct sm_heap *heap, uint32_t size);
