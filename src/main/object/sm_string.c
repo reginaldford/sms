@@ -27,19 +27,33 @@ sm_string *sm_new_string_at(struct sm_heap *heap, uint32_t size, char *str) {
   sm_strncpy(&newstr->content, str, size);
   return newstr;
 }
-
 // Make a string with a format spec, like printf, using variable arguments
 struct sm_string *sm_new_fstring_at(struct sm_heap *heap, const char *format, ...) {
   va_list args;
   va_start(args, format);
+  
+  // Create a copy of args for the second vsnprintf call
+  va_list args_copy;
+  va_copy(args_copy, args);
+  
   int length = vsnprintf(NULL, 0, format, args);
   if (length < 0) {
     va_end(args);
+    va_end(args_copy);
     return NULL;
   }
+  
   struct sm_string *newstr = sm_new_string_manual_at(heap, length + 1);
-  vsnprintf(&newstr->content, length + 1, format, args);
+  if (newstr == NULL) {
+    va_end(args);
+    va_end(args_copy);
+    return NULL;
+  }
+
+  vsnprintf(&newstr->content, length + 1, format, args_copy);
   va_end(args);
+  va_end(args_copy);
+  
   newstr->size = length;
   return newstr;
 }

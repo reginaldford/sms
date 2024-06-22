@@ -687,13 +687,9 @@ void yyerror(const char *msg) {
 struct sm_cx *_note() {
   struct sm_cx * note = sm_new_cx(NULL);
   if(parsing_fpath[0])
-  sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(parsing_fpath_len,parsing_fpath));
+    sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(parsing_fpath_len,parsing_fpath));
   else
-  sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(8,"terminal"));
-
-  char buffer[16];
-  sprintf(buffer,"%i",yylineno);
-  int numLen = strlen(buffer);
-  sm_cx_let(note,sm_new_symbol("line",4),(sm_object*)sm_new_string(numLen,buffer));
+    sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(10,"(terminal)"));
+  sm_cx_let(note,sm_new_symbol("line",4),(sm_object*)sm_new_double(yylineno));
   return note;
 }
