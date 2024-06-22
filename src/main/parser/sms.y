@@ -241,7 +241,7 @@ int parsing_fpath_len;
 %token <expr> NEW_XP
 %token <expr> XP_OP
 %token <expr> XP_SETOP
-%token <expr> XP_OPSTR
+%token <expr> XP_OPSYM
 
 %token <expr> NUMS_TOSTR
 %token <expr> NEW_NUMS
@@ -416,7 +416,7 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | FN_SETPARENT '(' EXPR ','  EXPR ')' {$$ = sm_new_expr_2(SM_FN_SETPARENT_EXPR,(sm_object *)$3,(sm_object*)$5, _note());}
 | XP_OP '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_EXPR,(sm_object*)$3, _note());}
 | XP_SETOP '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_XP_SET_OP_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
-| XP_OPSTR '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_STR_EXPR,(sm_object*)$3, _note());}
+| XP_OPSYM '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_SYM_EXPR,(sm_object*)$3, _note());}
 
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3, _note());}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3, _note());}
