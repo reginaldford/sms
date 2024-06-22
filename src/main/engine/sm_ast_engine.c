@@ -20,7 +20,7 @@ bool expect_type(sm_object *arg_n, uint32_t arg_num, uint16_t arg_type, uint16_t
   return arg_n->my_type == arg_type;
 }
 
-// Global true symbol
+// Convenience functions for the booleans
 #define IS_TRUE (x)((void *)x == (void *)sms_true)
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
 
@@ -60,7 +60,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
 
       if (tms < 0) {
         printf("ERROR: sleep function was provided a negative value.\n");
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)false;
       }
       struct timespec ts;
       int             ret;
@@ -505,7 +505,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_fun *fun = (sm_fun *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!expect_type((sm_object *)fun, 0, SM_FUN_TYPE, SM_FN_SETXP_EXPR))
         return (sm_object *)sms_false;
-      fun          = (sm_fun *)sm_copy((sm_object *)fun);
+      fun          = (sm_fun *)sm_copy((sm_object *)fun); // functional
       fun->content = sm_localize(sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf), fun);
       return (sm_object *)fun;
     }
@@ -581,13 +581,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       expression->op      = (int)((sm_double *)given_op)->value;
       return (sm_object *)expression;
     }
-    case SM_XP_OP_STR_EXPR: {
+    case SM_XP_OP_SYM_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_XP_OP_STR_EXPR))
+      if (!expect_type(obj0, 0, SM_EXPR_TYPE, SM_XP_OP_SYM_EXPR))
         return (sm_object *)sms_false;
-      sm_double *op_num = (sm_double *)obj0;
-      return (sm_object *)sm_new_string(sm_global_fn_name_len((int)op_num->value),
-                                        sm_global_fn_name((int)op_num->value));
+      int op_num = ((sm_expr *)obj0)->op;
+      return (sm_object *)sm_new_symbol(sm_global_fn_name(op_num),
+                                        sm_global_fn_name_len(op_num));
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1231,9 +1231,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
         //((sm_expr*)input)->notes might be a ptr to a cx
+<<<<<<< HEAD
         return (sm_object *)sm_new_error(
           sm_new_string(9, "TypeError"), sm_new_string(37, "Wrong type for second operand on plus"),
           sm_new_string(1, ((sm_expr *)input)->notes), 0, (sm_cx *)NULL);
+=======
+        return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
+                                         sm_new_string(37, "Wrong type for second operand on plus"),
+                                         sm_new_string(0, ""), 0);
+>>>>>>> da730e4 (functional fnSetParent, Renamed xpOpStr to xpOpSym and fixed)
       }
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
     }
