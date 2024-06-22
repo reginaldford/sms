@@ -586,8 +586,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type(obj0, 0, SM_EXPR_TYPE, SM_XP_OP_SYM_EXPR))
         return (sm_object *)sms_false;
       int op_num = ((sm_expr *)obj0)->op;
-      return (sm_object *)sm_new_symbol(sm_global_fn_name(op_num),
-                                        sm_global_fn_name_len(op_num));
+      return (sm_object *)sm_new_symbol(sm_global_fn_name(op_num), sm_global_fn_name_len(op_num));
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1230,10 +1229,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_PLUS_EXPR))
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
-        //((sm_expr*)input)->notes might be a ptr to a cx
-        return (sm_object *)sm_new_error(
-          sm_new_string(9, "TypeError"), sm_new_string(37, "Wrong type for second operand on plus"),
-          sm_new_string(1, ((sm_expr *)input)->notes), 0, (sm_cx *)NULL);
+        sm_string *source   = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+        sm_string *line     = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+        int        line_int = 0;
+        if (line)
+          line_int = atoi(&line->content);
+
+        return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
+                                         sm_new_string(37, "Wrong type for second operand on plus"),
+                                         source, line_int, NULL);
       }
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
     }
@@ -1610,11 +1614,48 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_ERRTITLE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type != SM_ERR_TYPE) {
-        // type check..
         return (sm_object *)sms_false;
       }
       sm_error *e = (sm_error *)obj0;
       return (sm_object *)e->title;
+    }
+    case SM_ERRLINE_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_ERR_TYPE) {
+        return (sm_object *)sms_false;
+      }
+      sm_error *e = (sm_error *)obj0;
+      return (sm_object *)sm_new_double(e->line);
+    }
+    case SM_ERRSOURCE_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_ERR_TYPE) {
+        return (sm_object *)sms_false;
+      }
+      sm_error *e = (sm_error *)obj0;
+      return (sm_object *)e->source;
+    }
+    case SM_ERRMESSAGE_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_ERR_TYPE) {
+        return (sm_object *)sms_false;
+      }
+      sm_error *e = (sm_error *)obj0;
+      if (e->message)
+        return (sm_object *)e->message;
+      else
+        return (sm_object*)sms_false;
+    }
+    case SM_ERRNOTES_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type != SM_ERR_TYPE) {
+        return (sm_object *)sms_false;
+      }
+      sm_error *e = (sm_error *)obj0;
+      if (e->notes)
+        return (sm_object *)e->notes;
+      else
+        return (sm_object*)sms_false;
     }
     default:
       return input;
