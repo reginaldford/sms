@@ -12,16 +12,45 @@ extern sm_heap   *sms_other_heap;
 extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
 
-// The engine should return an error if this returns false
-// and the next function will complain about type mismatch,
-// going up the callstack, until we hit a try or not
-// the checker is the type number of the function which is checking
+// Deprecated
 bool expect_type(sm_object *arg_n, uint32_t arg_num, uint16_t arg_type, uint16_t checker) {
   return arg_n->my_type == arg_type;
 }
 
+// Returns the object if it's ok, returns an error if it's not
+sm_object *type_check(sm_expr *sme, uint32_t operand, int param_type) {
+  sm_object *obj = sm_expr_get_arg(sme, operand);
+  if (param_type != obj->my_type) {
+    sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    char       buffer[256];
+    return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
+                                     sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s",
+                                                       operand, sm_global_fn_name(sme->op)),
+                                     source, (int)line->value, sm_new_cx(NULL));
+  }
+  return obj;
+}
+
+// Evaluate the argument, then run type check
+sm_object *eager_type_check(sm_expr *sme, int operand, int param_type, sm_cx *current_cx,
+                            sm_expr *sf) {
+  sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
+  if (param_type != obj->my_type) {
+    sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
+                                     sm_new_fstring_at(sms_heap,
+                                                       "Wrong type for argument %i on function %s",
+                                                       operand, sm_global_fn_name(sme->op)),
+                                     source, (int)line->value, sm_new_cx(NULL));
+  }
+  return obj;
+}
+
+
 // Convenience functions for the booleans
-#define IS_TRUE (x)((void *)x == (void *)sms_true)
+#define IS_TRUE(x) ((void *)x == (void *)sms_true)
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
 
 // Recursive engine
@@ -51,16 +80,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_SLEEP_EXPR: {
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      int        tms;
-      if (!expect_type(obj0, 0, SM_DOUBLE_TYPE, SM_SLEEP_EXPR))
-        return (sm_object *)sm_new_double(0);
-
+      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      int tms;
       tms = (int)((sm_double *)obj0)->value;
-
       if (tms < 0) {
         printf("ERROR: sleep function was provided a negative value.\n");
-        return (sm_object *)false;
+        return (sm_object *)sms_false;
       }
       struct timespec ts;
       int             ret;
@@ -86,11 +113,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
                                         (sm_object *)sm_new_double(status), NULL);
     }
     case SM_EXEC_EXPR: {
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_string *path;
-      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_EXEC_EXPR))
-        return (sm_object *)sms_false;
-      path = (sm_string *)obj0;
+      sm_string *path = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (path->my_type == SM_ERR_TYPE)
+        return (sm_object *)path;
       // The system command leaves 8 bits for extra information
       // We do not need it, so we shift away the 8 bits
       int result = system(&path->content) >> 8;
@@ -98,12 +123,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_OS_GETENV_EXPR: {
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_string *key;
-      if (!expect_type(obj0, 0, SM_STRING_TYPE, SM_OS_GETENV_EXPR))
-        return (sm_object *)sms_false;
-      key          = (sm_string *)obj0;
-      char *result = getenv(&key->content);
+      sm_string *key    = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      char      *result = getenv(&key->content);
       if (!result)
         return (sm_object *)sms_false;
       return (sm_object *)sm_new_string(strlen(result), result);
@@ -597,6 +618,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_string_escape(str0);
     }
     case SM_INPUT_EXPR: {
+      // TODO: are we in plain mode?
       // fgets(input_str, sizeof(input_str), stdin);
       char *line = linenoise("");
       // we remove the trailing newline character
@@ -1224,63 +1246,56 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }*/
     case SM_PLUS_EXPR: {
-      sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      // YOU ARE HERE -- clean this, apply to the rest, implement strmut, version, get this done!
-      for (int operand = 0; operand <= 1; operand++) {
-        if (!expect_type((sm_object *)sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf),
-                         operand, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
-          sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-          sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-          char       buffer[256];
-          return (sm_object *)sm_new_error(
-            sm_new_string(9, "TypeError"),
-            sm_new_fstring_at(sms_heap, "Wrong type for operand %i on plus", operand), source,
-            (int)line->value, NULL);
-        }
-      }
+      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
+      break;
     }
     case SM_MINUS_EXPR: {
-      sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (!expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_MINUS_EXPR))
-        return (sm_object *)sms_false;
-      if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_MINUS_EXPR))
-        return (sm_object *)sms_false;
+      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
       return (sm_object *)sm_new_double(obj0->value - obj1->value);
+      break;
     }
     case SM_TIMES_EXPR: {
-      sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (!expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_TIMES_EXPR))
-        return (sm_object *)sms_false;
-      if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_TIMES_EXPR))
-        return (sm_object *)sms_false;
+      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
       return (sm_object *)sm_new_double(obj0->value * obj1->value);
+      break;
     }
     case SM_DIVIDE_EXPR: {
-      sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (!expect_type((sm_object *)obj0, 0, SM_DOUBLE_TYPE, SM_DIVIDE_EXPR))
-        return (sm_object *)sms_false;
-      if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_DIVIDE_EXPR))
-        return (sm_object *)sms_false;
+      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
       return (sm_object *)sm_new_double(obj0->value / obj1->value);
+      break;
     }
     case SM_POW_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *arg1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_POW_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
-      sm_double *num1;
-      if (!expect_type(arg1, 1, SM_DOUBLE_TYPE, SM_POW_EXPR))
-        return (sm_object *)sms_false;
-      num1 = (sm_double *)arg1;
-      return (sm_object *)sm_new_double(pow(num0->value, num1->value));
+      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_double(pow(obj0->value, obj1->value));
+      break;
     }
+
     case SM_SIN_EXPR: {
       sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *num0;
@@ -1289,180 +1304,166 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       num0 = (sm_double *)arg0;
       return (sm_object *)sm_new_double(sin(num0->value));
     }
+      /*
+          case SM_SIN_EXPR: {
+            sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+            printf("the value of the first arg is %g\n", num0->value);
+            if (num0->my_type == SM_ERR_TYPE)
+              return (sm_object *)num0;
+            return (sm_object *)sm_new_double(sin(num0->value));
+            break;
+          }
+          */
+
     case SM_COS_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COS_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(cos(num0->value));
+      break;
     }
     case SM_TAN_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TAN_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(tan(num0->value));
+      break;
     }
     case SM_ASIN_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_SIN_EXPR))
-        return (sm_object *)sms_false;
-      num0     = (sm_double *)arg0;
-      double x = num0->value;
-      return (sm_object *)sm_new_double(asin(x));
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
+      return (sm_object *)sm_new_double(asin(num0->value));
+      break;
     }
     case SM_ACOS_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COS_EXPR))
-        return (sm_object *)sms_false;
-      num0     = (sm_double *)arg0;
-      double x = num0->value;
-      return (sm_object *)sm_new_double(acos(x));
-      printf("acos is not implemented yet.\n");
-      return (sm_object *)sm_new_double((num0->value));
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
+      return (sm_object *)sm_new_double(acos(num0->value));
+      break;
     }
+
     case SM_ATAN_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TAN_EXPR))
-        return (sm_object *)sms_false;
-      num0     = (sm_double *)arg0;
-      double x = num0->value;
-      return (sm_object *)sm_new_double(atan(x));
-      printf("atan is not implemented yet.\n");
-      return (sm_object *)sm_new_double((num0->value));
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
+      return (sm_object *)sm_new_double(atan(num0->value));
+      break;
     }
     case SM_SEC_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_SEC_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(1.0 / cos(num0->value));
+      break;
     }
     case SM_CSC_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_CSC_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(1.0 / sin(num0->value));
+      break;
     }
     case SM_COT_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COT_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(1.0 / tan(num0->value));
+      break;
     }
     case SM_SINH_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_SINH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(sinh(num0->value));
+      break;
     }
     case SM_COSH_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_COSH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(cosh(num0->value));
+      break;
     }
     case SM_TANH_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(tanh(num0->value));
+      break;
     }
     case SM_SECH_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(1.0 / cosh(num0->value));
+      break;
     }
     case SM_CSCH_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(1.0 / sinh(num0->value));
+      break;
     }
     case SM_COTH_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(1.0 / tanh(num0->value));
+      break;
     }
     case SM_LN_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(log(num0->value));
+      break;
     }
     case SM_LOG_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *arg1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_LOG_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
-      sm_double *num1;
-      if (!expect_type(arg1, 1, SM_DOUBLE_TYPE, SM_LOG_EXPR))
-        return (sm_object *)sms_false;
-      num1 = (sm_double *)arg1;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
+      sm_double *num1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num1->my_type == SM_ERR_TYPE)
+        return (sm_object *)num1;
       return (sm_object *)sm_new_double(log(num1->value) / log(num0->value));
+      break;
     }
     case SM_EXP_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(exp(num0->value));
+      break;
     }
     case SM_SQRT_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(sqrt(num0->value));
+      break;
     }
     case SM_ABS_EXPR: {
-      sm_object *arg0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_double *num0;
-      if (!expect_type(arg0, 0, SM_DOUBLE_TYPE, SM_TANH_EXPR))
-        return (sm_object *)sms_false;
-      num0 = (sm_double *)arg0;
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
       return (sm_object *)sm_new_double(num0->value < 0 ? -1 * num0->value : num0->value);
+      break;
     }
     case SM_IF_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (!IS_FALSE(condition_result))
+      if (!IS_FALSE(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      }
       return (sm_object *)sms_false;
     }
     case SM_IF_ELSE_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (!IS_FALSE(condition_result))
+      if (!IS_FALSE(condition_result)) {
         return sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      }
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
     }
     case SM_ARRAY_EXPR: {
@@ -1482,34 +1483,30 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)new_arr;
     }
     case SM_LT_EXPR: {
-      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (obj1->my_type == SM_DOUBLE_TYPE) {
-        if (obj2->my_type == SM_DOUBLE_TYPE) {
-          double v1 = ((sm_double *)obj1)->value;
-          double v2 = ((sm_double *)obj2)->value;
-          if (v1 < v2)
-            return (sm_object *)sms_true;
-          else
-            return (sm_object *)sms_false;
-        }
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
+      sm_double *obj2 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj2->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj2;
+      if (obj1->value < obj2->value) {
+        return (sm_object *)sms_true;
+      } else {
         return (sm_object *)sms_false;
       }
     }
     case SM_GT_EXPR: {
-      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (obj1->my_type == SM_DOUBLE_TYPE) {
-        if (obj2->my_type == SM_DOUBLE_TYPE) {
-          double v1 = ((sm_double *)obj1)->value;
-          double v2 = ((sm_double *)obj2)->value;
-          if (v1 > v2)
-            return (sm_object *)sms_true;
-          else
-            return (sm_object *)sms_false;
-        }
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
+      sm_double *obj2 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj2->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj2;
+      if (obj1->value > obj2->value) {
+        return (sm_object *)sms_true;
+      } else {
+        return (sm_object *)sms_false;
       }
-      return (sm_object *)sms_false;
     }
     case SM_EQEQ_EXPR: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1518,99 +1515,90 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_true;
       }
 
-      if (sm_object_eq(obj1, obj2))
+      if (sm_object_eq(obj1, obj2)) {
         return (sm_object *)sms_true;
-      else
+      } else {
         return (sm_object *)sms_false;
+      }
     }
     case SM_IS_EXPR: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (obj1 == obj2)
+      if (obj1 == obj2) {
         return (sm_object *)sms_true;
-      else
+      } else {
         return (sm_object *)sms_false;
+      }
     }
     case SM_GT_EQ_EXPR: {
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (obj0->my_type != SM_DOUBLE_TYPE) {
-        sm_string *str  = sm_object_to_string(obj0);
-        char      *cstr = &(str->content);
-        printf(">= failed. First argument is not a number: %s\n", cstr);
-      }
-      if (obj1->my_type != SM_DOUBLE_TYPE) {
-        sm_string *str  = sm_object_to_string(obj1);
-        char      *cstr = &(str->content);
-        printf(">= failed. Second argument is not a number: %s\n", cstr);
-      }
-      double val0 = ((sm_double *)obj0)->value;
-      double val1 = ((sm_double *)obj1)->value;
-      if (val0 >= val1)
+      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
+
+      if (obj0->value >= obj1->value) {
         return (sm_object *)sms_true;
-      else
+      } else {
         return (sm_object *)sms_false;
+      }
     }
     case SM_LT_EQ_EXPR: {
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (obj0->my_type != SM_DOUBLE_TYPE) {
-        sm_string *str  = sm_object_to_string(obj0);
-        char      *cstr = &(str->content);
-        printf("<= failed. First argument is not a number: %s\n", cstr);
-      }
-      if (obj1->my_type != SM_DOUBLE_TYPE) {
-        sm_string *str  = sm_object_to_string(obj1);
-        char      *cstr = &(str->content);
-        printf("<= failed. Second argument is not a number: %s\n", cstr);
-      }
-      double val0 = ((sm_double *)obj0)->value;
-      double val1 = ((sm_double *)obj1)->value;
-      if (val0 <= val1)
+      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+
+      sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
+
+      if (obj0->value <= obj1->value) {
         return (sm_object *)sms_true;
-      else
+      } else {
         return (sm_object *)sms_false;
+      }
     }
     case SM_RUNTIME_META_EXPR: {
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      return (sm_object *)sm_new_meta(obj0, current_cx);
+      sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return (sm_object *)sm_new_meta(obj, current_cx);
     }
+
+
     case SM_ERR_EXPR: {
-      // Makes a new err object. Variable input count
-      sm_object *obj0 = NULL;
-      sm_object *obj1 = NULL;
-      sm_object *obj2 = NULL;
-      // obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      // obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       uint32_t  num_inputs = sme->size;
       sm_error *newE       = sm_new_error_blank();
+
       if (num_inputs >= 1) {
-        obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-        if (obj0->my_type != SM_STRING_TYPE) {
-          sm_string *str    = sm_object_to_string(obj0);
-          char      *cstr   = &(str->content);
-          sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-          sm_string *line   = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-          return (sm_object *)sm_new_error(
-            sm_new_string(12, "TypeMismatch"),
-            sm_new_string(37, "First argument to Err is not a string"), source,
-            atoi(&line->content), NULL);
-        }
-        newE->title = (sm_string *)obj0;
-      } else
+        sm_string *title = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+        if (title->my_type == SM_ERR_TYPE)
+          return (sm_object *)title;
+        newE->title = title;
+      } else {
         newE->title = sm_new_string(10, "GenericErr");
-      if (num_inputs < 2)
-        newE->message = (sm_string *)sm_new_string(0, "");
-      else
-        newE->message = (sm_string *)sm_expr_get_arg(sme, 1);
-      if (num_inputs < 3)
-        newE->source = (sm_string *)sm_new_string(0, "");
-      else
-        newE->source = (sm_string *)sm_expr_get_arg(sme, 2);
-      newE->line  = 0;
+      }
+
+      if (num_inputs >= 2) {
+        sm_string *message = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
+        if (message->my_type == SM_ERR_TYPE)
+          return (sm_object *)message;
+        newE->message = message;
+      } else {
+        newE->message = sm_new_string(0, "");
+      }
+
+      sm_double *line = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+      newE->line      = (int)line->value;
+
+      sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+      newE->source      = source;
+
       newE->notes = sm_new_cx(current_cx); // experimental parenting
       return (sm_object *)newE;
     }
+
+
     case SM_ERRTITLE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type != SM_ERR_TYPE) {

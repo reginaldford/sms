@@ -219,7 +219,7 @@ char *sm_global_fn_name(uint32_t which) {
     "fnSetParent",  // SM_FN_SETPARENT_EXPR
     "xpOp",         // SM_XPR_OP
     "xpSetOp",      // SM_XPR_SETOP
-    "xpOpStr",      // SM_XPR_OPSTR
+    "xpOpSym",      // SM_XPR_OPSYM
     "strSize",      // SM_STR_SIZE_EXPR
     "strGet",       // SM_STR_GET_EXPR
     "strSet",       // SM_STR_SET_EXPR
