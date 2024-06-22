@@ -16,7 +16,7 @@ char *sm_strncpy(char *dest, const char *src, uint32_t n) {
 sm_string *sm_new_string(uint32_t size, char *str) {
   // We add a null character that is not included in the size
   struct sm_string *newstr = sm_new_string_manual(size);
-  sm_strncpy(&(newstr->content), str, size);
+  sm_strncpy(&newstr->content, str, size);
   return newstr;
 }
 
@@ -24,7 +24,7 @@ sm_string *sm_new_string(uint32_t size, char *str) {
 sm_string *sm_new_string_at(struct sm_heap *heap, uint32_t size, char *str) {
   // We add a null character that is not included in the size
   struct sm_string *newstr = sm_new_string_manual_at(heap, size);
-  sm_strncpy(&(newstr->content), str, size);
+  sm_strncpy(&newstr->content, str, size);
   return newstr;
 }
 
@@ -32,10 +32,7 @@ sm_string *sm_new_string_at(struct sm_heap *heap, uint32_t size, char *str) {
 struct sm_string *sm_new_fstring_at(struct sm_heap *heap, const char *format, ...) {
   va_list args;
   va_start(args, format);
-  va_list args_copy;
-  va_copy(args_copy, args);
-  int length = vsnprintf(NULL, 0, format, args_copy);
-  va_end(args_copy);
+  int length = vsnprintf(NULL, 0, format, args);
   if (length < 0) {
     va_end(args);
     return NULL;
@@ -46,7 +43,6 @@ struct sm_string *sm_new_fstring_at(struct sm_heap *heap, const char *format, ..
   newstr->size = length;
   return newstr;
 }
-
 
 // Return a new empty string (does not nullify contents)
 sm_string *sm_new_string_manual_at(struct sm_heap *heap, uint32_t size) {
@@ -69,7 +65,7 @@ sm_string *sm_new_string_manual(uint32_t size) {
 sm_string *sm_string_add(sm_string *str1, sm_string *str2) {
   uint32_t   size_sum   = str1->size + str2->size;
   sm_string *new_string = sm_new_string(size_sum, &(str1->content));
-  sm_strncpy(&(new_string->content) + str1->size, &(str2->content), str2->size);
+  sm_strncpy(&new_string->content + str1->size, &(str2->content), str2->size);
   return new_string;
 }
 
@@ -77,7 +73,7 @@ sm_string *sm_string_add(sm_string *str1, sm_string *str2) {
 sm_string *sm_string_to_string(sm_string *str) {
   const uint32_t final_len = str->size + 2;
   sm_string     *new_str   = sm_new_string(final_len, "");
-  sm_string_sprint(str, &(new_str->content), false);
+  sm_string_sprint(str, &new_str->content, false);
   (&new_str->content)[final_len] = '\0';
   return new_str;
 }
@@ -86,7 +82,7 @@ sm_string *sm_string_to_string(sm_string *str) {
 // Unescapes back to the c-style escape codes
 // Returns the length
 uint32_t sm_string_sprint(sm_string *self, char *to_str, bool fake) {
-  char *from_str = &(self->content);
+  char *from_str = &self->content;
   if (!fake)
     to_str[0] = '\"';
   // i for from_str , j for to_str
