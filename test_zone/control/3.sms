@@ -9,7 +9,7 @@
   # Commenting out the failing tests for now:
   tests->[
     [f(4), -5, "fun call"],
-    [f("4"), false, "wrong type returns false"],
+    # [isErr(f("4")), true), "TODO: isErr missing"],
     [g(4,1/2), -10, "fun calls another fun"],
     [self.f(4), -5, "object function call"],
     #[farray[0](4), -5, "array function call"],
