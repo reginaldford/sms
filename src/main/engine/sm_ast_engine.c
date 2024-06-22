@@ -1226,19 +1226,19 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_PLUS_EXPR: {
       sm_double *obj0 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_double *obj1 = (sm_double *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      for (int operand = 0; operand <= 1; operand++)
+      // YOU ARE HERE -- clean this, apply to the rest, implement strmut, version, get this done!
+      for (int operand = 0; operand <= 1; operand++) {
         if (!expect_type((sm_object *)sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf),
                          operand, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
-          sm_string *source   = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-          sm_string *line     = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-          int        line_int = line ? atoi(&line->content) : 0;
+          sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+          sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
           char       buffer[256];
-          printf("line_int is %i\n", line_int);
           return (sm_object *)sm_new_error(
             sm_new_string(9, "TypeError"),
             sm_new_fstring_at(sms_heap, "Wrong type for operand %i on plus", operand), source,
-            line_int, NULL);
+            (int)line->value, NULL);
         }
+      }
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
     }
     case SM_MINUS_EXPR: {
