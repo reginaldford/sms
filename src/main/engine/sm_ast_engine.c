@@ -1231,15 +1231,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       if (!expect_type((sm_object *)obj1, 1, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
         //((sm_expr*)input)->notes might be a ptr to a cx
-<<<<<<< HEAD
         return (sm_object *)sm_new_error(
           sm_new_string(9, "TypeError"), sm_new_string(37, "Wrong type for second operand on plus"),
           sm_new_string(1, ((sm_expr *)input)->notes), 0, (sm_cx *)NULL);
-=======
-        return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
-                                         sm_new_string(37, "Wrong type for second operand on plus"),
-                                         sm_new_string(0, ""), 0);
->>>>>>> da730e4 (functional fnSetParent, Renamed xpOpStr to xpOpSym and fixed)
       }
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
     }
