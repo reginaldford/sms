@@ -20,19 +20,6 @@ bool expect_type(sm_object *arg_n, uint32_t arg_num, uint16_t arg_type, uint16_t
   return arg_n->my_type == arg_type;
 }
 
-sm_error* type_check(){
-        if (!expect_type((sm_object *)sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf),
-                         operand, SM_DOUBLE_TYPE, SM_PLUS_EXPR)) {
-          sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-          sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-          char       buffer[256];
-          return (sm_object *)sm_new_error(
-            sm_new_string(9, "TypeError"),
-            sm_new_fstring_at(sms_heap, "Wrong type for operand %i on plus", operand), source,
-            (int)line->value, NULL);
-        }
-}
-
 // Convenience functions for the booleans
 #define IS_TRUE (x)((void *)x == (void *)sms_true)
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
