@@ -666,6 +666,8 @@ FILE* lex_file(char *fpath){
 }
 
 void done_lexing_file(FILE* f){
+  parsing_fpath[0]='\0';
+  parsing_fpath_len =0;
   _done_lexing_file(f);
 }
 
@@ -684,8 +686,12 @@ void yyerror(const char *msg) {
 // For the parser to quickly create a common type of context
 struct sm_cx *_note() {
   struct sm_cx * note = sm_new_cx(NULL);
+  if(parsing_fpath[0])
   sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(parsing_fpath_len,parsing_fpath));
-  char buffer[256];
+  else
+  sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(8,"terminal"));
+
+  char buffer[16];
   sprintf(buffer,"%i",yylineno);
   int numLen = strlen(buffer);
   sm_cx_let(note,sm_new_symbol("line",4),(sm_object*)sm_new_string(numLen,buffer));

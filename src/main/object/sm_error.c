@@ -19,7 +19,6 @@ sm_error *sm_new_error(sm_string *title, sm_string *message, sm_string *source, 
   new_error->message  = message;
   new_error->source   = source;
   new_error->line     = line;
-  new_error->notes    = (void *)notes;
   // collect filepath and line
   return new_error;
 }
