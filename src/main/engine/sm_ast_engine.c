@@ -1564,41 +1564,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_meta(obj, current_cx);
     }
-
-
-    case SM_ERR_EXPR: {
-      uint32_t  num_inputs = sme->size;
-      sm_error *newE       = sm_new_error_blank();
-
-      if (num_inputs >= 1) {
-        sm_string *title = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
-        if (title->my_type == SM_ERR_TYPE)
-          return (sm_object *)title;
-        newE->title = title;
-      } else {
-        newE->title = sm_new_string(10, "GenericErr");
-      }
-
-      if (num_inputs >= 2) {
-        sm_string *message = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
-        if (message->my_type == SM_ERR_TYPE)
-          return (sm_object *)message;
-        newE->message = message;
-      } else {
-        newE->message = sm_new_string(0, "");
-      }
-
-      sm_double *line = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-      newE->line      = (int)line->value;
-
-      sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-      newE->source      = source;
-
-      newE->notes = sm_new_cx(current_cx); // experimental parenting
-      return (sm_object *)newE;
-    }
-
-
     case SM_ERRTITLE_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type != SM_ERR_TYPE) {
@@ -1689,7 +1654,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     return (sm_object *)cx;
   }
   case SM_ERR_TYPE: {
-    // TODO: Add callstack info here.
+    // TODO:if(debug mode){ Add callstack info here.}
     return input;
   }
   default:

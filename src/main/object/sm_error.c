@@ -2,24 +2,29 @@
 
 #include "../sms.h"
 
-/// Error object which has not been used correctly yet
-/// @note source line info is to be stored in the AST and eventually passed to here
+/// Error object
 sm_error *sm_new_error_blank() {
   sm_error *new_error = sm_malloc(sizeof(sm_error));
   new_error->my_type  = SM_ERR_TYPE;
   return new_error;
 }
 
-/// Error object which has not been used correctly yet
-/// @note source line info is to be stored in the AST and eventually passed to here
-sm_error *sm_new_error(sm_string *title, sm_string *message, sm_string *source, uint32_t line,
-                       sm_cx *notes) {
+/// Creates an error with both title and message, with defaults if necessary
+sm_error *sm_new_error(int title_len, char *title_str, int message_len, char *message_str,
+                       int sourceLen, char *source, uint32_t line) {
   sm_error *new_error = sm_new_error_blank();
-  new_error->title    = title;
-  new_error->message  = message;
-  new_error->source   = source;
-  new_error->line     = line;
-  // collect filepath and line
+  new_error->title =
+    (title_len > 0) ? sm_new_string(title_len, title_str) : sm_new_string(10, "GenericErr");
+  new_error->message =
+    (message_len > 0) ? sm_new_string(message_len, message_str) : sm_new_string(0, "");
+  sm_string *sourceStr;
+  if (sourceLen)
+    sourceStr = sm_new_string(sourceLen, source);
+  else
+    sourceStr = sm_new_string(10, "(terminal)");
+
+  new_error->source = sourceStr;
+  new_error->line   = line;
   return new_error;
 }
 
@@ -27,6 +32,6 @@ sm_error *sm_new_error(sm_string *title, sm_string *message, sm_string *source, 
 /// Error type is a symbol involving things like "...Invalid" and "...Blocked"
 int sm_err_sprint(sm_error *self, char *buffer, bool fake) {
   if (!fake)
-    sprintf(buffer, "(%s)", &self->title->content);
-  return self->title->size + 2;
+    sprintf(buffer, "<%s,%s>", &self->title->content, &self->message->content);
+  return self->title->size + self->message->size + 3;
 }

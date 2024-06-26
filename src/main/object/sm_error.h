@@ -11,7 +11,7 @@ typedef struct sm_error {
   sm_cx     *notes;
 } sm_error;
 
-sm_error *sm_new_error(sm_string *title, sm_string *message, sm_string *source, uint32_t line,
-                       sm_cx *notes);
+sm_error *sm_new_error(int title_len, char *title_str, int message_len, char *message_str,
+                       int sourceLen, char *source, uint32_t line);
 int       sm_err_sprint(sm_error *self, char *buffer, bool fake);
 sm_error *sm_new_error_blank();
