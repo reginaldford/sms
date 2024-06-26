@@ -29,11 +29,13 @@ int parsing_fpath_len;
   sm_cx            *context;
   sm_meta          *meta;
   sm_fun           *fun;
+  sm_error         *err;
   sm_expr          *param_list;
   sm_fun_param_obj *param;
 };
 
 %type <fun> FUN
+%type <err> ERROR
 %type <fun> FUN_INTRO
 %type <expr> FUN_CALL
 %type <expr> FUN_CALL_OPEN
@@ -365,6 +367,7 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | ASSIGNMENT{}
 | INDEX_ASSIGNMENT{}
 | DOT_ASSIGNMENT{}
+| ERROR {}
 | FUN_CALL{}
 | FUN{}
 | IF_STATEMENT{}
@@ -457,15 +460,23 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | PWD '(' ')' { $$ = sm_new_expr_n(SM_PWD_EXPR,0,0, _note());}
 | RUNTIME_META '(' EXPR ')' { $$ = sm_new_expr(SM_RUNTIME_META_EXPR, (sm_object*)$3, _note());}
 | GC '(' ')' { $$ = sm_new_expr_n(SM_GC_EXPR, 0,0, _note()); }
-| ERR_NEW '(' ')' { $$ = sm_new_expr_0(SM_ERR_EXPR,_note());}
-| ERR_NEW '(' EXPR ')' { $$ = sm_new_expr(SM_ERR_EXPR,(sm_object*)$3,_note());}
-| ERR_NEW '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_ERR_EXPR,(sm_object*)1,(sm_object*)3,_note());}
-| ERR_NEW '(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_ERR_EXPR,(sm_object*)1,(sm_object*)3,(sm_object*)5,_note());}
 | ERR_TITLE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRTITLE_EXPR,(sm_object*)$3,_note());}
 | ERR_MESSAGE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRMESSAGE_EXPR,(sm_object*)$3,_note());}
 | ERR_SOURCE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRSOURCE_EXPR,(sm_object*)$3,_note());}
 | ERR_LINE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRLINE_EXPR,(sm_object*)$3,_note());}
 | ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERRNOTES_EXPR,(sm_object*)$3,_note());}
+
+
+ERROR : ERR_NEW '(' ')' { $$ = sm_new_error(0,NULL,0 ,NULL,parsing_fpath_len,parsing_fpath,yylineno);}
+| ERR_NEW '(' EXPR ')' {
+    sm_string* expr = (sm_string*)$3; // Assuming $3 is the EXPR result and it's a sm_string*
+    $$ = sm_new_error(expr->size, &expr->content,0, "",parsing_fpath_len, parsing_fpath,yylineno);
+}
+| ERR_NEW '(' EXPR ',' EXPR ')' {
+    sm_string* title = (sm_string*)$3; // Assuming $3 is the EXPR result and it's a sm_string*
+    sm_string* message = (sm_string*)$5; // Assuming $3 is the EXPR result and it's a sm_string*
+    $$ = sm_new_error(title->size, &title->content,message->size,&message->content,parsing_fpath_len, parsing_fpath,yylineno);
+}
 
 FUN : FUN_INTRO EXPR {
   //local variables are changed from symbol to local
