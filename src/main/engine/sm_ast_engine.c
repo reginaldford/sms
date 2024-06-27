@@ -619,10 +619,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_string_escape(str0);
     }
     case SM_INPUT_EXPR: {
-      // TODO: are we in plain mode?
-      // fgets(input_str, sizeof(input_str), stdin);
+      if(sm_global_environment(NULL)->plain_mode){
+        char input_str[500];
+         fgets(input_str, sizeof(input_str), stdin);
+        // we remove the trailing newline character
+        int len = strlen(input_str);
+        input_str[len-1]='\0';
+        return (sm_object *)sm_new_string(len-1, input_str);
+      }
       char *line = linenoise("");
-      // we remove the trailing newline character
       return (sm_object *)sm_new_string(strlen(line), line);
     }
     case SM_OR_EXPR: {
