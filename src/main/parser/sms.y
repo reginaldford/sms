@@ -467,15 +467,15 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERRNOTES_EXPR,(sm_object*)$3,_note());}
 
 
-ERROR : ERR_NEW '(' ')' { $$ = sm_new_error(0,NULL,0 ,NULL,parsing_fpath_len,parsing_fpath,yylineno);}
-| ERR_NEW '(' EXPR ')' {
-    sm_string* expr = (sm_string*)$3; // Assuming $3 is the EXPR result and it's a sm_string*
-    $$ = sm_new_error(expr->size, &expr->content,0, "",parsing_fpath_len, parsing_fpath,yylineno);
+ERROR : '<' '>' { $$ = sm_new_error(0,NULL,0 ,NULL,parsing_fpath_len,parsing_fpath,yylineno);}
+| '<' SYM '>' {
+    sm_symbol* sym = (sm_symbol*)$2; // Assuming $3 is the EXPR result and it's a sm_string*
+    $$ = sm_new_error(sym->name->size, &sym->name->content,0, "",parsing_fpath_len, parsing_fpath,yylineno);
 }
-| ERR_NEW '(' EXPR ',' EXPR ')' {
-    sm_string* title = (sm_string*)$3; // Assuming $3 is the EXPR result and it's a sm_string*
-    sm_string* message = (sm_string*)$5; // Assuming $3 is the EXPR result and it's a sm_string*
-    $$ = sm_new_error(title->size, &title->content,message->size,&message->content,parsing_fpath_len, parsing_fpath,yylineno);
+| '<' SYM ',' EXPR '>' {
+    sm_symbol* title = (sm_symbol*)$2; // Assuming $3 is the EXPR result and it's a sm_string*
+    sm_string* message = (sm_string*)$4; // Assuming $3 is the EXPR result and it's a sm_string*
+    $$ = sm_new_error(title->name->size, &title->name->content,message->size, &message->content,parsing_fpath_len, parsing_fpath,yylineno);
 }
 
 FUN : FUN_INTRO EXPR {

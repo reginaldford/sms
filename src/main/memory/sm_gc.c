@@ -121,10 +121,10 @@ void sm_inflate_heap() {
     }
     case SM_ERR_TYPE: {
       sm_error *err = (sm_error *)current_obj;
-      err->title    = (sm_string *)sm_meet_object((sm_object *)err->title);
-      err->message  = (sm_string *)sm_meet_object((sm_object *)err->message);
-      err->source   = (sm_string *)sm_meet_object((sm_object *)err->source);
-      err->notes    = (sm_cx *)sm_meet_object((sm_object *)err->notes);
+      // Title is a singleton. This speeds up if(errTitle(e) is :whatever) to find err category
+      err->message = (sm_string *)sm_meet_object((sm_object *)err->message);
+      err->source  = (sm_string *)sm_meet_object((sm_object *)err->source);
+      err->notes   = (sm_cx *)sm_meet_object((sm_object *)err->notes);
       break;
     }
     case SM_FUN_PARAM_TYPE: {
