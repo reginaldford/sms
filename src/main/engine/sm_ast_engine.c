@@ -18,32 +18,33 @@ bool expect_type(sm_object *arg_n, uint32_t arg_num, uint16_t arg_type, uint16_t
 }
 
 // Returns the object if it's ok, returns an error if it's not
-sm_object *type_check(sm_expr *sme, uint32_t operand, int param_type) {
+static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_type) {
   sm_object *obj = sm_expr_get_arg(sme, operand);
   if (param_type != obj->my_type) {
-    sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    char       buffer[256];
-    return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
-                                     sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s",
-                                                       operand, sm_global_fn_name(sme->op)),
-                                     source, (int)line->value, sm_new_cx(NULL));
+    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
+                                           sm_global_fn_name(sme->op));
+    return (sm_object *)sm_new_error(9, "TypeError", message->size, &message->content, source->size,
+                                     &source->content, (int)line->value);
   }
   return obj;
 }
 
 // Evaluate the argument, then run type check
-sm_object *eager_type_check(sm_expr *sme, int operand, int param_type, sm_cx *current_cx,
-                            sm_expr *sf) {
+// inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_type, sm_cx *current_cx,
+//                           sm_expr *sf);
+
+static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_type,
+                                          sm_cx *current_cx, sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type != obj->my_type) {
-    sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    return (sm_object *)sm_new_error(sm_new_string(9, "TypeError"),
-                                     sm_new_fstring_at(sms_heap,
-                                                       "Wrong type for argument %i on function %s",
-                                                       operand, sm_global_fn_name(sme->op)),
-                                     source, (int)line->value, sm_new_cx(NULL));
+    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
+                                           sm_global_fn_name(sme->op));
+    return (sm_object *)sm_new_error(9, "TypeError", message->size, &message->content, source->size,
+                                     &source->content, (int)line->value);
   }
   return obj;
 }
@@ -1191,7 +1192,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_false;
       return value;
     }
-    case SM_ASSIGN_DOT_EXPR: {
+    /*case SM_ASSIGN_DOT_EXPR: {
       sm_object *obj0  = sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (!expect_type(obj0, 0, SM_EXPR_TYPE, SM_ASSIGN_DOT_EXPR))
@@ -1201,8 +1202,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         char *error_msg = "Error: Incorrectly formatted AST.";
         int   len       = strlen(error_msg);
         printf("%s\n", error_msg);
-        return (sm_object *)sm_new_error(sm_new_string(6, "BadAST"), sm_new_string(len, error_msg),
-                                         sm_new_string(0, ""), 0, (void *)NULL);
+        return (sm_object*)sms_false;
       }
       sm_cx     *predot  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(dot_expr, 0), current_cx, sf);
       sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(dot_expr, 1);
@@ -1211,7 +1211,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (!sm_cx_let(predot, postdot, value))
         return (sm_object *)sms_false;
       return (sm_object *)sms_true;
-    }
+    }*/
     case SM_ASSIGN_LOCAL_EXPR: {
       sm_object *obj0  = sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);

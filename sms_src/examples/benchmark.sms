@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm450
+#!/usr/local/bin/sms -qm550
 #Use this to benchmark something
 {
   let t1 =[];
