@@ -28,20 +28,21 @@ sm_error *sm_new_error(int title_len, char *title_str, int message_len, char *me
   return new_error;
 }
 /// Creates an error with both title and message, with defaults if necessary
-sm_error *sm_new_error_from_strings(sm_symbol* title,sm_string* message,sm_string* source, uint32_t line, sm_cx* notes) {
+sm_error *sm_new_error_from_strings(sm_symbol *title, sm_string *message, sm_string *source,
+                                    uint32_t line, sm_cx *notes) {
   sm_error *new_error = sm_new_error_blank();
-  new_error->title = title;
-  new_error->message = message;
-  new_error->source = source;
-  new_error->line   = line;
-  new_error->notes   = notes;
+  new_error->title    = title;
+  new_error->message  = message;
+  new_error->source   = source;
+  new_error->line     = line;
+  new_error->notes    = notes;
   return new_error;
 }
 /// Creates an error with line and source from the expression
-sm_error *sm_new_error_from_expr(sm_string* title, sm_string* message ,sm_expr * sme, sm_cx* notes) {
-    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    return sm_new_error_from_strings(title, message, source, (int)line->value,notes);
+sm_error *sm_new_error_from_expr(sm_symbol *title, sm_string *message, sm_expr *sme, sm_cx *notes) {
+  sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+  sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+  return sm_new_error_from_strings(title, message, source, (int)line->value, notes);
 }
 
 /// If !fake, print the error type to a string buffer. Return the length regardlessly.
