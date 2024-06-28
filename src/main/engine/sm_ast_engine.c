@@ -13,7 +13,9 @@ extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
 
 // Basic type checking
-bool expect_type(sm_object *arg_n, int16_t arg_type) { return arg_n->my_type == arg_type; }
+static inline bool expect_type(sm_object *arg_n, int16_t arg_type) {
+  return arg_n->my_type == arg_type;
+}
 
 // Returns the object if it's ok, returns an error if it's not
 static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_type) {
