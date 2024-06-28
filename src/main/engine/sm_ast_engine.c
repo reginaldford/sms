@@ -278,7 +278,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_string *str0 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
       if (str0->my_type == SM_ERR_TYPE)
         return (sm_object *)str0;
-      sm_string *str1 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      sm_string *str1 = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
       if (str1->my_type == SM_ERR_TYPE)
         return (sm_object *)str1;
       sm_string *new_str = sm_new_string_manual(str0->size + str1->size);
