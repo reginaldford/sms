@@ -73,8 +73,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_GC_EXPR: {
       // This fails because it changes all of the pointers before the function returns.
       // sm_garbage_collect();
-      printf("gc command is not implemented yet!\n");
-      return (sm_object *)sms_false;
+      sm_symbol *title   = sm_new_symbol("notImplemented", 14);
+      sm_string *message = sm_new_string(33, "_gc() command is not implemented yet");
+      return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       break;
     }
     case SM_SLEEP_EXPR: {
@@ -84,8 +85,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       int tms;
       tms = (int)((sm_double *)obj0)->value;
       if (tms < 0) {
-        printf("ERROR: sleep function was provided a negative value.\n");
-        return (sm_object *)sms_false;
+        sm_symbol *title   = sm_new_symbol("negativeTime", 12);
+        sm_string *message = sm_new_string(45, "sleep function was provided a negative value.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       struct timespec ts;
       int             ret;
@@ -320,7 +322,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
       if (cx->my_type == SM_ERR_TYPE)
         return (sm_object *)cx;
-      sm_cx *new_parent = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
+      sm_cx *new_parent = (sm_cx *)eager_type_check(sme, 1, SM_CX_TYPE, current_cx, sf);
       if (new_parent->my_type == SM_ERR_TYPE)
         return (sm_object *)new_parent;
       cx         = (sm_cx *)sm_copy((sm_object *)cx);
@@ -411,7 +413,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_cx *cxFrom = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
       if (cxFrom->my_type != SM_CX_TYPE)
         return (sm_object *)cxFrom;
-      sm_cx *cxTo = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
+      sm_cx *cxTo = (sm_cx *)eager_type_check(sme, 1, SM_CX_TYPE, current_cx, sf);
       if (cxTo->my_type != SM_CX_TYPE)
         return (sm_object *)cxTo;
       sm_cx_import(cxFrom, cxTo);
@@ -1098,8 +1100,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
       sm_string *field_name = field_sym->name;
       sm_cx     *base_cx;
-      if (!expect_type(base_obj, SM_CX_TYPE))
-        return (sm_object *)sms_false;
+      if (base_obj->my_type != SM_CX_TYPE) {
+        sm_symbol *title   = sm_new_symbol("notACx", 6);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Attempted x.%s where x was not a contex",
+                                               &field_name->content);
+      }
       base_cx       = (sm_cx *)base_obj;
       sm_object *sr = sm_cx_get_far(base_cx, field_sym);
       if (sr == NULL) {
