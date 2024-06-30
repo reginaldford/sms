@@ -142,6 +142,7 @@ int parsing_fpath_len;
 %token <expr> ARR_CAT
 
 %token <expr> STR_SIZE
+%token <expr> STR_MUT
 %token <expr> STR_CAT
 %token <expr> STR_GET
 %token <expr> STR_SET
@@ -440,6 +441,7 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | EXPR AND EXPR   { $$ = sm_new_expr_2(SM_AND_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | STR_ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_STR_ESCAPE_EXPR,(sm_object*)$3, _note());}
 | STR_SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_STR_SIZE_EXPR,(sm_object*)$3, _note());}
+| STR_MUT '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_STR_MUT_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,    _note());}
 | STR_FIND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_FIND_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | STR_CAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_CAT_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | EXPR STR_CAT EXPR {$$ = sm_new_expr_2(SM_STR_CAT_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}

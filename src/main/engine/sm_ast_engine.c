@@ -329,6 +329,35 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)new_str;
       break;
     }
+    case SM_STR_MUT_EXPR: {
+      sm_string *original_str =
+        (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (original_str->my_type == SM_ERR_TYPE)
+        return (sm_object *)original_str;
+      sm_double *start_index =
+        (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (start_index->my_type == SM_ERR_TYPE)
+        return (sm_object *)start_index;
+      sm_string *replacement_str =
+        (sm_string *)eager_type_check(sme, 2, SM_STRING_TYPE, current_cx, sf);
+      if (replacement_str->my_type == SM_ERR_TYPE)
+        return (sm_object *)replacement_str;
+      // Calculate cutout length
+      int cutout_length = replacement_str->size;
+      // Check if new size exceeds original size
+      if (original_str->size - (int)start_index->value < (int)replacement_str->size) {
+        sm_symbol *title   = sm_new_symbol("strMutOverflow", 14);
+        sm_string *message = sm_new_string(46, "Could not mutate string within the size limit.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      char *content = &(original_str->content);
+      // Copy replacement string into the original string
+      sm_strncpy(content + (int)start_index->value, &(replacement_str->content),
+                 replacement_str->size);
+      // No need to copy the remainder since the string size stays the same
+      return (sm_object *)original_str;
+      break;
+    }
     case SM_STR_CAT_EXPR: {
       sm_string *str0 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
       if (str0->my_type == SM_ERR_TYPE)

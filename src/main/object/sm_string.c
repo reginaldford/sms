@@ -7,8 +7,6 @@ char *sm_strncpy(char *dest, const char *src, uint32_t n) {
   uint32_t i;
   for (i = 0; i < n; i++)
     dest[i] = src[i];
-  for (; i <= n; i++)
-    dest[i] = '\0';
   return dest;
 }
 

@@ -221,6 +221,7 @@ char *sm_global_fn_name(uint32_t which) {
     "xpSetOp",      // SM_XPR_SETOP
     "xpOpSym",      // SM_XPR_OPSYM
     "strSize",      // SM_STR_SIZE_EXPR
+    "strMut",       // SM_STR_MUT_EXPR
     "strGet",       // SM_STR_GET_EXPR
     "strSet",       // SM_STR_SET_EXPR
     "strMap",       // SM_STR_MAP_EXPR
