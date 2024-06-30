@@ -259,7 +259,7 @@ int parsing_fpath_len;
 %token <expr> MEM_CHECKFILE
 
 
-%token <expr> ERR_NEW
+%token <expr> IS_ERR
 %token <expr> ERR_TITLE
 %token <expr> ERR_MESSAGE
 %token <expr> ERR_SOURCE
@@ -460,6 +460,7 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | PWD '(' ')' { $$ = sm_new_expr_n(SM_PWD_EXPR,0,0, _note());}
 | RUNTIME_META '(' EXPR ')' { $$ = sm_new_expr(SM_RUNTIME_META_EXPR, (sm_object*)$3, _note());}
 | GC '(' ')' { $$ = sm_new_expr_n(SM_GC_EXPR, 0,0, _note()); }
+| IS_ERR '(' EXPR ')' { $$ = sm_new_expr(SM_ISERR_EXPR,(sm_object*)$3,_note());}
 | ERR_TITLE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRTITLE_EXPR,(sm_object*)$3,_note());}
 | ERR_MESSAGE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRMESSAGE_EXPR,(sm_object*)$3,_note());}
 | ERR_SOURCE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRSOURCE_EXPR,(sm_object*)$3,_note());}
