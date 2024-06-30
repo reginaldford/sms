@@ -203,7 +203,8 @@ sleep      {return SLEEP;}
 
 osFork        {return FORK;}
 osWait        {return WAIT;}
-osExec        {return EXEC;}
+osExec        {return OS_EXEC;}
+osExecToStr   {return OS_EXECTOSTR;}
 osGetEnv      {return OS_GETENV;}
 osSetEnv      {return OS_SETENV;}
 

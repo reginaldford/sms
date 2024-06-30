@@ -271,7 +271,8 @@ int parsing_fpath_len;
 %token <expr> DATE
 %token <expr> TIME
 %token <expr> SLEEP
-%token <expr> EXEC
+%token <expr> OS_EXEC
+%token <expr> OS_EXECTOSTR
 %token <expr> OS_GETENV
 %token <expr> OS_SETENV
 %token <expr> FORK
@@ -448,7 +449,8 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | DATE '(' ')' { $$ = sm_new_expr_n(SM_DATE_EXPR,0,0, _note());}
 | TIME '(' ')' { $$ = sm_new_expr_n(SM_TIME_EXPR,0,0, _note());}
 | SLEEP '(' EXPR ')' { $$ = sm_new_expr(SM_SLEEP_EXPR,(sm_object*)$3, _note());}
-| EXEC '(' EXPR ')' { $$ = sm_new_expr(SM_EXEC_EXPR,(sm_object*)$3, _note());}
+| OS_EXEC '(' EXPR ')' { $$ = sm_new_expr(SM_EXEC_EXPR,(sm_object*)$3, _note());}
+| OS_EXECTOSTR '(' EXPR ')' { $$ = sm_new_expr(SM_EXECTOSTR_EXPR,(sm_object*)$3, _note());}
 | OS_GETENV '(' EXPR ')' { $$ = sm_new_expr(SM_OS_GETENV_EXPR,(sm_object*)$3, _note());}
 | OS_SETENV '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_OS_SETENV_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FORK '(' ')' { $$ = sm_new_expr_n(SM_FORK_EXPR,0,0, _note());}

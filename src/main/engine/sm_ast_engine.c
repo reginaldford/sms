@@ -80,8 +80,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_SLEEP_EXPR: {
       sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj0->my_type == SM_ERR_TYPE)
-        return (sm_object *)obj0;
+      if (obj0->my_type != SM_DOUBLE_TYPE) {
+        sm_symbol *title   = sm_new_symbol("nonNumericTime", 14);
+        sm_string *message = sm_new_string(48, "sleep function was provided a non-numeric value.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
       int tms;
       tms = (int)((sm_double *)obj0)->value;
       if (tms < 0) {
@@ -122,6 +125,50 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return (sm_object *)sm_new_double(result);
       break;
     }
+    case SM_EXECTOSTR_EXPR: {
+      sm_string *path = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (path->my_type == SM_ERR_TYPE)
+        return (sm_object *)path;
+      FILE      *fp;
+      char       buffer[128]; // Buffer size to read the command output in chunks
+      sm_symbol *title       = sm_new_symbol("execToStrFailed", 11);
+      char      *output_data = NULL;
+      size_t     total_size  = 0;
+      // Execute the command and open a pipe to read its output
+      fp = popen(&(path->content), "r");
+      if (fp == NULL) {
+        sm_string *message = sm_new_string(45, "Failed to open pipe for command execution.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Read the command output in chunks
+      while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        size_t buffer_len      = strlen(buffer);
+        char  *new_output_data = realloc(output_data, total_size + buffer_len + 1);
+        if (new_output_data == NULL) {
+          free(output_data);
+          sm_string *message = sm_new_string(47, "Failed to allocate memory for command output.");
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        output_data = new_output_data;
+        memcpy(output_data + total_size, buffer, buffer_len);
+        total_size += buffer_len;
+        output_data[total_size] = '\0'; // Null terminate
+      }
+      // Close the pipe and get the command exit status
+      int result = pclose(fp) >> 8;
+      if (result != 0) {
+        // In case of error, free the output data and return an error
+        free(output_data);
+        sm_string *message = sm_new_string(42, "Command returned a non-zero exit status.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Create a new sm_string with the collected output and free the output data
+      sm_string *result_str = sm_new_string(total_size, output_data);
+      free(output_data);
+      return (sm_object *)result_str;
+      break;
+    }
+
     case SM_OS_GETENV_EXPR: {
       sm_string *key = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
       if (key->my_type == SM_ERR_TYPE)
