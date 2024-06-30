@@ -178,6 +178,7 @@ strRpt      {return STR_REPEAT;}
 strEscape   {return STR_ESCAPE;}
 strUnescape {return STR_UNESCAPE;}
 strSize     {return STR_SIZE;}
+strMut      {return STR_MUT;}
 strFind     {return STR_FIND;}
 strFindr    {return STR_FINDR;}
 strGet      {return STR_GET;}
