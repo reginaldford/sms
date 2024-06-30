@@ -131,7 +131,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)path;
       FILE      *fp;
       char       buffer[128]; // Buffer size to read the command output in chunks
-      sm_symbol *title       = sm_new_symbol("execToStrFailed", 11);
+      sm_symbol *title       = sm_new_symbol("osExecToStrFailed", 11);
       char      *output_data = NULL;
       size_t     total_size  = 0;
       // Execute the command and open a pipe to read its output
@@ -155,17 +155,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         output_data[total_size] = '\0'; // Null terminate
       }
       // Close the pipe and get the command exit status
-      int result = pclose(fp) >> 8;
-      if (result != 0) {
-        // In case of error, free the output data and return an error
-        free(output_data);
-        sm_string *message = sm_new_string(42, "Command returned a non-zero exit status.");
-        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
-      }
+      int return_code = pclose(fp) >> 8;
       // Create a new sm_string with the collected output and free the output data
       sm_string *result_str = sm_new_string(total_size, output_data);
       free(output_data);
-      return (sm_object *)result_str;
+      // Return a size 2 array with return value and return string
+      sm_double *output_code = sm_new_double(return_code);
+      sm_expr   *output =
+        sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)output_code, (sm_object *)result_str, NULL);
+      return (sm_object *)output;
       break;
     }
 
@@ -984,7 +982,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         putchar('\0');
       }
       fflush(stdout);
-      return (sm_object *)str;
+      return (sm_object *)sms_true;
       break;
     }
     case SM_PUTLN_EXPR: {
@@ -1005,7 +1003,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         putchar('\0');
       }
       fflush(stdout);
-      return evaluated;
+      return (sm_object *)sms_true;
       break;
     }
     case SM_WHILE_EXPR: {
@@ -1570,6 +1568,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_RUNTIME_META_EXPR: {
       sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_meta(obj, current_cx);
+    }
+    case SM_ISERR_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)sms_true;
+      else
+        return (sm_object *)sms_false;
     }
     case SM_ERRTITLE_EXPR: {
       sm_error *obj0 = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE, current_cx, sf);

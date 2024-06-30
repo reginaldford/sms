@@ -212,7 +212,7 @@ pwd          	 {return PWD;}
 ls           	 {return LS;}
 cd           	 {return CD;}
 
-Err           {return ERR_NEW;}
+isErr         {return IS_ERR;}
 errTitle      {return ERR_TITLE;}
 errMessage    {return ERR_MESSAGE;}
 errSource     {return ERR_SOURCE;}
