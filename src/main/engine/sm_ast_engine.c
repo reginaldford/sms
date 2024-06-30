@@ -984,7 +984,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         putchar('\0');
       }
       fflush(stdout);
-      return input;
+      return (sm_object *)str;
       break;
     }
     case SM_PUTLN_EXPR: {
