@@ -123,3 +123,20 @@ void sm_log(const char *format, ...) {
   va_end(args);
   fclose(fp);
 }
+
+void sm_print_string(sm_string *str) {
+  for (int i = 0; i < str->size; i++)
+    putc((&str->content)[i], stdout);
+}
+
+void sm_safe_print_string(sm_string *str) {
+  for (int i = 0; i < str->size; i++) {
+    char ch = (&str->content)[i];
+    if (isprint(ch) || isspace(ch))
+      putc(ch, stdout);
+    else
+      // Escape non-printable characters
+      printf("\\x%02X", (unsigned char)ch);
+  }
+  fflush(stdout);
+}

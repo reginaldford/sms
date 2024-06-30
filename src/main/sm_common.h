@@ -25,3 +25,8 @@ bool sm_is_symbol_char(char c);
 /// Write a log message to sms.log for debugging.
 /// Works just like printf
 void sm_log(const char *format, ...);
+
+/// Print a string, only regarding string size, not NULL termination
+void sm_print_string(struct sm_string *str);
+/// Print a string, trusting string size, but replacing non-printables with hex
+void sm_safe_print_string(struct sm_string *str);
