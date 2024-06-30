@@ -27,7 +27,7 @@
     put(two_digits(d[1]));
     put(":");
     put(two_digits(d[0]));
-    putln(" " str+ am_pm_str(d[2]));
+    putLn(" " str+ am_pm_str(d[2]));
     sleep(1000);
   };
 };

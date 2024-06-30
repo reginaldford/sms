@@ -4,6 +4,6 @@
 # Print the time with constant width
 while(true){
   osExec("clear");
-  putln(strPart(dateStr(),11,8));
+  putLn(strPart(dateStr(),11,8));
   sleep(1000);
 };

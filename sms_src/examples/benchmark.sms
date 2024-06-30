@@ -6,15 +6,15 @@
   let time_elapsed =0;
   let a =0;
   let benchmark = (e) => {
-    putln("Benchmarking: " str+ toStr(e));
+    putLn("Benchmarking: " str+ toStr(e));
 
     t1 = time();
-    putln(toStr(eval(e)));
+    putLn(toStr(eval(e)));
     t2 = time();
 
-    putln("Total time:");
+    putLn("Total time:");
     time_elapsed = 1000 * (t2[0] - t1[0]) +  0.001 * (t2[1] - t1[1]);
-    putln(toStr(time_elapsed) str+ " milliseconds")
+    putLn(toStr(time_elapsed) str+ " milliseconds")
   };
 
   let f = (n) =>

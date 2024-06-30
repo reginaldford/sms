@@ -10,6 +10,6 @@
     put("> ");
     in = input();
     ans = cxEval(env,parse(in));
-    putln(toStr(ans))
+    putLn(toStr(ans))
   };
 };

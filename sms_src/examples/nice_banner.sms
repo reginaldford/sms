@@ -4,7 +4,7 @@
   let userName = "unset";
   # sms -qm1 scriptname username
   if(size(_args)<4){
-    putln("Put your name as the arg to this program.");
+    putLn("Put your name as the arg to this program.");
     exit(0);
   } else {
     userName = _args[size(_args)-1];
@@ -18,7 +18,7 @@
 
   while(true){
     let selection = round(random()*(size(adjectives)-1));
-    putln("Hey, " str+ userName str+ ", You're " str+ adjectives[selection]);
+    putLn("Hey, " str+ userName str+ ", You're " str+ adjectives[selection]);
     sleep(2000);
   };
 };
