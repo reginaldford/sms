@@ -172,8 +172,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (key->my_type == SM_ERR_TYPE)
         return (sm_object *)key;
       char *result = getenv(&key->content);
-      if (!result)
-        return (sm_object *)sms_false;
+      if (!result) {
+        sm_symbol *title = sm_new_symbol("osGetEnvFailed", 14);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Failed to get environment variable: %s", &key->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
       return (sm_object *)sm_new_string(strlen(result), result);
       break;
     }
@@ -251,7 +255,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       char *path_cstr = &path->content;
       if (chdir(path_cstr) == 0)
         return (sm_object *)sms_true;
-      return (sm_object *)sms_false;
+      sm_symbol *title   = sm_new_symbol("cdFailed", 8);
+      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to change directory to %s");
+      return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       break;
     }
     case SM_DATE_STR_EXPR: {
@@ -361,7 +367,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       // If an error occurred, it is stored in the mapping
       sm_cx_let(current_cx, sym, value);
-      return (sm_object *)sms_true;
+      return value;
     }
     case SM_CX_SETPARENT_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
@@ -382,9 +388,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (sym->my_type == SM_ERR_TYPE)
         return (sm_object *)sym;
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
-      if (sm_cx_let(cx, sym, value))
-        return (sm_object *)sms_true;
-      return (sm_object *)sms_false;
+      sm_cx_let(cx, sym, value);
+      return value;
     }
     case SM_CX_GET_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
@@ -396,8 +401,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *result = sm_cx_get(cx, sym);
       if (result)
         return result;
-      else
-        return (sm_object *)sms_false;
+      sm_symbol *title = sm_new_symbol("cxGetFailed", 11);
+      sm_string *message =
+        sm_new_fstring_at(sms_heap, "cxGet did not find %s in this context.", &sym->name->content);
+      return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
     }
     case SM_CX_HAS_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
