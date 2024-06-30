@@ -19,6 +19,7 @@
           if(x+y>9) put("x") else put("_");    
         };
         putln("");
+        true;
       };
       #true
      }, true, "triangle printed?"]
