@@ -400,21 +400,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
     }
-    case SM_CX_DOT_EXPR: {
-      sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
-      if (cx->my_type == SM_ERR_TYPE)
-        return (sm_object *)cx;
-      sm_object *obj1      = sm_expr_get_arg(sme, 1);
-      sm_symbol *sym       = (sm_symbol *)obj1;
-      sm_object *retrieved = sm_cx_get_far(cx, sym);
-      if (retrieved)
-        return retrieved;
-      sm_symbol *title   = sm_new_symbol("varNotFound", 11);
-      sm_string *cx_str  = sm_object_to_string((sm_object *)current_cx);
-      sm_string *message = sm_new_fstring_at(sms_heap, "variable: %s not found in cx: %s",
-                                             &sym->name->content, &cx_str->content);
-      return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
-    }
     case SM_CX_CLEAR_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
       if (cx->my_type != SM_CX_TYPE)
@@ -1111,7 +1096,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_DOT_EXPR: {
       sm_object *base_obj   = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
-      sm_string *field_name = field_sym->code_id; // codemap opt
+      sm_string *field_name = field_sym->name;
       sm_cx     *base_cx;
       if (!expect_type(base_obj, SM_CX_TYPE))
         return (sm_object *)sms_false;
@@ -1204,21 +1189,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return value;
     }
     /*case SM_ASSIGN_DOT_EXPR: {
-      sm_object *obj0  = sm_expr_get_arg(sme, 0);
-      sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (!expect_type(obj0, 0, SM_EXPR_TYPE, SM_ASSIGN_DOT_EXPR))
-        return (sm_object *)sms_false;
-      sm_expr *dot_expr = (sm_expr *)obj0;
-      if (dot_expr->op != SM_DOT_EXPR) {
-        char *error_msg = "Error: Incorrectly formatted AST.";
-        int   len       = strlen(error_msg);
-        printf("%s\n", error_msg);
-        return (sm_object*)sms_false;
-      }
-      sm_cx     *predot  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(dot_expr, 0), current_cx, sf);
-      sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(dot_expr, 1);
-      if (!expect_type((sm_object *)predot, 0, SM_CX_TYPE, SM_ASSIGN_DOT_EXPR))
-        return (sm_object *)sms_false;
+     * bison parser doesn't like this
       if (!sm_cx_let(predot, postdot, value))
         return (sm_object *)sms_false;
       return (sm_object *)sms_true;
@@ -1237,23 +1208,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     /*case SM_ASSIGN_INDEX_EXPR: {
      * Doesnt work well with Bison, will reimplement in CParser
       // expecting a[4]=value=> =index_expr(a,4,value);
-      sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (!expect_type(obj0, 0, SM_EXPR_TYPE, SM_ASSIGN_INDEX_EXPR))
-        return (sm_object *)sms_false;
-      sm_expr *arr = (sm_expr *)obj0;
-      if (!expect_type(obj1, 1, SM_DOUBLE_TYPE, SM_ASSIGN_INDEX_EXPR))
-        return (sm_object *)sms_false;
-      sm_double *index = (sm_double *)obj1;
-      if (index->value >= arr->size || index->value < -0) {
-        printf("Error: Index out of range: %i\n", (int)index->value);
-        return (sm_object *)sm_new_error(sm_new_string(16,"IndexOutOfBounds"),
-            sm_new_string(19, "Index out of range"),
-                                         sm_new_string(1, "?"), 0);
-      }
       sm_expr_set_arg(arr, index->value, obj2);
-      return (sm_object *)sms_true;
+      return obj2;
       break;
     }*/
     case SM_PLUS_EXPR: {
