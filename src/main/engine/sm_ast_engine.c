@@ -942,8 +942,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_PUTLN_EXPR: {
       sm_string *str;
+      sm_object *evaluated;
       for (int i = 0; i < sme->size; i++) {
-        sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
+        evaluated = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
         if (!expect_type(evaluated, SM_STRING_TYPE)) {
           sm_symbol *title   = sm_new_symbol("typeMismatch", 12);
           sm_string *message = sm_new_fstring_at(
@@ -957,7 +958,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         putchar('\0');
       }
       fflush(stdout);
-      return input;
+      return evaluated;
       break;
     }
     case SM_WHILE_EXPR: {
