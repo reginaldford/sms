@@ -42,8 +42,9 @@ void start_repl(sm_env *env) {
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       // Print
       sm_string *result_str = sm_object_to_string(result);
-      printf("%s%s%s", sm_terminal_fg_color(SM_TERM_B_WHITE), &(result_str->content),
-             sm_terminal_reset());
+      printf("%s", sm_terminal_fg_color(SM_TERM_B_WHITE));
+      sm_safe_print_string(result_str);
+      printf("%s", sm_terminal_reset());
       // Cleanup
       sm_garbage_collect();
       fflush(stdout);
