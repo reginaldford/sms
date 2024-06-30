@@ -312,16 +312,16 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (len->my_type == SM_ERR_TYPE)
         return (sm_object *)len;
       if (start->value < 0 || start->value >= str0->size) {
-        sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
-        sm_string *message =
-          sm_new_fstring_at(sms_heap, "Calling %s with out of range start value: %i.\n",
-                            sm_global_fn_name(SM_STR_PART_EXPR), (int)start->value);
+        sm_symbol *title   = sm_new_symbol("strPartIndexErr", 15);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Calling strPart with out of range start value: %i", (int)start->value);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       if (len->value > str0->size - start->value) {
-        printf("Error: Calling %s with out of range length value: %i.\n",
-               sm_global_fn_name(SM_STR_PART_EXPR), (int)len->value);
-        return (sm_object *)sm_new_string(0, "");
+        sm_symbol *title   = sm_new_symbol("strPartLengthErr", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Calling strPart with out of range length value: %i", (int)len->value);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       sm_string *new_str = sm_new_string_manual((int)len->value);
       char      *content = &(new_str->content);
