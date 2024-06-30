@@ -935,30 +935,42 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return sm_engine_eval(obj1, where_to_eval, sf);
     }
     case SM_PUT_EXPR: {
-      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str;
-      if (!expect_type(evaluated, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      str = (sm_string *)evaluated;
-      for (uint32_t i = 0; i < str->size; i++)
-        putchar((&str->content)[i]);
-      putchar('\0');
+      for (int i = 0; i < sme->size; i++) {
+        sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
+        if (!expect_type(evaluated, SM_STRING_TYPE)) {
+          sm_symbol *title   = sm_new_symbol("typeMismatch", 12);
+          sm_string *message = sm_new_fstring_at(
+            sms_heap, "put function takes strings, but parameter %i was not a string", i);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        str = (sm_string *)evaluated;
+        for (uint32_t i = 0; i < str->size; i++)
+          putchar((&str->content)[i]);
+        putchar('\0');
+      }
       fflush(stdout);
-      return (sm_object *)sms_true;
+      return input;
       break;
     }
     case SM_PUTLN_EXPR: {
-      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *str;
-      if (!expect_type(evaluated, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      str = (sm_string *)evaluated;
-      for (uint32_t i = 0; i < str->size; i++)
-        putchar((&str->content)[i]);
-      putchar('\n');
-      putchar('\0');
+      for (int i = 0; i < sme->size; i++) {
+        sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
+        if (!expect_type(evaluated, SM_STRING_TYPE)) {
+          sm_symbol *title   = sm_new_symbol("typeMismatch", 12);
+          sm_string *message = sm_new_fstring_at(
+            sms_heap, "putLn function takes strings, but parameter %i was not a string", i);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        str = (sm_string *)evaluated;
+        for (uint32_t i = 0; i < str->size; i++)
+          putchar((&str->content)[i]);
+        putchar('\n');
+        putchar('\0');
+      }
       fflush(stdout);
-      return (sm_object *)sms_true;
+      return input;
       break;
     }
     case SM_WHILE_EXPR: {
@@ -970,7 +982,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (result->my_type == SM_RETURN_TYPE)
           return result;
       }
-      return (sm_object *)sms_true;
+      return result;
       break;
     }
     case SM_FOR_EXPR: {
@@ -1006,7 +1018,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         if (result->my_type == SM_RETURN_TYPE)
           return result;
       } while (!IS_FALSE(sm_engine_eval((sm_object *)condition, current_cx, sf)));
-      return (sm_object *)sms_true;
+      return result;
       break;
     }
     case SM_RETURN_EXPR: {
@@ -1077,8 +1089,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_INDEX_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_expr   *arr;
-      if (!expect_type(base_obj, SM_EXPR_TYPE))
-        return (sm_object *)sms_false;
+      if (!expect_type(base_obj, SM_EXPR_TYPE)) {
+        sm_symbol *title = sm_new_symbol("typeMismatch", 12);
+        sm_string *message =
+          sm_new_string(59, "Trying to apply index op to something that is not an array.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
       arr                  = (sm_expr *)base_obj;
       sm_object *index_obj = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_double *index_double;

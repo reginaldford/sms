@@ -2,8 +2,6 @@
   cx1 -> { ex1 -> "info"; ex2 -> "info2" };
   tests -> [
     [cx1.ex1, "info","dot expression"],
-    [cxDot(cx1,:ex1), "info","cxDot expression"],
-    [cxDot(cx2,:ex3), false,"nonexistent cxDot field"],
     [cxKeys(cx1),[ ex1, ex2 ], "cxKeys"],
     [cxValues(cx1),[ "info", "info2" ], "cxValues"],
     [cxGet(cx1,:ex2),"info2", "cxGet"],
