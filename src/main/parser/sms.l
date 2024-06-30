@@ -78,7 +78,7 @@ and          {return AND;}
 
 input        {return INPUT;}
 put          {return PUT;}
-putln        {return PUTLN;}
+putLn        {return PUTLN;}
 
 let          {return LET;}
 self         {return SELF;}
