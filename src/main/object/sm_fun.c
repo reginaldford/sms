@@ -13,13 +13,11 @@ sm_fun *sm_new_fun(sm_cx *parent, uint16_t num_params, sm_object *content) {
 }
 
 // new sm_fun_param structure
-sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val,
-                                       enum sm_object_type known_expr) {
+sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val) {
   sm_fun_param_obj *self = sm_malloc(sizeof(sm_fun_param_obj));
   self->my_type          = SM_FUN_PARAM_TYPE;
   self->name             = name;
   self->default_val      = default_val;
-  self->known_expr       = known_expr;
   return self;
 }
 
@@ -30,12 +28,10 @@ sm_fun_param *sm_fun_get_param(sm_fun *self, uint16_t i) {
 }
 
 // Set the i'th element of the array of sm_fun_param objects following the sm_fun struct
-void sm_fun_set_param(sm_fun *self, uint16_t i, sm_string *name, sm_object *default_val,
-                      int16_t known_expr) {
+void sm_fun_set_param(sm_fun *self, uint16_t i, sm_string *name, sm_object *default_val) {
   sm_fun_param *arr  = (sm_fun_param *)&(self[1]);
   arr[i].name        = name;
   arr[i].default_val = default_val;
-  arr[i].known_expr  = known_expr;
 }
 
 // Print to c str buffer a description of this parameter

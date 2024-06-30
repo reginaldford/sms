@@ -87,8 +87,9 @@ sm_string *sm_string_add(sm_string *str1, sm_string *str2) {
 sm_string *sm_string_to_string(sm_string *str) {
   const uint32_t final_len = str->size + 2;
   sm_string     *new_str   = sm_new_string(final_len, "");
-  sm_string_sprint(str, &new_str->content, false);
-  (&new_str->content)[final_len] = '\0';
+  const uint32_t len       = sm_string_sprint(str, &new_str->content, false);
+  (&new_str->content)[len] = '\0';
+  new_str->size            = len;
   return new_str;
 }
 
@@ -184,4 +185,14 @@ sm_string *sm_string_escape(sm_string *input) {
     final_i++;
   }
   return sm_new_string(final_i, to_str);
+}
+
+// Returns whether two strings match
+bool sm_string_is_equal(sm_string *str1, sm_string *str2) {
+  if (str1->size != str2->size)
+    return false;
+  for (uint32_t i = 0; i < str1->size; ++i)
+    if ((&str1->content)[i] != (&str2->content)[i])
+      return false;
+  return true;
 }

@@ -13,7 +13,6 @@ typedef struct sm_fun {
 typedef struct sm_fun_param {
   struct sm_string *name;
   struct sm_object *default_val;
-  int16_t           known_expr;
 } sm_fun_param;
 
 /// This is an independant garbage-collectable object version of sm_fun_param
@@ -22,7 +21,6 @@ typedef struct sm_fun_param_obj {
   uint16_t          my_type;
   struct sm_string *name;
   struct sm_object *default_val;
-  int16_t           known_expr;
 } sm_fun_param_obj;
 
 /// Create a new function
@@ -30,10 +28,8 @@ sm_fun *sm_new_fun(struct sm_cx *parent, uint16_t num_params, sm_object *content
 /// Print function to string
 uint32_t sm_fun_sprint(sm_fun *self, char *buffer, bool fake);
 /// Create a new function parameter object
-sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val,
-                                       enum sm_object_type known_expr);
+sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val);
 /// Get a function parameter (not object) from a function
 sm_fun_param *sm_fun_get_param(sm_fun *self, uint16_t i);
 /// Set the ith function parameter on a function
-void sm_fun_set_param(sm_fun *self, uint16_t i, sm_string *name, sm_object *default_val,
-                      int16_t known_expr);
+void sm_fun_set_param(sm_fun *self, uint16_t i, sm_string *name, sm_object *default_val);

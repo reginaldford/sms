@@ -11,16 +11,12 @@ sm_local *sm_new_local(uint16_t index, sm_string *name) {
   return new_local;
 }
 
-// If this symbol matches a parameter of the function, return which.
-// Else, return -1
+// If this symbol matches a param of the function, returns which.
+// else, returns -1
 int sym_matches_param(sm_symbol *sym, sm_fun *fun) {
-  for (uint16_t i = 0; i < fun->num_params; i++) {
-    sm_fun_param *param       = sm_fun_get_param(fun, i);
-    sm_string    *param_str   = param->name;
-    char         *param_cstr  = &param_str->content;
-    sm_string    *symbol_str  = sym->name;
-    char         *symbol_cstr = &symbol_str->content;
-    if (strcmp(param_cstr, symbol_cstr) == 0)
+  for (uint32_t i = 0; i < fun->num_params; i++) {
+    sm_fun_param *param = sm_fun_get_param(fun, i);
+    if (sm_string_is_equal(param->name, sym->name))
       return i;
   }
   return -1;

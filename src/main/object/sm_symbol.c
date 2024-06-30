@@ -26,7 +26,7 @@ sm_symbol *sm_new_symbol(char *name, int len) {
   sm_symbol *current_sym = (sm_symbol *)sms_symbol_heap->storage;
   // Looking for the existing symbol
   for (uint32_t i = 0; i < sms_num_symbols; i++) {
-    int current_sym_len = current_sym->name->size;
+    uint32_t current_sym_len = current_sym->name->size;
     if (len == current_sym_len && !strncmp(name, &current_sym->name->content, len))
       return current_sym;
     current_sym = current_sym + 1;

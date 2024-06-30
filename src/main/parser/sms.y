@@ -489,14 +489,14 @@ FUN_INTRO : PARAM_LIST ARROW {
   sm_fun *new_fun = sm_new_fun(parent_cx, ($1)->size, (sm_object *)NULL);
   for (uint32_t i = 0; i < ($1)->size; i++) {
     sm_fun_param_obj *po = (sm_fun_param_obj *)sm_expr_get_arg($1, i);
-    sm_fun_set_param(new_fun, i, po->name, po->default_val, po->known_expr);
+    sm_fun_set_param(new_fun, i, po->name, po->default_val);
   }
   $$ = new_fun;
 }
 | SYM ARROW {
   sm_cx * parent_cx = *(sm_global_lex_stack(NULL)->top);
   sm_fun *new_fun = sm_new_fun(parent_cx,1, (sm_object *)NULL);
-  sm_fun_set_param(new_fun, 0, $1->name, NULL, 0);
+  sm_fun_set_param(new_fun, 0, $1->name, NULL);
   $$ = new_fun;
 }
 
@@ -504,22 +504,22 @@ PARAM_LIST : '(' ')' {
   $$ = sm_new_expr_n(SM_PARAM_LIST_EXPR, 0, 0, _note());
 }
 | '(' SYM ')' {
-  sm_fun_param_obj * fpo = sm_new_fun_param_obj($2->name,NULL,0);
+  sm_fun_param_obj * fpo = sm_new_fun_param_obj($2->name,NULL);
   $$                = sm_new_expr(SM_PARAM_LIST_EXPR,(sm_object*)fpo, _note());
 }
 | PARAM_LIST_OPEN ')' {}
 | PARAM_LIST_OPEN SYM ')' {
-  sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL,0);
+  sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL);
   $$ = sm_expr_append($1, (sm_object *)new_param);
 }
 
 PARAM_LIST_OPEN : '(' SYM ',' {
   sm_expr *new_expr = sm_new_expr_n(SM_PARAM_LIST_EXPR, 1, 3, _note());
-  sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL,0);
+  sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL);
   $$                = sm_expr_set_arg(new_expr, 0, (sm_object*)new_param);
 }
 | PARAM_LIST_OPEN SYM ',' {
-  sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL,0);
+  sm_fun_param_obj * new_param= sm_new_fun_param_obj($2->name,NULL);
   $$ = sm_expr_append($1, (sm_object *)new_param);
 }
 
