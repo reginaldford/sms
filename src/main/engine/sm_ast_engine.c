@@ -404,16 +404,16 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
       if (cx->my_type == SM_ERR_TYPE)
         return (sm_object *)cx;
-      sm_object *obj1 = sm_expr_get_arg(sme, 1);
-      if (!expect_type(obj1, SM_SYMBOL_TYPE))
-        printf("asdf");
-      sm_symbol *sym = (sm_symbol *)obj1;
-      if (sym->my_type == SM_ERR_TYPE)
-        return (sm_object *)sym;
+      sm_object *obj1      = sm_expr_get_arg(sme, 1);
+      sm_symbol *sym       = (sm_symbol *)obj1;
       sm_object *retrieved = sm_cx_get_far(cx, sym);
       if (retrieved)
         return retrieved;
-      return (sm_object *)sms_false;
+      sm_symbol *title   = sm_new_symbol("varNotFound", 11);
+      sm_string *cx_str  = sm_object_to_string((sm_object *)current_cx);
+      sm_string *message = sm_new_fstring_at(sms_heap, "variable: %s not found in cx: %s",
+                                             &sym->name->content, &cx_str->content);
+      return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
     }
     case SM_CX_CLEAR_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
@@ -483,8 +483,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_CX_VALUES_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (cx->my_type)
-        return (sm_object *)sms_false;
+      if (cx->my_type != SM_CX_TYPE) {
+        sm_symbol *title = sm_new_symbol("typeMismatch", 12);
+        sm_string *message =
+          sm_new_string(50, "Passed something that is not a context to cxValues");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
       sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL));
       if (success)
         return (sm_object *)success;
@@ -522,14 +526,25 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr *params = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE, current_cx, sf);
       if (params->my_type != SM_EXPR_TYPE)
         return (sm_object *)params;
-      sm_fun *new_fun = sm_new_fun(fun->parent, fun->num_params, fun->content);
+      // Make a new function with the right size (params are part of a function)
+      sm_fun *new_fun = sm_new_fun(fun->parent, params->size, fun->content);
+      // Checking the parameters
+      for (uint32_t i = 0; i < params->size; i++) {
+        sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(params, i);
+        if (sym->my_type != SM_SYMBOL_TYPE) {
+          sm_symbol *title = sm_new_symbol("typeMismatch", 12);
+          sm_string *message =
+            sm_new_fstring_at(sms_heap,
+                              "When using fnSetParams(<fn>,<params>), params must be an array of "
+                              "symbols. Parameter %i is not a symbol.",
+                              i);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+      }
       // Setting the parameters of a new function
       for (uint32_t i = 0; i < params->size; i++) {
         sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(params, i);
-        // TODO: handle this
-        if (!expect_type((sm_object *)sym, SM_SYMBOL_TYPE))
-          break;
-        sm_fun_set_param(new_fun, i, sym->name, NULL, 0);
+        sm_fun_set_param(new_fun, i, sym->name, NULL);
       }
       // Relocalizing the AST
       new_fun->content    = sm_unlocalize(new_fun->content);
@@ -1087,10 +1102,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       base_cx       = (sm_cx *)base_obj;
       sm_object *sr = sm_cx_get_far(base_cx, field_sym);
       if (sr == NULL) {
-        sm_string *base_str = sm_object_to_string(base_obj);
-        printf("Error: Could not find variable: %s within %s\n", &(field_name->content),
-               &(base_str->content));
-        return (sm_object *)sms_false;
+        sm_symbol *title   = sm_new_symbol("varNotFound", 11);
+        sm_string *cx_str  = sm_object_to_string((sm_object *)current_cx);
+        sm_string *message = sm_new_fstring_at(sms_heap, "variable: %s not found in cx: %s",
+                                               &field_name->content, &cx_str->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       // return sm_cx_entries(sr.context)[sr.index].value;
       return (sm_object *)sr;
@@ -1552,9 +1568,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_ERRNOTES_EXPR: {
       sm_error *obj0 = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE, current_cx, sf);
-      // It's guaranteed to be an error now
-      // if(obj0->my_type!=SM_ERROR_TYPE)
-      //  return sm_new_error(....)
       if (obj0->notes)
         return (sm_object *)obj0->notes;
       else
@@ -1570,22 +1583,34 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   case SM_SELF_TYPE: {
     return (sm_object *)current_cx;
   }
-  case SM_PRIMITIVE_TYPE: {
-    printf("Primitives are not developed yet\n");
-    fflush(stdout);
-    return input;
-  }
   case SM_SYMBOL_TYPE: {
     sm_symbol *sym      = (sm_symbol *)input;
     sm_string *var_name = sym->code_id; // codemap nickname optimization
     sm_object *sr       = sm_cx_get_far(current_cx, sym);
     if (sr)
       return sr;
-    else {
-      sm_string *base_str = sm_object_to_string((sm_object *)current_cx);
-      sm_symbol *title    = sm_new_symbol("varNotFound", 11);
-      sm_string *message  = sm_new_fstring_at(
-        sms_heap, "%s was not found in cx saved to :noted on this err", &sym->name->content);
+    sm_symbol *title   = sm_new_symbol("varNotFound", 11);
+    sm_string *message = sm_new_fstring_at(
+      sms_heap, "%s was not found in cx saved to :noted on this err", &sym->name->content);
+    sm_cx *notes = sm_new_cx(NULL);
+    sm_cx_let(notes, sm_new_symbol("noted", 5), (sm_object *)current_cx);
+    sm_error *e = sm_new_error_blank();
+    e->title    = title;
+    e->message  = message;
+    e->source   = sm_new_string(9, "(runtime)");
+    e->line     = 0;
+    e->notes    = notes;
+    return (sm_object *)e;
+  }
+  case SM_LOCAL_TYPE: {
+    sm_local *local = (sm_local *)input;
+    if (local->index >= sf->size) {
+      printf("local error did happen loca is %i and sf size is %i\n", local->index, sf->size);
+      sm_symbol *title   = sm_new_symbol("invalidLocal", 12);
+      sm_string *message = sm_new_fstring_at(
+        sms_heap,
+        "This local variable points to element %i when the stack frame only has %i elements.",
+        local->index, sf->size);
       sm_cx *notes = sm_new_cx(NULL);
       sm_cx_let(notes, sm_new_symbol("noted", 5), (sm_object *)current_cx);
       sm_error *e = sm_new_error_blank();
@@ -1596,9 +1621,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       e->notes    = notes;
       return (sm_object *)e;
     }
-  }
-  case SM_LOCAL_TYPE: {
-    sm_local *local = (sm_local *)input;
     return sm_expr_get_arg(sf, local->index);
   }
   case SM_FUN_TYPE: {
@@ -1611,10 +1633,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     sm_cx *cx = (sm_cx *)input;
     cx        = (sm_cx *)sm_copy((sm_object *)cx);
     return (sm_object *)cx;
-  }
-  case SM_ERR_TYPE: {
-    // TODO:if(debug mode){ Add callstack info here.}
-    return input;
   }
   default:
     return input;

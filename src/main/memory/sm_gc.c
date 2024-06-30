@@ -4,6 +4,7 @@
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
+  // if (sm_is_within_heap(obj,sms_heap))
   if (obj->my_type != SM_SYMBOL_TYPE)
     return sm_realloc(obj, sm_sizeof(obj));
   else
@@ -124,7 +125,8 @@ void sm_inflate_heap() {
       // Title is a singleton. This speeds up if(errTitle(e) is :whatever) to find err category
       err->message = (sm_string *)sm_meet_object((sm_object *)err->message);
       err->source  = (sm_string *)sm_meet_object((sm_object *)err->source);
-      err->notes   = (sm_cx *)sm_meet_object((sm_object *)err->notes);
+      if (err->notes)
+        err->notes = (sm_cx *)sm_meet_object((sm_object *)err->notes);
       break;
     }
     case SM_FUN_PARAM_TYPE: {

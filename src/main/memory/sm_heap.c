@@ -62,50 +62,6 @@ sm_search_result find_space_within_bounds(sm_space_array *ssa, uint32_t size, ui
     return (sm_search_result){.found = false, .index = guess_point};
 }
 
-// Sort the space array that is unsorted by the 1 space at off_index
-void sort_1_off(sm_space_array *ssa, uint32_t off_index) {
-  uint32_t space_size = sm_get_space_array(ssa)[off_index]->my_type - SM_SPACE_TYPE;
-  // Now, to binary search the remaining portion of the array
-  sm_search_result sr = find_space_within_bounds(ssa, space_size, 0, off_index - 1);
-  // Use search result to sort this 1-off array
-  sm_space **space_array = sm_get_space_array(ssa);
-  sm_space  *off_space   = space_array[off_index];
-  uint32_t   upper_index = off_index;
-  uint32_t   lower_index = sr.index;
-  for (uint32_t i = upper_index; i > lower_index; i--) {
-    space_array[i] = space_array[i - 1];
-  }
-  space_array[lower_index] = off_space;
-}
-
-// Find a space from the global space array or NULL
-void *sm_malloc_from_spaces(uint32_t size) {
-  if (sm_global_space_array(NULL)->size > 0) {
-    sm_search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
-    // sr.found is true for exact matches
-    if (sr.found == true) {
-      sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];
-      // Deleting space by its index
-      sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
-      return good_space;
-    }
-    sm_space *result_space = check_space(size, sr.index);
-    if (result_space != NULL) {
-      uint32_t remaining_size = (result_space->my_type - SM_SPACE_TYPE) - size;
-      if (remaining_size >= sizeof(sm_space)) {
-        sm_space *new_space = (sm_space *)((char *)result_space) + size;
-        new_space->my_type  = SM_SPACE_TYPE + remaining_size;
-        sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
-        sort_1_off(sm_global_space_array(NULL), sr.index);
-      } else {
-        sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
-      }
-      return result_space;
-    }
-  }
-  return NULL;
-}
-
 // Internal 'malloc'
 void *sm_malloc(uint32_t size) {
   uint32_t bytes_used = sms_heap->used;
