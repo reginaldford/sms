@@ -10,13 +10,13 @@
     put("Guess the number: ");
     user_guess = parse(input());
     if(user_guess>answer)
-      putln("You guessed too high.")
+      putLn("You guessed too high.")
     else if(user_guess<answer)
-      putln("You guessed too low.");
+      putLn("You guessed too low.");
   };
-  putln("Congratulations! You WON!");
-  putln("The answer is: " str+ toStr(answer) str+ ".");
-  putln("You took " str+ toStr(tries) str+ " guesses.");
+  putLn("Congratulations! You WON!");
+  putLn("The answer is: " str+ toStr(answer) str+ ".");
+  putLn("You took " str+ toStr(tries) str+ " guesses.");
   let scoreStr = toStr( ceil(1000/tries)/10 );
-  putln("Your score is " str+ scoreStr str+ " %.");
+  putLn("Your score is " str+ scoreStr str+ " %.");
 };

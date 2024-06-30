@@ -11,7 +11,7 @@
   f = fnSetParent(f,env);
   # Run f 10 times
   for(let i = 0; i < 10 ; i = i + 1)
-    putln(toStr(f()));
+    putLn(toStr(f()));
   # Show the env cx
-  putln(toStr(env));
+  putLn(toStr(env));
 };

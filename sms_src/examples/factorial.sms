@@ -17,7 +17,7 @@
   while(true){
     put("Enter x: ");
     x = parse(input());
-    putln("The factorial of " str+ toStr(x)  str+ " is " str+
+    putLn("The factorial of " str+ toStr(x)  str+ " is " str+
       toStr(factorial(x)));
   };
 };

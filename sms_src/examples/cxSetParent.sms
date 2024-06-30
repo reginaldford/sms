@@ -10,9 +10,9 @@
   # Setting George's parent to Martha (functional design)
   personA = cxSetParent(personA,personB);
   # Show both objects:
-  putln("George: " str+ toStr(personA) str+ " . Martha: " str+ toStr(personB));
+  putLn("George: " str+ toStr(personA) str+ " . Martha: " str+ toStr(personB));
   # Printing the result
-  putln("The parent of " str+ personA.name str+ " is " str+ parent(personA).name);
+  putLn("The parent of " str+ personA.name str+ " is " str+ parent(personA).name);
   # Test the automatic parent searching
-  putln("George.phone_number gives " str+ toStr(personA.phone_number));
+  putLn("George.phone_number gives " str+ toStr(personA.phone_number));
 };
