@@ -261,6 +261,7 @@ char *sm_global_fn_name(uint32_t which) {
     "osFork",       // SM_FORK_EXPR
     "osWait",       // SM_WAIT_EXPR
     "osExec",       // SM_EXEC_EXPR
+    "osExecToStr",  // SM_EXECTOSTR_EXPR
     "osGetEnv",     // SM_OS_GETENV_EXPR
     "osSetEnv",     // SM_OS_SETENV_EXPR
     "_gc",          // SM_GC_EXPR
