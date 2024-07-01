@@ -13,17 +13,15 @@ void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, int buf_len, const char
   int  last_sym_len = 0;
   if (last_sym)
     last_sym_len = strlen(last_sym);
-  sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL);
+  sm_expr *empty_expr = sm_new_expr_n(SM_ARRAY_EXPR, 0, 8, NULL);
   keys                = sm_node_keys(cx->content, sm_new_stack_obj(17), empty_expr);
-  if (keys->size > 0) {
-    for (int i = 0; i < keys->size; i++) {
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(keys, i);
-      if (!strncmp(last_sym, &sym->name->content, MIN(last_sym_len, sym->name->size))) {
-        int completion_len = (sym->name->size) + buf_len;
-        sm_strncpy(concat_space, buf, buf_len - last_sym_len);
-        sm_strncpy(concat_space + buf_len - last_sym_len, &sym->name->content, sym->name->size);
-        linenoiseAddCompletion(lc, concat_space);
-      }
+  for (int i = 0; i < keys->size; i++) {
+    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(keys, i);
+    if (!strncmp(last_sym, &sym->name->content, MIN(last_sym_len, sym->name->size))) {
+      int completion_len = (sym->name->size) + buf_len;
+      sm_strncpy(concat_space + buf_len - last_sym_len, &sym->name->content, sym->name->size);
+      concat_space[buf_len + sym->name->size] = '\0';
+      linenoiseAddCompletion(lc, concat_space);
     }
   }
 }
