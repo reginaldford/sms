@@ -46,7 +46,6 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
   return obj;
 }
 
-
 // Convenience functions for the booleans
 #define IS_TRUE(x) ((void *)x == (void *)sms_true)
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
@@ -1555,21 +1554,16 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (obj1 == obj2) {
         return (sm_object *)sms_true;
       }
-
-      if (sm_object_eq(obj1, obj2)) {
+      if (sm_object_eq(obj1, obj2))
         return (sm_object *)sms_true;
-      } else {
-        return (sm_object *)sms_false;
-      }
+      return (sm_object *)sms_false;
     }
     case SM_IS_EXPR: {
       sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj2 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      if (obj1 == obj2) {
+      if (obj1 == obj2)
         return (sm_object *)sms_true;
-      } else {
-        return (sm_object *)sms_false;
-      }
+      return (sm_object *)sms_false;
     }
     case SM_GT_EQ_EXPR: {
       sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
@@ -1580,11 +1574,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (obj1->my_type == SM_ERR_TYPE)
         return (sm_object *)obj1;
 
-      if (obj0->value >= obj1->value) {
+      if (obj0->value >= obj1->value)
         return (sm_object *)sms_true;
-      } else {
-        return (sm_object *)sms_false;
-      }
+      return (sm_object *)sms_false;
     }
     case SM_LT_EQ_EXPR: {
       sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
@@ -1595,11 +1587,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (obj1->my_type == SM_ERR_TYPE)
         return (sm_object *)obj1;
 
-      if (obj0->value <= obj1->value) {
+      if (obj0->value <= obj1->value)
         return (sm_object *)sms_true;
-      } else {
-        return (sm_object *)sms_false;
-      }
+      return (sm_object *)sms_false;
     }
     case SM_RUNTIME_META_EXPR: {
       sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
@@ -1609,8 +1599,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type == SM_ERR_TYPE)
         return (sm_object *)sms_true;
-      else
-        return (sm_object *)sms_false;
+      return (sm_object *)sms_false;
     }
     case SM_ERRTITLE_EXPR: {
       sm_error *obj0 = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE, current_cx, sf);
@@ -1629,15 +1618,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_error *obj0 = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE, current_cx, sf);
       if (obj0->message)
         return (sm_object *)obj0->message;
-      else
-        return (sm_object *)sms_false;
+      return (sm_object *)sms_false;
     }
     case SM_ERRNOTES_EXPR: {
       sm_error *obj0 = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE, current_cx, sf);
       if (obj0->notes)
         return (sm_object *)obj0->notes;
-      else
-        return (sm_object *)sms_false;
+      return (sm_object *)sms_false;
     }
     default: // unrecognized expr gets returned without evaluation
       return input;
