@@ -17,8 +17,8 @@ cxLet(parent(_scratch), :vert, (x,u1,u2)=>{
     let convert=(x,u1,u2,ratioCX)=>{
       let normalized = x / cxGet(ratioCX,u1);
       let value = normalized * cxGet(ratioCX,u2);
-      putLn(toStr(x) str+ toStr(u1) str+ " = " str+
-        toStr(value) str+ toStr(u2));
+      putLn(str(x) str+ str(u1) str+ " = " str+
+        str(value) str+ str(u2));
       return value;
     };
 
@@ -39,10 +39,10 @@ cxLet(parent(_scratch), :vert, (x,u1,u2)=>{
     # We must have supplied something invalid
     putLn("The following units are allowed:");
     putLn("Mass Units:");
-    putLn(toStr(cxKeys(mratios)) str+ "\n");
+    putLn(str(cxKeys(mratios)) str+ "\n");
     putLn("Length Units:");
-    putLn(toStr(cxKeys(lratios)) str+ "\n");
+    putLn(str(cxKeys(lratios)) str+ "\n");
     putLn("Time Units:");
-    putLn(toStr(cxKeys(tratios)) str+ "\n");
+    putLn(str(cxKeys(tratios)) str+ "\n");
     putLn("Conversions must remain in the same dimension.");
 });

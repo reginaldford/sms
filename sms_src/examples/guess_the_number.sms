@@ -15,8 +15,8 @@
       putLn("You guessed too low.");
   };
   putLn("Congratulations! You WON!");
-  putLn("The answer is: " str+ toStr(answer) str+ ".");
-  putLn("You took " str+ toStr(tries) str+ " guesses.");
-  let scoreStr = toStr( ceil(1000/tries)/10 );
+  putLn("The answer is: " str+ str(answer) str+ ".");
+  putLn("You took " str+ str(tries) str+ " guesses.");
+  let scoreStr = str( ceil(1000/tries)/10 );
   putLn("Your score is " str+ scoreStr str+ " %.");
 };

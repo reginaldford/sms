@@ -15,24 +15,24 @@
   let pid2 = false;
 
   if( pid1 == 0 )
-    putLn("Child 1: answer: " str+ toStr(fib(n1)))
+    putLn("Child 1: answer: " str+ str(fib(n1)))
   else {
     pid2 = osFork();
     if(pid2 == 0)
-      putLn("Child 2: answer: " str+ toStr(fib(n2)));
+      putLn("Child 2: answer: " str+ str(fib(n2)));
   };
 
   if( not( pid1 == 0) and not(pid2==0) )
-  { putLn("Parent: Child 1 has pid " str+ toStr(pid1));
-    putLn("Parent: Child 2 has pid " str+ toStr(pid2));
+  { putLn("Parent: Child 1 has pid " str+ str(pid1));
+    putLn("Parent: Child 2 has pid " str+ str(pid2));
     let done1 = osWait();
-    putLn("Parent: Program with pid " str+ toStr(done1[0]) str+
-      " Completed with Return Code: " str+ toStr(done1[1]));
+    putLn("Parent: Program with pid " str+ str(done1[0]) str+
+      " Completed with Return Code: " str+ str(done1[1]));
   };
 
   if(  not( pid1 == 0) and not(pid2==0) )
   { let done2 = osWait();
-    putLn("Parent: Program with pid " str+ toStr(done2[0]) str+
-      " Completed with Return Code: " str+ toStr(done2[1]));
+    putLn("Parent: Program with pid " str+ str(done2[0]) str+
+      " Completed with Return Code: " str+ str(done2[1]));
   };
 };

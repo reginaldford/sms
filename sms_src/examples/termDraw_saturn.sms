@@ -20,7 +20,7 @@
     if(v <= 3) v = 0;
     v = mod(v,6);
     let s = if(not(v < 3) and not(v == 9))
-      toStr(v) else " ";
+      str(v) else " ";
     put(s);
   };
   

@@ -5,9 +5,9 @@
   # with 2 characters.
   let two_digits = (x) =>
     if(x<10)
-      "0" str+ toStr(x)
+      "0" str+ str(x)
     else
-      toStr(x);
+      str(x);
 
   let am_pm_str = (hr) => if(hr>11) "PM" else "AM";
 
