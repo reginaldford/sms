@@ -9,8 +9,10 @@ typedef struct sm_string {
   char     content; // stores NULL if nothing else
 } sm_string;
 
-/// Copy a string of known length
+/// Copy a string of known length, add NULL terminator
 char *sm_strncpy(char *dest, const char *src, uint32_t n);
+/// Copy a string of known length, DOES NOT add NULL terminator
+char *sm_strncpy_unsafe(char *dest, const char *src, uint32_t n);
 /// Construct a new sms string from a c string of known length
 sm_string *sm_new_string(uint32_t size, char *str);
 /// Construct a new sms string in given heap from a c string of known length

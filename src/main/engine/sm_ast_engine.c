@@ -266,7 +266,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       timeinfo          = localtime(&rawtime);
       sm_string *result = sm_new_string_manual(24);
       sm_strncpy(&(result->content), asctime(timeinfo), 24);
-      (&result->content)[24] = '\0';
       return (sm_object *)result;
       break;
     }
@@ -351,8 +350,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       char *content = &(original_str->content);
       // Copy replacement string into the original string
-      sm_strncpy(content + (int)start_index->value, &(replacement_str->content),
-                 replacement_str->size);
+      sm_strncpy_unsafe(content + (int)start_index->value, &(replacement_str->content),
+                        replacement_str->size);
       // No need to copy the remainder since the string size stays the same
       return (sm_object *)original_str;
       break;
