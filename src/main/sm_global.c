@@ -161,7 +161,7 @@ char *sm_global_fn_name(uint32_t which) {
     "",             // SM_INDEX_EXPR
     "",             // SM_BLOCK_EXPR
     "",             // SM_ARRAY_EXPR
-    "toStr",        // SM_TO_STRING_EXPR
+    "str",          // SM_NEW_STRING_EXPR
     "put",          // SM_PUT_EXPR
     "putLn",        // SM_PUTLN_EXPR
     "input",        // SM_INPUT_EXPR
@@ -237,7 +237,6 @@ char *sm_global_fn_name(uint32_t which) {
     "strRepeat",    // SM_STR_REPEAT_EXPR
     "strToMem",     // SM_STR_TOBLK_EXPR
     "str",          // SM_NEW_STR_EXPR
-    "toStr",        // SM_TO_STR_EXPR
     "strFmt",       // SM_TO_STRFMT_EXPR
     "newBlk",       // SM_NEW_BLK_EXPR
     "blkMap",       // SM_BLK_MAP_EXPR
@@ -266,6 +265,11 @@ char *sm_global_fn_name(uint32_t which) {
     "osGetEnv",     // SM_OS_GETENV_EXPR
     "osSetEnv",     // SM_OS_SETENV_EXPR
     "_gc",          // SM_GC_EXPR
+    "isErr",        // SM_ISERR_EXPR
+    "errTitle",     // SM_ERRTITLE_EXPR
+    "errMessage",   // SM_ERRMESSAGE_EXPR
+    "errLine",      // SM_ERRLINE_EXPR
+    "errNotes",     // SM_ERRNOTES_EXPR
     "?",            // SM_UNKNOWN_EXP
   };
   if (which >= num_functions)
@@ -282,7 +286,7 @@ uint32_t sm_global_fn_name_len(uint32_t which) {
     5, 2, 11, 5, 5, 5, 5, 8, 8, 12, 5,  4, 7,  6, 8, 6, 8,  5, 9, 8, 7, 8, 10, 8,  9, 6,  6,
     6, 9, 11, 8, 8, 3, 3, 6, 4, 4,  6,  4, 5,  5, 4, 3, 3,  2, 3, 3, 4, 7, 8,  11, 8, 11, 4,
     7, 7, 7,  6, 6, 6, 7, 8, 4, 8,  7,  9, 11, 8, 6, 9, 8,  3, 5, 6, 6, 6, 8,  7,  9, 9,  9,
-    8, 6, 6,  8, 7, 0, 0, 8, 4, 7,  4,  4, 5,  6, 6, 6, 11, 8, 8, 3, 1
+    8, 6, 6,  8, 7, 0, 0, 8, 4, 7,  4,  4, 5,  6, 6, 6, 11, 8, 8, 3, 5, 8, 10, 7,  8
 
   };
   if (which >= sm_global_num_fns())
@@ -291,7 +295,7 @@ uint32_t sm_global_fn_name_len(uint32_t which) {
 }
 
 uint32_t sm_global_num_fns() {
-  static const uint32_t num_fns = 183;
+  static const uint32_t num_fns = 187;
   return num_fns;
 }
 
