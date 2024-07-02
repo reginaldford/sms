@@ -9,17 +9,17 @@
     return (a) => a+b;
   };
   # We show the function generator
-  putLn("makeAdder function: " str+ toStr(makeAdder));
+  putLn("makeAdder function: " str+ str(makeAdder));
   # We generate one, designed to add 3
   let add3 = makeAdder(3);
-  putLn("add3 function: " str+ toStr(add3));
-  putLn("add3 parent cx: " str+ toStr(fnParent(add3)));
-  putLn("add3(5) is " str+ toStr(add3(5)));
+  putLn("add3 function: " str+ str(add3));
+  putLn("add3 parent cx: " str+ str(fnParent(add3)));
+  putLn("add3(5) is " str+ str(add3(5)));
   # We generate one, designed to add 5
   let add5 = makeAdder(5);
-  putLn("add5 function: " str+ toStr(add5));
-  putLn("add5 parent cx: " str+ toStr(fnParent(add5)));
-  putLn("add5(6) is " str+ toStr(add5(6)));
+  putLn("add5 function: " str+ str(add5));
+  putLn("add5 parent cx: " str+ str(fnParent(add5)));
+  putLn("add5(6) is " str+ str(add5(6)));
   # Grand finale
-  putLn("add3(add5(6)) is " str+ toStr(add3(add5(6))));
+  putLn("add3(add5(6)) is " str+ str(add3(add5(6))));
 };
