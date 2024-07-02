@@ -12,13 +12,14 @@ void graceful_exit(test_outline *to_free, int val) {
 // Read the file at filepath, parse and validate the structure.
 // If validated, return the completed test_outline, else exit with -1
 test_outline *parse_test_outline(char *filepath) {
-  test_outline *result_outline = malloc(sizeof(test_outline));
-  result_outline->num_chapters = 0;
-  const char *last_slash       = strrchr(filepath, '/');
+  int           file_path_length = strlen(filepath);
+  test_outline *result_outline   = malloc(sizeof(test_outline));
+  result_outline->num_chapters   = 0;
+  const char *last_slash         = strrchr(filepath, '/');
   if (!last_slash) {
     last_slash = filepath;
   }
-  sm_strncpy(result_outline->test_zone_path, filepath, strlen(filepath));
+  sm_strncpy(result_outline->test_zone_path, filepath, file_path_length);
   sm_env env;
   env.mem_flag   = false;
   env.quiet_mode = true;
