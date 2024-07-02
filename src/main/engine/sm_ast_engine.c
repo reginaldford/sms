@@ -686,6 +686,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       char *line = linenoise("");
       return (sm_object *)sm_new_string(strlen(line), line);
     }
+    case SM_ARGS_EXPR: {
+      if (sf)
+        return (sm_object *)sf;
+      return (sm_object *)sms_false;
+    }
     case SM_OR_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!IS_FALSE(obj0)) {
@@ -984,7 +989,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       return pr.parsed_object;
     }
-    case SM_TO_STRING_EXPR: {
+    case SM_NEW_STR_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_object_to_string(evaluated);
     }
@@ -1658,14 +1663,13 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   case SM_LOCAL_TYPE: {
     sm_local *local = (sm_local *)input;
     if (local->index >= sf->size) {
-      printf("local error did happen loca is %i and sf size is %i\n", local->index, sf->size);
       sm_symbol *title   = sm_new_symbol("invalidLocal", 12);
       sm_string *message = sm_new_fstring_at(
         sms_heap,
         "This local variable points to element %i when the stack frame only has %i elements.",
         local->index, sf->size);
       sm_cx *notes = sm_new_cx(NULL);
-      sm_cx_let(notes, sm_new_symbol("noted", 5), (sm_object *)current_cx);
+      sm_cx_let(notes, sm_new_symbol("noted", 5), input);
       sm_error *e = sm_new_error_blank();
       e->title    = title;
       e->message  = message;

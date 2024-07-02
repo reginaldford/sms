@@ -6,7 +6,6 @@
 typedef struct sm_string {
   int16_t  my_type;
   uint32_t size;
-  uint32_t space;   // make string at least 16 bytes
   char     content; // stores NULL if nothing else
 } sm_string;
 

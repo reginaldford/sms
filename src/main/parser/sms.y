@@ -62,7 +62,7 @@ int parsing_fpath_len;
 %type <expr> COMMAND
 
 %token SELF
-%token _INPUT
+%token ARGS
 %token LS
 %token CD
 %token PWD
@@ -160,7 +160,6 @@ int parsing_fpath_len;
 %token <expr> STR_REPEAT
 %token <expr> STR_TOMEM
 %token <expr> NEW_STR
-%token <expr> TO_STR
 %token <expr> TO_STRFMT
 
 %token <expr> NEW_MEM
@@ -278,7 +277,6 @@ int parsing_fpath_len;
 %token <expr> OS_SETENV
 %token <expr> FORK
 %token <expr> WAIT
-%token <expr> ARGS
 %token <expr> GETOPTIONS
 %token <expr> SETOPTIONS
 %token <expr> RESETOPTIONS
@@ -311,8 +309,9 @@ COMMAND : EXPR ';' {
 | ENDOFFILE { YYACCEPT; }
 
 EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
-EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
-  | EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3, _note()); }
+| ARGS '(' ')' { $$ = sm_new_expr_0(SM_ARGS_EXPR, _note());}
+| INPUT { $$ = (sm_expr*)sm_new_self(); }
+| EXIT '(' EXPR ')' { $$ = sm_new_expr(SM_EXIT_EXPR,(sm_object*)$3, _note()); }
 | EXIT '(' ')' { $$ = sm_new_expr_0(SM_EXIT_EXPR, _note()); }
 | LET SYM '=' EXPR { $$ = sm_new_expr_2(SM_LET_EXPR,(sm_object*)$2,(sm_object*)$4, _note()); }
 | RM SYM {$$ = sm_new_expr(SM_RM_EXPR, (sm_object *)$2, _note()); }
@@ -393,7 +392,7 @@ EXPR : INPUT { $$ = (sm_expr*)sm_new_self(); }
 | EVAL_FAST_IN_CX '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_EVAL_FAST_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FAILS '(' EXPR ')' {$$ = sm_new_expr(SM_FAILS_EXPR,(sm_object*)$3, _note());}
 | PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_PARSE_EXPR,(sm_object*)$3, _note());}
-| TO_STR '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3, _note());}
+| NEW_STR '(' EXPR ')' {$$ = sm_new_expr(SM_TO_STRING_EXPR,(sm_object*)$3, _note());}
 | PUT '(' EXPR ')' {$$ = sm_new_expr(SM_PUT_EXPR,(sm_object*)$3, _note());}
 | PUTLN '(' EXPR ')' {$$ = sm_new_expr(SM_PUTLN_EXPR,(sm_object*)$3, _note());}
 | INPUT '(' ')' { $$ = sm_new_expr_n(SM_INPUT_EXPR,0,0, _note());}

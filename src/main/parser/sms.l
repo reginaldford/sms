@@ -61,7 +61,7 @@ evalFast     {return EVAL_FAST;}
 evalFastInCX {return EVAL_FAST_IN_CX;}
 fails        {return FAILS;}
 parse        {return PARSE;}
-toStr        {return TO_STR;}
+str          {return NEW_STR;}
 toStrFmt     {return TO_STRFMT;}
 
 "->"         {return ASSOCIATE;}
@@ -82,7 +82,7 @@ putLn        {return PUTLN;}
 
 let          {return LET;}
 self         {return SELF;}
-_input       {return INPUT;}
+args         {return ARGS;}
 clear        {return CLEAR;}
 "."          {return DOT;}
 parent       {return PARENT;}
