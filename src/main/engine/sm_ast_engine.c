@@ -1302,9 +1302,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_double *index = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
       if (index->value >= arr->size || index->value < -0) {
         printf("Error: Index out of range: %i\n", (int)index->value);
-        sm_symbol *title   = sm_new_symbol("indexOutOfBounds", 16);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Index %i is out of bounds of array of size %i", (int)index, (int)arr->size);
+        sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Index %i is out of bounds of array of size %i",
+                            (int)index->value, (int)arr->size);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       sm_expr_set_arg(arr, index->value, value);
