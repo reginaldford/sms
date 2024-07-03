@@ -5,7 +5,7 @@
  @note Zero size string still has NULL termination. */
 typedef struct sm_string {
   int16_t  my_type;
-  int16_t  spacer;
+  int32_t  spacer;
   uint32_t size;
   char     content; // stores NULL if nothing else
 } sm_string;
