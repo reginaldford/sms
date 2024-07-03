@@ -334,6 +334,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 }
 | '(' EXPR ')' { $$ = $2; }
 | STRING{}
+| NEW_STR '(' EXPR ')' { $$ = sm_new_expr(SM_NEW_STR_EXPR, (sm_object *)$3, _note()); }
 | SIN '(' EXPR ')' { $$ = sm_new_expr(SM_SIN_EXPR, (sm_object *)$3, _note()); }
 | COS '(' EXPR ')' { $$ = sm_new_expr(SM_COS_EXPR, (sm_object *)$3, _note()); }
 | TAN '(' EXPR ')' { $$ = sm_new_expr(SM_TAN_EXPR, (sm_object *)$3, _note()); }
