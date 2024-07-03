@@ -1295,13 +1295,22 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return value;
       break;
     }
-    /*case SM_ASSIGN_INDEX_EXPR: {
-     * Doesnt work well with Bison, will reimplement in CParser
+    case SM_ASSIGN_INDEX_EXPR: {
       // expecting a[4]=value=> =index_expr(a,4,value);
-      sm_expr_set_arg(arr, index->value, obj2);
-      return obj2;
+      sm_object *value = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      sm_expr   *arr   = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
+      sm_double *index = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (index->value >= arr->size || index->value < -0) {
+        printf("Error: Index out of range: %i\n", (int)index->value);
+        sm_symbol *title   = sm_new_symbol("indexOutOfBounds", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Index %i is out of bounds of array of size %i", (int)index, (int)arr->size);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_expr_set_arg(arr, index->value, value);
+      return (sm_object *)sms_true;
       break;
-    }*/
+    }
     case SM_PLUS_EXPR: {
       sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
       if (obj0->my_type == SM_ERR_TYPE)
