@@ -57,6 +57,8 @@ int parsing_fpath_len;
 %type <expr> TEST_GT
 %type <expr> TEST_LT_EQ
 %type <expr> TEST_GT_EQ
+%type <expr> TEST_ISNAN
+%type <expr> TEST_ISINF
 %type <expr> BLOCK
 %type <expr> OPEN_BLOCK
 %type <expr> COMMAND
@@ -206,6 +208,9 @@ int parsing_fpath_len;
 %token <expr> GT
 %token <expr> LT_EQ
 %token <expr> GT_EQ
+%token <expr> ISNAN
+%token <expr> ISINF
+
 %token <expr> NOTEQ
 %token <expr> NOT
 %token <expr> OR
@@ -287,7 +292,7 @@ int parsing_fpath_len;
 %token ENDOFFILE
 
 %nonassoc SYM
-%nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS
+%nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS ISNAN ISINF
 %left ':'
 %left  '='
 %nonassoc ','
@@ -378,6 +383,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | TEST_GT{}
 | TEST_LT_EQ{}
 | TEST_GT_EQ{}
+| TEST_ISNAN{}
+| TEST_ISINF{}
 | BLOCK {}
 | EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | SYM '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
@@ -571,6 +578,14 @@ TEST_GT_EQ: GT_EQ '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(SM_GT_EQ_EXPR, (sm_object *)($3), (sm_object *)($5), _note());
 }
 | EXPR GT_EQ EXPR { $$ = sm_new_expr_2(SM_GT_EQ_EXPR,(sm_object*)$1,(sm_object*)$3, _note());};
+
+TEST_ISNAN: ISNAN '(' EXPR ')' {
+  $$ = sm_new_expr(SM_ISNAN_EXPR, (sm_object *)($3), _note());
+}
+
+TEST_ISINF: ISINF '(' EXPR ')' {
+  $$ = sm_new_expr(SM_ISINF_EXPR, (sm_object *)($3), _note());
+}
 
 EQ : EQEQ '(' EXPR ',' EXPR ')' {
   $$ = sm_new_expr_2(SM_EQEQ_EXPR, (sm_object *)($3), (sm_object *)($5), _note());
