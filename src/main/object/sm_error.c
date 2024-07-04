@@ -2,6 +2,24 @@
 
 #include "../sms.h"
 
+sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
+  sm_object *content = fun->content;
+  sm_object *result;
+  if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
+    sm_expr *content_sme = (sm_expr *)fun->content;
+    sm_cx   *new_cx      = sm_new_cx(fun->parent);
+    uint32_t i           = 1;
+    while (i < content_sme->size) {
+      result = sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
+      if (result->my_type == SM_RETURN_TYPE)
+        return ((sm_return *)result)->address;
+      i++;
+    }
+    return result;
+  } else {
+    return sm_engine_eval(content, fun->parent, sf);
+  }
+}
 /// Error object
 sm_error *sm_new_error_blank() {
   sm_error *new_error = sm_malloc(sizeof(sm_error));
@@ -22,11 +40,19 @@ sm_error *sm_new_error(int title_len, char *title_str, int message_len, char *me
     sourceStr = sm_new_string(sourceLen, source);
   else
     sourceStr = sm_new_string(10, "(terminal)");
-
   new_error->source = sourceStr;
   new_error->line   = line;
-  return new_error;
+  // Run the error handler if it exists
+  sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
+  sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
+  sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, (sm_object *)new_error, NULL);
+  if (fun)
+    return (sm_error *)execute_fun(fun, sm_new_cx(NULL), sf);
+  else
+    return new_error;
 }
+
+
 /// Creates an error with both title and message, with defaults if necessary
 sm_error *sm_new_error_from_strings(sm_symbol *title, sm_string *message, sm_string *source,
                                     uint32_t line, sm_cx *notes) {
