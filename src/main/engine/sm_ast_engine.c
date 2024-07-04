@@ -25,8 +25,10 @@ static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_ty
     sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
                                            sm_global_fn_name(sme->op));
-    return (sm_object *)sm_new_error(9, "TypeError", message->size, &message->content, source->size,
-                                     &source->content, (int)line->value);
+    // evaluate error handler if there is one
+    sm_cx *scratch = (sm_cx *)*(sm_global_lex_stack(NULL)->top);
+    return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
+                                     source->size, &source->content, (int)line->value);
   }
   return obj;
 }
@@ -40,8 +42,8 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
     sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
                                            sm_global_fn_name(sme->op));
-    return (sm_object *)sm_new_error(9, "TypeError", message->size, &message->content, source->size,
-                                     &source->content, (int)line->value);
+    return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
+                                     source->size, &source->content, (int)line->value);
   }
   return obj;
 }
@@ -1175,8 +1177,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       index_double   = (sm_double *)index_obj;
       uint32_t index = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
-        printf("Error: Index out of range: %i . Array size is %i\n", index, arr->size);
-        return (sm_object *)sms_false;
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Index out of range: %i . Array size is %i", index, arr->size);
+        sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 21);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       return sm_expr_get_arg(arr, index);
     }
@@ -1199,15 +1203,11 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
                                                &field_name->content, &cx_str->content);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-      // return sm_cx_entries(sr.context)[sr.index].value;
       return (sm_object *)sr;
     }
     case SM_PARENT_EXPR: {
       sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_cx     *base_cx;
-      if (!expect_type(base_obj, SM_CX_TYPE))
-        return (sm_object *)sms_false;
-      base_cx = (sm_cx *)base_obj;
+      sm_cx     *base_cx  = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
       if (base_cx->parent == NULL)
         return (sm_object *)sms_false;
       return (sm_object *)base_cx->parent;
@@ -1314,20 +1314,20 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_PLUS_EXPR: {
       sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj0->my_type == SM_ERR_TYPE)
+      if (obj0->my_type != SM_DOUBLE_TYPE)
         return (sm_object *)obj0;
       sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj1->my_type == SM_ERR_TYPE)
+      if (obj1->my_type != SM_DOUBLE_TYPE)
         return (sm_object *)obj1;
       return (sm_object *)sm_new_double(obj0->value + obj1->value);
       break;
     }
     case SM_MINUS_EXPR: {
       sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj0->my_type == SM_ERR_TYPE)
+      if (obj0->my_type != SM_DOUBLE_TYPE)
         return (sm_object *)obj0;
       sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj1->my_type == SM_ERR_TYPE)
+      if (obj1->my_type != SM_DOUBLE_TYPE)
         return (sm_object *)obj1;
       return (sm_object *)sm_new_double(obj0->value - obj1->value);
       break;
@@ -1719,6 +1719,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     sm_cx *cx = (sm_cx *)input;
     cx        = (sm_cx *)sm_copy((sm_object *)cx);
     return (sm_object *)cx;
+  }
+  case SM_ERR_TYPE: {
   }
   default:
     return input;
