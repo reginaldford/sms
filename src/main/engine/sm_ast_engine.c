@@ -1605,6 +1605,26 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
     }
+    case SM_ISNAN_EXPR: {
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
+      if (isnan(num0->value))
+        return (sm_object *)sms_true;
+      else
+        return (sm_object *)sms_false;
+      break;
+    }
+    case SM_ISINF_EXPR: {
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
+      if (isinf(num0->value))
+        return (sm_object *)sms_true;
+      else
+        return (sm_object *)sms_false;
+      break;
+    }
     case SM_RUNTIME_META_EXPR: {
       sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       return (sm_object *)sm_new_meta(obj, current_cx);

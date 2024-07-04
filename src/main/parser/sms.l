@@ -69,6 +69,11 @@ toStrFmt     {return TO_STRFMT;}
 !=           {return NOTEQ;}
 "<="         {return LT_EQ;}
 ">="         {return GT_EQ;}
+
+isNan        {return ISNAN;};
+isInf        {return ISINF;};
+
+
 is           {return IS;}
 
 not          {return NOT;}
