@@ -2,24 +2,6 @@
 
 #include "../sms.h"
 
-sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
-  sm_object *content = fun->content;
-  sm_object *result;
-  sm_cx     *new_cx = sm_new_cx(fun->parent);
-  if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
-    sm_expr *content_sme = (sm_expr *)fun->content;
-    uint32_t i           = 1;
-    while (i < content_sme->size) {
-      result = sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
-      if (result->my_type == SM_RETURN_TYPE)
-        return ((sm_return *)result)->address;
-      i++;
-    }
-    return result;
-  } else {
-    return sm_engine_eval(content, new_cx, sf);
-  }
-}
 /// Error object
 sm_error *sm_new_error_blank() {
   sm_error *new_error = sm_malloc(sizeof(sm_error));
