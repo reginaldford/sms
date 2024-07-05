@@ -2,13 +2,6 @@
 # Uses tput to get terminal dimensions, 
 # Then runs a for loop to fill up the screen with numbers
 {
-  # Function to get a number from a command
-  let getOutput = cmd => {
-    osExec(cmd str+ " > _tmp.dat" );
-    let output = fileRead("_tmp.dat");
-    osExec("rm _tmp.dat");
-    return parse(output);
-  };
   # Artistic engine
   let printChar=(x,y)=>{
     x=x*2.5;
@@ -23,8 +16,8 @@
   };
   
   # Run the double for loop
-  let tWidth = getOutput("tput cols");
-  let tHeight = getOutput("tput lines")-2;
+  let tWidth = parse(osExecToStr("tput cols")[1]);
+  let tHeight = parse(osExecToStr("tput lines")[1])-2;
   for(let x=0;x<tHeight;x=x+1)
     for(let y=0;y<tWidth;y=y+1)
       printChar(x,y);
