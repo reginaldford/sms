@@ -5,9 +5,9 @@
 sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   sm_object *content = fun->content;
   sm_object *result;
+  sm_cx     *new_cx = sm_new_cx(fun->parent);
   if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
     sm_expr *content_sme = (sm_expr *)fun->content;
-    sm_cx   *new_cx      = sm_new_cx(fun->parent);
     uint32_t i           = 1;
     while (i < content_sme->size) {
       result = sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
@@ -17,7 +17,7 @@ sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     }
     return result;
   } else {
-    return sm_engine_eval(content, fun->parent, sf);
+    return sm_engine_eval(content, new_cx, sf);
   }
 }
 /// Error object
