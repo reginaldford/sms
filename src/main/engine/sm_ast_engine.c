@@ -1721,6 +1721,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     return (sm_object *)cx;
   }
   case SM_ERR_TYPE: {
+    // Run the error handler if it exists
+    sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
+    sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
+    sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, sm_copy(input), NULL);
+    if (fun)
+      return execute_fun(fun, sm_new_cx(NULL), sf);
+    else
+      return input;
   }
   default:
     return input;
