@@ -13,7 +13,7 @@ extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
 
 // Execute a function
-sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
+inline sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   sm_object *content = fun->content;
   sm_object *result;
   sm_cx     *new_cx = sm_new_cx(fun->parent);
@@ -73,7 +73,7 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
 
 // Recursive engine
-sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
+inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;
@@ -1261,13 +1261,15 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           while (i < content_sme->size) {
             result = sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, new_args);
             if (result->my_type == SM_RETURN_TYPE)
-              return ((sm_return *)result)->address;
+              break;
             i++;
           }
         } else
           result = sm_engine_eval(fun->content, fun->parent, new_args);
         if (result->my_type == SM_RETURN_TYPE)
           return ((sm_return *)result)->address;
+        else
+          return result;
       } else
         return obj0;
       break;
