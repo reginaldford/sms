@@ -2,7 +2,6 @@
 
 // Denotes the type of expression
 // Must be in the same order as sm_global_fn_name
-//
 
 enum SM_EXPR_TYPE {
   SM_EXIT_EXPR,
@@ -117,13 +116,11 @@ enum SM_EXPR_TYPE {
   SM_FILE_RM_EXPR,
   SM_FILE_WRITE_EXPR,
   SM_FILE_APPEND_EXPR,
-  SM_CSV_TOARR_EXPR,
-  SM_ARR_TOCSV_EXPR,
-  SM_NEW_ARR_EXPR,
-  SM_ARR_CAT_EXPR,
-  SM_ARR_REPEAT_EXPR,
+  SM_ZEROS_EXPR,
   SM_PART_EXPR,
   SM_SIZE_EXPR,
+  SM_CAT_EXPR,
+  SM_REPEAT_EXPR,
   SM_RANDOM_EXPR,
   SM_SEED_EXPR,
   SM_ROUND_EXPR,
