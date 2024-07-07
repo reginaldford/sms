@@ -137,11 +137,10 @@ int parsing_fpath_len;
 %token <expr> MAP
 %token <expr> REDUCE
 %token <expr> SIZE
-%token <expr> ARR_PLUS
+%token <expr> ZEROS
 %token <expr> PART
-%token <expr> ARR_TOCSV
-%token <expr> ARR_REPEAT
-%token <expr> ARR_CAT
+%token <expr> REPEAT
+%token <expr> CAT
 
 %token <expr> STR_SIZE
 %token <expr> STR_MUT
@@ -369,6 +368,11 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | REDUCE '(' EXPR ',' EXPR ',' EXPR  ')' { $$ = sm_new_expr_3(SM_REDUCE_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7, _note()); }
 | CONTEXT{}
 | ARRAY{}
+| SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_SIZE_EXPR, (sm_object*)$3, _note());}
+| ZEROS '(' EXPR ')' {$$ = sm_new_expr(SM_ZEROS_EXPR, (sm_object*)$3, _note());}
+| PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_PART_EXPR, (sm_object*)$3, (sm_object*)$5,(sm_object*)$7, _note());}
+| REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_REPEAT_EXPR, (sm_object*)$3, (sm_object*)$5, _note());}
+| CAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_CAT_EXPR, (sm_object*)$3, (sm_object*)$5, _note());}
 | META_EXPR{}
 | ASSIGNMENT{}
 | INDEX_ASSIGNMENT{}
@@ -389,7 +393,6 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | SYM '[' EXPR ']' {$$ = sm_new_expr_2(SM_INDEX_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3, _note());}
-| SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_SIZE_EXPR,(sm_object*)$3, _note());}
 | WHILE '(' EXPR ')' EXPR {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FOR '(' EXPR ';' EXPR ';' EXPR ')' EXPR { $$ = sm_new_expr_4(SM_FOR_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,(sm_object*)$9,_note());}
 | DO_WHILE '(' EXPR ')' EXPR {$$ = sm_new_expr_2(SM_DO_WHILE_EXPR,(sm_object*)$5,(sm_object*)$3, _note());}
