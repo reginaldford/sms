@@ -125,13 +125,11 @@ fileSize     {return FILE_SIZE;}
 fileWrite    {return FILE_WRITE;}
 fileAppend   {return FILE_APPEND;}
 
-csvToArr   {return CSV_TOARR;}
-arrToCsv   {return ARR_TOCSV;}
 memToFile  {return MEM_TOFILE;}
 
-newArr      {return NEW_ARR;}
-arrCat      {return ARR_CAT;}
-arrRpt      {return ARR_REPEAT;}
+zeros       {return ZEROS;}
+cat         {return CAT;}
+repeat      {return REPEAT;}
 part        {return PART;}
 size        {return SIZE;}
 map         {return MAP;}
@@ -224,12 +222,10 @@ errMessage    {return ERR_MESSAGE;}
 errSource     {return ERR_SOURCE;}
 errLine       {return ERR_LINE;}
 errNotes      {return ERR_NOTES;}
-errCase       {return ERR_CASE;}
 
 _thisProcess   {return THISPROCESS;}
 _getOptions    {return GETOPTIONS;}
 _setOptions    {return SETOPTIONS;}
-_resetOptions  {return RESETOPTIONS;}
 _gc            {return GC;}
 _mem_saveFile  {return MEM_SAVEFILE;}
 _mem_readFile  {return MEM_READFILE;}
