@@ -37,15 +37,17 @@ static inline bool expect_type(sm_object *arg_n, int16_t arg_type) {
   return arg_n->my_type == arg_type;
 }
 
-// Returns the object if it's ok, returns an error if it's not
+// Return the object if it has right type, returns an error if it's not
 static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_type) {
   sm_object *obj = sm_expr_get_arg(sme, operand);
   if (param_type != obj->my_type) {
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
-                                           sm_global_fn_name(sme->op));
-    // evaluate error handler if there is one
+    sm_string *message = sm_new_fstring_at(
+      sms_heap, "Found type: %s instead of expected type: %s for argument %i on %s operation.",
+      sm_global_type_name(obj->my_type), sm_global_type_name(param_type), operand,
+      sm_global_fn_name(sme->op));
+    // Evaluate error handler if there is one
     sm_cx *scratch = (sm_cx *)*(sm_global_lex_stack(NULL)->top);
     return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                      source->size, &source->content, (int)line->value);
@@ -57,15 +59,8 @@ static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_ty
 static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_type,
                                           sm_cx *current_cx, sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
-  if (param_type != obj->my_type) {
-    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
-                                           sm_global_fn_name(sme->op));
-    return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
-                                     source->size, &source->content, (int)line->value);
-  }
-  return obj;
+  sm_expr_set_arg(sme, operand, obj);
+  return type_check(sme, operand, param_type);
 }
 
 // Convenience functions for the booleans
@@ -1120,52 +1115,37 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sm_new_return(to_return);
     }
     case SM_SIZE_EXPR: {
-      sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_expr   *arr;
-      if (!expect_type(base_obj, SM_EXPR_TYPE))
-        return (sm_object *)sms_false;
-      arr = (sm_expr *)base_obj;
+      sm_expr *arr = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
+      if (arr->my_type != SM_DOUBLE_TYPE)
+        return (sm_object *)arr;
       return (sm_object *)sm_new_double(arr->size);
+    }
+    case SM_CAT_EXPR: {
+      sm_expr *arr0 = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
+      sm_expr *arr1 = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
+      // sm_
+      return (sm_object *)sms_false;
     }
     case SM_MAP_EXPR: {
       // expecting a unary func
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_fun    *fun;
-      if (!expect_type(obj0, SM_FUN_TYPE))
-        return (sm_object *)sms_false;
-      fun             = (sm_fun *)obj0;
-      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_expr   *arr;
-      if (!expect_type(obj1, SM_EXPR_TYPE))
-        return (sm_object *)sms_false;
-      arr             = (sm_expr *)obj1;
+      sm_fun  *fun    = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE, current_cx, sf);
+      sm_expr *arr    = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE, current_cx, sf);
       sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size, NULL);
       for (uint32_t i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj, NULL);
-
-        sm_object *map_result = sm_engine_eval(fun->content, fun->parent, new_sf);
-
+        sm_object *map_result  = sm_engine_eval(fun->content, fun->parent, new_sf);
         if (map_result->my_type == SM_RETURN_TYPE)
           map_result = ((sm_return *)map_result)->address;
-
-        sm_expr_set_arg(output, i, map_result);
+        output=sm_expr_set_arg(output, i, map_result);
       }
       return (sm_object *)output;
     }
     case SM_REDUCE_EXPR: {
       // expecting a binary function
-      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_fun    *fun;
-      if (!expect_type(obj0, SM_FUN_TYPE))
-        return (sm_object *)sms_false;
-      fun = (sm_fun *)obj0;
+      sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE, current_cx, sf);
       // evaluating the expression to reduce
-      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_expr   *arr;
-      if (!expect_type(obj1, SM_EXPR_TYPE))
-        return (sm_object *)sms_false;
-      arr = (sm_expr *)obj1;
+      sm_expr *arr = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE, current_cx, sf);
       // initial value for reduction
       sm_object *initial = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
       // reducing the expression
@@ -1181,20 +1161,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return result;
     }
     case SM_INDEX_EXPR: {
-      sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_expr   *arr;
-      if (!expect_type(base_obj, SM_EXPR_TYPE)) {
-        sm_symbol *title = sm_new_symbol("typeMismatch", 12);
-        sm_string *message =
-          sm_new_string(59, "Trying to apply index op to something that is not an array.");
-        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
-      }
-      arr                  = (sm_expr *)base_obj;
-      sm_object *index_obj = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_double *index_double;
-      if (!expect_type(index_obj, SM_DOUBLE_TYPE))
-        return (sm_object *)sm_new_string(0, "");
-      index_double   = (sm_double *)index_obj;
+      sm_expr   *arr = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
+      sm_double *index_double =
+        (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
       uint32_t index = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
         sm_string *message = sm_new_fstring_at(
@@ -1305,7 +1274,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sms_true;
     }*/
     case SM_ASSIGN_LOCAL_EXPR: {
-      sm_object *obj0  = sm_expr_get_arg(sme, 0);
+           sm_object *obj0  = sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type == SM_LOCAL_TYPE) {
         sm_local *lcl = (sm_local *)obj0;
@@ -1374,10 +1343,10 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     }
     case SM_POW_EXPR: {
       sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj0->my_type == SM_ERR_TYPE)
+      if (obj0->my_type != SM_DOUBLE_TYPE)
         return (sm_object *)obj0;
       sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj1->my_type == SM_ERR_TYPE)
+      if (obj1->my_type != SM_DOUBLE_TYPE)
         return (sm_object *)obj1;
       return (sm_object *)sm_new_double(pow(obj0->value, obj1->value));
       break;
@@ -1661,8 +1630,11 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)e->title;
     }
     case SM_ERRLINE_EXPR: {
-      sm_error *obj0 = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE, current_cx, sf);
-      return (sm_object *)sm_new_double(obj0->line);
+      sm_error *obj0 = (sm_error *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)sm_new_double(obj0->line);
+      else
+        return (sm_object *)obj0;
     }
     case SM_ERRSOURCE_EXPR: {
       sm_error *obj0 = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE, current_cx, sf);
@@ -1711,22 +1683,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
   }
   case SM_LOCAL_TYPE: {
     sm_local *local = (sm_local *)input;
-    if (local->index >= sf->size) {
-      sm_symbol *title   = sm_new_symbol("invalidLocal", 12);
-      sm_string *message = sm_new_fstring_at(
-        sms_heap,
-        "This local variable points to element %i when the stack frame only has %i elements.",
-        local->index, sf->size);
-      sm_cx *notes = sm_new_cx(NULL);
-      sm_cx_let(notes, sm_new_symbol("noted", 5), input);
-      sm_error *e = sm_new_error_blank();
-      e->title    = title;
-      e->message  = message;
-      e->source   = sm_new_string(9, "(runtime)");
-      e->line     = 0;
-      e->notes    = notes;
-      return (sm_object *)e;
-    }
+    // locals are trusted, for speed
     return sm_expr_get_arg(sf, local->index);
   }
   case SM_FUN_TYPE: {
@@ -1740,7 +1697,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     cx        = (sm_cx *)sm_copy((sm_object *)cx);
     return (sm_object *)cx;
   }
-  case SM_ERR_TYPE: {
+  /*case SM_ERR_TYPE: {
     // Run the error handler if it exists
     sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
     sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
@@ -1749,7 +1706,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return execute_fun(fun, sm_new_cx(NULL), sf);
     else
       return input;
-  }
+  }*/
   default:
     return input;
   }

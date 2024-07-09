@@ -94,7 +94,7 @@ sm_expr *sm_expr_set_arg(sm_expr *expr, uint32_t index, sm_object *value) {
 }
 
 // Get an argument of an expression
-sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index) {
+inline sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index) {
   sm_object **ptr_array = (sm_object **)&(expr[1]);
   return ptr_array[index];
 }
