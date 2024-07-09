@@ -1137,7 +1137,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_object *map_result  = sm_engine_eval(fun->content, fun->parent, new_sf);
         if (map_result->my_type == SM_RETURN_TYPE)
           map_result = ((sm_return *)map_result)->address;
-        output=sm_expr_set_arg(output, i, map_result);
+        sm_expr_set_arg(output, i, map_result);
       }
       return (sm_object *)output;
     }
@@ -1274,7 +1274,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sms_true;
     }*/
     case SM_ASSIGN_LOCAL_EXPR: {
-           sm_object *obj0  = sm_expr_get_arg(sme, 0);
+      sm_object *obj0  = sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       if (obj0->my_type == SM_LOCAL_TYPE) {
         sm_local *lcl = (sm_local *)obj0;
