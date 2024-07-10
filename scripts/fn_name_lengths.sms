@@ -1,0 +1,21 @@
+#!/usr/local/bin/sms -qm1
+# prints the array of ints, used for sm_global_fn_name_ln( which )
+{
+  let cmdStr = "python fn_names.py";
+  let results = osExecToStr(cmdStr);
+  if(not(results[0] == 0)){
+      putLn("Could not run \"" str+ cmdStr str+ "\".");
+      exit(1);
+  };
+  let list = parse(results[1]);
+  list = map((s)=>strSize(s),list);
+
+  # Formatted as a C array of ints
+  put("{ ");
+  for(let i=0;i<size(list);i=i+1)
+    put(str(list[i]) str+ ",");
+  putLn(" }");
+
+  # Give the length
+  putLn("\nArray Length: " str+ str(size(list)) str+ "\n");
+};
