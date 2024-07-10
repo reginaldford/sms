@@ -298,7 +298,7 @@ uint32_t sm_global_fn_name_len(uint32_t which) {
 }
 
 uint32_t sm_global_num_fns() {
-  static const uint32_t num_fns = 188;
+  static const uint32_t num_fns = 190;
   return num_fns;
 }
 

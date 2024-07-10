@@ -64,30 +64,30 @@ void sm_inflate_heap() {
       // Meet the value
       link->value = sm_meet_object((sm_object *)link->value);
       // Meet the next
-      if (link->next != NULL)
+      if (link->next)
         link->next = (struct sm_link *)sm_meet_object((sm_object *)link->next);
       break;
     }
     case SM_CX_TYPE: {
       sm_cx *cx = (sm_cx *)current_obj;
       // Meet the parent
-      if (cx->parent != NULL)
+      if (cx->parent)
         cx->parent = (sm_cx *)sm_meet_object((sm_object *)cx->parent);
       // Meet the top cx node
-      if (cx->content != NULL)
+      if (cx->content)
         cx->content = (sm_node *)sm_meet_object((sm_object *)cx->content);
       break;
     }
     case SM_NODE_TYPE: {
       sm_node *node = (sm_node *)current_obj;
       // Meet the value
-      if (node->value != NULL)
+      if (node->value)
         node->value = sm_meet_object((sm_object *)node->value);
       // Meet the next node
-      if (node->next != NULL)
+      if (node->next)
         node->next = (struct sm_node *)sm_meet_object((sm_object *)node->next);
       // Meet the children
-      if (node->children != NULL)
+      if (node->children)
         node->children = (struct sm_node *)sm_meet_object((sm_object *)node->children);
       break;
     }
@@ -109,12 +109,12 @@ void sm_inflate_heap() {
     case SM_FUN_TYPE: {
       sm_fun *fun  = (sm_fun *)current_obj;
       fun->content = sm_meet_object((sm_object *)fun->content);
-      if (fun->parent != NULL)
+      if (fun->parent)
         fun->parent = (sm_cx *)sm_meet_object((sm_object *)fun->parent);
       for (uint32_t i = 0; i < fun->num_params; i++) {
         sm_fun_param *param = sm_fun_get_param(fun, i);
         param->name         = (sm_string *)sm_meet_object((sm_object *)param->name);
-        if (param->default_val != NULL) {
+        if (param->default_val) {
           param->default_val = sm_meet_object(param->default_val);
         }
       }
@@ -132,7 +132,7 @@ void sm_inflate_heap() {
     case SM_FUN_PARAM_TYPE: {
       sm_fun_param_obj *param = (sm_fun_param_obj *)current_obj;
       param->name             = (sm_string *)sm_meet_object((sm_object *)param->name);
-      if (param->default_val != NULL) {
+      if (param->default_val) {
         param->default_val = sm_meet_object((sm_object *)param->default_val);
       }
       break;
