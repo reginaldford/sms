@@ -280,7 +280,6 @@ char *sm_global_fn_name(uint32_t which) {
 // Corresponding string length of the string that would come from the sm_global_fn_name(which)
 uint32_t sm_global_fn_name_len(uint32_t which) {
   static uint64_t response_len[] = {
-
     4, 4, 5, 4,  2, 2, 3, 3, 1, 1, 1,  1, 1,  2, 1, 1,  1, 1, 1, 1, 3, 3,  3,  4,  4,  4, 4,
     4, 4, 5, 5,  5, 3, 3, 3, 4, 4, 4,  4, 4,  4, 5, 5,  5, 2, 3, 3, 4, 3,  4,  4,  3,  2, 2,
     3, 6, 6, 5,  3, 7, 6, 4, 6, 8, 12, 5, 5,  4, 2, 2,  2, 1, 1, 2, 2, 5,  5,  0,  0,  0, 3,
@@ -296,7 +295,7 @@ uint32_t sm_global_fn_name_len(uint32_t which) {
 }
 
 uint32_t sm_global_num_fns() {
-  static const uint32_t num_fns = 190;
+  static const uint32_t num_fns = 188;
   return num_fns;
 }
 
