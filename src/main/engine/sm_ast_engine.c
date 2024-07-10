@@ -399,6 +399,19 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sm_new_double(str0->size);
       break;
     }
+    case SM_ZEROS_EXPR: {
+      sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num0->my_type != SM_DOUBLE_TYPE)
+        return (sm_object *)num0;
+      if (num0->value < 1)
+        return (sm_object *)sm_new_expr_0(SM_ARRAY_EXPR, NULL);
+      sm_double *zero   = sm_new_double(0);
+      sm_expr   *output = sm_new_expr_n(SM_ARRAY_EXPR, (int)num0->value, (int)num0->value, NULL);
+      for (int i = 0; i < num0->value; i++)
+        sm_expr_set_arg(output, i, (sm_object *)zero);
+      return (sm_object *)output;
+      break;
+    }
     case SM_EXIT_EXPR: {
       int exit_code = 0;
       if (sme->size != 0) {
