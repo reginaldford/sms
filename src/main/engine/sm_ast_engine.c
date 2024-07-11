@@ -412,6 +412,36 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)output;
       break;
     }
+    case SM_PART_EXPR: {
+      sm_expr *list0 = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
+      if (list0->my_type == SM_ERR_TYPE)
+        return (sm_object *)list0;
+      sm_double *start = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (start->my_type == SM_ERR_TYPE)
+        return (sm_object *)start;
+      sm_double *len = (sm_double *)eager_type_check(sme, 2, SM_DOUBLE_TYPE, current_cx, sf);
+      if (len->my_type == SM_ERR_TYPE)
+        return (sm_object *)len;
+      if (start->value < 0 || start->value >= list0->size) {
+        sm_symbol *title   = sm_new_symbol("partIndexErr", 13);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Calling part with out of range start value: %i", (int)start->value);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      if (len->value > list0->size - start->value) {
+        sm_symbol *title   = sm_new_symbol("partLengthErr", 14);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Calling part with out of range length value: %i", (int)len->value);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_expr *new_list = sm_new_expr_n(SM_ARRAY_EXPR, (int)len->value, (int)len->value, NULL);
+      for (int i = 0; i < (int)len->value; i++) {
+        sm_object *element = sm_expr_get_arg(list0, (int)start->value + i);
+        sm_expr_set_arg(new_list, i, element);
+      }
+      return (sm_object *)new_list;
+      break;
+    }
     case SM_EXIT_EXPR: {
       int exit_code = 0;
       if (sme->size != 0) {
