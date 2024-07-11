@@ -6,7 +6,7 @@
   # makeAdder returns a function that adds x to the function's input
   let makeAdder = x => {
     let b=x;
-    return (a) => a+b;
+    return (a) => {a+b};
   };
   # We show the function generator
   putLn("makeAdder function: " str+ str(makeAdder));

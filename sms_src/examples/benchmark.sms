@@ -17,10 +17,11 @@
     putLn(str(time_elapsed) str+ " milliseconds")
   };
 
-  let f = (n) =>
+  let f = (n) => {
     if( n <= 1 )
       1
     else
       f(n - 1) + f(n - 2);
+  };
   benchmark(:f(31));
 };
