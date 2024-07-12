@@ -1719,9 +1719,12 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     }
     case SM_ERRNOTES_EXPR: {
       sm_error *obj0 = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE, current_cx, sf);
-      if (obj0->notes)
-        return (sm_object *)obj0->notes;
-      return (sm_object *)sms_false;
+      sm_cx    *notes;
+      if (obj0->notes) {
+        notes       = sm_new_cx(NULL);
+        obj0->notes = notes;
+      }
+      return (sm_object *)obj0->notes;
     }
     default: // unrecognized expr gets returned without evaluation
       return input;
@@ -1742,15 +1745,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     sm_symbol *title   = sm_new_symbol("varNotFound", 11);
     sm_string *message = sm_new_fstring_at(
       sms_heap, "%s was not found in cx saved to :noted on this err", &sym->name->content);
-    sm_cx *notes = sm_new_cx(NULL);
-    sm_cx_let(notes, sm_new_symbol("noted", 5), (sm_object *)current_cx);
-    sm_error *e = sm_new_error_blank();
-    e->title    = title;
-    e->message  = message;
-    e->source   = sm_new_string(9, "(runtime)");
-    e->line     = 0;
-    e->notes    = notes;
-    return (sm_object *)e;
+    sm_expr *envelope = sm_new_expr(SM_ARRAY_EXPR, input, NULL);
+    return (sm_object *)sm_new_error_from_expr(title, message, envelope, NULL);
   }
   case SM_LOCAL_TYPE: {
     sm_local *local = (sm_local *)input;
@@ -1760,15 +1756,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sms_heap,
         "This local variable points to element %i when the stack frame only has %i elements.",
         local->index, sf->size);
-      sm_cx *notes = sm_new_cx(NULL);
-      sm_cx_let(notes, sm_new_symbol("noted", 5), input);
-      sm_error *e = sm_new_error_blank();
-      e->title    = title;
-      e->message  = message;
-      e->source   = sm_new_string(9, "(runtime)");
-      e->line     = 0;
-      e->notes    = notes;
-      return (sm_object *)e;
+      // TODO: Add line/source to local objects, pass this data to a note cx for envelope
+      sm_expr *envelope = sm_new_expr(SM_ARRAY_EXPR, input, NULL);
+      return (sm_object *)sm_new_error_from_expr(title, message, envelope, NULL);
     }
     return sm_expr_get_arg(sf, local->index);
   }
