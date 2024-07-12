@@ -465,6 +465,28 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)new_array;
       break;
     }
+    case SM_CAT_EXPR: {
+      sm_expr *list0 = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
+      if (list0->my_type == SM_ERR_TYPE)
+        return (sm_object *)list0;
+      sm_expr *list1 = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE, current_cx, sf);
+      if (list1->my_type == SM_ERR_TYPE)
+        return (sm_object *)list1;
+      int      size0     = list0->size;
+      int      size1     = list1->size;
+      int      new_size  = size0 + size1;
+      sm_expr *new_array = sm_new_expr_n(SM_ARRAY_EXPR, new_size, new_size, NULL);
+      for (int i = 0; i < size0; i++) {
+        sm_object *element = sm_expr_get_arg(list0, i);
+        sm_expr_set_arg(new_array, i, element);
+      }
+      for (int i = 0; i < size1; i++) {
+        sm_object *element = sm_expr_get_arg(list1, i);
+        sm_expr_set_arg(new_array, size0 + i, element);
+      }
+      return (sm_object *)new_array;
+      break;
+    }
     case SM_EXIT_EXPR: {
       int exit_code = 0;
       if (sme->size != 0) {
