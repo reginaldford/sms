@@ -58,10 +58,11 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
                                           sm_cx *current_cx, sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type != obj->my_type) {
-    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
-                                           sm_global_fn_name(sme->op));
+    sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message =
+      sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
+                        operand, sm_global_fn_name(sme->op),sm_global_type_name(obj->my_type),sm_global_type_name(param_type));
     return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                      source->size, &source->content, (int)line->value);
   }
