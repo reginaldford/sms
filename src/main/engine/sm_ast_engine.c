@@ -41,10 +41,12 @@ static inline bool expect_type(sm_object *arg_n, int16_t arg_type) {
 static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_type) {
   sm_object *obj = sm_expr_get_arg(sme, operand);
   if (param_type != obj->my_type) {
-    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
-                                           sm_global_fn_name(sme->op));
+    sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string* message = sm_new_fstring_at(sms_heap,
+                      "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
+                      operand, sm_global_fn_name(sme->op), sm_global_type_name(obj->my_type),
+                      sm_global_type_name(param_type));
     // evaluate error handler if there is one
     sm_cx *scratch = (sm_cx *)*(sm_global_lex_stack(NULL)->top);
     return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
@@ -60,8 +62,10 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
   if (param_type != obj->my_type) {
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    sm_string *message = sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s", operand,
-                                           sm_global_fn_name(sme->op));
+    sm_string *message = sm_new_fstring_at(
+      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
+      operand, sm_global_fn_name(sme->op), sm_global_type_name(obj->my_type),
+      sm_global_type_name(param_type));
     return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                      source->size, &source->content, (int)line->value);
   }
@@ -440,6 +444,26 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_expr_set_arg(new_list, i, element);
       }
       return (sm_object *)new_list;
+      break;
+    }
+    case SM_REPEAT_EXPR: {
+      printf("yup\n");
+      sm_expr *list0 = (sm_expr *)eager_type_check(sme, 0, SM_ARRAY_EXPR, current_cx, sf);
+      if (list0->my_type == SM_ERR_TYPE)
+        return (sm_object *)list0;
+      sm_double *reps = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (reps->my_type == SM_ERR_TYPE)
+        return (sm_object *)reps;
+      double   repetitions   = reps->value;
+      int      original_size = list0->size;
+      int      new_size      = (int)(original_size * repetitions);
+      sm_expr *new_array     = sm_new_expr_n(SM_ARRAY_EXPR, new_size, new_size, NULL);
+      for (int i = 0; i < new_size; i++) {
+        int        original_index = i % original_size;
+        sm_object *element        = sm_expr_get_arg(list0, original_index);
+        sm_expr_set_arg(new_array, i, element);
+      }
+      return (sm_object *)new_array;
       break;
     }
     case SM_EXIT_EXPR: {
