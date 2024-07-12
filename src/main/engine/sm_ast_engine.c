@@ -423,13 +423,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (len->my_type == SM_ERR_TYPE)
         return (sm_object *)len;
       if (start->value < 0 || start->value >= list0->size) {
-        sm_symbol *title   = sm_new_symbol("partIndexErr", 13);
+        sm_symbol *title   = sm_new_symbol("partIndexErr", 12);
         sm_string *message = sm_new_fstring_at(
           sms_heap, "Calling part with out of range start value: %i", (int)start->value);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       if (len->value > list0->size - start->value) {
-        sm_symbol *title   = sm_new_symbol("partLengthErr", 14);
+        sm_symbol *title   = sm_new_symbol("partLengthErr", 13);
         sm_string *message = sm_new_fstring_at(
           sms_heap, "Calling part with out of range length value: %i", (int)len->value);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
