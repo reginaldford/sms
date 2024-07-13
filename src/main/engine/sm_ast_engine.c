@@ -60,11 +60,12 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
                                           sm_cx *current_cx, sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type != obj->my_type) {
-    sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    sm_string *message =
-      sm_new_fstring_at(sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
-                        operand, sm_global_fn_name(sme->op),sm_global_type_name(obj->my_type),sm_global_type_name(param_type));
+    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message = sm_new_fstring_at(
+      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
+      operand, sm_global_fn_name(sme->op), sm_global_type_name(obj->my_type),
+      sm_global_type_name(param_type));
     return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                      source->size, &source->content, (int)line->value);
   }
@@ -1786,23 +1787,21 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     sm_object *sr       = sm_cx_get_far(current_cx, sym);
     if (sr)
       return sr;
-    sm_symbol *title   = sm_new_symbol("varNotFound", 11);
-    sm_string *message = sm_new_fstring_at(
-      sms_heap, "%s was not found in cx saved to :noted on this err", &sym->name->content);
+    sm_symbol *title = sm_new_symbol("varNotFound", 11);
+    sm_string *message =
+      sm_new_fstring_at(sms_heap, "%s was not found in this context", &sym->name->content);
     sm_expr *envelope = sm_new_expr(SM_ARRAY_EXPR, input, NULL);
     return (sm_object *)sm_new_error_from_expr(title, message, envelope, NULL);
   }
   case SM_LOCAL_TYPE: {
     sm_local *local = (sm_local *)input;
     if (local->index >= sf->size) {
-      sm_symbol *title   = sm_new_symbol("invalidLocal", 12);
-      sm_string *message = sm_new_fstring_at(
-        sms_heap,
-        "This local variable points to element %i when the stack frame only has %i elements.",
-        local->index, sf->size);
-      // TODO: Add line/source to local objects, pass this data to a note cx for envelope
-      sm_expr *envelope = sm_new_expr(SM_ARRAY_EXPR, input, NULL);
-      return (sm_object *)sm_new_error_from_expr(title, message, envelope, NULL);
+      // TODO: Make local an expression so that it can hold line, source info
+      sm_symbol *title = sm_new_symbol("localNotFound", 13);
+      sm_string *message =
+        sm_new_fstring_at(sms_heap, "%s was not provided to this function.", &local->name->content);
+      return (sm_object *)sm_new_error_from_strings(title, message, sm_new_string(7, "unknown"), 0,
+                                                    NULL);
     }
     return sm_expr_get_arg(sf, local->index);
   }
