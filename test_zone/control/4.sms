@@ -6,7 +6,6 @@
   tests -> [
     [ for (let a = 1;a < 10;a = a + 1) a, 9, "basic for loop, 0 to 10"],
     [ for (let a = 10;a > 0;a = a - 1) a, 1, "basic for loop, 10 to 0"],
-    #here, "working" is only printed once because only 1 context is used for this process
     [ for (let a = 10;a > 0;a = a - 1){
       let a=1;
       putln("working");
