@@ -119,24 +119,6 @@ bool sm_is_infix(enum SM_EXPR_TYPE op) {
   }
 }
 
-// Useful for making decisions about parenthesis
-uint16_t op_level(enum SM_EXPR_TYPE op_expr) {
-  switch (op_expr) {
-  case SM_PLUS_EXPR:
-  case SM_MINUS_EXPR:
-    return 1;
-  case SM_TIMES_EXPR:
-  case SM_DIVIDE_EXPR:
-    return 2;
-  case SM_POW_EXPR:
-  case SM_EXP_EXPR:
-  case SM_LN_EXPR:
-    return 3;
-  default:
-    return 4;
-  }
-}
-
 // New string describing this expression
 sm_string *sm_expr_to_string(sm_expr *expr) {
   sm_string *new_str = sm_new_string_manual(sm_expr_sprint(expr, NULL, true));

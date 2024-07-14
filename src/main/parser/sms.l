@@ -45,6 +45,8 @@ log          {return LOG;}
 sqrt         {return SQRT;}
 abs          {return ABS;}
 
+"++"         {return INC;}
+"--"         {return DEC;}
 diff         {return DIFF;}
 simp         {return SIMP;}
 int          {return INT;}
@@ -241,6 +243,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
 [\<\>\=] { return yytext[0]; }
 
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
+
 
 ({alpha}?+{digit}?+_?+\'?+)?+ {
     yylval.sym = sm_new_symbol(yytext,yyleng);
