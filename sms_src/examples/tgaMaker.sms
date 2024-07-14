@@ -1,0 +1,44 @@
+#!/usr/local/bin/sms -m 400
+{
+    #debug mode
+    let _errHandler=(e)=>{ putLn(str(e)); e};
+    # Load the char function
+    eval(fileParse("char.sms"));
+    
+    let filename = "gradient.tga";
+    let width = 256;
+    let height = 256;
+
+    # Create the TGA header as a string with hex escapes
+    let header = "\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00" +
+                 char(mod(width, 256)) str+ char(width / 256) str+
+                 char(mod(height, 256)) str+ char(height / 256) str+
+                 "\x18\x00";
+
+    let pixel_count = width * height;
+    let tga_data = header;
+
+    # Manually initialize pixel data with zeros
+    # TODO: create strRepeat("..", number)
+    for (let i = 0; i < pixel_count * 3; i++) {
+        tga_data = tga_data str+ "\x00";
+    };
+
+    # Build the pixel data
+    let offset = 18;
+    for (let y = 0; y <= height - 1; y++) {
+        for (let x = 0; x <= width - 1; x++) {
+            let color = (x * 255) / (width - 1);
+            tga_data = strMut(tga_data, offset, char(color));
+            tga_data = strMut(tga_data, offset + 1, char(color));
+            tga_data = strMut(tga_data, offset + 2, char(color));
+            offset = offset + 3;
+        };
+    };
+
+    # Write the data to the file
+    let success = fileWrite(filename, tga_data);
+    if(success) putLn("Wrote " str+ filename str+ "successfully.")
+    else putLn("Could not write the file...");
+};
+
