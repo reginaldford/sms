@@ -1614,6 +1614,26 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sm_new_double(num0->value < 0 ? -1 * num0->value : num0->value);
       break;
     }
+    case SM_INC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_double *num = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num->my_type != SM_DOUBLE_TYPE)
+        return (sm_object *)num;
+      sm_double *output = sm_new_double(num->value + 1);
+      sm_cx_set(current_cx, sym, (sm_object*)output);
+      return (sm_object *)output;
+      break;
+    }
+    case SM_DEC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_double *num = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
+      if (num->my_type != SM_DOUBLE_TYPE)
+        return (sm_object*)num;
+      sm_double *output = sm_new_double(num->value - 1);
+      sm_cx_set(current_cx, sym, (sm_object*)output);
+      return (sm_object *)output;
+      break;
+    }
     case SM_IF_EXPR: {
       sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!IS_FALSE(condition_result)) {
