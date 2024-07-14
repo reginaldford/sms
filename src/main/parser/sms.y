@@ -691,7 +691,7 @@ CONTEXT_LIST : '{' ASSOCIATION ';' ASSOCIATION {
 
 FILE* lex_file(char *fpath){
   if(access(fpath,F_OK)!=0){
-    printf("File not found: %s\n",fpath);
+    fprintf(stderr,"File not found: %s\n",fpath);
     return false;
   }
   FILE * f = _lex_file(fpath);
