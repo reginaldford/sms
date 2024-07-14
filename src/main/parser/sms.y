@@ -75,7 +75,9 @@ int parsing_fpath_len;
 
 %token IS
 %token DOT
-%token <num> NUM
+%token <expr> NUM
+%token <expr> INC 
+%token <expr> DEC
 %token <expr> PIPE
 %token <expr> EQEQ
 %token <expr> ASSOCIATE
@@ -328,6 +330,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR '/' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR '^' EXPR { $$ = sm_new_expr_2(SM_POW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | NUM{}
+| SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1); }
+| SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1); }
 | '-' EXPR {
   if (((sm_object *)$2)->my_type == SM_DOUBLE_TYPE) {
     ((sm_double *)$2)->value *= -1;
