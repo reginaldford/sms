@@ -66,8 +66,9 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
       sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
       operand, sm_global_fn_name(sme->op), sm_global_type_name(obj->my_type),
       sm_global_type_name(param_type));
-    return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
-                                     source->size, &source->content, (int)line->value);
+    sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
+                                               source->size, &source->content, (int)line->value);
+    return err;
   }
   return obj;
 }
@@ -1616,21 +1617,35 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     }
     case SM_INC_EXPR: {
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply ++ to non-symbol. Object type is %s instead",
+                            sm_global_type_name(sym->my_type));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
       sm_double *num = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
       if (num->my_type != SM_DOUBLE_TYPE)
         return (sm_object *)num;
       sm_double *output = sm_new_double(num->value + 1);
-      sm_cx_set(current_cx, sym, (sm_object*)output);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
       return (sm_object *)output;
       break;
     }
     case SM_DEC_EXPR: {
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply -- to non-symbol. Object type is %s instead",
+                            sm_global_type_name(sym->my_type));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
       sm_double *num = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
       if (num->my_type != SM_DOUBLE_TYPE)
-        return (sm_object*)num;
+        return (sm_object *)num;
       sm_double *output = sm_new_double(num->value - 1);
-      sm_cx_set(current_cx, sym, (sm_object*)output);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
       return (sm_object *)output;
       break;
     }
