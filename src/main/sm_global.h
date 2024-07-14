@@ -40,3 +40,5 @@ uint32_t sm_global_type_name_len(uint32_t which);
 struct termios *sm_global_term_attrs();
 /// Read-only for user home directory
 struct sm_string *sm_global_home_directory();
+// Whether an object is a double
+bool sm_is_double(void *ptr);

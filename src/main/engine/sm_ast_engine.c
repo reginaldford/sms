@@ -78,6 +78,8 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
 
 // Recursive engine
 inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
+  if (sm_is_double(input))
+    return input;
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;
@@ -1421,13 +1423,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       break;
     }
     case SM_PLUS_EXPR: {
-      sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj0->my_type != SM_DOUBLE_TYPE)
-        return (sm_object *)obj0;
-      sm_double *obj1 = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
-      if (obj1->my_type != SM_DOUBLE_TYPE)
-        return (sm_object *)obj1;
-      return (sm_object *)sm_new_double(obj0->value + obj1->value);
+      double obj0 = (double)((uintptr_t)sm_expr_get_arg(sme, 0));
+      if (!sm_is_double((void *)((uintptr_t)obj0)))
+        return (sm_object *)((uintptr_t)obj0);
+      double obj1 = (double)((uintptr_t)sm_expr_get_arg(sme, 1));
+      if (!sm_is_double((void *)((uintptr_t)obj1)))
+        return (sm_object *)((uintptr_t)obj1);
+      return (sm_object *)((uintptr_t)(obj0 + obj1));
       break;
     }
     case SM_MINUS_EXPR: {

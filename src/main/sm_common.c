@@ -140,3 +140,8 @@ void sm_safe_print_string(sm_string *str) {
   }
   fflush(stdout);
 }
+
+// This does not work
+// If a double is a multiple of 4, the mantissa is a multiple of 4
+// The mantissa then makes the f64 appear as a valid pointer
+bool sm_is_double(void *ptr) { return (void *)(((uintptr_t)ptr + 3) & ~3) != ptr; }

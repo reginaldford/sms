@@ -2,18 +2,6 @@
 
 #include "../sms.h"
 
-// Return true if the object is a literal
-// This means the object evaluates to itself
-bool sm_object_is_literal(uint16_t t) {
-  switch (t) {
-  case SM_DOUBLE_TYPE:
-  case SM_STRING_TYPE:
-    return true;
-  default:
-    return false;
-  }
-}
-
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
   sm_string *new_str       = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));
@@ -25,6 +13,8 @@ sm_string *sm_object_to_string(sm_object *obj1) {
 // Print to a string buffer the object description
 // Return the length of the string
 uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
+  if (sm_is_double((void *)((uintptr_t)obj1)))
+    return sm_double_sprint((sm_double *)obj1, buffer, fake);
   switch (obj1->my_type) {
   case SM_DOUBLE_TYPE:
     return sm_double_sprint((sm_double *)obj1, buffer, fake);
@@ -58,6 +48,8 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 }
 // Return the size of the object in bytes
 int sm_sizeof(sm_object *obj1) {
+  if (sm_is_double(obj1))
+    return sizeof(double);
   switch (obj1->my_type) {
   case SM_DOUBLE_TYPE:
     return sizeof(sm_double);
