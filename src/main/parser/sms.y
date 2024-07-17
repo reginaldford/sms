@@ -147,6 +147,7 @@ int parsing_fpath_len;
 %token <expr> STR_SIZE
 %token <expr> STR_MUT
 %token <expr> STR_CAT
+%token <expr> STR_REPEAT
 %token <expr> STR_GET
 %token <expr> STR_SET
 %token <expr> STR_MAP
@@ -160,7 +161,6 @@ int parsing_fpath_len;
 %token <expr> STR_GETCHAR
 %token <expr> STR_TONUMS
 %token <expr> STR_CMP
-%token <expr> STR_REPEAT
 %token <expr> STR_TOMEM
 %token <expr> NEW_STR
 %token <expr> TO_STRFMT
@@ -458,6 +458,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | STR_FIND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_FIND_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | STR_CAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_CAT_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | EXPR STR_CAT EXPR {$$ = sm_new_expr_2(SM_STR_CAT_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
+| STR_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_REPEAT_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | STR_SPLIT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_SPLIT_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | STR_PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_STR_PART_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7, _note());}
 | DATE_STR '(' ')' { $$ = sm_new_expr_n(SM_DATE_STR_EXPR,0,0, _note());}

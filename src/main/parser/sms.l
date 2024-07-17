@@ -179,7 +179,7 @@ symName     {return SYM_NAME;}
 
 newStr      {return NEW_STR;}
 "str\+"     {return STR_CAT;}
-strRpt      {return STR_REPEAT;}
+strRepeat      {return STR_REPEAT;}
 strEscape   {return STR_ESCAPE;}
 strUnescape {return STR_UNESCAPE;}
 strSize     {return STR_SIZE;}

@@ -19,19 +19,16 @@
     let tga_data = header;
 
     # Manually initialize pixel data with zeros
-    # TODO: create strRepeat("..", number)
-    for (let i = 0; i < pixel_count * 3; i++) {
-        tga_data = tga_data str+ "\x00";
-    };
+    tga_data = strRepeat("\x00",pixel_count*3);
 
     # Build the pixel data
     let offset = 18;
     for (let y = 0; y <= height - 1; y++) {
         for (let x = 0; x <= width - 1; x++) {
             let color = (x * 255) / (width - 1);
-            tga_data = strMut(tga_data, offset, char(color));
-            tga_data = strMut(tga_data, offset + 1, char(color));
-            tga_data = strMut(tga_data, offset + 2, char(color));
+            strMut(tga_data, offset, char(color));
+            strMut(tga_data, offset + 1, char(color));
+            strMut(tga_data, offset + 2, char(color));
             offset = offset + 3;
         };
     };

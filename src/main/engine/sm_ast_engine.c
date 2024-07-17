@@ -404,6 +404,24 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sm_new_double(str0->size);
       break;
     }
+    case SM_STR_REPEAT_EXPR: {
+      sm_string *str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (str->my_type == SM_ERR_TYPE)
+        return (sm_object *)str;
+      sm_double *reps = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (reps->my_type == SM_ERR_TYPE)
+        return (sm_object *)reps;
+      double     repetitions   = reps->value;
+      int        original_size = str->size;
+      int        new_size      = (int)(original_size * repetitions);
+      sm_string *new_str       = sm_new_string_manual(new_size);
+      char      *content       = &(new_str->content);
+      for (int i = 0; i < new_size; i += original_size) {
+        sm_strncpy(content + i, &(str->content), original_size);
+      }
+      return (sm_object *)new_str;
+      break;
+    }
     case SM_ZEROS_EXPR: {
       sm_double *num0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
       if (num0->my_type != SM_DOUBLE_TYPE)
