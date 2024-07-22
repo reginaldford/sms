@@ -3,6 +3,10 @@
 /// Structure to hold global info affected by command line arguments
 /// @see sm_init populates this struct
 typedef struct sm_env {
+  /// Version string. Major.Minor.Patch
+  char version[17];
+  /// Length of version string
+  int version_len;
   /// File path to specified script (if path is given)
   char script_fp[256];
   /// Length of the file path

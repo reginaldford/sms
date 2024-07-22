@@ -9,16 +9,17 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.219%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion %s%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE),
+         &(sms_global_version()->content), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
 void check_init(sm_env *env, int num_args, char **argv) {
   if (env->initialized == false) {
+    sm_global_environment(env);
+    sm_init(env, num_args, argv);
     if (env->quiet_mode == false)
       print_intro();
-    sm_init(env, num_args, argv);
-    sm_global_environment(env);
   }
 }
 
