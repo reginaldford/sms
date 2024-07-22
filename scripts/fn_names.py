@@ -5,8 +5,9 @@ import sys
 input_file = "../src/main/sm_global.c"
 
 # Regular expressions to match the start and end patterns
+# _version should be the first expression in sm_global.c
 start_pattern = re.compile(r'\{')
-exit_pattern = re.compile(r'"exit"')
+version_pattern = re.compile(r'"\_version"')
 end_pattern = re.compile(r'\}')
 
 def process_file(input_file):
@@ -14,7 +15,7 @@ def process_file(input_file):
         sys.stdout.write('[')
         start_printing = False
         brace_count = 0
-        found_exit = False
+        found_version = False
         
         for line in infile:
             # Remove comments
@@ -26,12 +27,12 @@ def process_file(input_file):
                     brace_count += line.count('{')
                     start_printing = True
             
-            # Check for the "exit" pattern
-            if start_printing and not found_exit:
-                if exit_pattern.search(line):
-                    found_exit = True
+            # Check for the "version" pattern
+            if start_printing and not found_version:
+                if version_pattern.search(line):
+                    found_version = True
             
-            if start_printing and found_exit:
+            if start_printing and found_version:
                 brace_count += line.count('{')
                 brace_count -= line.count('}')
                 if brace_count == 0:
