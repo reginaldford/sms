@@ -18,6 +18,7 @@ digit [0-9]
 %%
 
 [ \t\f\v\n\\]  { ; }
+_version     {return VERSION;}
 exit         {return EXIT;}
 help         {return HELP;}
 

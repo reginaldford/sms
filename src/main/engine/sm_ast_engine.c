@@ -84,6 +84,10 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     sm_expr *sme = (sm_expr *)input;
     short    op  = sme->op;
     switch (op) {
+    case SM_VERSION_EXPR: {
+      return (sm_object *)sms_global_version();
+      break;
+    }
     case SM_DATE_EXPR: {
       time_t     rawtime;
       struct tm *timeinfo;

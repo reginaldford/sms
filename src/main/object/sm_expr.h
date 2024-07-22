@@ -4,6 +4,7 @@
 // Must be in the same order as sm_global_fn_name
 
 enum SM_EXPR_TYPE {
+  SM_VERSION_EXPR,
   SM_EXIT_EXPR,
   SM_HELP_EXPR,
   SM_CLEAR_EXPR,
