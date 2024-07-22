@@ -8,6 +8,11 @@ extern struct sm_heap *sms_symbol_name_heap;
 extern uint32_t        sms_num_symbols;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
+  // Set version number. Major.Minor.Patch
+  char *sms_version     = "0.21.9";
+  int   sms_version_len = 6;
+  sm_strncpy(env->version, sms_version, sms_version_len);
+  env->version_len = 6;
   // Register the signal handler
   sm_register_signals();
   // Default (inner) environment variables

@@ -352,3 +352,17 @@ sm_string *sm_global_hist_file() {
   }
   return (sm_string *)hist_file_string_space;
 }
+
+// global version string
+sm_string *sms_global_version() {
+  static char version_string_space[16 + sizeof(struct sm_string)];
+  sm_string  *str = (sm_string *)version_string_space;
+  if (!*version_string_space) {
+    sm_env     env = *sm_global_environment(NULL);
+    sm_string *str = (sm_string *)version_string_space;
+    str->my_type   = SM_STRING_TYPE;
+    str->size      = env.version_len;
+    sm_strncpy(&(str->content), env.version, env.version_len);
+  }
+  return (sm_string *)version_string_space;
+}
