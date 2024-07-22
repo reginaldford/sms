@@ -12,7 +12,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   char *sms_version     = "0.21.10";
   int   sms_version_len = 7;
   sm_strncpy(env->version, sms_version, sms_version_len);
-  env->version_len = 6;
+  env->version_len = sms_version_len;
   // Register the signal handler
   sm_register_signals();
   // Default (inner) environment variables
