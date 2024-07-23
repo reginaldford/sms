@@ -188,6 +188,7 @@ int parsing_fpath_len;
 %token <expr> FILE_RUN
 %token <expr> FILE_PART
 %token <expr> FILE_WRITE
+%token <expr> FILE_WRITETGA
 %token <expr> FILE_EXISTS
 %token <expr> FILE_STAT
 %token <expr> FILE_APPEND
@@ -435,12 +436,12 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | XP_OP '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_EXPR,(sm_object*)$3, _note());}
 | XP_SETOP '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_XP_SET_OP_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | XP_OPSYM '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_SYM_EXPR,(sm_object*)$3, _note());}
-
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3, _note());}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3, _note());}
 | FILE_RUN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_READ_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FILE_PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_FILE_PART_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7, _note());}
 | FILE_WRITE '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_WRITE_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
+| FILE_WRITETGA '(' EXPR ',' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_4(SM_FILE_WRITETGA_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,(sm_object*)$9, _note());}
 | FILE_APPEND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_APPEND_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FILE_EXISTS '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_EXISTS_EXPR,(sm_object*)$3, _note());}
 | FILE_RM '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_RM_EXPR,(sm_object*)$3, _note());}

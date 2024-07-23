@@ -101,6 +101,7 @@ enum sm_object_type {
 #include "engine/str.h"
 #include "engine/sm_diff.h"
 #include "engine/sm_simplify.h"
+#include "engine/sm_file_write_tga.h"
 #include "object/sm_return.h"
 #include "engine/sm_ast_engine.h"
 #include "engine/op/stack.h"

@@ -1,0 +1,14 @@
+{
+  # Assuming the width and height are 100x100 and we have pixel data
+  let width = 100;
+  let height = 100;
+  let pixels = zeros(3 * width * height); # This creates an empty array of the required size
+
+  # Fill the pixels array with example data (e.g., a gradient or solid color)
+  for (let i = 0; i < 3 * width * height; i++) {
+    pixels[i] = mod(i , 256); # Example: filling with a gradient
+  };
+
+  # Call the fileWriteTga function
+  fileWriteTga("output.tga", width, height, pixels);
+};
