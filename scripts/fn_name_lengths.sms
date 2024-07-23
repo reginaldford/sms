@@ -1,7 +1,7 @@
 #!/usr/local/bin/sms -qm1
 # prints the array of ints, used for sm_global_fn_name_ln( which )
 {
-  let cmdStr = "python fn_names.py";
+  let cmdStr = "python3 fn_names.py";
   let results = osExecToStr(cmdStr);
   if(not(results[0] == 0)){
       putLn("Could not run \"" str+ cmdStr str+ "\".");

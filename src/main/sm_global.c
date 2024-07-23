@@ -197,6 +197,7 @@ char *sm_global_fn_name(uint32_t which) {
     "fileMv",       // SM_FILE_MV_EXPR
     "fileRm",       // SM_FILE_RM_EXPR
     "fileWrite",    // SM_FILE_WRITE_EXPR
+    "fileWriteTga", // SM_FILE_WRITETGA_EXPR
     "fileAppend",   // SM_FILE_APPEND_EXPR
     "zeros",        // SM_ZEROS_EXPR
     "part",         // SM_PART_EXPR
@@ -283,20 +284,21 @@ char *sm_global_fn_name(uint32_t which) {
 // Corresponding string length of the string that would come from the sm_global_fn_name(which)
 uint32_t sm_global_fn_name_len(uint32_t which) {
   static uint64_t response_len[] = {
-    8, 4, 4,  5,  4, 2, 2, 3, 3, 1, 1,  1,  1,  1, 2, 1, 1, 1, 1,  1, 1, 3,  3, 3,  4, 4, 4, 4,
-    4, 4, 5,  5,  5, 3, 3, 3, 4, 4, 4,  4,  4,  4, 5, 5, 5, 2, 3,  3, 4, 3,  3, 3,  4, 4, 3, 2,
-    2, 3, 6,  6,  5, 3, 7, 6, 4, 6, 8,  12, 5,  5, 4, 2, 2, 2, 1,  1, 2, 2,  5, 5,  0, 0, 0, 3,
-    5, 4, 2,  11, 5, 5, 5, 5, 8, 8, 12, 5,  4,  7, 6, 8, 6, 8, 5,  9, 8, 7,  8, 10, 8, 9, 6, 6,
-    6, 9, 10, 5,  4, 4, 3, 6, 6, 4, 5,  5,  4,  3, 3, 2, 3, 3, 4,  7, 8, 11, 8, 11, 4, 7, 7, 7,
-    6, 6, 6,  6,  7, 8, 4, 8, 7, 9, 11, 8,  6,  9, 8, 3, 6, 6, 6,  8, 7, 9,  9, 9,  8, 6, 6, 8,
-    7, 0, 0,  8,  4, 7, 4, 4, 5, 6, 6,  6,  11, 8, 8, 3, 5, 8, 10, 9, 7, 8,  1};
+    8, 4, 4,  5,  4, 2, 2, 3, 3, 1, 1,  1,  1, 1,  2, 1, 1, 1, 1, 1,  1, 3, 3,  3,  4,  4, 4, 4,
+    4, 4, 5,  5,  5, 3, 3, 3, 4, 4, 4,  4,  4, 4,  5, 5, 5, 2, 3, 3,  4, 3, 3,  3,  4,  4, 3, 2,
+    2, 3, 6,  6,  5, 3, 7, 6, 4, 6, 8,  12, 5, 5,  4, 2, 2, 2, 1, 1,  2, 2, 5,  5,  0,  0, 0, 3,
+    5, 4, 2,  11, 5, 5, 5, 5, 8, 8, 12, 5,  4, 7,  6, 8, 6, 8, 5, 9,  8, 7, 8,  10, 8,  9, 6, 6,
+    6, 9, 12, 10, 5, 4, 4, 3, 6, 6, 4,  5,  5, 4,  3, 3, 2, 3, 3, 4,  7, 8, 11, 8,  11, 4, 7, 7,
+    7, 6, 6,  6,  6, 7, 8, 4, 8, 7, 9,  11, 8, 6,  9, 8, 3, 6, 6, 6,  8, 7, 9,  9,  9,  8, 6, 6,
+    8, 7, 0,  0,  8, 4, 7, 4, 4, 5, 6,  6,  6, 11, 8, 8, 3, 5, 8, 10, 9, 7, 8,  1};
+
   if (which >= sm_global_num_fns())
     return 1; // "?"
   return response_len[which];
 }
 
 uint32_t sm_global_num_fns() {
-  static const uint32_t num_fns = 190;
+  static const uint32_t num_fns = 192;
   return num_fns;
 }
 

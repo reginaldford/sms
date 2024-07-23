@@ -936,6 +936,92 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       fclose(fptr);
       return (sm_object *)sms_true;
     }
+
+
+    case SM_FILE_WRITETGA_EXPR: {
+      // Check and retrieve the filename
+      sm_string *filename = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (filename->my_type != SM_STRING_TYPE) {
+        return (sm_object *)filename;
+      }
+
+      // Check and retrieve the width
+      sm_double *width_obj = (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (width_obj->my_type != SM_DOUBLE_TYPE) {
+        return (sm_object *)width_obj;
+      }
+      uint16_t width = (uint16_t)(width_obj->value);
+
+      // Check and retrieve the height
+      sm_double *height_obj = (sm_double *)eager_type_check(sme, 2, SM_DOUBLE_TYPE, current_cx, sf);
+      if (height_obj->my_type != SM_DOUBLE_TYPE) {
+        return (sm_object *)height_obj;
+      }
+      uint16_t height = (uint16_t)(height_obj->value);
+
+      // Check and retrieve the pixel expression
+      sm_expr *pixel_expr = (sm_expr *)eager_type_check(sme, 3, SM_EXPR_TYPE, current_cx, sf);
+      if (pixel_expr->my_type != SM_EXPR_TYPE || pixel_expr->size != 3 * width * height) {
+        sm_symbol *title = sm_new_symbol("TypeMismatch", 12);
+        sm_string *message =
+          sm_new_string(49, "Expected an expression of the correct size for pixel data");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Extract the file name
+      const char *file_name = &filename->content;
+
+      // Allocate memory for pixel data
+      uint8_t *pixels = (uint8_t *)malloc(3 * width * height * sizeof(uint8_t));
+      if (!pixels) {
+        sm_symbol *title   = sm_new_symbol("MemoryError", 11);
+        sm_string *message = sm_new_string(24, "Failed to allocate memory");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Fill the pixel data by extracting each value from the pixel_expr
+      for (uint16_t y = 0; y < height; y++) {
+        for (uint16_t x = 0; x < width; x++) {
+          for (uint16_t c = 0; c < 3; c++) {
+            uint32_t   index           = 3 * (y * width + x) + c;
+            sm_double *pixel_value_obj = (sm_double *)sm_expr_get_arg(pixel_expr, index);
+            if (pixel_value_obj->my_type != SM_DOUBLE_TYPE) {
+              free(pixels);
+              return (sm_object *)pixel_value_obj;
+            }
+            double pixel_value = pixel_value_obj->value;
+            pixels[index] =
+              (uint8_t)(pixel_value < 0 ? 0
+                                        : (pixel_value > 255 ? 255 : (uint8_t)(pixel_value + 0.5)));
+          }
+        }
+      }
+
+      // Open the file for writing
+      FILE *output = fopen(file_name, "wb");
+      if (!output) {
+        free(pixels);
+        sm_symbol *title   = sm_new_symbol("FileError", 9);
+        sm_string *message = sm_new_string(29, "Failed to open file for writing");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Write the TGA file
+      bool success = sm_fileWriteTga(output, pixels, width, height);
+      fclose(output);
+      free(pixels);
+
+      if (!success) {
+        sm_symbol *title   = sm_new_symbol("FileError", 9);
+        sm_string *message = sm_new_string(22, "Failed to write TGA file");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      return (sm_object *)sms_true;
+      break;
+    }
+
+
     case SM_FILE_APPEND_EXPR: {
       // obtain the file name
       sm_string *fname_str;
