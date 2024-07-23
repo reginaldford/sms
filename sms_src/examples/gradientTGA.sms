@@ -1,14 +1,19 @@
+#!/usr/local/bin/sms -qm128
+# Produces a tga file with an artistic design
 {
-  # Assuming the width and height are 100x100 and we have pixel data
-  let width = 100;
-  let height = 100;
-  let pixels = zeros(3 * width * height); # This creates an empty array of the required size
-
-  # Fill the pixels array with example data (e.g., a gradient or solid color)
-  for (let i = 0; i < 3 * width * height; i++) {
-    pixels[i] = mod(i , 256); # Example: filling with a gradient
-  };
-
+  let width = 200;
+  let height = 200;
+  let pixels = zeros(3 * width * height);
+  # Fill the pixels array with data
+  for (let i = 0; i < 3 * width * height; i++) 
+    pixels[i] = mod(i / 3, 255);
+  # Second pass
+  for (let i = 0; i < 3 * width * height; i++) 
+    pixels[i] = mod(pixels[i] * floor(sqrt( i / 3 )), 255);
+  # Third pass
+  for (let i = 0; i < 3 * width * height; i++) 
+    pixels[i] = mod(pixels[mod( i + 99, size(pixels))] - floor(sqrt( i / 3 )), 255);
   # Call the fileWriteTga function
   fileWriteTga("output.tga", width, height, pixels);
+  putLn("Successfully wrote to output.tga");
 };
