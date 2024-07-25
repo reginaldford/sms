@@ -10,3 +10,5 @@ void sm_garbage_collect();
 sm_object *sm_move_to_new_heap(sm_object *obj);
 /// Completes the sm_garbage_collect() process by 'inflating' the existing objects in the heap.
 void sm_inflate_heap();
+/// Returns new location, mutates given object to sm_pointer objects
+sm_object *sm_meet_object(sm_object *obj);

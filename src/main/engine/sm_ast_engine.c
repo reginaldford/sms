@@ -100,14 +100,11 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)result;
       break;
     }
+
     case SM_GC_EXPR: {
-      // This fails because it changes all of the pointers before the function returns.
-      // sm_garbage_collect();
-      sm_symbol *title   = sm_new_symbol("notImplemented", 14);
-      sm_string *message = sm_new_string(33, "_gc() command is not implemented yet");
-      return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
-      break;
+      sm_garbage_collect();
     }
+
     case SM_SLEEP_EXPR: {
       sm_double *obj0 = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
       if (obj0->my_type != SM_DOUBLE_TYPE) {

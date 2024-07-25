@@ -1,6 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
+#include <execinfo.h>
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
@@ -181,6 +182,40 @@ void sm_garbage_collect() {
     // Parser output is a root
     if (sm_global_parser_output(NULL))
       sm_global_parser_output(sm_meet_object(((sm_object *)sm_global_parser_output(NULL))));
+
+    // Call stack GC
+    void  *buffer[100];
+    int    nptrs   = backtrace(buffer, 100);
+    char **strings = backtrace_symbols(buffer, nptrs);
+    if (strings == NULL) {
+      perror("backtrace_symbols");
+      exit(EXIT_FAILURE);
+    }
+
+    // Iterate through the stack frames
+    for (int i = 0; i < nptrs; i++) {
+      // Assuming that each stack frame can be interpreted as an array of pointers
+      // The actual interpretation of the stack frame depends on the architecture and ABI
+      void **frame      = (void **)buffer[i];
+      size_t frame_size = 64; // Assuming a fixed frame size for demonstration; this varies
+
+      printf("Inspecting frame %d at address %p\n", i, (void *)buffer[i]);
+
+      // Iterate through each possible pointer in the stack frame
+      for (size_t j = 0; j < frame_size; j++) {
+        void *ptr = frame[j];
+        printf("Inspecting pointer %p in frame %d, index %zu\n", ptr, i, j);
+        if (sm_is_within_heap(ptr, sms_other_heap)) {
+          printf("Found ptr within heap. Type: %s\n",
+                 sm_global_type_name(((sm_object *)ptr)->my_type));
+          if (((sm_object *)ptr)->my_type != SM_POINTER_TYPE) {
+            frame[j] = sm_move_to_new_heap((sm_object *)ptr);
+            printf("Moved ptr to new heap. New address: %p\n", frame[j]);
+          }
+        }
+      }
+    }
+    free(strings);
 
     // Inflate
     sm_inflate_heap();
