@@ -7,6 +7,8 @@ sm_heap   *sms_heap;
 sm_heap   *sms_other_heap;
 sm_symbol *sms_true;
 sm_symbol *sms_false;
+// callstack
+sm_stack *sms_stack;
 // Symbols including the 2 above live in a symbol heap
 sm_heap *sms_symbol_heap;
 // Symbol names are in alpabetical order, correlating with the symbol

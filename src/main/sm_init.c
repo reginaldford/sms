@@ -6,6 +6,7 @@ extern struct sm_heap *sms_heap;
 extern struct sm_heap *sms_symbol_heap;
 extern struct sm_heap *sms_symbol_name_heap;
 extern uint32_t        sms_num_symbols;
+extern sm_stack       *sms_stack;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Set version number. Major.Minor.Patch
@@ -37,6 +38,9 @@ void sm_init(sm_env *env, int num_args, char **argv) {
       env->history_file_len = strlen(env->history_file);
     }
   }
+
+  // Callstack
+  sms_stack = sm_new_stack(1024);
 
   // Symbol related heap allocations
   sms_symbol_heap      = sm_new_heap(1024 * 512);
