@@ -1,7 +1,8 @@
+
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
-#include <execinfo.h>
+#include <libunwind.h>
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
@@ -160,12 +161,22 @@ void sm_inflate_heap() {
   }
 }
 
+
 // Copying GC
+
+
+//
+//
+//
+//
+//
+//
 void sm_garbage_collect() {
   if (sms_heap->used != 0) {
     // Build "to" heap if necessary, same size as current
-    if (sms_other_heap == NULL)
+    if (sms_other_heap == NULL) {
       sms_other_heap = sm_new_heap(sms_heap->capacity);
+    }
 
     // Swap heaps now
     sm_heap *temp  = sms_other_heap;
@@ -181,41 +192,44 @@ void sm_garbage_collect() {
 
     // Parser output is a root
     if (sm_global_parser_output(NULL))
-      sm_global_parser_output(sm_meet_object(((sm_object *)sm_global_parser_output(NULL))));
+      sm_global_parser_output(sm_move_to_new_heap((sm_object *)sm_global_parser_output(NULL)));
 
-    // Call stack GC
-    void  *buffer[100];
-    int    nptrs   = backtrace(buffer, 100);
-    char **strings = backtrace_symbols(buffer, nptrs);
-    if (strings == NULL) {
-      perror("backtrace_symbols");
-      exit(EXIT_FAILURE);
-    }
+    // Call stack GC using libunwind
+    unw_cursor_t  cursor;
+    unw_context_t context;
+    unw_word_t    ip, sp;
 
-    // Iterate through the stack frames
-    for (int i = 0; i < nptrs; i++) {
-      // Assuming that each stack frame can be interpreted as an array of pointers
-      // The actual interpretation of the stack frame depends on the architecture and ABI
-      void **frame      = (void **)buffer[i];
-      size_t frame_size = 64; // Assuming a fixed frame size for demonstration; this varies
+    unw_getcontext(&context);
+    unw_init_local(&cursor, &context);
 
-      printf("Inspecting frame %d at address %p\n", i, (void *)buffer[i]);
+    printf("Heap start: %p, Heap used: %zu, Heap capacity: %zu\n", sms_heap->storage,
+           sms_heap->used, sms_heap->capacity);
 
-      // Iterate through each possible pointer in the stack frame
-      for (size_t j = 0; j < frame_size; j++) {
-        void *ptr = frame[j];
-        printf("Inspecting pointer %p in frame %d, index %zu\n", ptr, i, j);
-        if (sm_is_within_heap(ptr, sms_other_heap)) {
-          printf("Found ptr within heap. Type: %s\n",
-                 sm_global_type_name(((sm_object *)ptr)->my_type));
-          if (((sm_object *)ptr)->my_type != SM_POINTER_TYPE) {
-            frame[j] = sm_move_to_new_heap((sm_object *)ptr);
-            printf("Moved ptr to new heap. New address: %p\n", frame[j]);
+    while (unw_step(&cursor) > 0) {
+      unw_get_reg(&cursor, UNW_REG_IP, &ip);
+      unw_get_reg(&cursor, UNW_REG_SP, &sp);
+
+      // Iterate through the stack frame
+      for (uintptr_t addr = sp; addr < sp + 0x1000; addr += sizeof(void *)) {
+        // Prevent access to invalid memory
+        if (addr >= (uintptr_t)sms_heap->storage &&
+            addr < (uintptr_t)sms_heap->storage + sms_heap->capacity) {
+          void **ptr = (void **)addr;
+
+          // Basic pointer validity check
+          if ((uintptr_t)*ptr > 0x1000 && (uintptr_t)*ptr < (uintptr_t)-1) {
+            if (sm_is_within_heap(*ptr, sms_heap)) {
+              printf("Found ptr within heap. Type: %s\n",
+                     sm_global_type_name(((sm_object *)*ptr)->my_type));
+              if (((sm_object *)*ptr)->my_type != SM_POINTER_TYPE) {
+                *ptr = sm_move_to_new_heap((sm_object *)*ptr);
+                printf("Moved ptr to new heap. New address: %p\n", *ptr);
+              }
+            }
           }
         }
       }
     }
-    free(strings);
 
     // Inflate
     sm_inflate_heap();
@@ -223,6 +237,7 @@ void sm_garbage_collect() {
     // For tracking purposes
     sm_gc_count(1);
   }
+
   // This will be a global variable
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
     const uint32_t KB = 1024;

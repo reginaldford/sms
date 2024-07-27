@@ -7,9 +7,9 @@ CC_DEBUG        := clang
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
 # CC_UNIFIED      := zig cc -target x86_64-windows-gnu #doesnt work
-CFLAGS          := -O3
-CFLAGS_DEBUG    := -g
-CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
+CFLAGS          := -O3 
+CFLAGS_DEBUG    := -g -lm -I/usr/include/libunwind -lunwind -lunwind-x86_64 -lm
+CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping -lm -I/usr/include/libunwind -lunwind -lunwind-x86_64 -lm
 BUILD_DIR       := build
 SRC_BISON_FLEX  := src/bison_flex
 SRC_MAIN        := src/main
@@ -53,7 +53,7 @@ $(MAKE) $(SRC_MAIN)/linenoise/linenoise.c:
 	git submodule update --recursive --init
 
 bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
-	$(CC) $(CFLAGS) -lm  $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
+	$(CC) $(CFLAGS) -lm -I/usr/include/libunwind -lunwind -lunwind-x86_64 -lm  $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
 
 
 # Not files
@@ -68,15 +68,15 @@ all:
 
 # sms_dbg executable
 bin/$(BIN_NAME_DBG):  $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
-	$(CC_DEBUG) -lm  $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
+	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm -I/usr/include/libunwind -lunwind -lunwind-x86_64 -lm $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
 
 # sms_test executable
 bin/$(BIN_NAME_TEST):   $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(OBJS_TEST)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm  $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@
+	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@
 
 # sms_kernel_test executable
 bin/$(BIN_NAME_KT):  $(OBJS_PARSER) $(OBJS_BASE_DBG) $(OBJS_KT)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm   $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@
+	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@
 
 # Bison generates the parser
 $(SRC_BISON_FLEX)/y.tab.c: $(SRC_MAIN)/parser/sms.y
