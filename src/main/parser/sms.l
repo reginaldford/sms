@@ -306,7 +306,6 @@ _mem_checkFile {return MEM_CHECKFILE;}
 }
 
 
-
 %%
 
 
@@ -324,5 +323,8 @@ void _done_lexing_file(FILE* f){
 }
 
 void _lex_cstr(char * cstr,int len){
+if(len==0 || !cstr){
+  return;
+  }
   yy_scan_bytes(cstr,len);
 }

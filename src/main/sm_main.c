@@ -70,7 +70,7 @@ void run_file(char *file_path, sm_env *env) {
     clean_exit(env, 1);
   }
   if (pr.parsed_object != NULL) {
-    sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+    sm_engine_push_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
   }
 }
 
@@ -155,7 +155,7 @@ int main(int num_args, char *argv[]) {
         clean_exit(&env, 1);
       }
       sm_object *evaluated =
-        sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+        sm_engine_push_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       sm_string *response = sm_object_to_string(evaluated);
       printf("%s\n", &(response->content));
       fflush(stdout);

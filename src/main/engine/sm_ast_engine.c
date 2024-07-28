@@ -22,7 +22,7 @@ inline sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     sm_expr *content_sme = (sm_expr *)fun->content;
     uint32_t i           = 1;
     while (i < content_sme->size) {
-      result = sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
+      result = sm_engine_push_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
       if (result->my_type == SM_RETURN_TYPE)
         return ((sm_return *)result)->address;
       i++;
@@ -59,7 +59,7 @@ static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_ty
 // Evaluate the argument, then run type check
 static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_type,
                                           sm_cx *current_cx, sm_expr *sf) {
-  sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
+  sm_object *obj = sm_engine_push_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type != obj->my_type) {
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));

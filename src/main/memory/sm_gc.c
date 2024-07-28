@@ -181,7 +181,6 @@ void sm_garbage_collect() {
     // Parser output is a root
     if (sm_global_parser_output(NULL))
       sm_global_parser_output(sm_meet_object(((sm_object *)sm_global_parser_output(NULL))));
-
     // Inflate
     sm_inflate_heap();
 

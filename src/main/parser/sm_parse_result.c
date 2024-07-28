@@ -12,9 +12,13 @@ int   yyparse(void);
 
 // Parse a string with known length
 sm_parse_result sm_parse_cstr(char *cstr, int len) {
-  lex_cstr(cstr, len);
-  int result = yyparse();
-  return (sm_parse_result){.return_val = result, .parsed_object = sm_global_parser_output(NULL)};
+  if (len > 0 && cstr) {
+    lex_cstr(cstr, len);
+    int result = yyparse();
+    return (sm_parse_result){.return_val = result, .parsed_object = sm_global_parser_output(NULL)};
+  }
+  return (sm_parse_result){.return_val = 0, .parsed_object = NULL};
+  ;
 }
 
 // Run this the first time to begin parsing a file
