@@ -3,7 +3,8 @@
 #include "sms.h"
 #include "../bison_flex/y.tab.h"
 
-extern int yylineno;
+extern int       yylineno;
+extern sm_stack *sms_stack;
 
 // Prints intro
 void print_intro() {
@@ -40,8 +41,11 @@ void start_repl(sm_env *env) {
     sm_parse_result pr = sm_terminal_prompt(env->plain_mode);
     if (!pr.return_val && pr.parsed_object) {
       // Evaluate
-      sm_object *result =
-        sm_engine_push_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      sm_object *result;
+      sm_engine_push(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      while (sm_stack_size(sms_stack) > 0) {
+        result = sm_engine_eval();
+      }
       // Print
       sm_string *result_str = sm_object_to_string(result);
       printf("%s", sm_terminal_fg_color(SM_TERM_B_WHITE));
@@ -70,7 +74,7 @@ void run_file(char *file_path, sm_env *env) {
     clean_exit(env, 1);
   }
   if (pr.parsed_object != NULL) {
-    sm_engine_push_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+    sm_engine_push(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
   }
 }
 
@@ -155,7 +159,7 @@ int main(int num_args, char *argv[]) {
         clean_exit(&env, 1);
       }
       sm_object *evaluated =
-        sm_engine_push_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+        sm_engine_push(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       sm_string *response = sm_object_to_string(evaluated);
       printf("%s\n", &(response->content));
       fflush(stdout);
