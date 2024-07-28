@@ -56,10 +56,15 @@ static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_ty
   return obj;
 }
 
-// Evaluate the argument, then run type check
-static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_type,
-                                          sm_cx *current_cx, sm_expr *sf) {
-  sm_object *obj = sm_engine_push(sm_expr_get_arg(sme, operand), current_cx, sf);
+// Push to stack a type check op
+// TODO YOU ARE HERE etc. lol
+// note that the type check must be pushed first, then ops
+// so each engine case block does pushes in reverse order instead of eager eval order
+//
+static inline void eager_type_check(sm_expr *sme, int operand, int param_type, sm_cx *current_cx,
+                                    sm_expr *sf) {
+  sm_engine_push(sm_expr_get_arg(sme, operand), current_cx, sf);
+  sm_object *obj = sm_engine_eval();
   if (param_type != obj->my_type) {
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
@@ -80,22 +85,22 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
 
 // Top 3 elements of the sms_callstack: input, current_cx, and sf
 #define ENGINE_INPUT ((sm_object *)sms_stack->top)
-#define ENGINE_CX ((sm_object *)sms_stack->top - 1)
-#define ENGINE_STACKFRAME ((sm_object *)sms_stack->top - 2)
+#define ENGINE_CX ((sm_cx *)sms_stack->top - 1)
+#define ENGINE_STACKFRAME ((sm_expr *)sms_stack->top - 2)
 
 // Pushes 3 items
-sm_object *sm_engine_push(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
-  sm_stack_push(sms_stack, sf);
-  sm_stack_push(sms_stack, current_cx);
-  sm_stack_push(sms_stack, input);
+void sm_engine_push(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
+  sms_stack = sm_stack_push(sms_stack, sf);
+  sms_stack = sm_stack_push(sms_stack, current_cx);
+  sms_stack = sm_stack_push(sms_stack, input);
 }
 
 // Recursive engine
 inline sm_object *sm_engine_eval() {
   // unpack the callstack ptrs.
-  sm_object *input      = (sm_object *)sm_stack_pop(sms_stack);
-  sm_cx     *current_cx = (sm_cx *)sm_stack_pop(sms_stack);
-  sm_expr   *sf         = (sm_expr *)sm_stack_pop(sms_stack);
+  sm_object *input      = ENGINE_INPUT;
+  sm_cx     *current_cx = ENGINE_CX;
+  sm_expr   *sf         = ENGINE_STACKFRAME;
   // evaluate
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
@@ -1913,4 +1918,5 @@ inline sm_object *sm_engine_eval() {
   default:
     return input;
   }
+  return input;
 }
