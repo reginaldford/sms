@@ -1,6 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
+extern sm_stack *sms_stack;
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
@@ -181,6 +182,12 @@ void sm_garbage_collect() {
     // Parser output is a root
     if (sm_global_parser_output(NULL))
       sm_global_parser_output(sm_meet_object(((sm_object *)sm_global_parser_output(NULL))));
+
+    // Call stack is a root
+    for (int i = 0; i < sm_stack_size(sms_stack); i++) {
+      if (sms_stack->top - i)
+        *(sms_stack->top - i) = sm_meet_object((sm_object *)(sms_stack->top - i));
+    }
     // Inflate
     sm_inflate_heap();
 
