@@ -1495,12 +1495,15 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return (sm_object *)sms_false;
       return value;
     }
-    /*case SM_ASSIGN_DOT_EXPR: {
-     * bison parser doesn't like this
+    case SM_ASSIGN_DOT_EXPR: {
+      sm_cx     *predot  = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(sme, 1);
+      sm_object *value   = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+
       if (!sm_cx_let(predot, postdot, value))
         return (sm_object *)sms_false;
       return (sm_object *)sms_true;
-    }*/
+    }
     case SM_ASSIGN_LOCAL_EXPR: {
       sm_object *obj0  = sm_expr_get_arg(sme, 0);
       sm_object *value = (sm_object *)sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
