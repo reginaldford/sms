@@ -1,6 +1,7 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
+#include <stdlib.h>
 
 // Whether an expression contains a specific double
 bool sm_expr_has_num(sm_expr *expr, double n) {
@@ -297,23 +298,46 @@ sm_expr *apply_constants10(sm_expr *e) {
 }
 
 // a / b , check if a%b==0, if so, simplify
+int gcd(int a, int b) {
+  int temp;
+  while (b != 0) {
+    temp = a % b;
+
+    a = b;
+    b = temp;
+  }
+  return a;
+}
 sm_expr *apply_constants11(sm_expr *e) {
   if (e->my_type == SM_EXPR_TYPE) {
     if (e->op == SM_DIVIDE_EXPR) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == SM_DOUBLE_TYPE) {
+      if (obj0->my_type == SM_DOUBLE_TYPE && obj1->my_type == SM_DOUBLE_TYPE) {
         sm_double *d0 = (sm_double *)obj0;
-        if (obj1->my_type == SM_DOUBLE_TYPE) {
-          sm_double *d1 = (sm_double *)obj1;
-          int        i0 = (int)d0->value;
-          int        i1 = (int)d1->value;
-          if (i0 == d0->value && i1 == d1->value && i0 % i1 == 0) {
-            return (sm_expr *)((sm_object *)sm_new_double(i0 / i1));
-          } else
-            return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_double(i0),
-                                            (sm_object *)sm_new_double(i1), NULL);
+        sm_double *d1 = (sm_double *)obj1;
+        double     i0 = d0->value;
+        double     i1 = d1->value;
+
+        if (i1 != 0 && (int)i0 == i0 && (int)i1 == i1) { // Check if both values are integers
+          int int0 = (int)i0;
+          int int1 = (int)i1;
+
+          uint32_t divisor        = gcd(abs(int0), abs(int1));
+          int      simplified_num = int0 / divisor;
+          int      simplified_den = int1 / divisor;
+
+          if (simplified_den ==
+              1) { // If the denominator is 1, return the numerator as a single number
+            return (sm_expr *)((sm_object *)sm_new_double(simplified_num));
+          } else { // Otherwise, return the simplified fraction
+            return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR,
+                                            (sm_object *)sm_new_double(simplified_num),
+                                            (sm_object *)sm_new_double(simplified_den), NULL);
+          }
         }
+        return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_double(i0),
+                                        (sm_object *)sm_new_double(i1), NULL);
       }
     }
     sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
@@ -322,9 +346,10 @@ sm_expr *apply_constants11(sm_expr *e) {
       sm_expr_append(new_expr, (sm_object *)apply_constants11(current_obj));
     }
     return new_expr;
-  } else
-    return e;
+  }
+  return e;
 }
+
 
 // a ^ (b ^ c) = a ^ bc
 sm_expr *apply_constants12(sm_expr *e) {
@@ -470,12 +495,6 @@ sm_expr *apply_constants16(sm_expr *e) {
   } else
     return e;
 }
-
-// More simplifications:
-//  a + -1 * b = a - b
-//+(a,*(-1,...))=-(a,....)
-//+(+(..),..)=+(..,..)
-// a * b * c == *(a , b , c)
 
 
 // Run each simplifier until the expression stops changing.
