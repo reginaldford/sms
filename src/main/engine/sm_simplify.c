@@ -497,6 +497,57 @@ sm_expr *apply_constants16(sm_expr *e) {
 }
 
 
+sm_expr *apply_constants17(sm_expr *e) {
+  if (e->my_type == SM_EXPR_TYPE) {
+    sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
+
+    if (e->op == SM_TIMES_EXPR) {
+      int    count_numbers = 0;
+      double total         = 1;
+      int    non_one_terms = 0;
+
+      for (uint32_t i = 0; i < e->size; i++) {
+        sm_object *current_obj = sm_expr_get_arg(e, i);
+        if (current_obj->my_type == SM_DOUBLE_TYPE) {
+          sm_double *current_double = (sm_double *)current_obj;
+          if (current_double->value == 1) {
+            continue; // Skip multiplying by 1
+          }
+          total *= current_double->value;
+          count_numbers++;
+        } else {
+          new_expr =
+            sm_expr_append(new_expr, (sm_object *)apply_constants17((sm_expr *)current_obj));
+          non_one_terms++;
+        }
+      }
+
+      if (count_numbers > 0 && total != 1) {
+        new_expr = sm_expr_append(new_expr, (sm_object *)sm_new_double(total));
+      }
+
+      // If new_expr is empty, it means we had only 1s
+      if (new_expr->size == 0) {
+        return (sm_expr *)sm_new_double(1);
+      }
+
+      // If we have exactly one non-one term and no numbers other than 1, return the term itself
+      if (non_one_terms == 1 && count_numbers == 0) {
+        return (sm_expr *)sm_expr_get_arg(new_expr, 0);
+      }
+
+      return new_expr;
+    }
+
+    for (uint32_t i = 0; i < e->size; i++) {
+      sm_expr *current_obj = (sm_expr *)sm_expr_get_arg(e, i);
+      new_expr             = sm_expr_append(new_expr, (sm_object *)apply_constants17(current_obj));
+    }
+
+    return new_expr;
+  }
+  return e;
+}
 // Run each simplifier until the expression stops changing.
 sm_object *sm_simplify(sm_object *obj) {
   sm_expr *result      = (sm_expr *)obj;
@@ -520,6 +571,7 @@ sm_object *sm_simplify(sm_object *obj) {
     result      = apply_constants14(result);
     result      = apply_constants15(result);
     result      = apply_constants16(result);
+    result      = apply_constants17(result);
   } while (sm_object_eq((sm_object *)last_result, (sm_object *)result) == false);
   return (sm_object *)result;
 }

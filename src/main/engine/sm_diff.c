@@ -63,6 +63,7 @@ bool has_symbol(sm_expr *self, sm_symbol *sym) {
 
 // Return an expression that is the derivative of obj, with respect to wrt
 // If the object is not an expression, just return the object.
+
 sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
   switch (obj->my_type) {
   case SM_SYMBOL_TYPE: {
@@ -75,7 +76,6 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
   case SM_DOUBLE_TYPE:
     return (sm_object *)sm_new_double(0);
   case SM_EXPR_TYPE: {
-    // The rest of the cases are expr_type
     sm_expr *expr = (sm_expr *)obj;
     switch (expr->op) {
     case SM_DIFF_EXPR: {
@@ -88,7 +88,6 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       bool       obj0_has = has_symbol((sm_expr *)obj0, wrt);
       bool       obj1_has = has_symbol((sm_expr *)obj1, wrt);
       if (obj0_has && !obj1_has) {
-        // f(x)^n => n*f(x)^(n-1)
         sm_object *deducted_expr =
           (sm_object *)sm_new_expr_2(SM_MINUS_EXPR, obj1, (sm_object *)sm_new_double(1), NULL);
         sm_object *pow_expr = (sm_object *)sm_new_expr_2(SM_POW_EXPR, obj0, deducted_expr, NULL);
@@ -97,7 +96,6 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_outside, diff_inside, NULL);
       } else if (!obj0_has && obj1_has) {
-        // a^f(x) => ln(a)*a^f(x)*f'(x)
         sm_object *ln_expr  = (sm_object *)sm_new_expr(SM_LN_EXPR, obj0, NULL);
         sm_object *pow_expr = (sm_object *)sm_new_expr_2(SM_POW_EXPR, obj0, obj1, NULL);
         sm_object *diff_outside =
@@ -105,8 +103,6 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_outside, diff_inside, NULL);
       } else if (obj0_has && obj1_has) {
-        // f(x)^g(x)
-        //  solution is f(x)^g(x)*(g(x)/f(x)+ln(f(x)))
         sm_expr *p1 = sm_new_expr_2(SM_POW_EXPR, obj0, (sm_object *)wrt, NULL);
         sm_expr *p2 = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)wrt, obj0, NULL);
         sm_expr *p3 = sm_new_expr(SM_LN_EXPR, obj0, NULL);
@@ -132,9 +128,9 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
           sm_object *current_obj = sm_expr_get_arg(expr, j);
           if (j == i) {
             sm_object *diff = sm_diff(current_obj, wrt);
-            sm_expr_append(product, diff);
+            product         = sm_expr_append(product, diff);
           } else
-            sm_expr_append(product, current_obj);
+            product = sm_expr_append(product, current_obj);
         }
         if (!sm_expr_has_num(expr, 0))
           sum = sm_expr_append(sum, (sm_object *)product);
@@ -144,7 +140,6 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       return (sm_object *)sum;
     }
     case SM_DIVIDE_EXPR: {
-      // input is a/b
       sm_expr *output   = sm_new_expr_n(SM_DIVIDE_EXPR, 2, 2, NULL);
       sm_expr *aprime_b = sm_new_expr_2(SM_TIMES_EXPR, sm_diff(sm_expr_get_arg(expr, 0), wrt),
                                         sm_expr_get_arg(expr, 1), NULL);
@@ -159,10 +154,11 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       return (sm_object *)output;
     }
     case SM_SQRT_EXPR: {
-      sm_object *power_val = (sm_object *)sm_new_expr_2(SM_POW_EXPR, sm_expr_get_arg(expr, 0),
-                                                        (sm_object *)sm_new_double(-0.5), NULL);
-      return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(0.5), power_val,
-                                        NULL);
+      sm_object *arg = sm_expr_get_arg(expr, 0);
+      sm_object *power_expr =
+        (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, (sm_object *)sm_new_double(0.5), NULL);
+      sm_object *diff_power = sm_diff(power_expr, wrt);
+      return (sm_object *)diff_power;
     }
     case SM_SIN_EXPR: {
       if (has_symbol(expr, wrt)) {
