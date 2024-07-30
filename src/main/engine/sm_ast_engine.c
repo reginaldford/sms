@@ -982,7 +982,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       // Fill the pixel data by extracting each value from the pixel_expr
       for (uint16_t y = 0; y < height; y++) {
         for (uint16_t x = 0; x < width; x++) {
-          for (uint16_t c = 0; c < 3; c++) {
+          // Flip bgr to rgb
+          for (uint16_t c = 3; c >= 0; c--) {
             uint32_t   index           = 3 * (y * width + x) + c;
             sm_double *pixel_value_obj = (sm_double *)sm_expr_get_arg(pixel_expr, index);
             if (pixel_value_obj->my_type != SM_DOUBLE_TYPE) {
