@@ -173,35 +173,56 @@ uint32_t sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
     return sm_global_fn_name_len(expr->op) + 2;
   }
   if (expr->size == 1) {
-    uint32_t len  = 0;
-    uint32_t len2 = 0;
-    len           = sm_global_fn_name_len(expr->op);
-    if (!fake)
+    uint32_t len  = sm_global_fn_name_len(expr->op);
+    uint32_t len2 = sm_object_sprint(sm_expr_get_arg(expr, 0), buffer + 2 + len, fake);
+
+    if (!fake) {
       buffer[0] = '(';
-    if (!fake)
       buffer[1] = '_';
-    if (!fake)
       sm_strncpy(&(buffer[2]), sm_global_fn_name(expr->op), len);
-
-    len2 = sm_object_sprint(sm_expr_get_arg(expr, 0), buffer + 2 + len, fake);
-
-    if (!fake)
       buffer[2 + len + len2] = ')';
+    }
     return 3 + len + len2;
   }
-  if (expr->size > 2) {
+  if (expr->size > 2)
     return sm_prefix_sprint(expr, buffer, fake);
-  }
 
   sm_object *o1 = sm_expr_get_arg(expr, 0);
   sm_object *o2 = sm_expr_get_arg(expr, 1);
 
-  // left op right
-  int cursor = sm_object_sprint(o1, buffer, fake);
-  if (!fake)
+  int cursor = 0;
+
+  // Check if parentheses are needed for the left operand
+  if (o1->my_type == SM_EXPR_TYPE && ((sm_expr *)o1)->size > 1) {
+    if (!fake)
+      buffer[cursor] = '(';
+    cursor++;
+    cursor += sm_object_sprint(o1, buffer + cursor, fake);
+    if (!fake)
+      buffer[cursor] = ')';
+    cursor++;
+  } else {
+    cursor += sm_object_sprint(o1, buffer + cursor, fake);
+  }
+
+  if (!fake) {
     sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+  }
   cursor += sm_global_fn_name_len(expr->op);
-  cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
+
+  // Check if parentheses are needed for the right operand
+  if (o2->my_type == SM_EXPR_TYPE && ((sm_expr *)o2)->size > 1) {
+    if (!fake)
+      buffer[cursor] = '(';
+    cursor++;
+    cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
+    if (!fake)
+      buffer[cursor] = ')';
+    cursor++;
+  } else {
+    cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
+  }
+
   return cursor;
 }
 
