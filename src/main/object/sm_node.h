@@ -46,9 +46,9 @@ int sm_node_map_left_count(uint64_t map, int map_index);
 bool sm_node_rm_nth(struct sm_node *root, int n);
 /// Returns the number of non-NULL values in nodes under this node (including this node)
 int sm_node_size(sm_node *node);
-/// Return an array of the keys (as string objects) under this node
+/// Return a tuple of the keys (as string objects) under this node
 sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collection);
-/// Return an array of the values (as string objects) under this node
+/// Return a tuple of the values (as string objects) under this node
 sm_expr *sm_node_values(sm_node *node, sm_expr *collection);
 /// A node is empty if is has NULL as value and 0LL as map
 bool sm_node_is_empty(sm_node *node);

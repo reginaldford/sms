@@ -2,7 +2,7 @@
 
 #include "../sms.h"
 
-// A local variable stores the index of the 'stack frame' array.
+// A local variable stores the index of the 'stack frame' tuple.
 sm_local *sm_new_local(uint16_t index, sm_string *name) {
   sm_local *new_local = sm_malloc(sizeof(sm_local));
   new_local->my_type  = SM_LOCAL_TYPE;

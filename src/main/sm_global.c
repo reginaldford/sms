@@ -27,7 +27,7 @@ int sm_gc_count(int increase) {
   return gc_count;
 }
 
-// New capacity of arrays that need to grow:
+// New capacity of tuples that need to grow:
 // Replacement is ignored if less than 1.
 // new_capacity = old_capacity * growth_factor + 1;
 double sm_global_growth_factor(double replacement) {
@@ -40,11 +40,11 @@ double sm_global_growth_factor(double replacement) {
   return factor;
 }
 
-// The global space array sorted by size
-sm_space_array *sm_global_space_array(sm_space_array *replacement) {
-  static sm_space_array *spaces = NULL;
+// The global space tuple sorted by size
+sm_space_tuple *sm_global_space_tuple(sm_space_tuple *replacement) {
+  static sm_space_tuple *spaces = NULL;
   if (replacement != NULL) {
-    sm_space_array *temp = spaces;
+    sm_space_tuple *temp = spaces;
     spaces               = replacement;
     return temp;
   }
@@ -165,7 +165,7 @@ char *sm_global_fn_name(uint32_t which) {
     "isInf",        // SM_ISINF_EXPR
     "",             // SM_INDEX_EXPR
     "",             // SM_BLOCK_EXPR
-    "",             // SM_ARRAY_EXPR
+    "",             // SM_TUPLE_EXPR
     "put",          // SM_PUT_EXPR
     "putLn",        // SM_PUTLN_EXPR
     "args",         // SM_INPUT_EXPR

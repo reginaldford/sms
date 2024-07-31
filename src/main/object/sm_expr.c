@@ -88,15 +88,15 @@ sm_expr *sm_expr_concat(sm_expr *expr1, sm_expr *expr2) {
 
 // Set an argument of an expression
 sm_expr *sm_expr_set_arg(sm_expr *expr, uint32_t index, sm_object *value) {
-  sm_object **ptr_array = (sm_object **)&(expr[1]);
-  ptr_array[index]      = value;
+  sm_object **ptr_tuple = (sm_object **)&(expr[1]);
+  ptr_tuple[index]      = value;
   return expr;
 }
 
 // Get an argument of an expression
 sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index) {
-  sm_object **ptr_array = (sm_object **)&(expr[1]);
-  return ptr_array[index];
+  sm_object **ptr_tuple = (sm_object **)&(expr[1]);
+  return ptr_tuple[index];
 }
 
 // Can this op take 2 arguments AND have infix representation?

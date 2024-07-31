@@ -637,10 +637,10 @@ META_EXPR : ':' EXPR { $$ = sm_new_meta((sm_object *)$2, *(sm_global_lex_stack(N
 
 ARRAY : ARRAY_LIST ']' {};
 | ARRAY_LIST ',' ']' {};
-| '[' EXPR ']' { $$ = (sm_expr *)sm_new_expr(SM_ARRAY_EXPR, (sm_object *)$2, _note()); }
-| '[' ']' { $$ = sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, _note()); }
+| '[' EXPR ']' { $$ = (sm_expr *)sm_new_expr(SM_TUPLE_EXPR, (sm_object *)$2, _note()); }
+| '[' ']' { $$ = sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, _note()); }
 
-ARRAY_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)$2, (sm_object *)$4, _note()); }
+ARRAY_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_TUPLE_EXPR, (sm_object *)$2, (sm_object *)$4, _note()); }
 | ARRAY_LIST ',' EXPR { $$ = sm_expr_append($1, (sm_object *)$3); }
 
 ASSOCIATION : EXPR ASSOCIATE EXPR { $$ = sm_new_expr_2(SM_ASSOCIATE_EXPR,(sm_object*)$1,(sm_object*)$3, _note()); }

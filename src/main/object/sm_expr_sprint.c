@@ -20,9 +20,9 @@ uint32_t sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum SM_EXPR_TYPE 
   return buffer_pos;
 }
 
-// Print to a cstring buffer the description of array
+// Print to a cstring buffer the description of tuple
 // Return the resulting length
-uint32_t sm_expr_array_sprint(sm_expr *expr, char *buffer, bool fake) {
+uint32_t sm_expr_tuple_sprint(sm_expr *expr, char *buffer, bool fake) {
   if (!fake)
     buffer[0] = '[';
   if (expr->size == 0) {
@@ -256,8 +256,8 @@ uint32_t sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
     return sm_index_expr_sprint(expr, buffer, fake);
     break;
   }
-  case SM_ARRAY_EXPR: {
-    return sm_expr_array_sprint(expr, buffer, fake);
+  case SM_TUPLE_EXPR: {
+    return sm_expr_tuple_sprint(expr, buffer, fake);
     break;
   }
   case SM_FUN_CALL_EXPR: {

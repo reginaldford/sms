@@ -19,7 +19,7 @@ void test0() {
   printf("We survived.\n");
 }
 
-// Testing space arrays
+// Testing space tuples
 int chapter_4(int test) {
   int current_test = 0;
   TEST(test0());
