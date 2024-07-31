@@ -93,10 +93,10 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       struct tm *timeinfo;
       time(&rawtime);
       timeinfo            = localtime(&rawtime);
-      int     *time_array = (int *)timeinfo;
-      sm_expr *result     = sm_new_expr_n(SM_ARRAY_EXPR, 9, 9, NULL);
+      int     *time_tuple = (int *)timeinfo;
+      sm_expr *result     = sm_new_expr_n(SM_TUPLE_EXPR, 9, 9, NULL);
       for (int i = 0; i < 9; i++)
-        sm_expr_set_arg(result, i, (sm_object *)sm_new_double(time_array[i]));
+        sm_expr_set_arg(result, i, (sm_object *)sm_new_double(time_tuple[i]));
       return (sm_object *)result;
       break;
     }
@@ -142,7 +142,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       status        = WEXITSTATUS(status);
       if (child_pid == -1)
         status = 1;
-      return (sm_object *)sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)sm_new_double(child_pid),
+      return (sm_object *)sm_new_expr_2(SM_TUPLE_EXPR, (sm_object *)sm_new_double(child_pid),
                                         (sm_object *)sm_new_double(status), NULL);
     }
     case SM_EXEC_EXPR: {
@@ -189,10 +189,10 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       // Create a new sm_string with the collected output and free the output data
       sm_string *result_str = sm_new_string(total_size, output_data);
       free(output_data);
-      // Return a size 2 array with return value and return string
+      // Return a size 2 tuple with return value and return string
       sm_double *output_code = sm_new_double(return_code);
       sm_expr   *output =
-        sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)output_code, (sm_object *)result_str, NULL);
+        sm_new_expr_2(SM_TUPLE_EXPR, (sm_object *)output_code, (sm_object *)result_str, NULL);
       return (sm_object *)output;
       break;
     }
@@ -254,8 +254,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         i++;
       }
       closedir(dir);
-      sm_expr *names_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i, NULL);
-      sm_expr *types_arr = sm_new_expr_n(SM_ARRAY_EXPR, i, i, NULL);
+      sm_expr *names_arr = sm_new_expr_n(SM_TUPLE_EXPR, i, i, NULL);
+      sm_expr *types_arr = sm_new_expr_n(SM_TUPLE_EXPR, i, i, NULL);
       for (uint32_t names_i = 0; names_i < i; names_i++) {
         sm_expr_set_arg(names_arr, names_i, (sm_object *)entry_names[names_i]);
         if (entry_types[names_i] != 0)
@@ -264,7 +264,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
           sm_expr_set_arg(types_arr, names_i, (sm_object *)sms_false);
       }
       sm_expr *result =
-        sm_new_expr_2(SM_ARRAY_EXPR, (sm_object *)names_arr, (sm_object *)types_arr, NULL);
+        sm_new_expr_2(SM_TUPLE_EXPR, (sm_object *)names_arr, (sm_object *)types_arr, NULL);
       return (sm_object *)result;
       break;
     }
@@ -303,7 +303,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     case SM_TIME_EXPR: {
       struct timeval t;
       gettimeofday(&t, NULL);
-      sm_expr *result = sm_new_expr_n(SM_ARRAY_EXPR, 2, 2, NULL);
+      sm_expr *result = sm_new_expr_n(SM_TUPLE_EXPR, 2, 2, NULL);
       sm_expr_set_arg(result, 0, (sm_object *)sm_new_double(t.tv_sec));
       sm_expr_set_arg(result, 1, (sm_object *)sm_new_double(t.tv_usec));
       return (sm_object *)result;
@@ -431,9 +431,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (num0->my_type != SM_DOUBLE_TYPE)
         return (sm_object *)num0;
       if (num0->value < 1)
-        return (sm_object *)sm_new_expr_0(SM_ARRAY_EXPR, NULL);
+        return (sm_object *)sm_new_expr_0(SM_TUPLE_EXPR, NULL);
       sm_double *zero   = sm_new_double(0);
-      sm_expr   *output = sm_new_expr_n(SM_ARRAY_EXPR, (int)num0->value, (int)num0->value, NULL);
+      sm_expr   *output = sm_new_expr_n(SM_TUPLE_EXPR, (int)num0->value, (int)num0->value, NULL);
       for (int i = 0; i < num0->value; i++)
         sm_expr_set_arg(output, i, (sm_object *)zero);
       return (sm_object *)output;
@@ -461,7 +461,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
           sms_heap, "Calling part with out of range length value: %i", (int)len->value);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-      sm_expr *new_list = sm_new_expr_n(SM_ARRAY_EXPR, (int)len->value, (int)len->value, NULL);
+      sm_expr *new_list = sm_new_expr_n(SM_TUPLE_EXPR, (int)len->value, (int)len->value, NULL);
       for (int i = 0; i < (int)len->value; i++) {
         sm_object *element = sm_expr_get_arg(list0, (int)start->value + i);
         sm_expr_set_arg(new_list, i, element);
@@ -479,13 +479,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       double   repetitions   = reps->value;
       int      original_size = list0->size;
       int      new_size      = (int)(original_size * repetitions);
-      sm_expr *new_array     = sm_new_expr_n(SM_ARRAY_EXPR, new_size, new_size, NULL);
+      sm_expr *new_tuple     = sm_new_expr_n(SM_TUPLE_EXPR, new_size, new_size, NULL);
       for (int i = 0; i < new_size; i++) {
         int        original_index = i % original_size;
         sm_object *element        = sm_expr_get_arg(list0, original_index);
-        sm_expr_set_arg(new_array, i, element);
+        sm_expr_set_arg(new_tuple, i, element);
       }
-      return (sm_object *)new_array;
+      return (sm_object *)new_tuple;
       break;
     }
     case SM_CAT_EXPR: {
@@ -498,16 +498,16 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       int      size0     = list0->size;
       int      size1     = list1->size;
       int      new_size  = size0 + size1;
-      sm_expr *new_array = sm_new_expr_n(SM_ARRAY_EXPR, new_size, new_size, NULL);
+      sm_expr *new_tuple = sm_new_expr_n(SM_TUPLE_EXPR, new_size, new_size, NULL);
       for (int i = 0; i < size0; i++) {
         sm_object *element = sm_expr_get_arg(list0, i);
-        sm_expr_set_arg(new_array, i, element);
+        sm_expr_set_arg(new_tuple, i, element);
       }
       for (int i = 0; i < size1; i++) {
         sm_object *element = sm_expr_get_arg(list1, i);
-        sm_expr_set_arg(new_array, size0 + i, element);
+        sm_expr_set_arg(new_tuple, size0 + i, element);
       }
-      return (sm_object *)new_array;
+      return (sm_object *)new_tuple;
       break;
     }
     case SM_EXIT_EXPR: {
@@ -675,7 +675,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (cx->my_type != SM_CX_TYPE)
         return (sm_object *)cx;
       sm_expr *success =
-        sm_node_keys(cx->content, sm_new_stack_obj(32), sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL));
+        sm_node_keys(cx->content, sm_new_stack_obj(32), sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, NULL));
       if (success)
         return (sm_object *)success;
       return (sm_object *)sms_false;
@@ -688,7 +688,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
           sm_new_string(50, "Passed something that is not a context to cxValues");
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-      sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_ARRAY_EXPR, 0, 0, NULL));
+      sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, NULL));
       if (success)
         return (sm_object *)success;
       return (sm_object *)sms_false;
@@ -734,7 +734,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
           sm_symbol *title = sm_new_symbol("typeMismatch", 12);
           sm_string *message =
             sm_new_fstring_at(sms_heap,
-                              "When using fnSetParams(<fn>,<params>), params must be an array of "
+                              "When using fnSetParams(<fn>,<params>), params must be a tuple of "
                               "symbols. Parameter %i is not a symbol.",
                               i);
           return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
@@ -1146,8 +1146,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       struct stat filestat;
       sm_expr    *output;
       if (stat(fname_cstr, &filestat) == 0) {
-        // build an array with stat information.
-        output = sm_new_expr_n(SM_ARRAY_EXPR, 16, 16, NULL);
+        // build a tuple with stat information.
+        output = sm_new_expr_n(SM_TUPLE_EXPR, 16, 16, NULL);
         sm_expr_set_arg(output, 0, (sm_object *)sm_new_double(filestat.st_dev));
         sm_expr_set_arg(output, 1, (sm_object *)sm_new_double(filestat.st_ino));
         sm_expr_set_arg(output, 2, (sm_object *)sm_new_double(filestat.st_mode));
@@ -1384,7 +1384,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (!expect_type(base_obj, SM_EXPR_TYPE)) {
         sm_symbol *title = sm_new_symbol("typeMismatch", 12);
         sm_string *message =
-          sm_new_string(59, "Trying to apply index op to something that is not an array.");
+          sm_new_string(59, "Trying to apply index op to something that is not a tuple.");
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       arr                  = (sm_expr *)base_obj;
@@ -1396,8 +1396,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       uint32_t index = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
         sm_string *message = sm_new_fstring_at(
-          sms_heap, "Index out of range: %i . Array size is %i", index, arr->size);
-        sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 21);
+          sms_heap, "Index out of range: %i . tuple size is %i", index, arr->size);
+        sm_symbol *title = sm_new_symbol("tupleIndexOutOfBounds", 21);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       return sm_expr_get_arg(arr, index);
@@ -1525,7 +1525,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         printf("Error: Index out of range: %i\n", (int)index->value);
         sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
         sm_string *message =
-          sm_new_fstring_at(sms_heap, "Index %i is out of bounds of array of size %i",
+          sm_new_fstring_at(sms_heap, "Index %i is out of bounds of tuple of size %i",
                             (int)index->value, (int)arr->size);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
@@ -1775,8 +1775,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       }
       return sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
     }
-    case SM_ARRAY_EXPR: {
-      sm_expr *new_arr = sm_new_expr_n(SM_ARRAY_EXPR, sme->size, sme->size, NULL);
+    case SM_TUPLE_EXPR: {
+      sm_expr *new_arr = sm_new_expr_n(SM_TUPLE_EXPR, sme->size, sme->size, NULL);
       for (uint32_t i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
         sm_expr_set_arg(new_arr, i, new_val);

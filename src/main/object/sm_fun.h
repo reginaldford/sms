@@ -1,6 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-/// An sm_fun struct is understood to have an array of sm_fun_param structs following.
+/// An sm_fun struct is understood to have a tuple of sm_fun_param structs following.
 /// The number of sm_fun_param structs that follow is specified in num_params
 typedef struct sm_fun {
   int16_t           my_type;

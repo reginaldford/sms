@@ -21,13 +21,13 @@ sm_fun_param_obj *sm_new_fun_param_obj(sm_string *name, sm_object *default_val) 
   return self;
 }
 
-// Return the i'th element of the array of sm_fun_param objects following the sm_fun struct
+// Return the i'th element of the tuple of sm_fun_param objects following the sm_fun struct
 sm_fun_param *sm_fun_get_param(sm_fun *self, uint16_t i) {
   sm_fun_param *arr = (sm_fun_param *)&(self[1]);
   return &(arr[i]);
 }
 
-// Set the i'th element of the array of sm_fun_param objects following the sm_fun struct
+// Set the i'th element of the tuple of sm_fun_param objects following the sm_fun struct
 void sm_fun_set_param(sm_fun *self, uint16_t i, sm_string *name, sm_object *default_val) {
   sm_fun_param *arr  = (sm_fun_param *)&(self[1]);
   arr[i].name        = name;

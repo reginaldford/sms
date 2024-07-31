@@ -25,8 +25,8 @@ sm_stack_obj *sm_stack_obj_push(sm_stack_obj *self, void *ptr) {
     current_stack     = sm_malloc(sizeof(sm_stack_obj) + sizeof(void *) * self->capacity);
     memcpy(current_stack, self, sizeof(sm_stack_obj) + sizeof(void *) * old_size);
   }
-  void **array                            = sm_stack_obj_content(current_stack);
-  array[sm_stack_obj_size(current_stack)] = ptr;
+  void **tuple                            = sm_stack_obj_content(current_stack);
+  tuple[sm_stack_obj_size(current_stack)] = ptr;
   current_stack->top += 1;
   return current_stack;
 }

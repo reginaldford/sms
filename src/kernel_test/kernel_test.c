@@ -10,7 +10,7 @@
 #include "chapter_1.h" // Generating many objects and then collecting the garbage.
 #include "chapter_2.h" // Verify some expression printing mechanics.
 #include "chapter_3.h" // Checks that contexts can scope and that memory is managed correctly
-// #include "chapter_4.h" // Testing space array system, for deallocated space
+// #include "chapter_4.h" // Testing space tuple system, for deallocated space
 
 #define CHAPTER(f)                                                                                 \
   if (chosen_chapter == -1 || chosen_chapter == current_chapter) {                                 \

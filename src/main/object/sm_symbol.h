@@ -12,7 +12,7 @@ typedef struct sm_symbol {
 /// Acts as a nickname for the symbol, speeding up sms mapped tries
 sm_string *sm_symbol_encode_id(sm_symbol *sym);
 /// Decode the id of the symbol
-/// id is the array index of the symbol in the symbol heap
+/// id is the tuple index of the symbol in the symbol heap
 sm_symbol *sm_symbol_decode_id(char *code_id, int code_id_len);
 /// Returns a new or existing symbol from the symbol heap
 sm_symbol *sm_new_symbol(char *name, int name_len);
