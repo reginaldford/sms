@@ -68,7 +68,7 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
       sm_global_type_name(param_type));
     sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                                source->size, &source->content, (int)line->value);
-    return err;
+    return sm_engine_eval(err, current_cx, sf);
   }
   return obj;
 }
@@ -1974,7 +1974,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
     sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, sm_copy(input), NULL);
     if (fun)
-      return execute_fun(fun, sm_new_cx(NULL), sf);
+      return execute_fun(fun, current_cx, sf);
     else
       return input;
   }
