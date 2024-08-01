@@ -1379,20 +1379,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return result;
     }
     case SM_INDEX_EXPR: {
-      sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_expr   *arr;
-      if (!expect_type(base_obj, SM_EXPR_TYPE)) {
-        sm_symbol *title = sm_new_symbol("typeMismatch", 12);
-        sm_string *message =
-          sm_new_string(59, "Trying to apply index op to something that is not a tuple.");
-        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
-      }
-      arr                  = (sm_expr *)base_obj;
-      sm_object *index_obj = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_double *index_double;
-      if (!expect_type(index_obj, SM_DOUBLE_TYPE))
-        return (sm_object *)sm_new_string(0, "");
-      index_double   = (sm_double *)index_obj;
+      sm_expr *arr = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
+      if (arr->my_type != SM_EXPR_TYPE)
+        return (sm_object *)arr;
+      sm_double *index_double =
+        (sm_double *)eager_type_check(sme, 1, SM_DOUBLE_TYPE, current_cx, sf);
+      if (index_double->my_type != SM_DOUBLE_TYPE)
+        return (sm_object *)index_double;
       uint32_t index = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
         sm_string *message = sm_new_fstring_at(
