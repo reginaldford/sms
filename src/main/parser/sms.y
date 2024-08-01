@@ -459,6 +459,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | STR_SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_STR_SIZE_EXPR,(sm_object*)$3, _note());}
 | STR_MUT '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_STR_MUT_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,    _note());}
 | STR_FIND '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_FIND_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
+| STR_FINDR '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_FINDR_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | STR_CAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_CAT_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | EXPR STR_CAT EXPR {$$ = sm_new_expr_2(SM_STR_CAT_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | STR_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_STR_REPEAT_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}

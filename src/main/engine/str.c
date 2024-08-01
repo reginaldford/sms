@@ -2,18 +2,32 @@
 
 #include "../sms.h"
 
-// Return the index of the first instance of this substring in str
-sm_double *sm_str_find(sm_string *str, sm_string *to_find) {
+// Return the index of the first instance of this substring in str or false
+sm_object *sm_str_find(sm_string *str, sm_string *to_find) {
   const char *cstr        = &(str)->content;
   const char *to_findcstr = &(to_find)->content;
   const char *result      = strstr(cstr, to_findcstr);
   if (result != NULL) {
-    return sm_new_double(result - cstr);
+    return (sm_object *)sm_new_double(result - cstr);
   } else {
-    return sm_new_double(-1);
+    return (sm_object *)sms_false;
   }
 }
 
+// Function to find substring in reverse
+sm_object *sm_str_findr(sm_string *haystack, sm_string *needle) {
+  uint32_t haystack_size = haystack->size;
+  uint32_t needle_size   = needle->size;
+  if (needle_size > haystack_size)
+    return (sm_object *)sms_false; // Needle is longer than haystack
+  // Iterate from the end of the haystack
+  for (int32_t i = haystack_size - needle_size; i >= 0; --i) {
+    if (strncmp(&haystack->content + i, &needle->content, needle_size)) {
+      return (sm_object *)sm_new_double(i);
+    }
+  }
+  return (sm_object *)sms_false; // Needle not found
+}
 // Return a tuple with all of the parts of str,
 // split up into substrings, where the instances of needle are separated
 // So, strSplit("abc123abc123","c") == [ "ab" , "c", "123ab", "c" , "123" ]
