@@ -235,14 +235,18 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       char cwd[1024];
       if (getcwd(cwd, sizeof(cwd))) {
       } else {
-        printf("Error: Current working directory is invalid: %s .\n", cwd);
-        return (sm_object *)sm_new_double(0);
+        sm_string *msg =
+          sm_new_fstring_at(sms_heap, "Error: Current working directory is invalid: %s .\n", cwd);
+        sm_symbol *title = sm_new_symbol("invalidWorkingDirectory", 23);
+        return (sm_object *)sm_new_error_from_expr(title, msg, sme, NULL);
       }
 
       dir = opendir(cwd);
       if (dir == NULL) {
-        printf("Error: Current working directory is invalid: %s .\n", cwd);
-        return (sm_object *)sm_new_double(0);
+        sm_string *msg =
+          sm_new_fstring_at(sms_heap, "Error: Current working directory is invalid: %s .\n", cwd);
+        sm_symbol *title = sm_new_symbol("invalidWorkingDirectory", 23);
+        return (sm_object *)sm_new_error_from_expr(title, msg, sme, NULL);
       }
       while ((entry = readdir(dir)) && i < MAX_ENTRIES) {
         uint32_t path_length = strlen(cwd) + strlen(entry->d_name) + 1;
@@ -320,8 +324,17 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       sm_string *needle = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
       if (needle->my_type == SM_ERR_TYPE)
         return (sm_object *)needle;
-
-      return (sm_object *)sm_str_find(haystack, needle);
+      return sm_str_find(haystack, needle);
+      break;
+    }
+    case SM_STR_FINDR_EXPR: {
+      sm_string *haystack = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (haystack->my_type == SM_ERR_TYPE)
+        return (sm_object *)haystack;
+      sm_string *needle = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
+      if (needle->my_type == SM_ERR_TYPE)
+        return (sm_object *)needle;
+      return sm_str_findr(haystack, needle);
       break;
     }
     case SM_STR_SPLIT_EXPR: {
