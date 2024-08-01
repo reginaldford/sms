@@ -159,15 +159,15 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       sm_string *path = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
       if (path->my_type == SM_ERR_TYPE)
         return (sm_object *)path;
-      FILE      *fp;
-      char       buffer[128]; // Buffer size to read the command output in chunks
-      sm_symbol *title       = sm_new_symbol("osExecToStrFailed", 11);
-      char      *output_data = NULL;
-      size_t     total_size  = 0;
+      FILE  *fp;
+      char   buffer[128]; // Buffer size to read the command output in chunks
+      char  *output_data = NULL;
+      size_t total_size  = 0;
       // Execute the command and open a pipe to read its output
       fp = popen(&(path->content), "r");
       if (fp == NULL) {
         sm_string *message = sm_new_string(45, "Failed to open pipe for command execution.");
+        sm_symbol *title   = sm_new_symbol("osExecToStrPopenFailed", 11);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       // Read the command output in chunks
@@ -177,6 +177,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         if (new_output_data == NULL) {
           free(output_data);
           sm_string *message = sm_new_string(47, "Failed to allocate memory for command output.");
+          sm_symbol *title   = sm_new_symbol("osExecToStrMemOverFlow", 11);
           return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
         }
         output_data = new_output_data;
@@ -272,8 +273,10 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       char cwd[1024];
       if (getcwd(cwd, sizeof(cwd))) {
       } else {
-        printf("Error: Current working directory is invalid: %s .\n", cwd);
-        return (sm_object *)sm_new_double(0);
+        sm_string *msg =
+          sm_new_fstring_at(sms_heap, "Error: Current working directory is invalid: %s .\n", cwd);
+        sm_symbol *title = sm_new_symbol("pwdFailed", 9);
+        return (sm_object *)sm_new_error_from_expr(title, msg, sme, NULL);
       }
       return (sm_object *)sm_new_string(strlen(cwd), cwd);
       break;
@@ -283,11 +286,12 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (path->my_type != SM_STRING_TYPE)
         return (sm_object *)path;
       char *path_cstr = &path->content;
-      if (chdir(path_cstr) == 0)
-        return (sm_object *)sms_true;
-      sm_symbol *title   = sm_new_symbol("cdFailed", 8);
-      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to change directory to %s");
-      return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      if (chdir(path_cstr) != 0) {
+        sm_symbol *title   = sm_new_symbol("cdFailed", 8);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to change directory to %s");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return (sm_object *)sms_true;
       break;
     }
     case SM_DATE_STR_EXPR: {
@@ -683,15 +687,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     case SM_CX_VALUES_EXPR: {
       sm_cx *cx = (sm_cx *)sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (cx->my_type != SM_CX_TYPE) {
-        sm_symbol *title = sm_new_symbol("typeMismatch", 12);
-        sm_string *message =
-          sm_new_string(50, "Passed something that is not a context to cxValues");
+        sm_symbol *title   = sm_new_symbol("typeMismatch", 12);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Passed value of type %s to argument 0 of cxValues call. Expected Cx.",
+          sm_global_type_name(cx->my_type));
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-      sm_expr *success = sm_node_values(cx->content, sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, NULL));
-      if (success)
-        return (sm_object *)success;
-      return (sm_object *)sms_false;
+      return (sm_object *)sm_node_values(cx->content, sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, NULL));
     }
     case SM_FN_XP_EXPR: {
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE, current_cx, sf);
@@ -1389,24 +1391,21 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       uint32_t index = (int)index_double->value;
       if (arr->size < index + 1 || index_double->value < 0) {
         sm_string *message = sm_new_fstring_at(
-          sms_heap, "Index out of range: %i . tuple size is %i", index, arr->size);
+          sms_heap, "Index out of range: %i . Tuple size is %i", index, arr->size);
         sm_symbol *title = sm_new_symbol("tupleIndexOutOfBounds", 21);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       return sm_expr_get_arg(arr, index);
     }
     case SM_DOT_EXPR: {
-      sm_object *base_obj   = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_cx *base_cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
+      if (base_cx->my_type == SM_ERR_TYPE)
+        return (sm_object *)base_cx;
       sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
       sm_string *field_name = field_sym->name;
-      sm_cx     *base_cx;
-      if (base_obj->my_type != SM_CX_TYPE) {
-        sm_symbol *title   = sm_new_symbol("notACx", 6);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Attempted x.%s where x was not a contex",
-                                               &field_name->content);
-      }
-      base_cx       = (sm_cx *)base_obj;
-      sm_object *sr = sm_cx_get_far(base_cx, field_sym);
+      sm_string *message = sm_new_fstring_at(sms_heap, "Attempted x.%s where x was not a context",
+                                             &field_name->content);
+      sm_object *sr      = sm_cx_get_far(base_cx, field_sym);
       if (sr == NULL) {
         sm_symbol *title   = sm_new_symbol("varNotFound", 11);
         sm_string *cx_str  = sm_object_to_string((sm_object *)current_cx);
