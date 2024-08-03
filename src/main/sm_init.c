@@ -9,7 +9,7 @@ extern uint32_t        sms_num_symbols;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Set version number. Major.Minor.Patch
-  char *sms_version     = "0.21.15";
+  char *sms_version     = "0.21.16";
   int   sms_version_len = 7;
   sm_strncpy(env->version, sms_version, sms_version_len);
   env->version_len = sms_version_len;
