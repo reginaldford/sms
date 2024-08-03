@@ -1,5 +1,5 @@
-#!/usr/local/bin/sms -m14g
-#14 gigs of memory... gc is needed
+#!/usr/local/bin/sms -m6g
+#6 gigs of memory... gc is needed
 {
   let l=400;
   let w=800;
@@ -18,6 +18,5 @@
     drawCircle(random()*w,random()*l,random()*170);
   let success = fileWriteTga("output.tga",w,l,a);
   putLn(str(success));
-  osExec("explorer.exe output.tga");
-  putLn("done.");
+  putLn("Completed Drawing Something. Open output.tga");
 };

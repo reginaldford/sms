@@ -137,28 +137,38 @@ uint32_t sm_for_sprint(sm_expr *expr, char *buffer, bool fake) {
   return cursor;
 }
 
-
 // Print description of let expression to buffer
 uint32_t sm_let_sprint(sm_expr *expr, char *buffer, bool fake) {
   if (!fake)
     sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
   uint32_t cursor = sm_global_fn_name_len(expr->op);
-
   if (!fake)
     buffer[cursor] = ' ';
   cursor++;
-
   cursor += sm_object_sprint(sm_expr_get_arg(expr, 0), &(buffer[cursor]), fake);
-
   if (!fake)
     buffer[cursor] = '=';
   cursor++;
-
   cursor += sm_object_sprint(sm_expr_get_arg(expr, 1), &(buffer[cursor]), fake);
-
   return cursor;
 }
-
+// Function to check if an expression contains '+' or '-' operators
+bool sm_expr_contains_terms(sm_expr *expr) {
+  // Check the current expression operator
+  if (expr->op == SM_PLUS_EXPR || expr->op == SM_MINUS_EXPR) {
+    return true;
+  }
+  // Recursively check sub-expressions
+  for (uint32_t i = 0; i < expr->size; ++i) {
+    sm_object *sub_obj = sm_expr_get_arg(expr, i);
+    if (sub_obj->my_type == SM_EXPR_TYPE) {
+      if (sm_expr_contains_terms((sm_expr *)sub_obj)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 // Print infix to c string buffer
 // Return length
@@ -186,14 +196,11 @@ uint32_t sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
   }
   if (expr->size > 2)
     return sm_prefix_sprint(expr, buffer, fake);
-
-  sm_object *o1 = sm_expr_get_arg(expr, 0);
-  sm_object *o2 = sm_expr_get_arg(expr, 1);
-
-  int cursor = 0;
-
+  sm_object *o1     = sm_expr_get_arg(expr, 0);
+  sm_object *o2     = sm_expr_get_arg(expr, 1);
+  int        cursor = 0;
   // Check if parentheses are needed for the left operand
-  if (o1->my_type == SM_EXPR_TYPE && ((sm_expr *)o1)->size > 1) {
+  if (o1->my_type == SM_EXPR_TYPE && sm_expr_contains_terms((sm_expr *)o1)) {
     if (!fake)
       buffer[cursor] = '(';
     cursor++;
@@ -204,14 +211,12 @@ uint32_t sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
   } else {
     cursor += sm_object_sprint(o1, buffer + cursor, fake);
   }
-
   if (!fake) {
     sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
   }
   cursor += sm_global_fn_name_len(expr->op);
-
   // Check if parentheses are needed for the right operand
-  if (o2->my_type == SM_EXPR_TYPE && ((sm_expr *)o2)->size > 1) {
+  if (o2->my_type == SM_EXPR_TYPE && sm_expr_contains_terms((sm_expr *)o2)) {
     if (!fake)
       buffer[cursor] = '(';
     cursor++;
@@ -222,7 +227,6 @@ uint32_t sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
   } else {
     cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
   }
-
   return cursor;
 }
 
