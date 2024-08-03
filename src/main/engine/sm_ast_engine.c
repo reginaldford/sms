@@ -977,9 +977,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       // Check and retrieve the pixel expression
       sm_expr *pixel_expr = (sm_expr *)eager_type_check(sme, 3, SM_EXPR_TYPE, current_cx, sf);
       if (pixel_expr->my_type != SM_EXPR_TYPE || pixel_expr->size != 3 * width * height) {
-        sm_symbol *title = sm_new_symbol("TypeMismatch", 12);
+        sm_symbol *title = sm_new_symbol("BadTgaArraySize", 12);
         sm_string *message =
-          sm_new_string(49, "Expected an expression of the correct size for pixel data");
+          sm_new_string(49, "Expected pixel array to have (3 * width * height) elements.");
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
 
@@ -989,17 +989,18 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       // Allocate memory for pixel data
       uint8_t *pixels = (uint8_t *)malloc(3 * width * height * sizeof(uint8_t));
       if (!pixels) {
-        sm_symbol *title   = sm_new_symbol("MemoryError", 11);
-        sm_string *message = sm_new_string(24, "Failed to allocate memory");
+        sm_symbol *title = sm_new_symbol("MemoryError", 11);
+        sm_string *message =
+          sm_new_string(24, "Failed to allocate memory for fileWriteTga function");
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
 
       // Fill the pixel data by extracting each value from the pixel_expr
       for (uint16_t y = 0; y < height; y++) {
         for (uint16_t x = 0; x < width; x++) {
-          // Flip bgr to rgb
-          for (uint16_t c = 3; c >= 0; c--) {
-            uint32_t   index           = 3 * (y * width + x) + c;
+          for (uint16_t c = 0; c < 3; c++) {
+            // Flip bgr to rgb
+            uint32_t   index           = 3 * (y * width + x + 1) - c - 1;
             sm_double *pixel_value_obj = (sm_double *)sm_expr_get_arg(pixel_expr, index);
             if (pixel_value_obj->my_type != SM_DOUBLE_TYPE) {
               free(pixels);
@@ -1007,8 +1008,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
             }
             double pixel_value = pixel_value_obj->value;
             pixels[index] =
-              (uint8_t)(pixel_value < 0 ? 0
-                                        : (pixel_value > 255 ? 255 : (uint8_t)(pixel_value + 0.5)));
+              (uint8_t)(pixel_value < 0 ? 0 : (pixel_value > 255 ? 255 : (uint8_t)(pixel_value)));
           }
         }
       }
