@@ -229,7 +229,7 @@ char *sm_global_fn_name(uint32_t which) {
     "strSet",       // SM_STR_SET_EXPR
     "strMap",       // SM_STR_MAP_EXPR
     "strFind",      // SM_STR_FIND_EXPR
-    "strFindr",     // SM_STR_FINDR_EXPR
+    "strFindR",     // SM_STR_FINDR_EXPR
     "str+",         // SM_STR_CAT_EXPR
     "strSplit",     // SM_STR_SPLIT_EXPR
     "strPart",      // SM_STR_PART_EXPR

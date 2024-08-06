@@ -21,11 +21,9 @@ sm_object *sm_str_findr(sm_string *haystack, sm_string *needle) {
   if (needle_size > haystack_size)
     return (sm_object *)sms_false; // Needle is longer than haystack
   // Iterate from the end of the haystack
-  for (int32_t i = haystack_size - needle_size; i >= 0; --i) {
-    if (strncmp(&haystack->content + i, &needle->content, needle_size)) {
+  for (int32_t i = haystack_size - needle_size; i >= 0; --i)
+    if (!strncmp(&haystack->content + i, &needle->content, needle_size))
       return (sm_object *)sm_new_double(i);
-    }
-  }
   return (sm_object *)sms_false; // Needle not found
 }
 // Return a tuple with all of the parts of str,

@@ -187,7 +187,7 @@ strUnescape {return STR_UNESCAPE;}
 strSize     {return STR_SIZE;}
 strMut      {return STR_MUT;}
 strFind     {return STR_FIND;}
-strFindr    {return STR_FINDR;}
+strFindR    {return STR_FINDR;}
 strGet      {return STR_GET;}
 strSet      {return STR_SET;}
 strSplit    {return STR_SPLIT;}
