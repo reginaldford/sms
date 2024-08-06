@@ -76,6 +76,7 @@ enum sm_object_type {
 #include "sm_env.h"
 #include "sm_signal.h"
 #include "sm_init.h"
+#include "object/sm_type.h"
 #include "object/sm_string.h"
 #include "object/sm_object.h"
 #include "object/sm_expr.h"
