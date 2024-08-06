@@ -45,8 +45,7 @@ static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_ty
     sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
       sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
-      operand, sm_global_fn_name(sme->op), sm_global_type_name(obj->my_type),
-      sm_global_type_name(param_type));
+      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type));
     // evaluate error handler if there is one
     sm_cx *scratch = (sm_cx *)*(sm_global_lex_stack(NULL)->top);
     return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
@@ -64,8 +63,7 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
     sm_double *line    = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
       sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
-      operand, sm_global_fn_name(sme->op), sm_global_type_name(obj->my_type),
-      sm_global_type_name(param_type));
+      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type));
     sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                                source->size, &source->content, (int)line->value);
     return sm_engine_eval(err, current_cx, sf);
@@ -703,7 +701,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_symbol *title   = sm_new_symbol("typeMismatch", 12);
         sm_string *message = sm_new_fstring_at(
           sms_heap, "Passed value of type %s to argument 0 of cxValues call. Expected Cx.",
-          sm_global_type_name(cx->my_type));
+          sm_type_name(cx->my_type));
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       return (sm_object *)sm_node_values(cx->content, sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, NULL));
@@ -1738,7 +1736,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
         sm_string *message =
           sm_new_fstring_at(sms_heap, "Cannot apply ++ to non-symbol. Object type is %s instead",
-                            sm_global_type_name(sym->my_type));
+                            sm_type_name(sym->my_type));
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       sm_double *num = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);
@@ -1755,7 +1753,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
         sm_string *message =
           sm_new_fstring_at(sms_heap, "Cannot apply -- to non-symbol. Object type is %s instead",
-                            sm_global_type_name(sym->my_type));
+                            sm_type_name(sym->my_type));
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       sm_double *num = (sm_double *)eager_type_check(sme, 0, SM_DOUBLE_TYPE, current_cx, sf);

@@ -88,7 +88,6 @@ enum sm_object_type {
 #include "object/sm_double.h"
 #include "object/sm_fun.h"
 #include "object/sm_local.h"
-#include "object/sm_link.h"
 #include "object/sm_meta.h"
 #include "object/sm_self.h"
 #include "object/sm_error.h"

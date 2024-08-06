@@ -59,15 +59,6 @@ void sm_inflate_heap() {
     // scan_cursor is not referred to for the rest of the loop
     scan_cursor += sm_sizeof(current_obj);
     switch (current_obj->my_type) {
-    case SM_LINK_TYPE: {
-      struct sm_link *link = (struct sm_link *)current_obj;
-      // Meet the value
-      link->value = sm_meet_object((sm_object *)link->value);
-      // Meet the next
-      if (link->next)
-        link->next = (struct sm_link *)sm_meet_object((sm_object *)link->next);
-      break;
-    }
     case SM_CX_TYPE: {
       sm_cx *cx = (sm_cx *)current_obj;
       // Meet the parent
