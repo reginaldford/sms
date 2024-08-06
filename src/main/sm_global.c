@@ -62,22 +62,6 @@ sm_stack *sm_global_lex_stack(sm_stack *replacement) {
   return lex_stack;
 }
 
-// Return the name of this type.
-// Must be synchronized with enum sm_object_type
-char *sm_global_type_name(uint32_t which) {
-  static char *response[] = {"float", "expr", "prim",   "str",   "sym",   "cx",  "node",
-                             "ptr",   "meta", "space",  "fun",   "param", "lcl", "l",
-                             "err",   "self", "return", "block", "stack", "?"};
-  return response[which];
-}
-
-// Return the length of the name of this type.
-// Must be synchronized with enum sm_object_type
-uint32_t sm_global_type_name_len(uint32_t which) {
-  static uint32_t response_len[] = {5, 4, 4, 3, 3, 2, 4, 3, 4, 5, 3, 5, 3, 1, 3, 4, 6, 5, 5, 1};
-  return response_len[which];
-}
-
 // Primitive_names
 char *sm_global_fn_name(uint32_t which) {
   const uint32_t num_functions = sm_global_num_fns();

@@ -32,10 +32,6 @@ sm_stack *sm_global_lex_stack(sm_stack *replacement);
 sm_object *sm_global_parser_output(sm_object *replacement);
 /// Global env struct from initialization
 sm_env *sm_global_environment(sm_env *replacement);
-/// Global names of types
-char *sm_global_type_name(uint32_t which);
-/// Global lengths of the type names
-uint32_t sm_global_type_name_len(uint32_t which);
 /// Global terminal io struct for vt100 functions
 struct termios *sm_global_term_attrs();
 /// Read-only for user home directory
