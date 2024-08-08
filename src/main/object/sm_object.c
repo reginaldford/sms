@@ -92,7 +92,9 @@ int sm_sizeof(sm_object *obj1) {
   case SM_RETURN_TYPE:
     return sizeof(sm_return);
   case SM_STACK_OBJ_TYPE:
-    return sm_stack_obj_size((sm_stack_obj *)obj1);
+    return sizeof(sm_stack) + sizeof(void *) * sm_stack_obj_size((sm_stack_obj *)obj1);
+  case SM_ARRAY_TYPE:
+    return sizeof(sm_array) + sizeof(void *) * ((sm_array *)obj1)->size;
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
     exit(1);

@@ -60,7 +60,9 @@ enum sm_object_type {
   SM_BC_BLOCK_TYPE,
   /// 18: Stack (sm_stack_obj.h)
   SM_STACK_OBJ_TYPE,
-  /// 19: Unrecognized
+  /// 19: Array (sm_array.h)
+  SM_ARRAY_TYPE,
+  /// 20: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -105,3 +107,4 @@ enum sm_object_type {
 #include "object/sm_return.h"
 #include "engine/sm_ast_engine.h"
 #include "engine/op/stack.h"
+#include "object/sm_array.h"
