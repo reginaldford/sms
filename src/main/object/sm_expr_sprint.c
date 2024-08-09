@@ -25,11 +25,6 @@ uint32_t sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum SM_EXPR_TYPE 
 uint32_t sm_expr_tuple_sprint(sm_expr *expr, char *buffer, bool fake) {
   if (!fake)
     buffer[0] = '[';
-  if (expr->size == 0) {
-    if (!fake)
-      buffer[1] = ']';
-    return 2;
-  }
   int len = sm_expr_contents_sprint(expr, &(buffer[1]), expr->op, fake);
   if (!fake)
     buffer[1 + len] = ']';

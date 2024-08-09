@@ -43,8 +43,8 @@ int parsing_fpath_len;
 %type <param_list> PARAM_LIST
 %type <array> F64_ARRAY
 %type <array> F64_ARRAY_OPEN
-%type <array> U8_ARRAY
-%type <array> U8_ARRAY_OPEN
+%type <array> UI8_ARRAY
+%type <array> UI8_ARRAY_OPEN
 %type <expr> PARAM_LIST_OPEN
 %type <expr> IF_STATEMENT
 %type <meta> META_EXPR
@@ -122,7 +122,7 @@ int parsing_fpath_len;
 %token <expr> RM
 
 %token F64_ARRAY_OPEN
-%token U8_ARRAY_OPEN
+%token UI8_ARRAY_OPEN
 
 %token <expr> LET
 
@@ -446,7 +446,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | XP_SETOP '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_XP_SET_OP_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | XP_OPSYM '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_SYM_EXPR,(sm_object*)$3, _note());}
 | F64_ARRAY { }
-| U8_ARRAY { }
+| UI8_ARRAY { }
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3, _note());}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3, _note());}
 | FILE_RUN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_READ_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
@@ -537,8 +537,8 @@ F64_ARRAY : F64_ARRAY_OPEN ']' {
   $$ = sm_new_array(SM_DOUBLE_TYPE, 0);
 }
 
-U8_ARRAY : U8_ARRAY_OPEN ']' {
-  $$ = sm_new_array(SM_DOUBLE_TYPE, 0);
+UI8_ARRAY : UI8_ARRAY_OPEN ']' {
+  $$ = sm_new_array(SM_UI8_TYPE, 0);
 }
 
 PARAM_LIST : '(' ')' {

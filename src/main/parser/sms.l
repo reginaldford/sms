@@ -97,7 +97,7 @@ parent       {return PARENT;}
 rm           {return RM;}
 
 "f64["       {return F64_ARRAY_OPEN;}
-"u8["        {return U8_ARRAY_OPEN;}
+"ui8["        {return UI8_ARRAY_OPEN;}
 
 newCx        {return NEW_CX;}
 cxSetParent  {return CX_SETPARENT;}
