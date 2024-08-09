@@ -62,7 +62,9 @@ enum sm_object_type {
   SM_STACK_OBJ_TYPE,
   /// 19: Array (sm_array.h)
   SM_ARRAY_TYPE,
-  /// 20: Unrecognized
+  /// 20: unsigned byte int (sm_ui8.h)
+  SM_UI8_TYPE,
+  /// 21: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -81,6 +83,7 @@ enum sm_object_type {
 #include "object/sm_type.h"
 #include "object/sm_string.h"
 #include "object/sm_object.h"
+#include "object/sm_array.h"
 #include "object/sm_expr.h"
 #include "sm_stack.h"
 #include "object/sm_stack_obj.h"
@@ -107,4 +110,3 @@ enum sm_object_type {
 #include "object/sm_return.h"
 #include "engine/sm_ast_engine.h"
 #include "engine/op/stack.h"
-#include "object/sm_array.h"
