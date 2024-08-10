@@ -38,6 +38,8 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
     return sm_self_sprint((sm_self *)obj1, buffer, fake);
   case SM_ARRAY_TYPE:
     return sm_array_sprint((sm_array *)obj1, buffer, fake);
+  case SM_UI8_TYPE:
+    return sm_ui8_sprint((sm_ui8 *)obj1, buffer, fake);
   default: {
     int len = 3 + log(obj1->my_type) / log(10);
     if (!fake)
@@ -85,6 +87,8 @@ int sm_sizeof(sm_object *obj1) {
     return sizeof(sm_stack) + sizeof(void *) * sm_stack_obj_size((sm_stack_obj *)obj1);
   case SM_ARRAY_TYPE:
     return sizeof(sm_array) + sizeof(void *) * ((sm_array *)obj1)->size;
+  case SM_UI8_TYPE:
+    return sizeof(sm_ui8);
   default:
     printf("Cannot determine size of object of type %d\n", obj1->my_type);
     exit(1);

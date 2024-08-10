@@ -15,7 +15,7 @@
 #include <pwd.h>
 
 #define f64 double
-#define ui8 char
+#define ui8 uint8_t
 
 // We use __builtin_popcount_ll in sm_node.c
 #if defined(__x86_64__)
@@ -74,8 +74,8 @@ enum sm_object_type {
 // Useful macros
 #define MIN(x, y) (x < y ? x : y)
 #define MAX(x, y) (x > y ? x : y)
-#define DEBUG_HERE(note)                                                                           \
-  printf("%s line %i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                         \
+#define DEBUG(note)                                                                                \
+  fprintf(stderr, "%s:%i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                     \
   fflush(stdout);
 #include "linenoise/linenoise.h"
 #include "sm_common.h"
@@ -95,6 +95,7 @@ enum sm_object_type {
 #include "object/sm_cx.h"
 #include "parser/sm_parse_result.h"
 #include "object/sm_f64.h"
+#include "object/sm_ui8.h"
 #include "object/sm_fun.h"
 #include "object/sm_local.h"
 #include "object/sm_meta.h"

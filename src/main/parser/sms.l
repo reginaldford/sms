@@ -243,8 +243,22 @@ _mem_checkFile {return MEM_CHECKFILE;}
 
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
    yylval.num = sm_new_f64(atof(yytext));
-   return NUM;
+   return F64;
   }
+
+
+ui8\(([0-9]+)\)    {
+      int number = atoi(yytext + 4); // Skip "ui8("
+      // Check for closing parenthesis
+      if (yytext[4 + strlen(yytext + 4) - 1] != ')') {
+          fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
+          return 0; // or appropriate error handling
+      }
+      yylval.ui8 = sm_new_ui8(number); // Call the function with the number
+      return UI8;
+  }
+
+
 [\<\>\=] { return yytext[0]; }
 
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
