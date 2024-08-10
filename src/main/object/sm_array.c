@@ -28,7 +28,6 @@ uint32_t sm_array_sprint(sm_array *a, char *buffer, bool fake) {
     len += 4;
     break;
   }
-  // else if(a->inner_type==SM_U8_TYPE)
   if (!fake)
     for (uint8_t i = 0; i < 4; i++)
       buffer[i] = part1[i];

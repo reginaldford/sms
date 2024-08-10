@@ -40,17 +40,6 @@ f64 sm_global_growth_factor(f64 replacement) {
   return factor;
 }
 
-// The global space tuple sorted by size
-sm_space_tuple *sm_global_space_tuple(sm_space_tuple *replacement) {
-  static sm_space_tuple *spaces = NULL;
-  if (replacement != NULL) {
-    sm_space_tuple *temp = spaces;
-    spaces               = replacement;
-    return temp;
-  }
-  return spaces;
-}
-
 // the global lexical stack
 sm_stack *sm_global_lex_stack(sm_stack *replacement) {
   static sm_stack *lex_stack = NULL;

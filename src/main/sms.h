@@ -103,7 +103,7 @@ enum sm_object_type {
 #include "object/sm_error.h"
 #include "object/sm_bc_block.h"
 #include "memory/sm_pointer.h"
-#include "memory/sm_space.h"
+#include "object/sm_space.h"
 #include "memory/sm_gc.h"
 #include "sm_global.h"
 #include "terminal/sm_terminal.h"
