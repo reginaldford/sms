@@ -15,7 +15,7 @@
     put(s);
   };
   
-  # Run the double for loop
+  # Run the f64 for loop
   let tWidth = parse(osExecToStr("tput cols")[1]);
   let tHeight = parse(osExecToStr("tput lines")[1])-2;
   for(let x=0;x<tHeight;x=x+1)

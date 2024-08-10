@@ -49,7 +49,7 @@ sm_error *sm_new_error_from_strings(sm_symbol *title, sm_string *message, sm_str
 /// Creates an error with line and source from the expression
 sm_error *sm_new_error_from_expr(sm_symbol *title, sm_string *message, sm_expr *sme, sm_cx *notes) {
   sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-  sm_double *line   = (sm_double *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+  sm_f64    *line   = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
   return sm_new_error_from_strings(title, message, source, (int)line->value, notes);
 }
 

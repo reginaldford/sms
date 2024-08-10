@@ -1,6 +1,6 @@
 #!/bin/bash
 # Backup your code before you do this
-str='s/global_type_name/type_name/g'
+str='s/double/f64/g'
 find ../src/ -name "*.c" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.h" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.y" -exec sed -i -e "$str" {} +

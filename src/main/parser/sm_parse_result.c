@@ -22,7 +22,7 @@ sm_parse_result sm_parse_file(char *fname) {
   FILE *success = lex_file(fname);
   if (!success) {
     printf("Error: There was a problem with opening the file: %s\n", fname);
-    return (sm_parse_result){.return_val = -1, .parsed_object = (sm_object *)sm_new_double(0)};
+    return (sm_parse_result){.return_val = -1, .parsed_object = (sm_object *)sm_new_f64(0)};
   }
   int result = yyparse();
   _done_lexing_file(success);

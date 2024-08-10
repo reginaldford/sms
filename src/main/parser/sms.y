@@ -22,7 +22,7 @@ int parsing_fpath_len;
 %}
 
 %union {
-  sm_double        *num;
+  sm_f64        *num;
   sm_symbol        *sym;
   sm_expr          *expr;
   sm_string        *str;
@@ -345,11 +345,11 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
 | '-' EXPR {
-  if (((sm_object *)$2)->my_type == SM_DOUBLE_TYPE) {
-    ((sm_double *)$2)->value *= -1;
+  if (((sm_object *)$2)->my_type == SM_F64_TYPE) {
+    ((sm_f64 *)$2)->value *= -1;
     $$ = $2;
   } else {
-    $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(-1), (sm_object *)$2, _note());
+    $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1), (sm_object *)$2, _note());
   }
 }
 | '(' EXPR ')' { $$ = $2; }
@@ -534,7 +534,10 @@ FUN_INTRO : PARAM_LIST ARROW {
 
 
 F64_ARRAY : F64_ARRAY_OPEN ']' {
-  $$ = sm_new_array(SM_DOUBLE_TYPE, 0);
+  $$ = sm_new_array(SM_F64_TYPE, 0);
+}
+| F64_ARRAY_OPEN SYM ']' {
+  //$$ = sm_new_array;
 }
 
 UI8_ARRAY : UI8_ARRAY_OPEN ']' {
@@ -750,6 +753,6 @@ struct sm_cx *_note() {
     sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(parsing_fpath_len,parsing_fpath));
   else
     sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(10,"(terminal)"));
-  sm_cx_let(note,sm_new_symbol("line",4),(sm_object*)sm_new_double(yylineno));
+  sm_cx_let(note,sm_new_symbol("line",4),(sm_object*)sm_new_f64(yylineno));
   return note;
 }

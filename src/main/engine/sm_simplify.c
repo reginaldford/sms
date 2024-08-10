@@ -3,25 +3,25 @@
 #include "../sms.h"
 #include <stdlib.h>
 
-// Whether an expression contains a specific double
-bool sm_expr_has_num(sm_expr *expr, double n) {
+// Whether an expression contains a specific f64
+bool sm_expr_has_num(sm_expr *expr, f64 n) {
   for (uint32_t i = 0; i < expr->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(expr, i);
-    if (current_obj->my_type == SM_DOUBLE_TYPE) {
-      if (((sm_double *)current_obj)->value == n)
+    if (current_obj->my_type == SM_F64_TYPE) {
+      if (((sm_f64 *)current_obj)->value == n)
         return true;
     }
   }
   return false;
 }
 
-// Remove all cases of a certain double from this expression
-sm_expr *sm_expr_rm_num(sm_expr *expr, double to_rm) {
+// Remove all cases of a certain f64 from this expression
+sm_expr *sm_expr_rm_num(sm_expr *expr, f64 to_rm) {
   sm_expr *result = sm_new_expr_n(expr->op, 0, expr->size, NULL);
   for (uint32_t i = 0; i < expr->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(expr, i);
-    if (current_obj->my_type == SM_DOUBLE_TYPE) {
-      if (((sm_double *)current_obj)->value != to_rm) {
+    if (current_obj->my_type == SM_F64_TYPE) {
+      if (((sm_f64 *)current_obj)->value != to_rm) {
         result = sm_expr_append(result, current_obj);
       }
     } else
@@ -34,7 +34,7 @@ sm_expr *sm_expr_rm_num(sm_expr *expr, double to_rm) {
 sm_expr *apply_constants0(sm_expr *e) {
   if (e->my_type == SM_EXPR_TYPE) {
     if (e->op == SM_TIMES_EXPR && sm_expr_has_num(e, 0))
-      return (sm_expr *)sm_new_double(0);
+      return (sm_expr *)sm_new_f64(0);
     else {
       sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
       for (uint32_t i = 0; i < e->size; i++) {
@@ -57,9 +57,9 @@ sm_expr *apply_constants1(sm_expr *e) {
   }
   if (e->size == 0) {
     if (e->op == SM_TIMES_EXPR) {
-      return (sm_expr *)sm_new_double(1);
+      return (sm_expr *)sm_new_f64(1);
     } else if (e->op == SM_PLUS_EXPR) {
-      return (sm_expr *)sm_new_double(0);
+      return (sm_expr *)sm_new_f64(0);
     }
   }
   sm_expr *new_e = sm_new_expr_n(e->op, 0, e->size, NULL);
@@ -78,7 +78,7 @@ sm_expr *apply_constants1(sm_expr *e) {
 sm_expr *apply_constants2(sm_expr *e) {
   if (e->my_type == SM_EXPR_TYPE) {
     if (e->op == SM_TIMES_EXPR && e->size == 0)
-      return (sm_expr *)sm_new_double(1);
+      return (sm_expr *)sm_new_f64(1);
     else {
       sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
       for (uint32_t i = 0; i < e->size; i++) {
@@ -96,9 +96,9 @@ sm_expr *apply_constants3(sm_expr *e) {
   if (e->my_type == SM_EXPR_TYPE) {
     if (e->op == SM_DIVIDE_EXPR && e->size == 2) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
-      if (obj0->my_type == SM_DOUBLE_TYPE) {
-        if (((sm_double *)obj0)->value == 0) {
-          return (sm_expr *)sm_new_double(0);
+      if (obj0->my_type == SM_F64_TYPE) {
+        if (((sm_f64 *)obj0)->value == 0) {
+          return (sm_expr *)sm_new_f64(0);
         }
       }
     }
@@ -118,12 +118,12 @@ sm_expr *apply_constants4(sm_expr *e) {
     if (e->op == SM_MINUS_EXPR && e->size == 2) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == SM_DOUBLE_TYPE) {
-        if (((sm_double *)obj0)->value == 0) {
-          if (obj1->my_type == SM_DOUBLE_TYPE) {
-            return (sm_expr *)sm_new_double(-1 * ((sm_double *)obj1)->value);
+      if (obj0->my_type == SM_F64_TYPE) {
+        if (((sm_f64 *)obj0)->value == 0) {
+          if (obj1->my_type == SM_F64_TYPE) {
+            return (sm_expr *)sm_new_f64(-1 * ((sm_f64 *)obj1)->value);
           } else
-            return sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(-1), obj1, NULL);
+            return sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1), obj1, NULL);
         }
       }
     }
@@ -143,9 +143,9 @@ sm_expr *apply_constants5(sm_expr *e) {
     if (e->op == SM_TIMES_EXPR && e->size == 2) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == SM_DOUBLE_TYPE) {
-        if (obj1->my_type == SM_DOUBLE_TYPE) {
-          return (sm_expr *)sm_new_double(((sm_double *)obj0)->value * ((sm_double *)obj1)->value);
+      if (obj0->my_type == SM_F64_TYPE) {
+        if (obj1->my_type == SM_F64_TYPE) {
+          return (sm_expr *)sm_new_f64(((sm_f64 *)obj0)->value * ((sm_f64 *)obj1)->value);
         }
       }
     }
@@ -165,12 +165,12 @@ sm_expr *apply_constants6(sm_expr *e) {
     if (e->op == SM_TIMES_EXPR && e->size == 2) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == SM_DOUBLE_TYPE) {
+      if (obj0->my_type == SM_F64_TYPE) {
         if (obj1->my_type == SM_EXPR_TYPE && ((sm_expr *)obj1)->op == SM_TIMES_EXPR) {
           sm_object *leftmost = sm_expr_get_arg((sm_expr *)obj1, 0);
-          if (leftmost->my_type == SM_DOUBLE_TYPE) {
+          if (leftmost->my_type == SM_F64_TYPE) {
             sm_expr *result =
-              (sm_expr *)sm_new_double(((sm_double *)obj0)->value * ((sm_double *)leftmost)->value);
+              (sm_expr *)sm_new_f64(((sm_f64 *)obj0)->value * ((sm_f64 *)leftmost)->value);
             sm_expr *expr1     = ((sm_expr *)obj1);
             sm_expr *remainder = sm_new_expr_n(SM_TIMES_EXPR, 0, expr1->size - 1, NULL);
             for (uint32_t i = 1; i < expr1->size; i++) {
@@ -199,14 +199,14 @@ sm_expr *apply_constants7(sm_expr *e) {
     if (e->size == 2 && (e->op == SM_PLUS_EXPR || e->op == SM_MINUS_EXPR)) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == SM_DOUBLE_TYPE) {
-        if (obj1->my_type == SM_DOUBLE_TYPE) {
-          sm_double *d0 = (sm_double *)obj0;
-          sm_double *d1 = (sm_double *)obj1;
+      if (obj0->my_type == SM_F64_TYPE) {
+        if (obj1->my_type == SM_F64_TYPE) {
+          sm_f64 *d0 = (sm_f64 *)obj0;
+          sm_f64 *d1 = (sm_f64 *)obj1;
           if (e->op == SM_PLUS_EXPR)
-            return (sm_expr *)sm_new_double(d0->value + d1->value);
+            return (sm_expr *)sm_new_f64(d0->value + d1->value);
           else
-            return (sm_expr *)sm_new_double(d0->value - d1->value);
+            return (sm_expr *)sm_new_f64(d0->value - d1->value);
         }
       }
     }
@@ -226,12 +226,12 @@ sm_expr *apply_constants8(sm_expr *e) {
   if (e->my_type == SM_EXPR_TYPE) {
     if (e->op == SM_POW_EXPR) {
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj1->my_type == SM_DOUBLE_TYPE) {
-        sm_double *d1 = (sm_double *)obj1;
+      if (obj1->my_type == SM_F64_TYPE) {
+        sm_f64 *d1 = (sm_f64 *)obj1;
         if (d1->value == 1)
           return (sm_expr *)sm_expr_get_arg(e, 0);
         else if (d1->value == 0)
-          return (sm_expr *)sm_new_double(1);
+          return (sm_expr *)sm_new_f64(1);
       }
     }
     sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
@@ -254,8 +254,8 @@ sm_expr *apply_constants9(sm_expr *self) {
   new_expr->op       = orig_expr->op;
   for (uint32_t i = 0; i < orig_expr->size; i++) {
     sm_object *arg = sm_expr_get_arg(orig_expr, i);
-    if (arg->my_type == SM_DOUBLE_TYPE) {
-      sm_double *num = (sm_double *)arg;
+    if (arg->my_type == SM_F64_TYPE) {
+      sm_f64 *num = (sm_f64 *)arg;
       if (num->value == 0.0) {
         if (orig_expr->op == SM_PLUS_EXPR || (orig_expr->op == SM_MINUS_EXPR && i > 0)) {
           continue;
@@ -279,11 +279,11 @@ sm_expr *apply_constants10(sm_expr *e) {
     if (e->op == SM_POW_EXPR) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == SM_DOUBLE_TYPE) {
-        sm_double *d0 = (sm_double *)obj0;
-        if (obj1->my_type == SM_DOUBLE_TYPE) {
-          sm_double *d1 = (sm_double *)obj1;
-          return (sm_expr *)sm_new_double(pow(d0->value, d1->value));
+      if (obj0->my_type == SM_F64_TYPE) {
+        sm_f64 *d0 = (sm_f64 *)obj0;
+        if (obj1->my_type == SM_F64_TYPE) {
+          sm_f64 *d1 = (sm_f64 *)obj1;
+          return (sm_expr *)sm_new_f64(pow(d0->value, d1->value));
         }
       }
     }
@@ -313,11 +313,11 @@ sm_expr *apply_constants11(sm_expr *e) {
     if (e->op == SM_DIVIDE_EXPR) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
-      if (obj0->my_type == SM_DOUBLE_TYPE && obj1->my_type == SM_DOUBLE_TYPE) {
-        sm_double *d0 = (sm_double *)obj0;
-        sm_double *d1 = (sm_double *)obj1;
-        double     i0 = d0->value;
-        double     i1 = d1->value;
+      if (obj0->my_type == SM_F64_TYPE && obj1->my_type == SM_F64_TYPE) {
+        sm_f64 *d0 = (sm_f64 *)obj0;
+        sm_f64 *d1 = (sm_f64 *)obj1;
+        f64     i0 = d0->value;
+        f64     i1 = d1->value;
 
         if (i1 != 0 && (int)i0 == i0 && (int)i1 == i1) { // Check if both values are integers
           int int0 = (int)i0;
@@ -329,15 +329,14 @@ sm_expr *apply_constants11(sm_expr *e) {
 
           if (simplified_den ==
               1) { // If the denominator is 1, return the numerator as a single number
-            return (sm_expr *)((sm_object *)sm_new_double(simplified_num));
+            return (sm_expr *)((sm_object *)sm_new_f64(simplified_num));
           } else { // Otherwise, return the simplified fraction
-            return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR,
-                                            (sm_object *)sm_new_double(simplified_num),
-                                            (sm_object *)sm_new_double(simplified_den), NULL);
+            return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_f64(simplified_num),
+                                            (sm_object *)sm_new_f64(simplified_den), NULL);
           }
         }
-        return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_double(i0),
-                                        (sm_object *)sm_new_double(i1), NULL);
+        return (sm_expr *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_f64(i0),
+                                        (sm_object *)sm_new_f64(i1), NULL);
       }
     }
     sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
@@ -407,7 +406,7 @@ sm_expr *apply_constants14(sm_expr *e) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
       if (sm_object_eq(obj0, obj1)) {
-        return (sm_expr *)((sm_object *)sm_new_double(1));
+        return (sm_expr *)((sm_object *)sm_new_f64(1));
       }
     }
     sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
@@ -436,33 +435,33 @@ sm_expr *apply_constants15(sm_expr *e) {
   if (e->my_type == SM_EXPR_TYPE) {
     sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
     if (e->op == SM_PLUS_EXPR || e->op == SM_TIMES_EXPR) {
-      uint32_t double_locations[e->size];
+      uint32_t f64_locations[e->size];
       uint32_t num_count = 0;
       for (uint32_t j = 0; j < e->size; j++) {
         sm_object *current_obj = sm_expr_get_arg(e, j);
-        if (current_obj->my_type == SM_DOUBLE_TYPE) {
-          double_locations[num_count++] = j;
+        if (current_obj->my_type == SM_F64_TYPE) {
+          f64_locations[num_count++] = j;
         }
       }
       // put numbers first, unified
       if (num_count > 0) {
         uint32_t num_index;
-        double   calculation = 0;
+        f64      calculation = 0;
         if (e->op == SM_TIMES_EXPR)
           calculation = 1;
         for (num_index = 0; num_index < num_count; num_index++) {
-          sm_double *current_num = (sm_double *)sm_expr_get_arg(e, double_locations[num_index]);
+          sm_f64 *current_num = (sm_f64 *)sm_expr_get_arg(e, f64_locations[num_index]);
           if (e->op == SM_PLUS_EXPR)
             calculation += current_num->value;
           else
             calculation *= current_num->value;
         }
-        sm_expr_append(new_expr, (sm_object *)sm_new_double(calculation));
+        sm_expr_append(new_expr, (sm_object *)sm_new_f64(calculation));
       }
       // then add the rest
       uint32_t next_not = -1;
       for (uint32_t last_i = num_count; last_i < e->size; last_i++) {
-        next_not = find_next_not(e, next_not, SM_DOUBLE_TYPE);
+        next_not = find_next_not(e, next_not, SM_F64_TYPE);
         sm_expr_append(new_expr, sm_expr_get_arg(e, next_not));
       }
       return new_expr;
@@ -483,7 +482,7 @@ sm_expr *apply_constants16(sm_expr *e) {
       sm_object *obj0 = sm_expr_get_arg(e, 0);
       sm_object *obj1 = sm_expr_get_arg(e, 1);
       if (sm_object_eq(obj0, obj1)) {
-        return (sm_expr *)sm_new_double(0);
+        return (sm_expr *)sm_new_f64(0);
       }
     }
     sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
@@ -502,18 +501,18 @@ sm_expr *apply_constants17(sm_expr *e) {
     sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
 
     if (e->op == SM_TIMES_EXPR) {
-      int    count_numbers = 0;
-      double total         = 1;
-      int    non_one_terms = 0;
+      int count_numbers = 0;
+      f64 total         = 1;
+      int non_one_terms = 0;
 
       for (uint32_t i = 0; i < e->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(e, i);
-        if (current_obj->my_type == SM_DOUBLE_TYPE) {
-          sm_double *current_double = (sm_double *)current_obj;
-          if (current_double->value == 1) {
+        if (current_obj->my_type == SM_F64_TYPE) {
+          sm_f64 *current_f64 = (sm_f64 *)current_obj;
+          if (current_f64->value == 1) {
             continue; // Skip multiplying by 1
           }
-          total *= current_double->value;
+          total *= current_f64->value;
           count_numbers++;
         } else {
           new_expr =
@@ -523,12 +522,12 @@ sm_expr *apply_constants17(sm_expr *e) {
       }
 
       if (count_numbers > 0 && total != 1) {
-        new_expr = sm_expr_append(new_expr, (sm_object *)sm_new_double(total));
+        new_expr = sm_expr_append(new_expr, (sm_object *)sm_new_f64(total));
       }
 
       // If new_expr is empty, it means we had only 1s
       if (new_expr->size == 0) {
-        return (sm_expr *)sm_new_double(1);
+        return (sm_expr *)sm_new_f64(1);
       }
 
       // If we have exactly one non-one term and no numbers other than 1, return the term itself

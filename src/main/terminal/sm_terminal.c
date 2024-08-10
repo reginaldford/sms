@@ -112,7 +112,7 @@ sm_parse_result sm_terminal_prompt_linenoise() {
     }
   }
   // nothing was parsed
-  return (sm_parse_result){.return_val = -1, .parsed_object = (sm_object *)sm_new_double(0)};
+  return (sm_parse_result){.return_val = -1, .parsed_object = (sm_object *)sm_new_f64(0)};
 }
 
 bool sm_terminal_has_color() {

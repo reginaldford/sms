@@ -19,7 +19,7 @@ uint32_t sm_array_sprint(sm_array *a, char *buffer, bool fake) {
   char     f64_header[] = "f64[";
   char     ui8_header[] = "ui8[";
   switch (a->inner_type) {
-  case SM_DOUBLE_TYPE:
+  case SM_F64_TYPE:
     part1 = f64_header;
     len += 4;
     break;
@@ -40,7 +40,7 @@ uint32_t sm_array_sprint(sm_array *a, char *buffer, bool fake) {
 
 sm_object *sm_array_get_arg(sm_array *a, uint32_t index) {
   switch (a->inner_type) {
-  case SM_DOUBLE_TYPE:
+  case SM_F64_TYPE:
     return (sm_object *)(&a->content)[index];
   }
   return (sm_object *)sms_false;
