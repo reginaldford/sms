@@ -2,12 +2,12 @@
 
 #include "../sms.h"
 
-sm_array *sm_new_array(uint16_t type, uint32_t size) {
-  sm_array *output =
-    sm_malloc(sizeof(sm_array) + (sizeof(type) - sm_type_header_size(type)) * size);
+sm_array *sm_new_array(uint16_t type, uint32_t size, sm_object *content, uint32_t offset) {
+  sm_array *output   = sm_malloc(sizeof(sm_array));
   output->my_type    = SM_ARRAY_TYPE;
   output->inner_type = type;
   output->size       = size;
+  output->content    = content;
   return output;
 }
 

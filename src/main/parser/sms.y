@@ -50,8 +50,8 @@ int parsing_fpath_len;
 %type <context> CONTEXT
 %type <context> CONTEXT_LIST
 %type <expr> EXPR
-%type <expr> ARRAY
-%type <expr> ARRAY_LIST
+%type <expr> TUPLE
+%type <expr> TUPLE_LIST
 %type <expr> EQ
 %type <expr> ASSOCIATION
 %type <expr> TEST_LT
@@ -381,7 +381,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | MAP '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_MAP_EXPR,(sm_object*)$3,(sm_object*)$5, _note()); }
 | REDUCE '(' EXPR ',' EXPR ',' EXPR  ')' { $$ = sm_new_expr_3(SM_REDUCE_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7, _note()); }
 | CONTEXT{}
-| ARRAY{}
+| TUPLE{}
 | SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_SIZE_EXPR, (sm_object*)$3, _note());}
 | ZEROS '(' EXPR ')' {$$ = sm_new_expr(SM_ZEROS_EXPR, (sm_object*)$3, _note());}
 | PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_PART_EXPR, (sm_object*)$3, (sm_object*)$5,(sm_object*)$7, _note());}
@@ -532,14 +532,14 @@ FUN_INTRO : PARAM_LIST ARROW {
 
 
 F64_ARRAY : F64_ARRAY_OPEN ']' {
-  $$ = sm_new_array(SM_F64_TYPE, 0);
+  $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0);
 }
 | F64_ARRAY_OPEN SYM ']' {
   //$$ = sm_new_array;
 }
 
 UI8_ARRAY : UI8_ARRAY_OPEN ']' {
-  $$ = sm_new_array(SM_UI8_TYPE, 0);
+  $$ = sm_new_array(SM_UI8_TYPE, 0,NULL,0);
 }
 
 PARAM_LIST : '(' ')' {
@@ -657,13 +657,13 @@ FUN_CALL_OPEN : EXPR '(' EXPR {
 
 META_EXPR : ':' EXPR { $$ = sm_new_meta((sm_object *)$2, *(sm_global_lex_stack(NULL))->top); }
 
-ARRAY : ARRAY_LIST ']' {};
-| ARRAY_LIST ',' ']' {};
+TUPLE : TUPLE_LIST ']' {};
+| TUPLE_LIST ',' ']' {};
 | '[' EXPR ']' { $$ = (sm_expr *)sm_new_expr(SM_TUPLE_EXPR, (sm_object *)$2, _note()); }
 | '[' ']' { $$ = sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, _note()); }
 
-ARRAY_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_TUPLE_EXPR, (sm_object *)$2, (sm_object *)$4, _note()); }
-| ARRAY_LIST ',' EXPR { $$ = sm_expr_append($1, (sm_object *)$3); }
+TUPLE_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_TUPLE_EXPR, (sm_object *)$2, (sm_object *)$4, _note()); }
+| TUPLE_LIST ',' EXPR { $$ = sm_expr_append($1, (sm_object *)$3); }
 
 ASSOCIATION : EXPR ASSOCIATE EXPR { $$ = sm_new_expr_2(SM_ASSOCIATE_EXPR,(sm_object*)$1,(sm_object*)$3, _note()); }
 
