@@ -8,7 +8,7 @@ sm_object *sm_str_find(sm_string *str, sm_string *to_find) {
   const char *to_findcstr = &(to_find)->content;
   const char *result      = strstr(cstr, to_findcstr);
   if (result != NULL) {
-    return (sm_object *)sm_new_double(result - cstr);
+    return (sm_object *)sm_new_f64(result - cstr);
   } else {
     return (sm_object *)sms_false;
   }
@@ -23,7 +23,7 @@ sm_object *sm_str_findr(sm_string *haystack, sm_string *needle) {
   // Iterate from the end of the haystack
   for (int32_t i = haystack_size - needle_size; i >= 0; --i)
     if (!strncmp(&haystack->content + i, &needle->content, needle_size))
-      return (sm_object *)sm_new_double(i);
+      return (sm_object *)sm_new_f64(i);
   return (sm_object *)sms_false; // Needle not found
 }
 // Return a tuple with all of the parts of str,

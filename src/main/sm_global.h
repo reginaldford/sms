@@ -17,7 +17,7 @@ extern sm_symbol *sms_false;
 /// Increase the global garbage collection count by 1, report the result
 int sm_gc_count(int increase);
 /// If replacement is non-zero, stores the new value. Returns the previous value regardless
-double sm_global_growth_factor(double replacement);
+f64 sm_global_growth_factor(f64 replacement);
 /// Global space tuple for memory management
 sm_space_tuple *sm_global_space_tuple(sm_space_tuple *replacement);
 /// Global (primitive) function names

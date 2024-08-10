@@ -69,12 +69,12 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
   case SM_SYMBOL_TYPE: {
     sm_symbol *sym = (sm_symbol *)obj;
     if (sm_symbol_equal(wrt, sym))
-      return (sm_object *)sm_new_double(1);
+      return (sm_object *)sm_new_f64(1);
     else
-      return (sm_object *)sm_new_double(0);
+      return (sm_object *)sm_new_f64(0);
   }
-  case SM_DOUBLE_TYPE:
-    return (sm_object *)sm_new_double(0);
+  case SM_F64_TYPE:
+    return (sm_object *)sm_new_f64(0);
   case SM_EXPR_TYPE: {
     sm_expr *expr = (sm_expr *)obj;
     switch (expr->op) {
@@ -89,7 +89,7 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       bool       obj1_has = has_symbol((sm_expr *)obj1, wrt);
       if (obj0_has && !obj1_has) {
         sm_object *deducted_expr =
-          (sm_object *)sm_new_expr_2(SM_MINUS_EXPR, obj1, (sm_object *)sm_new_double(1), NULL);
+          (sm_object *)sm_new_expr_2(SM_MINUS_EXPR, obj1, (sm_object *)sm_new_f64(1), NULL);
         sm_object *pow_expr = (sm_object *)sm_new_expr_2(SM_POW_EXPR, obj0, deducted_expr, NULL);
         sm_object *diff_outside =
           (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, sm_expr_get_arg(expr, 1), pow_expr, NULL);
@@ -110,7 +110,7 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
         sm_expr *p5 = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)p1, (sm_object *)p4, NULL);
         return (sm_object *)p5;
       }
-      return (sm_object *)sm_new_double(0);
+      return (sm_object *)sm_new_f64(0);
     }
     case SM_PLUS_EXPR:
     case SM_MINUS_EXPR: {
@@ -136,7 +136,7 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
           sum = sm_expr_append(sum, (sm_object *)product);
       }
       if (sum->size == 0)
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
       return (sm_object *)sum;
     }
     case SM_DIVIDE_EXPR: {
@@ -150,13 +150,13 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
                                                  (sm_object *)bprime_a, NULL));
       sm_expr_set_arg(output, 1,
                       (sm_object *)sm_new_expr_2(SM_POW_EXPR, (sm_object *)sm_expr_get_arg(expr, 1),
-                                                 (sm_object *)sm_new_double(2), NULL));
+                                                 (sm_object *)sm_new_f64(2), NULL));
       return (sm_object *)output;
     }
     case SM_SQRT_EXPR: {
       sm_object *arg = sm_expr_get_arg(expr, 0);
       sm_object *power_expr =
-        (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, (sm_object *)sm_new_double(0.5), NULL);
+        (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, (sm_object *)sm_new_f64(0.5), NULL);
       sm_object *diff_power = sm_diff(power_expr, wrt);
       return (sm_object *)diff_power;
     }
@@ -167,27 +167,27 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_COS_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *diff_outside = (sm_object *)sm_new_expr_2(
           SM_TIMES_EXPR, (sm_object *)sm_new_expr(SM_SIN_EXPR, sm_expr_get_arg(expr, 0), NULL),
-          (sm_object *)sm_new_double(-1), NULL);
+          (sm_object *)sm_new_f64(-1), NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_TAN_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *sec = (sm_object *)sm_new_expr(SM_SEC_EXPR, sm_expr_get_arg(expr, 0), NULL);
         sm_object *sec_squared =
-          (sm_object *)sm_new_expr_2(SM_POW_EXPR, sec, (sm_object *)sm_new_double(2), NULL);
+          (sm_object *)sm_new_expr_2(SM_POW_EXPR, sec, (sm_object *)sm_new_f64(2), NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, sec_squared, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_SEC_EXPR: {
       if (has_symbol(expr, wrt)) {
@@ -196,64 +196,64 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_outside, diff_inside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_CSC_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *diff_outside = (sm_object *)sm_new_expr_3(
           SM_TIMES_EXPR, (sm_object *)sm_new_expr(SM_CSC_EXPR, sm_expr_get_arg(expr, 0), NULL),
           (sm_object *)sm_new_expr(SM_COT_EXPR, sm_expr_get_arg(expr, 0), NULL),
-          (sm_object *)sm_new_double(-1), NULL);
+          (sm_object *)sm_new_f64(-1), NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_COT_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *csc_sq = (sm_object *)sm_new_expr_2(
           SM_POW_EXPR, (sm_object *)sm_new_expr(SM_CSC_EXPR, sm_expr_get_arg(expr, 0), NULL),
-          (sm_object *)sm_new_double(2), NULL);
+          (sm_object *)sm_new_f64(2), NULL);
         sm_object *diff_outside =
-          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(-1), csc_sq, NULL);
+          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1), csc_sq, NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_SECH_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *diff_outside = (sm_object *)sm_new_expr_3(
-          SM_TIMES_EXPR, (sm_object *)sm_new_double(-1),
+          SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1),
           (sm_object *)sm_new_expr(SM_TANH_EXPR, sm_expr_get_arg(expr, 0), NULL),
           (sm_object *)sm_new_expr(SM_SECH_EXPR, sm_expr_get_arg(expr, 0), NULL), NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_CSCH_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *diff_outside = (sm_object *)sm_new_expr_3(
-          SM_TIMES_EXPR, (sm_object *)sm_new_double(-1),
+          SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1),
           (sm_object *)sm_new_expr(SM_COTH_EXPR, sm_expr_get_arg(expr, 0), NULL),
           (sm_object *)sm_new_expr(SM_CSCH_EXPR, sm_expr_get_arg(expr, 0), NULL), NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_COTH_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *csch_sq = (sm_object *)sm_new_expr_2(
           SM_POW_EXPR, (sm_object *)sm_new_expr(SM_CSCH_EXPR, sm_expr_get_arg(expr, 0), NULL),
-          (sm_object *)sm_new_double(2), NULL);
+          (sm_object *)sm_new_f64(2), NULL);
         sm_object *diff_outside =
-          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_double(-1), csch_sq, NULL);
+          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1), csch_sq, NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_SINH_EXPR: {
       if (has_symbol(expr, wrt)) {
@@ -262,35 +262,35 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_COSH_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *diff_outside = (sm_object *)sm_new_expr_2(
           SM_TIMES_EXPR, (sm_object *)sm_new_expr(SM_SINH_EXPR, sm_expr_get_arg(expr, 0), NULL),
-          (sm_object *)sm_new_double(-1), NULL);
+          (sm_object *)sm_new_f64(-1), NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, diff_outside, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     case SM_TANH_EXPR: {
       if (has_symbol(expr, wrt)) {
         sm_object *sech = (sm_object *)sm_new_expr(SM_SECH_EXPR, sm_expr_get_arg(expr, 0), NULL);
         sm_object *sec_squared =
-          (sm_object *)sm_new_expr_2(SM_POW_EXPR, sech, (sm_object *)sm_new_double(2), NULL);
+          (sm_object *)sm_new_expr_2(SM_POW_EXPR, sech, (sm_object *)sm_new_f64(2), NULL);
         sm_object *diff_inside = sm_diff(sm_expr_get_arg(expr, 0), wrt);
         return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, sec_squared, NULL);
       } else
-        return (sm_object *)sm_new_double(0);
+        return (sm_object *)sm_new_f64(0);
     }
     default: {
-      return (sm_object *)sm_new_double(0);
+      return (sm_object *)sm_new_f64(0);
     }
     }
   }
   default: {
-    return (sm_object *)sm_new_double(0);
+    return (sm_object *)sm_new_f64(0);
   }
   }
 }

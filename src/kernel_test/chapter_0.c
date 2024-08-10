@@ -7,14 +7,14 @@ int chapter_0(int test) {
   TEST(printf("sizeof %s is %d\n", "enum", (int)sizeof(enum sm_object_type)));
   TEST(printf("sizeof %s is %d\n", "long", (int)sizeof(long)));
   TEST(printf("sizeof %s is %d\n", "long long", (int)sizeof(long long)));
-  TEST(printf("sizeof %s is %d\n", "double", (int)sizeof(double)));
+  TEST(printf("sizeof %s is %d\n", "f64", (int)sizeof(f64)));
   TEST(printf("sizeof %s is %d\n", "int", (int)sizeof(int)));
   TEST(printf("sizeof %s is %d\n", "short", (int)sizeof(int)));
   TEST(printf("sizeof %s is %d\n", "sm_object*", (int)sizeof(sm_object *)));
   TEST(printf("sizeof %s is %d\n", "sm_object", (int)sizeof(sm_object)));
   TEST(printf("sizeof %s is %d\n", "sm_string", (int)sizeof(sm_string)));
   TEST(printf("sizeof %s is %d\n", "sm_cx", (int)sizeof(sm_cx)));
-  TEST(printf("sizeof %s is %d\n", "sm_double", (int)sizeof(sm_double)));
+  TEST(printf("sizeof %s is %d\n", "sm_f64", (int)sizeof(sm_f64)));
   TEST(printf("sizeof %s is %d\n", "sm_pointer", (int)sizeof(sm_pointer)));
   TEST(printf("sizeof %s is %d\n", "sm_symbol", (int)sizeof(sm_symbol)));
   TEST(printf("sizeof %s is %d\n", "sm_expr", (int)sizeof(sm_expr)));

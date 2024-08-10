@@ -242,7 +242,7 @@ _mem_checkFile {return MEM_CHECKFILE;}
 '\0'        {return DONE;}
 
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
-   yylval.num = sm_new_double(atof(yytext));
+   yylval.num = sm_new_f64(atof(yytext));
    return NUM;
   }
 [\<\>\=] { return yytext[0]; }

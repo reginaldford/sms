@@ -14,8 +14,8 @@ sm_string *sm_object_to_string(sm_object *obj1) {
 // Return the length of the string
 uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   switch (obj1->my_type) {
-  case SM_DOUBLE_TYPE:
-    return sm_double_sprint((sm_double *)obj1, buffer, fake);
+  case SM_F64_TYPE:
+    return sm_f64_sprint((sm_f64 *)obj1, buffer, fake);
   case SM_STRING_TYPE:
     return sm_string_sprint((sm_string *)obj1, buffer, fake);
   case SM_EXPR_TYPE:
@@ -49,8 +49,8 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 // Return the size of the object in bytes
 int sm_sizeof(sm_object *obj1) {
   switch (obj1->my_type) {
-  case SM_DOUBLE_TYPE:
-    return sizeof(sm_double);
+  case SM_F64_TYPE:
+    return sizeof(sm_f64);
   case SM_EXPR_TYPE:
     return sizeof(sm_expr) + sizeof(sm_object *) * ((sm_expr *)obj1)->capacity;
   case SM_PRIMITIVE_TYPE:
@@ -98,9 +98,9 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
   if (self->my_type != other->my_type)
     return false;
   switch (self->my_type) {
-  case SM_DOUBLE_TYPE: {
-    double value1 = ((sm_double *)self)->value;
-    double value2 = ((sm_double *)other)->value;
+  case SM_F64_TYPE: {
+    f64 value1 = ((sm_f64 *)self)->value;
+    f64 value2 = ((sm_f64 *)other)->value;
     if (value1 == value2)
       return true;
     else

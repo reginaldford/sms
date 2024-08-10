@@ -64,13 +64,13 @@ test_outline *parse_test_outline(char *filepath) {
     sm_symbol *num_subchapters_sym = sm_new_symbol("num_subchapters", 15);
 
     sm_object *num_subchapters_obj = sm_cx_get(current_ch_cx, num_subchapters_sym);
-    if (num_subchapters_obj->my_type != SM_DOUBLE_TYPE) {
+    if (num_subchapters_obj->my_type != SM_F64_TYPE) {
       printf("In addition to the chapter name, the context must associate 'num_subchapters' with a "
              "number.\n");
       graceful_exit(result_outline, -1);
     }
     // successfully collected number of subchapters
-    double num_subchapters = ((sm_double *)num_subchapters_obj)->value;
+    f64 num_subchapters = ((sm_f64 *)num_subchapters_obj)->value;
     result_outline->num_chapters++;
     result_outline->num_subchapters[i] = num_subchapters;
     result_outline->chapter_names[i]   = &(ch_name_str->content);

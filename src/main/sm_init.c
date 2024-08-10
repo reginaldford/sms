@@ -16,7 +16,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   // Register the signal handler
   sm_register_signals();
   // Default (inner) environment variables
-  double mem_bytes   = 64 * 1024 * 1024;
+  f64 mem_bytes      = 64 * 1024 * 1024;
   env->script_fp[0]  = '\0';
   env->script_fp_len = 0;
   env->eval_cmd[0]   = '\0';
@@ -53,7 +53,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   // Build the global context's parent
   sm_cx     *parent_cx = sm_new_cx(NULL);
   sm_symbol *pi_sym    = sm_new_symbol("PI", 2);
-  sm_cx_let(parent_cx, pi_sym, (sm_object *)sm_new_double(3.14159265358979323846));
+  sm_cx_let(parent_cx, pi_sym, (sm_object *)sm_new_f64(3.14159265358979323846));
   // Add program args if available
   if (env) {
     sm_expr *args = sm_new_expr_n(SM_TUPLE_EXPR, env->num_args, env->num_args, NULL);

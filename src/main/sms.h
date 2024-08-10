@@ -14,6 +14,9 @@
 #include <termios.h>
 #include <pwd.h>
 
+#define f64 double
+#define ui8 char
+
 // We use __builtin_popcount_ll in sm_node.c
 #if defined(__x86_64__)
 #include <x86intrin.h>
@@ -22,8 +25,8 @@
 /// These are the major object types of SMS
 /// @note Must remain syncronized with function sm_object_type_str
 enum sm_object_type {
-  /// 0: double precision floating point (sm_double.h)
-  SM_DOUBLE_TYPE,
+  /// 0: f64 precision floating point (sm_f64.h)
+  SM_F64_TYPE,
   /// 1: Expression (sm_expr.h)
   SM_EXPR_TYPE,
   /// 2: Primitive is not used yet
@@ -91,7 +94,7 @@ enum sm_object_type {
 #include "object/sm_node.h"
 #include "object/sm_cx.h"
 #include "parser/sm_parse_result.h"
-#include "object/sm_double.h"
+#include "object/sm_f64.h"
 #include "object/sm_fun.h"
 #include "object/sm_local.h"
 #include "object/sm_meta.h"

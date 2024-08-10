@@ -186,7 +186,7 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_st
         if (sm_node_map_get(node->map, current_bit) == true) {
           int      child_index = sm_node_child_index(node->map, current_bit);
           sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
-          sm_stack_obj_push(char_stack, sm_new_double(current_bit));
+          sm_stack_obj_push(char_stack, sm_new_f64(current_bit));
           cursor += sm_node_sprint(child_here, &(buffer[cursor]), fake, char_stack);
           sm_stack_obj_pop(char_stack);
           items_to_do--;
@@ -277,7 +277,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
 
-    sm_stack_obj_push(char_stack, sm_new_double(bit_index));
+    sm_stack_obj_push(char_stack, sm_new_f64(bit_index));
     collection = sm_node_keys(child_here, char_stack, collection);
     sm_stack_obj_pop(char_stack);
     map ^= bit; // Clear the current bit

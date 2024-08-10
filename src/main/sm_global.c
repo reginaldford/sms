@@ -30,8 +30,8 @@ int sm_gc_count(int increase) {
 // New capacity of tuples that need to grow:
 // Replacement is ignored if less than 1.
 // new_capacity = old_capacity * growth_factor + 1;
-double sm_global_growth_factor(double replacement) {
-  static double factor = 1.5;
+f64 sm_global_growth_factor(f64 replacement) {
+  static f64 factor = 1.5;
   if (replacement >= 1.0) {
     int previous_factor = factor;
     factor              = replacement;
