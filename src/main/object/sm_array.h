@@ -7,6 +7,6 @@ typedef struct sm_array {
   sm_object *content;
 } sm_array;
 
-sm_array *sm_new_array(uint16_t type, uint32_t size);
+sm_array *sm_new_array(uint16_t type, uint32_t size, sm_object *content, uint32_t offset);
 uint32_t  sm_array_sprint(sm_array *a, char *buffer, bool fake);
 uint32_t  sm_array_contents_sprint(sm_array *a, char *buffer, bool fake);
