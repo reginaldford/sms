@@ -144,6 +144,9 @@ void sm_inflate_heap() {
         ((sm_object **)&stack[1])[i] = sm_meet_object(((sm_object **)&stack[1])[i]);
       break;
     }
+    case SM_ARRAY_TYPE: {
+      // TODO: update ptr to space
+    }
     default:
       break;
     }

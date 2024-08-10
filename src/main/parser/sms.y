@@ -1,11 +1,6 @@
 %{
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <math.h>
-#include <string.h>
 #include "../main/sms.h"
 
 extern int yylex();
@@ -23,6 +18,7 @@ int parsing_fpath_len;
 
 %union {
   sm_f64        *num;
+  sm_ui8        *ui8;
   sm_symbol        *sym;
   sm_expr          *expr;
   sm_string        *str;
@@ -81,7 +77,8 @@ int parsing_fpath_len;
 
 %token IS
 %token DOT
-%token <expr> NUM
+%token <expr> F64
+%token <expr> UI8
 %token <expr> INC 
 %token <expr> DEC
 %token <expr> PIPE
@@ -341,7 +338,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR '*' EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR '/' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR '^' EXPR { $$ = sm_new_expr_2(SM_POW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| NUM{}
+| F64{}
+| UI8{}
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
 | '-' EXPR {
