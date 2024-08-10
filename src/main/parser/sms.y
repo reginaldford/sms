@@ -752,7 +752,7 @@ struct sm_cx *_note() {
   if(parsing_fpath[0])
     sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(parsing_fpath_len,parsing_fpath));
   else
-    sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(10,"(terminal)"));
+    sm_cx_let(note,sm_new_symbol("source",6),(sm_object*)sm_new_string(7,"(stdin)"));
   sm_cx_let(note,sm_new_symbol("line",4),(sm_object*)sm_new_f64(yylineno));
   return note;
 }

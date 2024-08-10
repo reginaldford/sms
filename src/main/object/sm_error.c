@@ -21,7 +21,7 @@ sm_error *sm_new_error(int title_len, char *title_str, int message_len, char *me
   if (sourceLen)
     sourceStr = sm_new_string(sourceLen, source);
   else
-    sourceStr = sm_new_string(10, "(terminal)");
+    sourceStr = sm_new_string(7, "(stdin)");
   new_error->source = sourceStr;
   new_error->line   = line;
   // Run the error handler if it exists
