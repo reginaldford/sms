@@ -22,45 +22,6 @@ sm_heap *sm_new_heap(uint32_t capacity) {
   return new_heap;
 }
 
-// Check for adequate space size
-// If it is acceptable,  remove it from the space tuple and return the space, else return NULL
-sm_space *check_space(uint32_t size, uint32_t index) {
-  if (index + 1 <= sm_global_space_tuple(NULL)->size) {
-    uint32_t space_size =
-      sm_get_space_tuple(sm_global_space_tuple(NULL))[index]->my_type - SM_SPACE_TYPE;
-    if (space_size >= size) {
-      sm_space *good_space = sm_get_space_tuple(sm_global_space_tuple(NULL))[index];
-      return good_space;
-    }
-    return NULL;
-  }
-  return NULL;
-}
-
-// Binary search for space in a size ordered space tuple
-sm_search_result find_space_within_bounds(sm_space_tuple *ssa, uint32_t size, uint32_t lower_limit,
-                                          uint32_t upper_limit) {
-  sm_space **space_tuple = sm_get_space_tuple(ssa);
-  int        comparison  = 1;
-  uint32_t   guess_point = (upper_limit + lower_limit) / 2.0;
-  while (lower_limit < upper_limit && comparison != 0) {
-    comparison = space_tuple[guess_point]->my_type - SM_SPACE_TYPE - size;
-    if (comparison == 0)
-      return (sm_search_result){.found = true, .index = guess_point};
-    else if (comparison > 0)
-      upper_limit = guess_point == 0 ? 0 : guess_point - 1;
-    else
-      lower_limit = guess_point + 1;
-    guess_point = (upper_limit + lower_limit) / 2.0;
-  }
-  comparison = space_tuple[guess_point]->my_type - SM_SPACE_TYPE - size;
-  if (comparison == 0)
-    return (sm_search_result){.found = true, .index = guess_point};
-  if (comparison < 0) {
-    return (sm_search_result){.found = false, .index = guess_point + 1};
-  } else // comparison > 0
-    return (sm_search_result){.found = false, .index = guess_point};
-}
 
 // Internal 'malloc'
 void *sm_malloc(uint32_t size) {

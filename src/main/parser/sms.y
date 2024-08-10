@@ -39,8 +39,10 @@ int parsing_fpath_len;
 %type <param_list> PARAM_LIST
 %type <array> F64_ARRAY
 %type <array> F64_ARRAY_OPEN
+%type <array> F64_ARRAY_LIST
 %type <array> UI8_ARRAY
 %type <array> UI8_ARRAY_OPEN
+%type <array> UI8_ARRAY_LIST
 %type <expr> PARAM_LIST_OPEN
 %type <expr> IF_STATEMENT
 %type <meta> META_EXPR
@@ -531,12 +533,12 @@ FUN_INTRO : PARAM_LIST ARROW {
 }
 
 
-F64_ARRAY : F64_ARRAY_OPEN ']' {
-  $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0);
-}
-| F64_ARRAY_OPEN SYM ']' {
-  //$$ = sm_new_array;
-}
+F64_ARRAY : F64_ARRAY_LIST ']' {};
+| F64_ARRAY_LIST ',' ']' {};
+| F64_ARRAY_OPEN F64 ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
+| F64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
+
+F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 { $$ = sm_new_array(SM_F64_TYPE,2,NULL,0); }
 
 UI8_ARRAY : UI8_ARRAY_OPEN ']' {
   $$ = sm_new_array(SM_UI8_TYPE, 0,NULL,0);
@@ -659,7 +661,7 @@ META_EXPR : ':' EXPR { $$ = sm_new_meta((sm_object *)$2, *(sm_global_lex_stack(N
 
 TUPLE : TUPLE_LIST ']' {};
 | TUPLE_LIST ',' ']' {};
-| '[' EXPR ']' { $$ = (sm_expr *)sm_new_expr(SM_TUPLE_EXPR, (sm_object *)$2, _note()); }
+| '[' EXPR ']' { $$ = sm_new_expr(SM_TUPLE_EXPR, (sm_object *)$2, _note()); }
 | '[' ']' { $$ = sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, _note()); }
 
 TUPLE_LIST : '[' EXPR ',' EXPR { $$ = sm_new_expr_2(SM_TUPLE_EXPR, (sm_object *)$2, (sm_object *)$4, _note()); }
