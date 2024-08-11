@@ -12,14 +12,14 @@ sm_array *sm_new_array(uint32_t type, uint32_t size, sm_object *content, uint32_
   return output;
 }
 
-double sm_f64_array_get_bare(sm_array *a, uint32_t index) {
+f64 sm_f64_array_get_bare(sm_array *a, uint32_t index) {
   // if (index >= a->size || a->inner_type != SM_F64_TYPE) {
-  return ((f64 *)&a->content[1])[index];
+  return ((f64 *)&a->content[2])[index];
 }
 
 ui8 sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
   // if (index >= a->size || a->inner_type != SM_UI8_TYPE) {
-  return ((ui8 *)&a->content[1])[index];
+  return ((ui8 *)&a->content[2])[index];
 }
 
 
@@ -39,16 +39,14 @@ sm_object *sm_array_get(sm_array *a, uint32_t index) {
 sm_object *sm_f64_array_set(sm_array *a, uint32_t index, sm_f64 *number) {
   if (index >= a->size)
     return (sm_object *)sms_false;
-  if (a->inner_type != SM_F64_TYPE)
-    return (sm_object *)sms_false;
-  ((f64 *)&a->content[1])[index] = number->value;
+  // needs to account for space object's header which has a size
+  // this immediately converts to f64,
+  ((f64 *)&a->content[2])[index] = number->value;
   return (sm_object *)sms_true;
 }
 
 sm_object *sm_ui8_array_set(sm_array *a, uint32_t index, sm_ui8 *number) {
   if (index >= a->size)
-    return (sm_object *)sms_false;
-  if (a->inner_type != SM_UI8_TYPE)
     return (sm_object *)sms_false;
   ((ui8 *)&a->content[1])[index] = number->value;
   return (sm_object *)sms_true;
