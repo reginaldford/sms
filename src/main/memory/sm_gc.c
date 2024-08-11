@@ -145,7 +145,9 @@ void sm_inflate_heap() {
       break;
     }
     case SM_ARRAY_TYPE: {
-      // TODO: update ptr to space
+      sm_array *a = (sm_array *)current_obj;
+      a->content  = sm_meet_object(a->content);
+      break;
     }
     default:
       break;

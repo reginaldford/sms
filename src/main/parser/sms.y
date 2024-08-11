@@ -17,8 +17,8 @@ int parsing_fpath_len;
 %}
 
 %union {
-  sm_f64        *num;
-  sm_ui8        *ui8;
+  sm_f64           *num;
+  sm_ui8           *ui8;
   sm_symbol        *sym;
   sm_expr          *expr;
   sm_string        *str;
@@ -28,7 +28,7 @@ int parsing_fpath_len;
   sm_error         *err;
   sm_expr          *param_list;
   sm_fun_param_obj *param;
-  sm_array *array;
+  sm_array         *array;
 };
 
 %type <fun> FUN
@@ -535,7 +535,11 @@ FUN_INTRO : PARAM_LIST ARROW {
 
 F64_ARRAY : F64_ARRAY_LIST ']' {};
 | F64_ARRAY_LIST ',' ']' {};
-| F64_ARRAY_OPEN F64 ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
+| F64_ARRAY_OPEN F64 ']' {
+  sm_space * space = sm_new_space(sizeof(f64));
+  f64 * content = (f64*)&space[1];
+  *content = ((sm_f64*)$2)->value;
+  $$ = sm_new_array(SM_F64_TYPE, 1,(sm_object*)space,sizeof(sm_object)) ;} 
 | F64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
 
 F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 { $$ = sm_new_array(SM_F64_TYPE,2,NULL,0); }
