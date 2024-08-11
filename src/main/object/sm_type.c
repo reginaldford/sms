@@ -37,9 +37,3 @@ uint32_t sm_type_name_len(uint32_t which) {
                                     5, 5, 2, 5, 4, 6, 5, 5, 5, 3, 1};
   return response_len[which];
 }
-
-// Return the size of the object header in bytes
-uint8_t sm_type_header_size(uint32_t which) {
-  static const uint8_t default_size = 4;
-  return default_size;
-}

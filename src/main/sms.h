@@ -75,7 +75,7 @@ enum sm_object_type {
 #define MIN(x, y) (x < y ? x : y)
 #define MAX(x, y) (x > y ? x : y)
 #define DEBUG(note)                                                                                \
-  fprintf(stderr, "%s:%i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                     \
+  fprintf(stderr, "\n%s:%i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                   \
   fflush(stdout);
 #include "linenoise/linenoise.h"
 #include "sm_common.h"
@@ -86,7 +86,6 @@ enum sm_object_type {
 #include "object/sm_type.h"
 #include "object/sm_string.h"
 #include "object/sm_object.h"
-#include "object/sm_array.h"
 #include "object/sm_expr.h"
 #include "sm_stack.h"
 #include "object/sm_stack_obj.h"
@@ -104,6 +103,7 @@ enum sm_object_type {
 #include "object/sm_bc_block.h"
 #include "memory/sm_pointer.h"
 #include "object/sm_space.h"
+#include "object/sm_array.h"
 #include "memory/sm_gc.h"
 #include "sm_global.h"
 #include "terminal/sm_terminal.h"

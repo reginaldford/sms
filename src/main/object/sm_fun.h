@@ -3,9 +3,9 @@
 /// An sm_fun struct is understood to have a tuple of sm_fun_param structs following.
 /// The number of sm_fun_param structs that follow is specified in num_params
 typedef struct sm_fun {
-  int16_t           my_type;
+  uint32_t          my_type;
   struct sm_cx     *parent;
-  uint16_t          num_params;
+  uint32_t          num_params;
   struct sm_object *content;
 } sm_fun;
 

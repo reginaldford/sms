@@ -3,7 +3,7 @@
 /// A boxed f64-precision floating point value
 /// @note Until SMS has a type system, this is the only numeric type
 typedef struct sm_f64 {
-  int16_t my_type;
+  int32_t my_type;
   f64     value;
 } sm_f64;
 
