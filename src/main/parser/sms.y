@@ -537,9 +537,9 @@ F64_ARRAY : F64_ARRAY_LIST ']' {};
 | F64_ARRAY_LIST ',' ']' {};
 | F64_ARRAY_OPEN F64 ']' {
   sm_space * space = sm_new_space(sizeof(f64));
-  f64 * content = (f64*)&space[1];
-  *content = ((sm_f64*)$2)->value;
-  $$ = sm_new_array(SM_F64_TYPE, 1,(sm_object*)space,sizeof(sm_object)) ;} 
+  $$ = sm_new_array(SM_F64_TYPE, 1,(sm_object*)space,sizeof(sm_space)) ;
+  sm_f64_array_set($$,0,(sm_f64*)$2);
+} 
 | F64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
 
 F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 { $$ = sm_new_array(SM_F64_TYPE,2,NULL,0); }

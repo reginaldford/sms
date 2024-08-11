@@ -76,7 +76,6 @@ toStrFmt     {return TO_STRFMT;}
 isNan        {return ISNAN;};
 isInf        {return ISINF;};
 
-
 is           {return IS;}
 
 not          {return NOT;}

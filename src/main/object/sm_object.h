@@ -2,7 +2,7 @@
 
 // all garbage collected objects start with this
 typedef struct sm_object {
-  int16_t my_type;
+  uint32_t my_type;
 } sm_object;
 
 sm_string *sm_object_to_string(sm_object *obj1);
