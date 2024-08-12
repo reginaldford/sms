@@ -28,7 +28,7 @@ uint32_t sm_f64_sprint(sm_f64 *self, char *buffer, bool fake) {
     buffer = internal_buf;
   }
   uint16_t count = 0;
-  for (; count < 24 && buffer[count] != '\0'; count++)
-    ;
+  while (count < 24 && buffer[count] != '\0')
+    count++;
   return count;
 }
