@@ -3,7 +3,7 @@
 // Store an error
 // source is NULL or "file : line : col" or similar
 typedef struct sm_error {
-  int16_t    my_type;
+  int32_t    my_type;
   sm_symbol *title;
   sm_string *message;
   sm_string *source;

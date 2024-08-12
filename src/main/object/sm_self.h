@@ -2,7 +2,7 @@
 
 /// This structure represents a self statement
 typedef struct sm_self {
-  int           my_type;
+  uint32_t      my_type;
   struct sm_cx *context;
 } sm_self;
 

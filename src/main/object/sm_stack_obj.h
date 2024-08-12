@@ -4,7 +4,7 @@
 /// Instead of an integer for the top location, it uses a pointer
 /// Therefore, size = stack->top - &(stack[1])
 typedef struct sm_stack_obj {
-  int16_t  my_type;
+  uint32_t my_type;
   uint32_t capacity;
   void   **top;
 } sm_stack_obj;

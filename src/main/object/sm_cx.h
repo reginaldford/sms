@@ -2,7 +2,7 @@
 /// Contexts are data trees that map symbol names to values
 
 typedef struct sm_cx {
-  int16_t       my_type;
+  int32_t       my_type;
   struct sm_cx *parent;
   sm_node      *content;
 } sm_cx;
