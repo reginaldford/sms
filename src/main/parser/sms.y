@@ -17,7 +17,7 @@ int parsing_fpath_len;
 %}
 
 %union {
-  int32_t          integer;
+  uint32_t         integer;
   sm_f64           *num;
   sm_ui8           *ui8;
   sm_symbol        *sym;
@@ -535,9 +535,13 @@ FUN_INTRO : PARAM_LIST ARROW {
   $$ = new_fun;
 }
 
-
 F64_ARRAY : F64_ARRAY_LIST ']' {};
 | F64_ARRAY_LIST ',' ']' {};
+| F64_ARRAY_OPEN INTEGER ']' {
+  sm_space * space = sm_new_space(sizeof(f64));
+  $$ = sm_new_array(SM_F64_TYPE, 1,(sm_object*)space,sizeof(sm_space)) ;
+  sm_f64_array_set($$,0,sm_new_f64($2));
+}
 | F64_ARRAY_OPEN F64 ']' {
   sm_space * space = sm_new_space(sizeof(f64));
   $$ = sm_new_array(SM_F64_TYPE, 1,(sm_object*)space,sizeof(sm_space)) ;

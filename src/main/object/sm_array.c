@@ -48,7 +48,7 @@ sm_object *sm_f64_array_set(sm_array *a, uint32_t index, sm_f64 *number) {
 sm_object *sm_ui8_array_set(sm_array *a, uint32_t index, sm_ui8 *number) {
   if (index >= a->size)
     return (sm_object *)sms_false;
-  ((ui8 *)&a->content[1])[index] = number->value;
+  ((ui8 *)&a->content[2])[index] = number->value;
   return (sm_object *)sms_true;
 }
 

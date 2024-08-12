@@ -76,7 +76,7 @@ int sm_sizeof(sm_object *obj1) {
   case SM_LOCAL_TYPE:
     return sizeof(sm_local);
   case SM_SPACE_TYPE:
-    return sizeof(sm_space) + sm_round_size(((sm_space *)obj1)->size);
+    return sm_round_size(sizeof(sm_space) + ((sm_space *)obj1)->size);
   case SM_SELF_TYPE:
     return sizeof(struct sm_self);
   case SM_ERR_TYPE:
