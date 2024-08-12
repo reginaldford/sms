@@ -146,22 +146,7 @@ void sm_inflate_heap() {
     }
     case SM_ARRAY_TYPE: {
       sm_array *a = (sm_array *)current_obj;
-      sm_sprint_dump();
-
-      printf("\n\n\n...\n\n\n");
-
-      a->content = sm_meet_object(a->content);
-      sm_sprint_dump();
-
-      // printf("\nAfter:\n");
-      // printf("We have value 0: %u\n", sm_ui8_array_get_bare(a, 0));
-      // printf("content type#: %u\n", a->content->my_type);
-      // printf("content size#: %u\n", sm_sizeof(a->content));
-      // printf("content csize#: %u\n", sizeof(*a->content));
-      // printf("array type#: %u\n", a->my_type);
-      // printf("array size#: %u\n", sm_sizeof(a));
-      // printf("array csize#: %u\n", sizeof(*a));
-
+      a->content  = sm_meet_object(a->content);
       break;
     }
     default:
