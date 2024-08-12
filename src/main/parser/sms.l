@@ -96,7 +96,7 @@ parent       {return PARENT;}
 rm           {return RM;}
 
 "f64["       {return F64_ARRAY_OPEN;}
-"ui8["        {return UI8_ARRAY_OPEN;}
+"ui8["       {return UI8_ARRAY_OPEN;}
 
 newCx        {return NEW_CX;}
 cxSetParent  {return CX_SETPARENT;}
@@ -239,6 +239,11 @@ _mem_checkFile {return MEM_CHECKFILE;}
 
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}
+
+([0-9]+) {
+ yylval.integer = atoi(yytext);
+ return INTEGER;
+}
 
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
    yylval.num = sm_new_f64(atof(yytext));

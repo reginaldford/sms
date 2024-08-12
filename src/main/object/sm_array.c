@@ -83,8 +83,7 @@ uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
   uint32_t cursor = 0;
   uint32_t i      = 0;
   for (; i + 1 < array->size; i++) {
-    // cursor += sm_f64_sprint(sm_array_get(array, i), &(buffer[cursor]), fake);
-    // cursor += sm_f64_sprint(sm_array_get(array, i), &(buffer[cursor]), fake);
+    cursor += sprintf(&buffer[cursor], "%f", sm_f64_array_get_bare(array, array->size - 1));
     if (!fake)
       buffer[cursor] = ',';
     cursor++;
@@ -99,6 +98,27 @@ uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
   }
   return cursor;
 }
+uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
+  if (array->size == 0)
+    return 0;
+  uint32_t cursor = 0;
+  uint32_t i      = 0;
+  for (; i + 1 < array->size; i++) {
+    cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, array->size - 1));
+    if (!fake)
+      buffer[cursor] = ',';
+    cursor++;
+  }
+  if (array->size > 0) {
+    if (!fake) {
+      cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, array->size - 1));
+    } else {
+      char tmp[20];
+      cursor += sprintf(tmp, "%i", sm_ui8_array_get_bare(array, array->size - 1));
+    }
+  }
+  return cursor;
+}
 
 uint32_t sm_array_contents_sprint(sm_array *a, char *buffer, bool fake) {
   uint32_t cursor = 0;
@@ -107,7 +127,7 @@ uint32_t sm_array_contents_sprint(sm_array *a, char *buffer, bool fake) {
     return sm_f64_array_contents_sprint(a, buffer, fake);
   }
   case SM_UI8_TYPE: {
-    // return sm_ui8_array_get_bare(a, index);
+    return sm_ui8_array_contents_sprint(a, buffer, fake);
   }
   }
   return 0;
