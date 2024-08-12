@@ -13,5 +13,5 @@ uint32_t   sm_array_sprint(sm_array *a, char *buffer, bool fake);
 uint32_t   sm_array_contents_sprint(sm_array *a, char *buffer, bool fake);
 sm_object *sm_f64_array_set(sm_array *a, uint32_t index, sm_f64 *number);
 sm_object *sm_ui8_array_set(sm_array *a, uint32_t index, sm_ui8 *number);
-double     sm_f64_array_get_bare(sm_array *a, uint32_t index);
+f64        sm_f64_array_get_bare(sm_array *a, uint32_t index);
 ui8        sm_ui8_array_get_bare(sm_array *a, uint32_t index);
