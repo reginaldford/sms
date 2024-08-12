@@ -22,7 +22,6 @@ ui8 sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
   return ((ui8 *)&a->content[2])[index];
 }
 
-
 sm_object *sm_array_get(sm_array *a, uint32_t index) {
   switch (a->inner_type) {
   case SM_F64_TYPE: {
