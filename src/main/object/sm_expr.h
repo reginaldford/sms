@@ -202,7 +202,7 @@ enum SM_EXPR_TYPE {
 // Assumed to have pointers following the structure for each argument
 // Size denotes the number of trailing pointers.
 typedef struct sm_expr {
-  int16_t           my_type;  // 2
+  int32_t           my_type;  // 2
   enum SM_EXPR_TYPE op;       // 4
   uint32_t          capacity; // 4
   uint32_t          size;     // 4

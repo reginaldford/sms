@@ -3,7 +3,7 @@
 /// These mapped trie nodes make up trees rooted in sm_cx structs
 typedef struct sm_node {
   /// The type of this object (SM_NODE_TYPE)
-  int16_t my_type;
+  int32_t my_type;
   /// The value is null or some object
   struct sm_object *value;
   /// Go to the next sibling node

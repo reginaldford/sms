@@ -2,7 +2,7 @@
 
 /// This structure forms a return statement
 typedef struct sm_return {
-  uint16_t   my_type;
+  uint32_t   my_type;
   sm_object *address;
 } sm_return;
 

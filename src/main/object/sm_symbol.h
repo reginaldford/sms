@@ -2,7 +2,7 @@
 
 /// Object for a symbol which references a value in a context if evaluated
 typedef struct sm_symbol {
-  int16_t    my_type;
+  int32_t    my_type;
   sm_string *name;
   sm_string *code_id;
 } sm_symbol;
