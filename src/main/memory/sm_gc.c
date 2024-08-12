@@ -145,12 +145,8 @@ void sm_inflate_heap() {
       break;
     }
     case SM_ARRAY_TYPE: {
-      DEBUG("array gc");
       sm_array *a = (sm_array *)current_obj;
-      printf("array content type is %i\n", a->content->my_type);
-
-      a->content = sm_meet_object(a->content);
-      printf("new array content type is %i\n", a->content->my_type);
+      a->content  = sm_meet_object(a->content);
       break;
     }
     default:

@@ -17,6 +17,7 @@ int parsing_fpath_len;
 %}
 
 %union {
+  int32_t          integer;
   sm_f64           *num;
   sm_ui8           *ui8;
   sm_symbol        *sym;
@@ -81,6 +82,7 @@ int parsing_fpath_len;
 %token DOT
 %token <expr> F64
 %token <expr> UI8
+%token <integer> INTEGER
 %token <expr> INC 
 %token <expr> DEC
 %token <expr> PIPE
@@ -342,6 +344,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR '^' EXPR { $$ = sm_new_expr_2(SM_POW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | F64{}
 | UI8{}
+| INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
 | '-' EXPR {
@@ -541,12 +544,16 @@ F64_ARRAY : F64_ARRAY_LIST ']' {};
   sm_f64_array_set($$,0,(sm_f64*)$2);
 } 
 | F64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
-
 F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 { $$ = sm_new_array(SM_F64_TYPE,2,NULL,0); }
 
-UI8_ARRAY : UI8_ARRAY_OPEN ']' {
-  $$ = sm_new_array(SM_UI8_TYPE, 0,NULL,0);
-}
+UI8_ARRAY : UI8_ARRAY_OPEN ']' {};
+| UI8_ARRAY_LIST ',' ']' {};
+| UI8_ARRAY_OPEN INTEGER ']' {
+  sm_space * space = sm_new_space(sizeof(ui8));
+  $$ = sm_new_array(SM_UI8_TYPE, 1,(sm_object*)space,sizeof(sm_space)) ;
+  sm_ui8_array_set($$,0,sm_new_ui8($2));
+} 
+UI8_ARRAY_LIST : UI8_ARRAY_OPEN UI8 ',' UI8 { $$ = sm_new_array(SM_UI8_TYPE,2,NULL,0); }
 
 PARAM_LIST : '(' ')' {
   $$ = sm_new_expr_n(SM_PARAM_LIST_EXPR, 0, 0, _note());
