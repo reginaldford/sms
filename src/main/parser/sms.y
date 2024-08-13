@@ -548,7 +548,9 @@ F64_ARRAY : F64_ARRAY_LIST ']' {};
   sm_f64_array_set($$,0,(sm_f64*)$2);
 } 
 | F64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
-F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 { $$ = sm_new_array(SM_F64_TYPE,2,NULL,0); }
+F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 {
+               $$ = sm_new_array(SM_F64_TYPE,2,NULL,0);
+  }
 
 UI8_ARRAY : UI8_ARRAY_OPEN ']' {};
 | UI8_ARRAY_LIST ',' ']' {};
@@ -557,7 +559,19 @@ UI8_ARRAY : UI8_ARRAY_OPEN ']' {};
   $$ = sm_new_array(SM_UI8_TYPE, 1,(sm_object*)space,sizeof(sm_space)) ;
   sm_ui8_array_set($$,0,sm_new_ui8($2));
 } 
-UI8_ARRAY_LIST : UI8_ARRAY_OPEN UI8 ',' UI8 { $$ = sm_new_array(SM_UI8_TYPE,2,NULL,0); }
+UI8_ARRAY_LIST : UI8_ARRAY_OPEN INTEGER ',' INTEGER  {
+     // Putting space after array s.t. space can grow without recopy
+     // YOU ARE HERE?
+     $$ = sm_new_array(SM_UI8_TYPE,2,NULL,0); 
+     sm_space * space = sm_new_space(4);
+     $$->content=(sm_object*)space;
+     sm_ui8_array_set($$,0,sm_new_ui8($2));
+     sm_ui8_array_set($$,1,sm_new_ui8($4));
+}
+| UI8_ARRAY_LIST ',' INTEGER {
+      sm_ui8_array_set($$,$$->size,sm_new_ui8($3));
+      $$->size++;
+};
 
 PARAM_LIST : '(' ')' {
   $$ = sm_new_expr_n(SM_PARAM_LIST_EXPR, 0, 0, _note());

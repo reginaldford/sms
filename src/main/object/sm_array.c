@@ -76,27 +76,30 @@ uint32_t sm_array_sprint(sm_array *a, char *buffer, bool fake) {
     buffer[len] = ']';
   return ++len;
 }
+
 uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
   if (array->size == 0)
     return 0;
   uint32_t cursor = 0;
   uint32_t i      = 0;
   for (; i + 1 < array->size; i++) {
-    cursor += sprintf(&buffer[cursor], "%f", sm_f64_array_get_bare(array, array->size - 1));
+    cursor += snprintf(&buffer[cursor], 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
     if (!fake)
       buffer[cursor] = ',';
     cursor++;
   }
   if (array->size > 0) {
     if (!fake) {
-      cursor += sprintf(&buffer[cursor], "%f", sm_f64_array_get_bare(array, array->size - 1));
+      cursor +=
+        snprintf(&buffer[cursor], 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
     } else {
-      char tmp[20];
-      cursor += sprintf(tmp, "%f", sm_f64_array_get_bare(array, array->size - 1));
+      char tmp[24];
+      cursor += snprintf(tmp, 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
     }
   }
   return cursor;
 }
+
 uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
   if (array->size == 0)
     return 0;

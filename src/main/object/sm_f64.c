@@ -2,6 +2,7 @@
 
 #include "../sms.h"
 
+// Return new object encapsulating 64 bit floating point value
 sm_f64 *sm_new_f64(f64 value) {
   struct sm_f64 *newnum = (sm_f64 *)sm_malloc(sizeof(sm_f64));
   newnum->my_type       = SM_F64_TYPE;
@@ -20,11 +21,11 @@ sm_string *sm_f64_to_string(sm_f64 *self) {
 // Adds a c string describing the f64 to the buffer
 // Returns the length
 uint32_t sm_f64_sprint(sm_f64 *self, char *buffer, bool fake) {
-  char internal_buf[24];
+  char internal_buf[25];
   if (!fake)
-    snprintf(buffer, 23, "%.16g", self->value);
+    snprintf(buffer, 24, "%.16g", self->value);
   else {
-    snprintf(internal_buf, 23, "%.16g", self->value);
+    snprintf(internal_buf, 24, "%.16g", self->value);
     buffer = internal_buf;
   }
   uint16_t count = 0;
