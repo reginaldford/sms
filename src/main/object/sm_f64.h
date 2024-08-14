@@ -1,7 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-/// A boxed f64-precision floating point value
-/// @note Until SMS has a type system, this is the only numeric type
+/// A boxed double-precision floating point value
 typedef struct sm_f64 {
   uint32_t my_type;
   f64      value;

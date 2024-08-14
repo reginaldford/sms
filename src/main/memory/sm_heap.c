@@ -9,7 +9,6 @@ extern sm_symbol *sms_false;
 extern sm_heap   *sms_symbol_heap;
 extern sm_heap   *sms_symbol_name_heap;
 
-
 // For rounding up object size to the next multiple of 4 bytes.
 uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
 
@@ -21,7 +20,6 @@ sm_heap *sm_new_heap(uint32_t capacity) {
   new_heap->storage  = (char *)(new_heap + 1);
   return new_heap;
 }
-
 
 // Internal 'malloc'
 void *sm_malloc(uint32_t size) {
@@ -62,6 +60,7 @@ int sm_mem_dump(sm_heap *heap, char *name) {
   FILE *fp = fopen(name, "wb");
   // Write the data to the file
   fwrite(buffer, 1, buffer_length, fp);
+  fflush(fp);
   // Close the file
   // Returns 0 if there are no problems
   return fclose(fp);
