@@ -32,3 +32,5 @@ int sm_mem_dump(sm_heap *heap, char *fname);
 void sm_mem_cleanup();
 /// Prints every object in the current heap to stdout
 void sm_sprint_dump();
+/// Dumps the memory with a counting file name. current_#.mem and  other_#.mem starting with 1
+void sm_dump_and_count();

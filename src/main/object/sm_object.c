@@ -58,7 +58,7 @@ uint32_t sm_sizeof(sm_object *obj1) {
   case SM_PRIMITIVE_TYPE:
     return sizeof(sm_expr);
   case SM_STRING_TYPE:
-    return sm_round_size(sizeof(sm_string) + ((sm_string *)obj1)->size + 1);
+    return sizeof(sm_string) + sm_round_size(((sm_string *)obj1)->size);
   case SM_SYMBOL_TYPE:
     return sizeof(sm_symbol);
   case SM_CX_TYPE:
@@ -87,8 +87,9 @@ uint32_t sm_sizeof(sm_object *obj1) {
     return sizeof(sm_stack) + sizeof(void *) * sm_stack_obj_size((sm_stack_obj *)obj1);
   case SM_ARRAY_TYPE:
     return sizeof(sm_array);
-  case SM_UI8_TYPE:
+  case SM_UI8_TYPE: {
     return sizeof(sm_ui8);
+  }
   default:
     printf("Cannot determine size of object of type %u\n", obj1->my_type);
     exit(1);
@@ -105,6 +106,14 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
   case SM_F64_TYPE: {
     f64 value1 = ((sm_f64 *)self)->value;
     f64 value2 = ((sm_f64 *)other)->value;
+    if (value1 == value2)
+      return true;
+    else
+      return false;
+  }
+  case SM_UI8_TYPE: {
+    ui8 value1 = ((sm_ui8 *)self)->value;
+    ui8 value2 = ((sm_ui8 *)other)->value;
     if (value1 == value2)
       return true;
     else

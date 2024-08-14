@@ -549,13 +549,13 @@ F64_ARRAY : F64_ARRAY_LIST ']' {};
 } 
 | F64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
 F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 {
-               $$ = sm_new_array(SM_F64_TYPE,2,NULL,0);
-  }
+ $$ = sm_new_array(SM_F64_TYPE,2,NULL,0);
+}
 
 UI8_ARRAY : UI8_ARRAY_OPEN ']' {};
 | UI8_ARRAY_LIST ',' ']' {};
 | UI8_ARRAY_OPEN INTEGER ']' {
-  sm_space * space = sm_new_space(2);
+  sm_space * space = sm_new_space(1);
   $$ = sm_new_array(SM_UI8_TYPE, 1,(sm_object*)space,sizeof(sm_space)) ;
   sm_ui8_array_set($$,0,sm_new_ui8($2));
 } 
