@@ -54,7 +54,7 @@ void sm_inflate_heap() {
   // Inflate new space. 'meet' every ptr
   // Meeting will copy to new heap if necessary
   char *scan_cursor = (char *)sms_heap->storage;
-  while (scan_cursor < ((char *)sms_heap->storage) + sms_heap->used) {
+  while (scan_cursor < sms_heap->storage + sms_heap->used) {
     sm_object *current_obj = (sm_object *)scan_cursor;
     // scan_cursor is not referred to for the rest of the loop
     scan_cursor += sm_sizeof(current_obj);
@@ -174,9 +174,9 @@ void sm_garbage_collect() {
     *sm_global_lex_stack(NULL)->top =
       (sm_cx *)sm_move_to_new_heap((sm_object *)*sm_global_lex_stack(NULL)->top);
 
-    // Parser output is a root
+    // Parser output never gets saved. Ptrs would get broken, so set it to a literal
     if (sm_global_parser_output(NULL))
-      sm_global_parser_output(sm_meet_object(((sm_object *)sm_global_parser_output(NULL))));
+      sm_global_parser_output((sm_object *)sms_false);
 
     // Inflate
     sm_inflate_heap();
@@ -184,7 +184,7 @@ void sm_garbage_collect() {
     // For tracking purposes
     sm_gc_count(1);
   }
-  // This will be a global variable
+  // Report memory stat
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
     const uint32_t KB = 1024;
     putc('\n', stdout);
