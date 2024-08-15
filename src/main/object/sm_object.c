@@ -41,10 +41,12 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_UI8_TYPE:
     return sm_ui8_sprint((sm_ui8 *)obj1, buffer, fake);
   default: {
-    int len = 3 + log(obj1->my_type) / log(10);
-    if (!fake)
-      snprintf(buffer, len, "?(%i)", obj1->my_type);
-    return len;
+    if (fake)
+      return sprintf(buffer, "?(%i)", obj1->my_type);
+    else {
+      char fake_buffer[10];
+      return sprintf(fake_buffer, "?(%i)", obj1->my_type);
+    }
   }
   }
 }
