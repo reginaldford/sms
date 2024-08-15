@@ -2,6 +2,9 @@
 
 #include "../sms.h"
 
+extern sm_heap *sms_symbol_heap;
+extern sm_heap *sms_symbol_name_heap;
+
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
   sm_string *new_str       = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));
@@ -52,6 +55,9 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 }
 // Return the size of the object in bytes
 uint32_t sm_sizeof(sm_object *obj1) {
+  if (!sm_is_within_heap(obj1, sms_heap) && !sm_is_within_heap(obj1, sms_other_heap)) {
+    exit(1);
+  }
   switch (obj1->my_type) {
   case SM_F64_TYPE:
     return sizeof(sm_f64);
@@ -92,9 +98,20 @@ uint32_t sm_sizeof(sm_object *obj1) {
   case SM_UI8_TYPE: {
     return sizeof(sm_ui8);
   }
-  default:
-    printf("Cannot determine size of object of type %u\n", obj1->my_type);
+  default: {
+    fprintf(stderr, "BAD OBJECT CASE: \n");
+    fprintf(stderr, "Type: %u\n", obj1->my_type);
+    fprintf(stderr, "Position Ptr      : %p\n", obj1);
+    fprintf(stderr, "Position in Heap  : %ld\n", ((char *)obj1) - sms_other_heap->storage);
+    fprintf(stderr, "Is in symbol  heap: %b\n", sm_is_within_heap(obj1, sms_symbol_heap));
+    fprintf(stderr, "Is in symname heap: %b\n", sm_is_within_heap(obj1, sms_symbol_name_heap));
+    sm_dump_and_count();
+    fprintf(stderr, "Memory dumped\n");
+    sm_mem_cleanup();
+    fprintf(stderr, "Exiting with 1\n");
+    fflush(stdout);
     exit(1);
+  }
   }
 }
 
