@@ -11,24 +11,14 @@ sm_ui8 *sm_new_ui8(ui8 value) {
 
 // Return an sm_string describing this ui8
 sm_string *sm_ui8_to_string(sm_ui8 *self) {
-  sm_string *new_str = sm_new_string(sm_ui8_sprint(self, NULL, true), "");
-  sm_ui8_sprint(self, &(new_str->content), false);
-  (&new_str->content)[new_str->size] = '\0';
-  return new_str;
+  return sm_new_fstring_at(sms_heap, "ui8(%u)", self->value);
 }
 
 // Adds a c string describing the ui8 to the buffer
 // Returns the length
 uint32_t sm_ui8_sprint(sm_ui8 *self, char *buffer, bool fake) {
   char internal_buf[10];
-  if (!fake)
-    snprintf(buffer, 10, "ui8(%i)", self->value);
-  else {
-    snprintf(internal_buf, 10, "ui8(%i)", self->value);
+  if (fake)
     buffer = internal_buf;
-  }
-  uint16_t count = 0;
-  while (count < 10 && buffer[count] != '\0')
-    count++;
-  return count;
+  return sprintf(buffer, "ui8(%u)", self->value);
 }
