@@ -103,6 +103,8 @@ uint32_t sm_sizeof(sm_object *obj1) {
     fprintf(stderr, "Type: %u\n", obj1->my_type);
     fprintf(stderr, "Position Ptr      : %p\n", obj1);
     fprintf(stderr, "Position in Heap  : %ld\n", ((char *)obj1) - sms_other_heap->storage);
+    fprintf(stderr, "Heap cap : %u\n", sms_other_heap->capacity);
+    fprintf(stderr, "Heap used: %u\n", sms_other_heap->used);
     fprintf(stderr, "Is in symbol  heap: %b\n", sm_is_within_heap(obj1, sms_symbol_heap));
     fprintf(stderr, "Is in symname heap: %b\n", sm_is_within_heap(obj1, sms_symbol_name_heap));
     sm_dump_and_count();

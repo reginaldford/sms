@@ -4,6 +4,9 @@
 typedef struct sm_ui8 {
   uint32_t my_type;
   uint8_t  value;
+  uint8_t  value2;
+  uint8_t  value3;
+  uint8_t  value4;
 } sm_ui8;
 
 /// Create a new number
