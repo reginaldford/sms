@@ -1,0 +1,57 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug sms",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/sms",
+            "args": [], // Add any arguments for your program here
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "Build all",
+            "miDebuggerPath": "/usr/bin/lldb", // Path to the debugger, adjust if needed
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "internalConsoleOptions": "openOnSessionStart",
+            "launchCompleteCommand": "exec-run",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceFolder}",
+                "pipeProgram": "/usr/bin/ssh",
+                "pipeArgs": ["localhost"],
+                "debuggerPath": "/usr/bin/lldb"
+            },
+            "logging": {
+                "engineLogging": false
+            },
+        },
+        {
+            "name": "Debug sms_dbg",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/sms_dbg",
+            "args": [], // Add any arguments for your program here
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "Build debug",
+            "miDebuggerPath": "/usr/bin/gdb", // Path to the debugger, adjust if needed
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ]
+}
