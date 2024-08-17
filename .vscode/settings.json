@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/rex/code/sms/bin",
+            "binaryPath": "/home/rex/code/sms/bin/sms_dbg",
+            "binaryArgs": []
+        }
+    ]
+}
