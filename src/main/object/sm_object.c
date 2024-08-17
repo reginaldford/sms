@@ -55,9 +55,6 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 }
 // Return the size of the object in bytes
 uint32_t sm_sizeof(sm_object *obj1) {
-  if (!sm_is_within_heap(obj1, sms_heap) && !sm_is_within_heap(obj1, sms_other_heap)) {
-    exit(1);
-  }
   switch (obj1->my_type) {
   case SM_F64_TYPE:
     return sizeof(sm_f64);
