@@ -81,24 +81,25 @@ uint32_t sm_array_sprint(sm_array *a, char *buffer, bool fake) {
 }
 
 uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
-  if (array->size == 0)
-    return 0;
-  uint32_t cursor = 0;
-  uint32_t i      = 0;
+  uint32_t cursor       = 0;
+  uint32_t bufferCursor = 0;
+  uint32_t i            = 0;
+  char     fakeBuf[25];
+  // TODO: ! better design
+  if (fake)
+    buffer = fakeBuf;
   for (; i + 1 < array->size; i++) {
-    cursor += snprintf(&buffer[cursor], 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
+    if (fake)
+      bufferCursor = 0;
+    bufferCursor +=
+      snprintf(&buffer[bufferCursor], 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
+    cursor += bufferCursor;
     if (!fake)
       buffer[cursor] = ',';
     cursor++;
   }
   if (array->size > 0) {
-    if (!fake) {
-      cursor +=
-        snprintf(&buffer[cursor], 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
-    } else {
-      char tmp[24];
-      cursor += snprintf(tmp, 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
-    }
+    cursor += snprintf(&buffer[cursor], 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
   }
   return cursor;
 }
