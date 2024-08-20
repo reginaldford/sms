@@ -23,7 +23,7 @@ ui8 *sm_ui8_array_get_start(sm_array *a) { return (ui8 *)(&((sm_space *)a->conte
 
 ui8 sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
   // if (index >= a->size || a->inner_type != SM_UI8_TYPE) {
-  return ((ui8 *)a->content)[index];
+  return sm_ui8_array_get_start(a)[index];
 }
 
 sm_object *sm_array_get(sm_array *a, uint32_t index) {
