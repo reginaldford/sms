@@ -1436,8 +1436,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
           sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
           return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
         }
-        fprintf(stderr, "array index retreival not implemented yet!");
-        // return sm_array_get(arr, index);
+        return sm_array_get(arr, index);
       }
       }
     }

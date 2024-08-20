@@ -12,14 +12,18 @@ sm_array *sm_new_array(uint32_t type, uint32_t size, sm_object *content, uint32_
   return output;
 }
 
+f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(&((sm_space *)a->content)[1]); }
+
 f64 sm_f64_array_get_bare(sm_array *a, uint32_t index) {
   // if (index >= a->size || a->inner_type != SM_F64_TYPE) {
-  return ((f64 *)&a->content[2])[index];
+  return sm_f64_array_get_start(a)[index];
 }
+
+ui8 *sm_ui8_array_get_start(sm_array *a) { return (ui8 *)(&((sm_space *)a->content)[1]); }
 
 ui8 sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
   // if (index >= a->size || a->inner_type != SM_UI8_TYPE) {
-  return ((ui8 *)&a->content[2])[index];
+  return ((ui8 *)a->content)[index];
 }
 
 sm_object *sm_array_get(sm_array *a, uint32_t index) {
@@ -33,7 +37,6 @@ sm_object *sm_array_get(sm_array *a, uint32_t index) {
   }
   return (sm_object *)sms_false;
 }
-
 
 sm_object *sm_f64_array_set(sm_array *a, uint32_t index, sm_f64 *number) {
   if (index >= a->size)
