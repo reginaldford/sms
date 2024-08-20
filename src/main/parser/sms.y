@@ -548,9 +548,19 @@ F64_ARRAY : F64_ARRAY_LIST ']' {};
   sm_f64_array_set($$,0,(sm_f64*)$2);
 } 
 | F64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_F64_TYPE, 0,NULL,0) ;} 
+
+
 F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 {
  $$ = sm_new_array(SM_F64_TYPE,2,NULL,0);
 }
+| F64_ARRAY_LIST ',' INTEGER {
+      $$->size++;
+      sm_f64_array_set($$,$$->size-1,sm_new_f64($3));
+};
+| F64_ARRAY_LIST ',' F64 {
+      $$->size++;
+      sm_f64_array_set($$,$$->size-1,sm_new_f64(((sm_f64*)$3)->value));
+};
 
 UI8_ARRAY : UI8_ARRAY_OPEN ']' {};
 | UI8_ARRAY_LIST ',' ']' {};
@@ -560,8 +570,6 @@ UI8_ARRAY : UI8_ARRAY_OPEN ']' {};
   sm_ui8_array_set($$,0,sm_new_ui8($2));
 } 
 | UI8_ARRAY_LIST ']' {}; 
-
-
 
 UI8_ARRAY_LIST : UI8_ARRAY_OPEN INTEGER ',' INTEGER  {
      $$ = sm_new_array(SM_UI8_TYPE,2,NULL,0); 
