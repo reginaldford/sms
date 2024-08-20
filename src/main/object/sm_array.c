@@ -108,19 +108,17 @@ uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
     return 0;
   uint32_t cursor = 0;
   uint32_t i      = 0;
+  char     tmp[20];
+  if (fake)
+    buffer = tmp;
   for (; i + 1 < array->size; i++) {
-    cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, array->size - 1));
+    cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, i));
     if (!fake)
       buffer[cursor] = ',';
     cursor++;
   }
   if (array->size > 0) {
-    if (!fake) {
-      cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, array->size - 1));
-    } else {
-      char tmp[20];
-      cursor += sprintf(tmp, "%i", sm_ui8_array_get_bare(array, array->size - 1));
-    }
+    cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, array->size - 1));
   }
   return cursor;
 }
