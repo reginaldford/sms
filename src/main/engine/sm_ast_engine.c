@@ -71,6 +71,23 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
   return obj;
 }
 
+// Evaluate the argument, then run type check. 2 possibilities allowed
+static inline sm_object *eager_type_check2(sm_expr *sme, int operand, int param_type1,
+                                           int param_type2, sm_cx *current_cx, sm_expr *sf) {
+  sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
+  if (param_type1 != obj->my_type && param_type2 != obj->my_type) {
+    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message = sm_new_fstring_at(
+      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
+      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type1));
+    sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
+                                               source->size, &source->content, (int)line->value);
+    return sm_engine_eval(err, current_cx, sf);
+  }
+  return obj;
+}
+
 // Convenience functions for the booleans
 #define IS_TRUE(x) ((void *)x == (void *)sms_true)
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
@@ -1391,20 +1408,38 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return result;
     }
     case SM_INDEX_EXPR: {
-      sm_expr *arr = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
-      if (arr->my_type != SM_EXPR_TYPE)
-        return (sm_object *)arr;
+      // obj could be sm_expr or sm_array
+      sm_expr *obj =
+        (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
+      if (obj->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj;
       sm_f64 *index_f64 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (index_f64->my_type != SM_F64_TYPE)
         return (sm_object *)index_f64;
-      uint32_t index = (int)index_f64->value;
-      if (arr->size < index + 1 || index_f64->value < 0) {
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Index out of range: %i . Tuple size is %i", index, arr->size);
-        sm_symbol *title = sm_new_symbol("tupleIndexOutOfBounds", 21);
-        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      uint32_t index = (uint32_t)index_f64->value;
+      switch (obj->my_type) {
+      case SM_EXPR_TYPE: {
+        sm_expr *arr = (sm_expr *)obj;
+        if (arr->size < index + 1 || index_f64->value < 0) {
+          sm_string *message = sm_new_fstring_at(
+            sms_heap, "Index out of range: %i . Tuple size is %i", index, arr->size);
+          sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        return sm_expr_get_arg(arr, index);
       }
-      return sm_expr_get_arg(arr, index);
+      case SM_ARRAY_TYPE: {
+        sm_array *arr = (sm_array *)obj;
+        if (arr->size < index + 1 || index_f64->value < 0) {
+          sm_string *message = sm_new_fstring_at(
+            sms_heap, "Index out of range: %i . Array size is %i", index, arr->size);
+          sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        fprintf(stderr, "array index retreival not implemented yet!");
+        // return sm_array_get(arr, index);
+      }
+      }
     }
     case SM_DOT_EXPR: {
       sm_cx *base_cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
