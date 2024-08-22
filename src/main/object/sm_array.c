@@ -12,14 +12,18 @@ sm_array *sm_new_array(uint32_t type, uint32_t size, sm_object *content, uint32_
   return output;
 }
 
-f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(&((sm_space *)a->content)[1]); }
 
 f64 sm_f64_array_get_bare(sm_array *a, uint32_t index) {
   // if (index >= a->size || a->inner_type != SM_F64_TYPE) {
   return sm_f64_array_get_start(a)[index];
 }
 
+
+f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(&((sm_space *)a->content)[1]); }
 ui8 *sm_ui8_array_get_start(sm_array *a) { return (ui8 *)(&((sm_space *)a->content)[1]); }
+
+// f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(((char*)a->content)+a->offset); }
+// ui8 *sm_ui8_array_get_start(sm_array *a) { return (ui8 *)(((char*)a->content)+a->offset); }
 
 ui8 sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
   // if (index >= a->size || a->inner_type != SM_UI8_TYPE) {
@@ -38,19 +42,17 @@ sm_object *sm_array_get(sm_array *a, uint32_t index) {
   return (sm_object *)sms_false;
 }
 
-sm_object *sm_f64_array_set(sm_array *a, uint32_t index, sm_f64 *number) {
+sm_object *sm_f64_array_set(sm_array *a, uint32_t index, f64 number) {
   if (index >= a->size)
     return (sm_object *)sms_false;
-  // needs to account for space object's header which has a size
-  // this immediately converts to f64,
-  ((f64 *)&a->content[2])[index] = number->value;
+  ((f64 *)sm_f64_array_get_start(a))[index] = number;
   return (sm_object *)sms_true;
 }
 
-sm_object *sm_ui8_array_set(sm_array *a, uint32_t index, sm_ui8 *number) {
+sm_object *sm_ui8_array_set(sm_array *a, uint32_t index, ui8 number) {
   if (index >= a->size)
     return (sm_object *)sms_false;
-  ((ui8 *)&a->content[2])[index] = number->value;
+  ((char *)sm_ui8_array_get_start(a))[index] = number;
   return (sm_object *)sms_true;
 }
 
@@ -85,21 +87,25 @@ uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
   uint32_t bufferCursor = 0;
   uint32_t i            = 0;
   char     fakeBuf[25];
-  // TODO: ! better design
-  if (fake)
+  if (fake) {
     buffer = fakeBuf;
-  for (; i + 1 < array->size; i++) {
-    if (fake)
-      bufferCursor = 0;
-    bufferCursor +=
-      snprintf(&buffer[bufferCursor], 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
-    cursor += bufferCursor;
-    if (!fake)
-      buffer[cursor] = ',';
-    cursor++;
   }
-  if (array->size > 0) {
-    cursor += snprintf(&buffer[cursor], 24, "%.16g", sm_f64_array_get_bare(array, array->size - 1));
+  for (i = 0; i < array->size; i++) {
+    if (fake) {
+      bufferCursor = 0; // Reset bufferCursor to 0 if we are faking
+    }
+    f64 value    = sm_f64_array_get_bare(array, i);
+    bufferCursor = snprintf(&buffer[cursor], 24, "%.16g", value);
+    cursor += bufferCursor;
+    if (i + 1 < array->size) {
+      if (!fake) {
+        buffer[cursor] = ',';
+      }
+      cursor++;
+    }
+  }
+  if (!fake) {
+    buffer[cursor] = '\0';
   }
   return cursor;
 }
