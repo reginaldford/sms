@@ -51,7 +51,9 @@ sm_error *sm_new_error_from_expr(sm_symbol *title, sm_string *message, sm_expr *
   sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
   sm_f64    *line   = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
   sm_error  *e      = sm_new_error_from_strings(title, message, source, (int)line->value, notes);
-  return sm_engine_eval(e, NULL, NULL);
+  // Call _errHandler through engine eval.
+  // This process does not refer to current_cx or stackframe, so those parameters can be NULL
+  return (sm_error *)sm_engine_eval((sm_object *)e, NULL, NULL);
 }
 
 /// If !fake, print the error type to a string buffer. Return the length regardlessly.
