@@ -50,7 +50,8 @@ sm_error *sm_new_error_from_strings(sm_symbol *title, sm_string *message, sm_str
 sm_error *sm_new_error_from_expr(sm_symbol *title, sm_string *message, sm_expr *sme, sm_cx *notes) {
   sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
   sm_f64    *line   = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-  return sm_new_error_from_strings(title, message, source, (int)line->value, notes);
+  sm_error  *e      = sm_new_error_from_strings(title, message, source, (int)line->value, notes);
+  return sm_engine_eval(e, NULL, NULL);
 }
 
 /// If !fake, print the error type to a string buffer. Return the length regardlessly.
