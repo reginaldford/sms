@@ -12,7 +12,7 @@
 
   # Formatted as a C array of ints
   put("{ ");
-  for(let i=0;i<size(list);i=i+1){
+  for(let i=0;i<size(list);i=i +1){
     put(str(list[i]));
     if(not(i==(size(list)-1)))
       put(",");
