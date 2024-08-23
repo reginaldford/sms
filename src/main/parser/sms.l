@@ -22,6 +22,12 @@ _version     {return VERSION;}
 exit         {return EXIT;}
 help         {return HELP;}
 
+"i+" {return IPLUS;}
+"i-" {return IMINUS;}
+"i*" {return ITIMES;}
+"i/" {return IDIVIDE;}
+"i^" {return IPOW;}
+
 sin          {return SIN;}
 cos          {return COS;}
 tan          {return TAN;}
