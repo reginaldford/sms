@@ -1568,6 +1568,56 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sms_true;
       break;
     }
+    case SM_IPLUS_EXPR: {
+      sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (obj0->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj0;
+      sm_ui8 *obj1 = (sm_ui8 *)eager_type_check(sme, 1, SM_UI8_TYPE, current_cx, sf);
+      if (obj1->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_ui8(obj0->value + obj1->value);
+      break;
+    }
+    case SM_IMINUS_EXPR: {
+      sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (obj0->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj0;
+      sm_ui8 *obj1 = (sm_ui8 *)eager_type_check(sme, 1, SM_UI8_TYPE, current_cx, sf);
+      if (obj1->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_ui8(obj0->value - obj1->value);
+      break;
+    }
+    case SM_ITIMES_EXPR: {
+      sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      sm_ui8 *obj1 = (sm_ui8 *)eager_type_check(sme, 1, SM_UI8_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_ui8(obj0->value * obj1->value);
+      break;
+    }
+    case SM_IDIVIDE_EXPR: {
+      sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      sm_ui8 *obj1 = (sm_ui8 *)eager_type_check(sme, 1, SM_UI8_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_ui8(obj0->value / obj1->value);
+      break;
+    }
+    case SM_IPOW_EXPR: {
+      sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj0;
+      sm_ui8 *obj1 = (sm_ui8 *)eager_type_check(sme, 1, SM_UI8_TYPE, current_cx, sf);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_ui8(pow(obj0->value, obj1->value));
+      break;
+    }
     case SM_PLUS_EXPR: {
       sm_f64 *obj0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
       if (obj0->my_type != SM_F64_TYPE)

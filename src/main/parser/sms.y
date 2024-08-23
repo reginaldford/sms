@@ -342,6 +342,11 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR '*' EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR '/' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR '^' EXPR { $$ = sm_new_expr_2(SM_POW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR "i+" EXPR { $$ = sm_new_expr_2(SM_IPLUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR "i-" EXPR { $$ = sm_new_expr_2(SM_IMINUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR "i*" EXPR { $$ = sm_new_expr_2(SM_ITIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR "i/" EXPR { $$ = sm_new_expr_2(SM_IDIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR "i^" EXPR { $$ = sm_new_expr_2(SM_IPOW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | F64{}
 | UI8{}
 | INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
