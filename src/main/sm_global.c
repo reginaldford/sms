@@ -77,11 +77,11 @@ char *sm_global_fn_name(uint32_t which) {
     "*",            // SM_TIMES_EXPR
     "/",            // SM_DIVIDE_EXPR
     "^",            // SM_POW_EXPR
-    "i+",           // SM_IPLUS_EXPR
-    "i-",           // SM_IMINUS_EXPR
-    "i*",           // SM_ITIMES_EXPR
-    "i/",           // SM_IDIVIDE_EXPR
-    "i^",           // SM_IPOW_EXPR
+    "_+",           // SM_IPLUS_EXPR
+    "_-",           // SM_IMINUS_EXPR
+    "_*",           // SM_ITIMES_EXPR
+    "_/",           // SM_IDIVIDE_EXPR
+    "_^",           // SM_IPOW_EXPR
     "sin",          // SM_SIN_EXPR
     "cos",          // SM_COS_EXPR
     "tan",          // SM_TAN_EXPR
