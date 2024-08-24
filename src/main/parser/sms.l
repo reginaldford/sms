@@ -22,11 +22,11 @@ _version     {return VERSION;}
 exit         {return EXIT;}
 help         {return HELP;}
 
-"i+" {return IPLUS;}
-"i-" {return IMINUS;}
-"i*" {return ITIMES;}
-"i/" {return IDIVIDE;}
-"i^" {return IPOW;}
+"_+" {return IPLUS;}
+"_-" {return IMINUS;}
+"_*" {return ITIMES;}
+"_/" {return IDIVIDE;}
+"_^" {return IPOW;}
 
 sin          {return SIN;}
 cos          {return COS;}
