@@ -1577,6 +1577,145 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sms_true;
       break;
     }
+    case SM_IXOR_EXPR: {
+      sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (obj0->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj0;
+      sm_ui8 *obj1 = (sm_ui8 *)eager_type_check(sme, 1, SM_UI8_TYPE, current_cx, sf);
+      if (obj1->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_ui8(obj0->value ^ obj1->value);
+      break;
+    }
+    case SM_IAND_EXPR: {
+      sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (obj0->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj0;
+      sm_ui8 *obj1 = (sm_ui8 *)eager_type_check(sme, 1, SM_UI8_TYPE, current_cx, sf);
+      if (obj1->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_ui8(obj0->value & obj1->value);
+      break;
+    }
+    case SM_IOR_EXPR: {
+      sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (obj0->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj0;
+      sm_ui8 *obj1 = (sm_ui8 *)eager_type_check(sme, 1, SM_UI8_TYPE, current_cx, sf);
+      if (obj1->my_type != SM_UI8_TYPE)
+        return (sm_object *)obj1;
+      return (sm_object *)sm_new_ui8(obj0->value | obj1->value);
+      break;
+    }
+    case SM_PLUSEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for += operation. Expected numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_f64 *current_f64 = (sm_f64 *)current_value;
+      sm_f64 *value_f64   = (sm_f64 *)value;
+      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for += operation.", sm_type_name(SM_F64_TYPE));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_object *result = (sm_object *)sm_new_f64(current_f64->value + value_f64->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return result;
+    }
+    case SM_MINUSEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for -= operation. Expected numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_f64 *current_f64 = (sm_f64 *)current_value;
+      sm_f64 *value_f64   = (sm_f64 *)value;
+      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for -= operation.", sm_type_name(SM_F64_TYPE));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_object *result = (sm_object *)sm_new_f64(current_f64->value - value_f64->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return result;
+    }
+    case SM_TIMESEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for *= operation. Expected numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_f64 *current_f64 = (sm_f64 *)current_value;
+      sm_f64 *value_f64   = (sm_f64 *)value;
+      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for *= operation.", sm_type_name(SM_F64_TYPE));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_object *result = (sm_object *)sm_new_f64(current_f64->value * value_f64->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return result;
+    }
+    case SM_DIVIDEEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for /= operation. Expected numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_f64 *current_f64 = (sm_f64 *)current_value;
+      sm_f64 *value_f64   = (sm_f64 *)value;
+      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for /= operation.", sm_type_name(SM_F64_TYPE));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      if (value_f64->value == 0.0) {
+        sm_symbol *title   = sm_new_symbol("divisionByZero", 15);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Division by zero in /= operation.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      sm_object *result = (sm_object *)sm_new_f64(current_f64->value / value_f64->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return result;
+    }
     case SM_IPLUS_EXPR: {
       sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
       if (obj0->my_type != SM_UI8_TYPE)
