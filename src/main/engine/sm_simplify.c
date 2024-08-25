@@ -1,7 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
-#include <stdlib.h>
 
 // Whether an expression contains a specific f64
 bool sm_expr_has_num(sm_expr *expr, f64 n) {

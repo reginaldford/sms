@@ -1,18 +1,22 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
+#include <ctype.h>
+#include <dirent.h>
+#include <math.h>
+#include <pwd.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <time.h>
-#include <stdint.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 #include <termios.h>
-#include <pwd.h>
+#include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 #define f64 double
 #define ui8 uint8_t

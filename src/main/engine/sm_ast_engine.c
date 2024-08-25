@@ -1,10 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
-#include "sys/time.h"
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
 
 // Globals from sm_global.c
 extern sm_heap   *sms_heap;

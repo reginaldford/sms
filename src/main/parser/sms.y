@@ -90,6 +90,7 @@ int parsing_fpath_len;
 %token <expr> IPOW
 %token <expr> IXOR
 %token <expr> IAND
+%token <expr> IOR
 %token <expr> PLUSEQ
 %token <expr> MINUSEQ
 %token <expr> TIMESEQ
@@ -346,6 +347,9 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR ITIMES EXPR { $$ = sm_new_expr_2(SM_ITIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IDIVIDE EXPR { $$ = sm_new_expr_2(SM_IDIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IPOW EXPR { $$ = sm_new_expr_2(SM_IPOW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR IXOR EXPR { $$ = sm_new_expr_2(SM_IXOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR IAND EXPR { $$ = sm_new_expr_2(SM_IAND_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR IOR EXPR { $$ = sm_new_expr_2(SM_IOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | F64{}
 | UI8{}
 | INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
