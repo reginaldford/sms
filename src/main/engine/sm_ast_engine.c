@@ -872,6 +872,20 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return (sm_object *)sms_false;
       return (sm_object *)sms_true;
     }
+    case SM_XOR_EXPR: {
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+
+      // XOR is true if exactly one of obj0 or obj1 is true
+      bool is_obj0_true = !IS_FALSE(obj0);
+      bool is_obj1_true = !IS_FALSE(obj1);
+
+      if (is_obj0_true != is_obj1_true) {
+        return (sm_object *)sms_true;
+      } else {
+        return (sm_object *)sms_false;
+      }
+    }
     case SM_NOT_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (!IS_FALSE(obj0))
