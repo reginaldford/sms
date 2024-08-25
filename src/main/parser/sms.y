@@ -88,6 +88,13 @@ int parsing_fpath_len;
 %token <expr> ITIMES
 %token <expr> IDIVIDE
 %token <expr> IPOW
+%token <expr> IXOR
+%token <expr> IAND
+%token <expr> PLUSEQ
+%token <expr> MINUSEQ
+%token <expr> TIMESEQ
+%token <expr> DIVIDEEQ
+%token <expr> POWEREQ
 %token <expr> INC 
 %token <expr> DEC
 %token <expr> PIPE
@@ -177,7 +184,6 @@ int parsing_fpath_len;
 %token <expr> STR_GETCHAR
 %token <expr> STR_TONUMS
 %token <expr> STR_CMP
-%token <expr> STR_TOMEM
 %token <expr> NEW_STR
 %token <expr> TO_STRFMT
 
@@ -187,12 +193,6 @@ int parsing_fpath_len;
 %token <expr> MEM_PART
 %token <expr> MEM_TONUMS
 %token <expr> NUMS_TOMEM
-%token <expr> MEM_TOFILE
-%token <expr> MEM_PRINT
-%token <expr> MEM_SET
-%token <expr> MEM_GET
-%token <expr> MEM_TOSTR
-%token <expr> MEM_SIZE
 
 %token <expr> PUT
 %token <expr> PUTLN
@@ -253,7 +253,6 @@ int parsing_fpath_len;
 %token <expr> CX_SIZE
 %token <expr> CX_RM
 
-%token <expr> NEW_FN
 %token <fun>  ARROW
 %token <expr> FN_XP
 %token <expr> FN_SETXP
@@ -267,11 +266,6 @@ int parsing_fpath_len;
 %token <expr> XP_SETOP
 %token <expr> XP_OPSYM
 
-%token <expr> NUMS_TOSTR
-%token <expr> NEW_NUMS
-
-%token <expr> MALLOC_OBJ
-%token <expr> FREE_OBJ
 %token <expr> COPY
 %token <expr> DEEP_COPY
 
@@ -479,7 +473,6 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3, _note());}
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | EXPR AND EXPR   { $$ = sm_new_expr_2(SM_AND_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
-| EXPR XOR EXPR   { $$ = sm_new_expr_2(SM_XOR_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | STR_ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_STR_ESCAPE_EXPR,(sm_object*)$3, _note());}
 | STR_SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_STR_SIZE_EXPR,(sm_object*)$3, _note());}
 | STR_MUT '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_STR_MUT_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,    _note());}

@@ -27,6 +27,14 @@ help         {return HELP;}
 "_*" {return ITIMES;}
 "_/" {return IDIVIDE;}
 "_^" {return IPOW;}
+"_xor" {return IXOR;}
+"_and" {return IAND;}
+
+"+=" {return PLUSEQ;}
+"-=" {return MINUSEQ;}
+"*=" {return TIMESEQ;}
+"/=" {return DIVIDEEQ;}
+"^=" {return POWEREQ;}
 
 sin          {return SIN;}
 cos          {return COS;}
@@ -62,13 +70,11 @@ if           {return IF;}
 else         {return ELSE;}
 while        {return WHILE;}
 for          {return FOR;}
+forEach      {return FOR;}
 doWhile      {return DO_WHILE;}
 return       {return RETURN;}
 eval         {return EVAL;}
 cxEval       {return CX_EVAL;}
-evalFast     {return EVAL_FAST;}
-evalFastInCX {return EVAL_FAST_IN_CX;}
-fails        {return FAILS;}
 parse        {return PARSE;}
 str          {return NEW_STR;}
 toStrFmt     {return TO_STRFMT;}
@@ -137,8 +143,6 @@ fileWrite    {return FILE_WRITE;}
 fileWriteTga {return FILE_WRITETGA;}
 fileAppend   {return FILE_APPEND;}
 
-memToFile  {return MEM_TOFILE;}
-
 zeros       {return ZEROS;}
 cat         {return CAT;}
 repeat      {return REPEAT;}
@@ -155,7 +159,6 @@ ceil        {return CEIL;}
 mod         {return MOD;}
 
 =>          {return ARROW;}
-newFn       {return NEW_FN;}
 fnXp        {return FN_XP;}
 fnSetXp     {return FN_SETXP;}
 fnParams    {return FN_PARAMS;}
@@ -168,20 +171,6 @@ xpOp        {return XP_OP;}
 xpSetOp     {return XP_SETOP;}
 xpOpSym     {return XP_OPSYM;}
 
-newMem     {return NEW_MEM;}
-memSet     {return MEM_SET;}
-memSize    {return MEM_SIZE;}
-memGet     {return MEM_GET;}
-memUnite   {return MEM_UNITE;}
-memPart    {return MEM_PART;}
-memPrint   {return MEM_PRINT;}
-memTonums  {return MEM_TONUMS;}
-memMap     {return MEM_MAP;}
-memTostr   {return MEM_TOSTR;}
-
-memAlloc   {return MALLOC_OBJ;}
-memFree    {return FREE_OBJ;}
-
 cpy         {return COPY;}
 deepCpy     {return DEEP_COPY;}
 
@@ -189,7 +178,7 @@ symName     {return SYM_NAME;}
 
 newStr      {return NEW_STR;}
 "str\+"     {return STR_CAT;}
-strRepeat      {return STR_REPEAT;}
+strRepeat   {return STR_REPEAT;}
 strEscape   {return STR_ESCAPE;}
 strUnescape {return STR_UNESCAPE;}
 strSize     {return STR_SIZE;}
@@ -201,14 +190,7 @@ strSet      {return STR_SET;}
 strSplit    {return STR_SPLIT;}
 strPart     {return STR_PART;}
 strCmp      {return STR_CMP;}
-strToNums   {return STR_TONUMS;}
 strMap      {return STR_MAP;}
-strToMem    {return STR_TOMEM;}
-
-newNums    {return NEW_NUMS;}
-numsToMem  {return NUMS_TOMEM;}
-numsToStr  {return NUMS_TOSTR;}
-numsToCsv  {return NUMS_TOSTR;}
 
 meta       {return RUNTIME_META;}
 
@@ -239,9 +221,6 @@ _thisProcess   {return THISPROCESS;}
 _getOptions    {return GETOPTIONS;}
 _setOptions    {return SETOPTIONS;}
 _gc            {return GC;}
-_mem_saveFile  {return MEM_SAVEFILE;}
-_mem_readFile  {return MEM_READFILE;}
-_mem_checkFile {return MEM_CHECKFILE;}
 
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}
