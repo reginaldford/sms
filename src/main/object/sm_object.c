@@ -5,6 +5,20 @@
 extern sm_heap *sms_symbol_heap;
 extern sm_heap *sms_symbol_name_heap;
 
+// Whether an object is an integer (eventually, 8, 16, 32, or 64 bit)
+// Returns 0 if it's not an int, and returns the number of bytes in the int otherwise
+uint32_t sm_object_is_int(sm_object *obj1) {
+  switch (obj1->my_type) {
+  case SM_F64_TYPE:
+    return sizeof(f64);
+  case SM_UI8_TYPE:
+    return sizeof(ui8);
+  default:
+    return 0;
+  }
+}
+
+
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
   sm_string *new_str       = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));

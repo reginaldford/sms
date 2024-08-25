@@ -28,6 +28,7 @@ help         {return HELP;}
 "_/" {return IDIVIDE;}
 "_^" {return IPOW;}
 "_xor" {return IXOR;}
+"_or"  {return IOR;}
 "_and" {return IAND;}
 
 "+=" {return PLUSEQ;}
