@@ -23,9 +23,8 @@ inline sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
       i++;
     }
     return result;
-  } else {
+  } else
     return sm_engine_eval(content, new_cx, sf);
-  }
 }
 
 // Basic type checking
