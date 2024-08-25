@@ -7,8 +7,6 @@ typedef struct sm_ui8 {
   ui8      filler1;
   ui8      filler2;
   ui8      filler3;
-  uint64_t filler4;
-  // temp solution. Might need miniptr
 } sm_ui8;
 
 /// Create a new number
