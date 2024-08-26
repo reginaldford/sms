@@ -20,15 +20,10 @@ f64 sm_f64_array_get_bare(sm_array *a, uint32_t index) {
 
 
 f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(&((sm_space *)a->content)[1]); }
+
 ui8 *sm_ui8_array_get_start(sm_array *a) { return (ui8 *)(&((sm_space *)a->content)[1]); }
 
-// f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(((char*)a->content)+a->offset); }
-// ui8 *sm_ui8_array_get_start(sm_array *a) { return (ui8 *)(((char*)a->content)+a->offset); }
-
-ui8 sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
-  // if (index >= a->size || a->inner_type != SM_UI8_TYPE) {
-  return sm_ui8_array_get_start(a)[index];
-}
+ui8 sm_ui8_array_get_bare(sm_array *a, uint32_t index) { return sm_ui8_array_get_start(a)[index]; }
 
 sm_object *sm_array_get(sm_array *a, uint32_t index) {
   switch (a->inner_type) {
@@ -42,18 +37,12 @@ sm_object *sm_array_get(sm_array *a, uint32_t index) {
   return (sm_object *)sms_false;
 }
 
-sm_object *sm_f64_array_set(sm_array *a, uint32_t index, f64 number) {
-  if (index >= a->size)
-    return (sm_object *)sms_false;
+void sm_f64_array_set(sm_array *a, uint32_t index, f64 number) {
   ((f64 *)sm_f64_array_get_start(a))[index] = number;
-  return (sm_object *)sms_true;
 }
 
-sm_object *sm_ui8_array_set(sm_array *a, uint32_t index, ui8 number) {
-  if (index >= a->size)
-    return (sm_object *)sms_false;
-  ((char *)sm_ui8_array_get_start(a))[index] = number;
-  return (sm_object *)sms_true;
+void sm_ui8_array_set(sm_array *a, uint32_t index, ui8 number) {
+  ((ui8 *)sm_ui8_array_get_start(a))[index] = number;
 }
 
 // Print to a cstring buffer the description of array

@@ -1561,21 +1561,67 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       break;
     }
     case SM_ASSIGN_INDEX_EXPR: {
-      // expecting a[4]=value=> =index_expr(a,4,value);
+      // Expecting a[4]=value => =index_expr(a,4,value);
       sm_object *value = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
-      sm_expr   *arr   = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
-      sm_f64    *index = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      if (index->value >= arr->size || index->value < -0) {
-        printf("Error: Index out of range: %i\n", (int)index->value);
-        sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
+      sm_expr   *arr_obj =
+        (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
+      sm_f64 *index = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
+      // This works on both tuples and arrays
+      switch (arr_obj->my_type) {
+      case SM_EXPR_TYPE: {
+        sm_expr *arr_expr = (sm_expr *)arr_obj;
+        if ((uint32_t)index->value >= arr_expr->size || (uint32_t)index->value < 0) {
+          sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
+          sm_string *message =
+            sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
+                              (uint32_t)index->value, (uint32_t)arr_expr->size);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        sm_expr_set_arg(arr_expr, (uint32_t)index->value, value);
+        break;
+      }
+      case SM_ARRAY_TYPE: {
+        sm_array *arr = (sm_array *)arr_obj;
+        if ((uint32_t)index->value >= arr->size || (uint32_t)index->value < 0) {
+          sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
+          sm_string *message =
+            sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
+                              (uint32_t)index->value, (uint32_t)arr->size);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        if (arr->inner_type != value->my_type) {
+          sm_symbol *title   = sm_new_symbol("arrayAssignmentTypeMismatch", 27);
+          sm_string *message = sm_new_fstring_at(
+            sms_heap, "Array contains objects of type %s, but assignment value has type %s",
+            sm_type_name(arr->inner_type), sm_type_name(value->my_type));
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        switch (arr->inner_type) {
+        case SM_F64_TYPE: {
+          sm_f64_array_set(arr, index->value, ((sm_f64 *)value)->value);
+          break;
+        }
+        case SM_UI8_TYPE: {
+          sm_ui8_array_set(arr, index->value, ((sm_ui8 *)value)->value);
+          break;
+        }
+        default: {
+          sm_symbol *title = sm_new_symbol("arrayTypeUnknownError", 19);
+          sm_string *message =
+            sm_new_fstring_at(sms_heap, "Unsupported array inner type %i", (int)arr->inner_type);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        }
+        break;
+      }
+      default: {
+        sm_symbol *title = sm_new_symbol("invalidExpressionType", 19);
         sm_string *message =
-          sm_new_fstring_at(sms_heap, "Index %i is out of bounds of tuple of size %i",
-                            (int)index->value, (int)arr->size);
+          sm_new_fstring_at(sms_heap, "Invalid expression type %i", (int)arr_obj->my_type);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-      sm_expr_set_arg(arr, index->value, value);
-      return (sm_object *)sms_true;
-      break;
+      }
+      return value;
     }
     case SM_IXOR_EXPR: {
       sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
