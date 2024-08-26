@@ -354,6 +354,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | SYM MINUSEQ EXPR { $$ = sm_new_expr_2(SM_MINUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM TIMESEQ EXPR { $$ = sm_new_expr_2(SM_TIMESEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM DIVIDEEQ EXPR { $$ = sm_new_expr_2(SM_DIVIDEEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| SYM POWEREQ EXPR { $$ = sm_new_expr_2(SM_POWEREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | F64{}
 | UI8{}
 | INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
