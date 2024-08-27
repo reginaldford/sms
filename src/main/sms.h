@@ -27,7 +27,7 @@
 #endif
 
 /// These are the major object types of SMS
-/// @note Must remain syncronized with function sm_object_type_str
+/// @note Must remain syncronized with function sm_type_name
 enum sm_object_type {
   /// 0: f64 precision floating point (sm_f64.h)
   SM_F64_TYPE,
