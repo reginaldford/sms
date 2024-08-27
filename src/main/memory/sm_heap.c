@@ -11,6 +11,7 @@ extern sm_heap   *sms_symbol_name_heap;
 
 // For rounding up object size to the next multiple of 4 bytes.
 uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
+uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~7; }
 
 // Create a new heap of some capacity
 sm_heap *sm_new_heap(uint32_t capacity) {

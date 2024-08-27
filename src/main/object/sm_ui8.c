@@ -3,7 +3,7 @@
 #include "../sms.h"
 
 sm_ui8 *sm_new_ui8(ui8 value) {
-  struct sm_ui8 *newnum = (sm_ui8 *)sm_malloc(sizeof(sm_ui8));
+  struct sm_ui8 *newnum = (sm_ui8 *)sm_malloc(sm_round_size64(sizeof(sm_ui8)));
   newnum->my_type       = SM_UI8_TYPE;
   newnum->value         = value;
   return newnum;
