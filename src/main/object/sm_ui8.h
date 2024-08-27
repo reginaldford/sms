@@ -4,9 +4,6 @@
 typedef struct sm_ui8 {
   uint32_t my_type;
   ui8      value;
-  ui8      filler1;
-  ui8      filler2;
-  ui8      filler3;
 } sm_ui8;
 
 /// Create a new number

@@ -95,7 +95,7 @@ uint32_t sm_sizeof(sm_object *obj1) {
   case SM_LOCAL_TYPE:
     return sizeof(sm_local);
   case SM_SPACE_TYPE:
-    return sizeof(sm_space) + ((((sm_space *)obj1)->size) << 3);
+    return sizeof(sm_space) + sm_round_size(((sm_space *)obj1)->size);
   case SM_SELF_TYPE:
     return sizeof(struct sm_self);
   case SM_ERR_TYPE:
@@ -106,18 +106,23 @@ uint32_t sm_sizeof(sm_object *obj1) {
     return sizeof(sm_stack) + sizeof(void *) * sm_stack_obj_size((sm_stack_obj *)obj1);
   case SM_ARRAY_TYPE:
     return sizeof(sm_array);
-  case SM_UI8_TYPE: {
+  case SM_UI8_TYPE:
     return sizeof(sm_ui8);
-  }
   default: {
-    fprintf(stderr, "BAD OBJECT CASE: \n");
+    fprintf(stderr, "\nBAD OBJECT CASE: \n");
     fprintf(stderr, "Type: %u\n", obj1->my_type);
-    fprintf(stderr, "Position Ptr      : %p\n", obj1);
-    fprintf(stderr, "Position in Heap  : %ld\n", ((char *)obj1) - sms_other_heap->storage);
-    fprintf(stderr, "Heap cap : %u\n", sms_other_heap->capacity);
-    fprintf(stderr, "Heap used: %u\n", sms_other_heap->used);
-    fprintf(stderr, "Is in symbol  heap: %b\n", sm_is_within_heap(obj1, sms_symbol_heap));
-    fprintf(stderr, "Is in symname heap: %b\n", sm_is_within_heap(obj1, sms_symbol_name_heap));
+    fprintf(stderr, "Bad Object Position Ptr      : %p\n", obj1);
+    fprintf(stderr, "Bad Object Is in symbol  heap: %b\n",
+            sm_is_within_heap(obj1, sms_symbol_heap));
+    fprintf(stderr, "Bad Object Is in symname heap: %b\n",
+            sm_is_within_heap(obj1, sms_symbol_name_heap));
+    if (sm_is_within_heap(obj1, sms_other_heap)) {
+      fprintf(stderr, "Bad Object Position in Heap  : %ld\n",
+              ((char *)obj1) - sms_other_heap->storage);
+      fprintf(stderr, "Heap Start Position          : %p\n", sms_other_heap->storage);
+      fprintf(stderr, "Heap cap : %u\n", sms_other_heap->capacity);
+      fprintf(stderr, "Heap used: %u\n", sms_other_heap->used);
+    }
     sm_dump_and_count();
     fprintf(stderr, "Memory dumped\n");
     sm_mem_cleanup();

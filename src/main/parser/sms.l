@@ -242,9 +242,9 @@ ui8\(([0-9]+)\)    {
       // Check for closing parenthesis
       if (yytext[4 + strlen(yytext + 4) - 1] != ')') {
           fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
-          return 0; // or appropriate error handling
+          return 0; 
       }
-      yylval.ui8 = sm_new_ui8(number); // Call the function with the number
+      yylval.ui8 = sm_new_ui8(number); 
       return UI8;
   }
 
