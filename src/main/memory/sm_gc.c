@@ -41,7 +41,7 @@ sm_object *sm_meet_object(sm_object *obj) {
   if (sm_is_within_heap(obj, sms_other_heap)) {
     uint32_t obj_type = obj->my_type;
     if (obj_type == SM_POINTER_TYPE)
-      return (sm_object *)((uint64_t)((uint64_t)sms_heap) + (uint64_t)((sm_pointer *)obj)->address);
+      return (sm_object *)(((uint64_t)sms_heap) + (uint64_t)((sm_pointer *)obj)->address);
     else
       return sm_move_to_new_heap(obj);
   } else

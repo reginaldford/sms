@@ -1356,12 +1356,21 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sm_new_return(to_return);
     }
     case SM_SIZE_EXPR: {
-      sm_object *base_obj = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_expr   *arr;
-      if (!expect_type(base_obj, SM_EXPR_TYPE))
-        return (sm_object *)sms_false;
-      arr = (sm_expr *)base_obj;
-      return (sm_object *)sm_new_f64(arr->size);
+      sm_object *base_obj = eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
+      if (base_obj->my_type == SM_ERR_TYPE)
+        return base_obj;
+      switch (base_obj->my_type) {
+      case SM_EXPR_TYPE: {
+        sm_expr *expr = (sm_expr *)base_obj;
+        return (sm_object *)sm_new_f64(expr->size);
+      }
+      case SM_ARRAY_TYPE: {
+        sm_array *array = (sm_array *)base_obj;
+        return (sm_object *)sm_new_f64(array->size);
+      }
+      default:
+        return (sm_object *)sm_new_f64(0);
+      }
     }
     case SM_MAP_EXPR: {
       // expecting a unary func
