@@ -106,7 +106,7 @@ uint32_t sm_sizeof(sm_object *obj1) {
   case SM_ARRAY_TYPE:
     return sizeof(sm_array);
   case SM_UI8_TYPE:
-    return sizeof(sm_pointer); // objects cannot be smaller than sm_pointer
+    return sizeof(sm_ui8);
   default: {
     fprintf(stderr, "\nBAD OBJECT CASE: \n");
     fprintf(stderr, "Type: %u\n", obj1->my_type);
