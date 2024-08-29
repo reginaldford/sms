@@ -1,6 +1,6 @@
 #!/bin/bash
 # Backup your code before you do this
-str='s/SM_FILE_WRITE_EXPR/SM_FILE_WRITESTR_EXPR/g'
+str='s/fileRead/fileReadStr/g'
 find ../src/ -name "*.c" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.h" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.y" -exec sed -i -e "$str" {} +
