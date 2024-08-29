@@ -90,7 +90,7 @@ sm_string *sm_read_file(char *filePath, int filePathLen) {
   sm_string *fname_str;
   char      *fname_cstr = filePath;
   if (access(fname_cstr, F_OK) != 0) {
-    printf("fileReadStr failed because the file, %s ,does not exist.\n", fname_cstr);
+    printf("fileReadStrStr failed because the file, %s ,does not exist.\n", fname_cstr);
     return (sm_string *)sms_false;
   }
   FILE *fptr = fopen(fname_cstr, "r");
