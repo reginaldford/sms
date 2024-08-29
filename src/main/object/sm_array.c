@@ -12,10 +12,9 @@ sm_array *sm_new_array(uint32_t type, uint32_t size, sm_object *content, uint32_
   return output;
 }
 
+f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(&((sm_space *)a->content)[1]); }
 
 f64 sm_f64_array_get_bare(sm_array *a, uint32_t index) { return sm_f64_array_get_start(a)[index]; }
-
-f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(&((sm_space *)a->content)[1]); }
 
 ui8 *sm_ui8_array_get_start(sm_array *a) { return (ui8 *)(&((sm_space *)a->content)[1]); }
 
@@ -71,27 +70,28 @@ uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
   uint32_t cursor       = 0;
   uint32_t bufferCursor = 0;
   uint32_t i            = 0;
-  char     fakeBuf[25];
-  if (fake) {
+  char     fakeBuf[64]; // Temporary buffer used when fake is true
+  if (fake)
     buffer = fakeBuf;
-  }
   for (i = 0; i < array->size; i++) {
-    if (fake) {
+    if (fake)
       bufferCursor = 0; // Reset bufferCursor to 0 if we are faking
-    }
-    f64 value    = sm_f64_array_get_bare(array, i);
-    bufferCursor = snprintf(&buffer[cursor], 24, "%.16g", value);
+    f64 value = sm_f64_array_get_bare(array, i);
+    // Write the value to the buffer, ensuring no overflow
+    bufferCursor = snprintf(&buffer[cursor], 25, "%.16g", value); // Write value to the buffer
+    if (bufferCursor >= 25)
+      bufferCursor = 24; // Safeguard against overflow from snprintf
     cursor += bufferCursor;
+    // Add a comma if it's not the last element
     if (i + 1 < array->size) {
-      if (!fake) {
+      if (!fake)
         buffer[cursor] = ',';
-      }
       cursor++;
     }
   }
-  if (!fake) {
+  // Null-terminate the buffer if not faking
+  if (!fake)
     buffer[cursor] = '\0';
-  }
   return cursor;
 }
 
@@ -109,9 +109,8 @@ uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
       buffer[cursor] = ',';
     cursor++;
   }
-  if (array->size > 0) {
+  if (array->size > 0)
     cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, array->size - 1));
-  }
   return cursor;
 }
 

@@ -572,10 +572,14 @@ F64_ARRAY_LIST : F64_ARRAY_OPEN F64 ',' F64 {
 }
 | F64_ARRAY_LIST ',' INTEGER {
       $$->size++;
+      sm_space * space = (sm_space*)$$->content;
+      space->size+=sizeof(f64);
       sm_f64_array_set($$,$$->size-1,$3);
 };
 | F64_ARRAY_LIST ',' F64 {
       $$->size++;
+      sm_space* space = (sm_space*)$$->content;
+      space->size+=sizeof(f64);
       sm_f64_array_set($$,$$->size-1,((sm_f64*)$3)->value);
 };
 
