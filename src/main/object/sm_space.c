@@ -4,7 +4,7 @@
 
 // General purpose space of memory
 sm_space *sm_new_space(uint32_t size) {
-  sm_space *new_space = sm_malloc(sizeof(sm_space) + sm_round_size64(size));
+  sm_space *new_space = sm_malloc(sizeof(sm_space) + sm_round_size(size));
   new_space->my_type  = SM_SPACE_TYPE;
   new_space->size     = size;
   return new_space;
