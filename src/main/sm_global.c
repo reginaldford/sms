@@ -181,7 +181,7 @@ char *sm_global_fn_name(uint32_t which) {
     "fileCp",        // SM_FILE_CP_EXPR
     "fileMv",        // SM_FILE_MV_EXPR
     "fileRm",        // SM_FILE_RM_EXPR
-    "fileWrite",     // SM_FILE_WRITE_EXPR
+    "fileWrite",     // SM_FILE_WRITESTR_EXPR
     "fileWriteTga",  // SM_FILE_WRITETGA_EXPR
     "fileAppend",    // SM_FILE_APPEND_EXPR
     "zeros",         // SM_ZEROS_EXPR
