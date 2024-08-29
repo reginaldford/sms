@@ -140,7 +140,7 @@ fileCp       {return FILE_CP;}
 fileMv       {return FILE_MV;}
 fileRm       {return FILE_RM;}
 fileSize     {return FILE_SIZE;}
-fileWrite    {return FILE_WRITE;}
+fileWriteStr {return FILE_WRITESTR;}
 fileWriteTga {return FILE_WRITETGA;}
 fileAppend   {return FILE_APPEND;}
 

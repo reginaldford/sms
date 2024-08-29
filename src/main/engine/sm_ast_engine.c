@@ -301,8 +301,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return (sm_object *)path;
       char *path_cstr = &path->content;
       if (chdir(path_cstr) != 0) {
-        sm_symbol *title   = sm_new_symbol("cdFailed", 8);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to change directory to %s");
+        sm_symbol *title = sm_new_symbol("cdFailed", 8);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Failed to change directory to %s", path_cstr);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       return (sm_object *)sms_true;
@@ -943,39 +944,49 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       srand((int)floor_val);
       return (sm_object *)sms_true;
     }
-    case SM_FILE_WRITE_EXPR: {
-      // obtain the file name
-      sm_string *fname_str;
-      sm_object *evaluated_fname = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (!expect_type(evaluated_fname, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      fname_str        = (sm_string *)evaluated_fname;
+    case SM_FILE_WRITESTR_EXPR: {
+      // Obtain the file name using eager_type_check
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (fname_str->my_type == SM_ERR_TYPE)
+        return (sm_object *)fname_str; // Return the error if type check fails
       char *fname_cstr = &(fname_str->content);
-      // obtain the content to write
-      sm_object *evaluated_content = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_string *content_str;
-      if (!expect_type(evaluated_content, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      content_str        = (sm_string *)evaluated_content;
+      // Obtain the content to write using eager_type_check
+      sm_string *content_str =
+        (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
+      if (content_str->my_type == SM_ERR_TYPE)
+        return (sm_object *)content_str; // Return the error if type check fails
       char *content_cstr = &(content_str->content);
-      FILE *fptr         = fopen(fname_cstr, "wb");
-      // check that file can be opened for writing
+      // Open the file for writing
+      FILE *fptr = fopen(fname_cstr, "wb");
       if (fptr == NULL) {
-        printf("fileWrite failed to open: %s\n", fname_cstr);
-        return (sm_object *)sms_false;
+        char error_msg[256];
+        snprintf(error_msg, sizeof(error_msg), "fileWrite failed to open: %s", fname_cstr);
+        sm_symbol *title   = sm_new_symbol("fileOpenError", strlen("fileOpenError"));
+        sm_string *message = sm_new_string(strlen(error_msg), error_msg);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-      const int CHUNK_SIZE = 128;
-      fwrite(content_cstr, CHUNK_SIZE, content_str->size / CHUNK_SIZE, fptr);
-      if (fmod(content_str->size, CHUNK_SIZE)) {
-        uint32_t cursor = (content_str->size / CHUNK_SIZE) * CHUNK_SIZE;
-        fwrite(&content_cstr[cursor], 1, content_str->size - cursor, fptr);
+      // Write content to file in chunks of 1024 bytes
+      size_t       total_written = 0;
+      const size_t CHUNK_SIZE    = 1024;
+      while (total_written < content_str->size) {
+        size_t to_write = CHUNK_SIZE;
+        if (total_written + CHUNK_SIZE > content_str->size) {
+          to_write       = content_str->size - total_written;
+          size_t written = fwrite(content_cstr + total_written, 1, to_write, fptr);
+          if (written != to_write) {
+            fclose(fptr);
+            sm_symbol *title   = sm_new_symbol("fileWriteError", strlen("fileWriteError"));
+            sm_string *message = sm_new_string(strlen("fileWrite failed during write operation"),
+                                               "fileWrite failed during write operation");
+            return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+          }
+          total_written += written;
+        }
+        // Close the file
+        fclose(fptr);
+        return (sm_object *)sms_true;
       }
-
-      fclose(fptr);
-      return (sm_object *)sms_true;
     }
-
-
     case SM_FILE_WRITETGA_EXPR: {
       // Check and retrieve the filename
       sm_string *filename = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
@@ -1059,8 +1070,6 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sms_true;
       break;
     }
-
-
     case SM_FILE_APPEND_EXPR: {
       // obtain the file name
       sm_string *fname_str;
@@ -1087,26 +1096,56 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sms_true;
     }
     case SM_FILE_READ_EXPR: {
-      sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_string *fname_str;
-      if (!expect_type(evaluated, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      fname_str        = (sm_string *)evaluated;
+      // Evaluate and check if the first argument is a string (file name)
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (fname_str->my_type == SM_ERR_TYPE)
+        return (sm_object *)fname_str; // Return the error if type check fails
       char *fname_cstr = &(fname_str->content);
+      // Check if the file exists
       if (access(fname_cstr, F_OK) != 0) {
-        printf("fileReadStr failed because the file, %s ,does not exist.\n", fname_cstr);
-        return (sm_object *)sm_new_string(0, "");
+        char error_msg[256];
+        snprintf(error_msg, sizeof(error_msg),
+                 "fileReadStr failed because the file, %s, does not exist.", fname_cstr);
+        sm_symbol *title   = sm_new_symbol("fileNotFoundError", strlen("fileNotFoundError"));
+        sm_string *message = sm_new_string(strlen(error_msg), error_msg);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
+      // Open the file for reading
       FILE *fptr = fopen(fname_cstr, "r");
+      if (fptr == NULL) {
+        char error_msg[256];
+        snprintf(error_msg, sizeof(error_msg), "fileReadStr failed to open: %s", fname_cstr);
+        sm_symbol *title   = sm_new_symbol("fileOpenError", strlen("fileOpenError"));
+        sm_string *message = sm_new_string(strlen(error_msg), error_msg);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Determine the file length
       fseek(fptr, 0, SEEK_END);
-      long       len    = ftell(fptr);
+      long len = ftell(fptr);
+      if (len < 0) {
+        fclose(fptr);
+        sm_symbol *title   = sm_new_symbol("fileReadError", strlen("fileReadError"));
+        sm_string *message = sm_new_string(strlen("fileReadStr failed to determine file length"),
+                                           "fileReadStr failed to determine file length");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Read the file contents
       sm_string *output = sm_new_string_manual(len);
       fseek(fptr, 0, SEEK_SET);
-      fread(&(output->content), 1, len, fptr);
+      size_t read_count = fread(&(output->content), 1, len, fptr);
+      if (read_count != len) {
+        fclose(fptr);
+        sm_symbol *title   = sm_new_symbol("fileReadError", strlen("fileReadError"));
+        sm_string *message = sm_new_string(strlen("fileReadStr failed during read operation"),
+                                           "fileReadStr failed during read operation");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
       fclose(fptr);
-      *(&output->content + len) = '\0';
+      // Null-terminate the output string
+      (&output->content)[len] = '\0';
       return (sm_object *)output;
     }
+
     case SM_FILE_PART_EXPR: {
       sm_object *evaluated = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_string *fname_str;
