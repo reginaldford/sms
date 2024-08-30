@@ -33,9 +33,12 @@ uint32_t sm_expr_tuple_sprint(sm_expr *expr, char *buffer, bool fake) {
 
 // Print description of prefix expression to buffer
 uint32_t sm_prefix_sprint(sm_expr *expr, char *buffer, bool fake) {
-  if (!fake)
-    sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
-  uint32_t cursor = sm_global_fn_name_len(expr->op);
+  uint32_t cursor = 0;
+  if (!sm_global_fn_hidden(expr->op)) {
+    if (!fake)
+      sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+    cursor = sm_global_fn_name_len(expr->op);
+  }
   if (!fake)
     buffer[cursor] = expr->op == SM_BLOCK_EXPR ? '{' : '(';
   cursor++;
