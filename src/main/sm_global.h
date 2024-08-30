@@ -36,3 +36,5 @@ struct termios *sm_global_term_attrs();
 struct sm_string *sm_global_home_directory();
 /// Global version string
 sm_string *sms_global_version();
+/// Returns whether fn name is hidden when containing expression is printed
+bool sm_global_fn_hidden(uint32_t which);

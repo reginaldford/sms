@@ -51,6 +51,16 @@ sm_stack *sm_global_lex_stack(sm_stack *replacement) {
   return lex_stack;
 }
 
+bool sm_global_fn_hidden(uint32_t which) {
+  switch (which) {
+  case SM_FN_PARAMS_EXPR:
+  case SM_PARAM_LIST_EXPR:
+    return true;
+    break;
+  }
+  return false;
+}
+
 // Primitive_names
 char *sm_global_fn_name(uint32_t which) {
   const uint32_t num_functions = sm_global_num_fns();
