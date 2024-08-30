@@ -232,21 +232,27 @@ _gc            {return GC;}
 }
 
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
-   yylval.num = sm_new_f64(atof(yytext));
+   yylval.num = atof(yytext);
    return F64;
   }
 
-
-ui8\(([0-9]+)\)    {
-      int number = atoi(yytext + 4); // Skip "ui8("
-      // Check for closing parenthesis
-      if (yytext[4 + strlen(yytext + 4) - 1] != ')') {
-          fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
-          return 0; 
-      }
-      yylval.ui8 = sm_new_ui8(number); 
-      return UI8;
-  }
+ui8\((-?[0-9]+)\) {
+    char *num_str = yytext + 4;  // Skip "ui8("
+    // Find the position of the closing parenthesis
+    char *end_paren = strchr(num_str, ')');
+    if (!end_paren) {
+        fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
+        return 0;
+    }   
+    // Temporarily terminate the string at the closing parenthesis
+    *end_paren = '\0';
+    // Trim spaces from the start and end of num_str
+    char *end = num_str + strlen(num_str) - 1;
+    end[1] = '\0';  // Null-terminate the trimmed string
+    int number = atoi(num_str);  // Convert the trimmed number string to an integer
+    yylval.ui8 = number;
+    return UI8;
+}
 
 
 [\<\>\=] { return yytext[0]; }
