@@ -80,6 +80,7 @@ int parsing_fpath_len;
 
 %token IS
 %token DOT
+%token <expr> AS_F64
 %token <num> F64
 %token <ui8> UI8
 %token <integer> INTEGER
@@ -468,6 +469,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | XP_OP '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_EXPR,(sm_object*)$3, _note());}
 | XP_SETOP '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_XP_SET_OP_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | XP_OPSYM '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_SYM_EXPR,(sm_object*)$3, _note());}
+| AS_F64 '(' EXPR ')' { $$ = sm_new_expr(SM_AS_F64_EXPR, (sm_object*)$3 , _note()); }
 | F64_ARRAY { }
 | UI8_ARRAY { }
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3, _note());}

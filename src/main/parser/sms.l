@@ -22,6 +22,8 @@ _version     {return VERSION;}
 exit         {return EXIT;}
 help         {return HELP;}
 
+asF64 {return AS_F64;}
+
 "_+" {return IPLUS;}
 "_-" {return IMINUS;}
 "_*" {return ITIMES;}
