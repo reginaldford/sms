@@ -83,6 +83,27 @@ static inline sm_object *eager_type_check2(sm_expr *sme, int operand, int param_
   return obj;
 }
 
+// Evaluate the argument, then run type check. 3 possibilities allowed
+static inline sm_object *eager_type_check3(sm_expr *sme, int operand, int param_type1,
+                                           int param_type2, int param_type3, sm_cx *current_cx,
+                                           sm_expr *sf) {
+  sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
+  if (param_type1 != obj->my_type && param_type2 != obj->my_type && param_type3 != obj->my_type) {
+    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message = sm_new_fstring_at(
+      sms_heap,
+      "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s, %s, or %s",
+      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type1),
+      sm_type_name(param_type2), sm_type_name(param_type3));
+    sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
+                                               source->size, &source->content, (int)line->value);
+    return sm_engine_eval(err, current_cx, sf);
+  }
+  return obj;
+}
+
+
 // Convenience functions for the booleans
 #define IS_TRUE(x) ((void *)x == (void *)sms_true)
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
@@ -92,14 +113,18 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;
-    short    op  = sme->op;
+    uint32_t op  = sme->op;
     switch (op) {
     case SM_VERSION_EXPR: {
       return (sm_object *)sms_global_version();
       break;
     }
     case SM_NEW_F64_EXPR: {
-      sm_object *fromObj = eager_type_check2(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, current_cx, sf);
+      sm_object *fromObj =
+        eager_type_check3(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, SM_STRING_TYPE, current_cx, sf);
+      if (fromObj->my_type == SM_ERR_TYPE)
+        return fromObj;
+
       switch (fromObj->my_type) {
       case SM_F64_TYPE:
         return (sm_object *)sm_new_f64(((sm_f64 *)fromObj)->value);
@@ -110,7 +135,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       default: {
         sm_symbol *title   = sm_new_symbol("cannotConvertToF64", 18);
         sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to f64.",
-                                               sm_global_fn_name(fromObj->my_type));
+                                               sm_type_name(fromObj->my_type));
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       }
