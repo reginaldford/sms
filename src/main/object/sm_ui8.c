@@ -4,7 +4,7 @@
 
 sm_ui8 *sm_new_ui8(ui8 value) {
   // Objects must be at least the size of sm_pointer
-  struct sm_ui8 *newnum = (sm_ui8 *)sm_malloc(sizeof(sm_pointer));
+  struct sm_ui8 *newnum = (sm_ui8 *)sm_malloc(sizeof(sm_ui8));
   newnum->my_type       = SM_UI8_TYPE;
   newnum->value         = value;
   return newnum;

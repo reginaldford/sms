@@ -198,17 +198,17 @@ enum SM_EXPR_TYPE {
   SM_UNKNOWN_EXPR,
 };
 
-// Head of an expression
-// Assumed to have pointers following the structure for each argument
-// Size denotes the number of trailing pointers.
+/// Head of an expression
+/// Assumed to have pointers following the structure for each argument
+/// Size denotes the number of trailing pointers.
 typedef struct sm_expr {
-  int32_t           my_type;  // 2
-  enum SM_EXPR_TYPE op;       // 4
-  uint32_t          capacity; // 4
-  uint32_t          size;     // 4
-  // ! notes would be sm_cx* , but dependancy cycle prevents
-  // We use NULL to signify no notes.
-  void *notes; // 8
+  int32_t           my_type;
+  enum SM_EXPR_TYPE op;
+  uint32_t          capacity;
+  uint32_t          size;
+  /// note: dependancy cycle prevents us from using sm_cx* as type for notes
+  /// We use NULL to signify no notes.
+  void *notes;
 } sm_expr;
 
 /// New Expression with no args
