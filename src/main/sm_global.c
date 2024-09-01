@@ -75,7 +75,7 @@ char *sm_global_fn_name(uint32_t which) {
     "cd",            // SM_CD_EXPR
     "pwd",           // SM_PWD_EXPR
     "let",           // SM_LET_EXPR
-    "asF64",         // SM_AS_F64_EXPR
+    "f64",           // SM_NEW_F64_EXPR
     "=",             // SM_ASSIGN_EXPR
     "=",             // SM_ASSIGN_DOT_EXPR
     "=",             // SM_ASSIGN_LOCAL_EXPR
@@ -267,7 +267,7 @@ char *sm_global_fn_name(uint32_t which) {
 // Corresponding string length of the string that would come from the sm_global_fn_name(which)
 uint32_t sm_global_fn_name_len(uint32_t which) {
   static uint64_t response_len[] = {
-    8, 4, 4,  5,  4, 2, 2,  3,  3, 5,  1, 1, 1, 1,  1,  2,  1,  1,  1, 1,  1, 1, 2, 2, 2,  2,  2, 4,
+    8, 4, 4,  5,  4, 2, 2,  3,  3, 3,  1, 1, 1, 1,  1,  2,  1,  1,  1, 1,  1, 1, 2, 2, 2,  2,  2, 4,
     4, 3, 2,  2,  2, 2, 2,  3,  3, 3,  4, 4, 4, 4,  4,  4,  5,  5,  5, 3,  3, 3, 4, 4, 4,  4,  4, 4,
     5, 5, 5,  2,  3, 3, 4,  3,  3, 3,  4, 4, 3, 2,  2,  3,  6,  6,  5, 3,  7, 6, 4, 6, 8,  12, 5, 5,
     4, 2, 2,  2,  1, 1, 2,  2,  5, 5,  5, 5, 5, 3,  5,  4,  2,  11, 5, 5,  5, 5, 8, 8, 12, 5,  4, 7,
