@@ -98,6 +98,23 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)sms_global_version();
       break;
     }
+    case SM_NEW_F64_EXPR: {
+      sm_object *fromObj = eager_type_check2(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, current_cx, sf);
+      switch (fromObj->my_type) {
+      case SM_F64_TYPE:
+        return (sm_object *)sm_new_f64(((sm_f64 *)fromObj)->value);
+      case SM_UI8_TYPE:
+        return (sm_object *)sm_new_f64(((sm_ui8 *)fromObj)->value);
+      case SM_STRING_TYPE:
+        return (sm_object *)sm_new_f64(((sm_string *)fromObj)->content);
+      default: {
+        sm_symbol *title   = sm_new_symbol("cannotConvertToF64", 18);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to f64.",
+                                               sm_global_fn_name(fromObj->my_type));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      }
+    }
     case SM_DATE_EXPR: {
       time_t     rawtime;
       struct tm *timeinfo;

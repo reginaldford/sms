@@ -22,7 +22,7 @@ _version     {return VERSION;}
 exit         {return EXIT;}
 help         {return HELP;}
 
-asF64 {return AS_F64;}
+f64 {return NEW_F64;}
 
 "_+" {return IPLUS;}
 "_-" {return IMINUS;}
