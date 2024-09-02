@@ -38,6 +38,7 @@ int parsing_fpath_len;
 %type <expr> FUN_CALL
 %type <expr> FUN_CALL_OPEN
 %type <param_list> PARAM_LIST
+%type <expr> NEW_UI8
 %type <array> F64_ARRAY
 %type <array> F64_ARRAY_OPEN
 %type <array> F64_ARRAY_LIST
@@ -358,6 +359,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | SYM POWEREQ EXPR { $$ = sm_new_expr_2(SM_POWEREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | F64 { $$ = (sm_expr*)sm_new_f64($1);}
 | UI8 { $$ = (sm_expr*)sm_new_ui8($1);}
+| NEW_UI8 { }
 | INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
@@ -523,7 +525,6 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | ERR_LINE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRLINE_EXPR,(sm_object*)$3,_note());}
 | ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERRNOTES_EXPR,(sm_object*)$3,_note());}
 
-
 ERROR : '<' '>' { $$ = sm_new_error(0,NULL,0 ,NULL,parsing_fpath_len,parsing_fpath,yylineno);}
 | '<' SYM '>' {
     sm_symbol* sym = (sm_symbol*)$2; // Assuming $3 is the EXPR result and it's a sm_string*
@@ -586,6 +587,10 @@ F64_ARRAY_LIST : F64_ARRAY_OPEN F64 {
    space->size+=sizeof(f64);
    sm_f64_array_set($$,$$->size-1,$3);
    sms_heap->used+=sizeof(f64);
+};
+
+NEW_UI8 : "ui8(" EXPR ')' {
+  $$ = sm_new_expr(SM_NEW_UI8_EXPR,(sm_object*)$2,_note());
 };
 
 UI8_ARRAY : UI8_ARRAY_LIST ']' {};
