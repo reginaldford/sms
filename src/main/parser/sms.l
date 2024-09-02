@@ -238,6 +238,8 @@ _gc            {return GC;}
    return F64;
   }
 
+ui8 { return NEW_UI8; }
+
 ui8\((-?[0-9]+)\) {
     char *num_str = yytext + 4;  // Skip "ui8("
     // Find the position of the closing parenthesis
