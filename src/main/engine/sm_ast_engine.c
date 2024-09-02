@@ -1049,6 +1049,70 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return (sm_object *)sms_true;
       }
     }
+    case SM_FILE_WRITEARR_EXPR: {
+      // Obtain the file name using eager_type_check
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (fname_str->my_type == SM_ERR_TYPE)
+        return (sm_object *)fname_str; // Return the error if type check fails
+      char *fname_cstr = &(fname_str->content);
+      // Obtain the sm_array content to write using eager_type_check
+      sm_array *content_array = (sm_array *)eager_type_check(sme, 1, SM_ARRAY_TYPE, current_cx, sf);
+      if (content_array->my_type == SM_ERR_TYPE)
+        return (sm_object *)content_array; // Return the error if type check fails
+      // Determine the content type and set up the appropriate pointer and size
+      char  *content_cstr = NULL;
+      size_t content_size = 0;
+      switch (content_array->inner_type) {
+      case SM_UI8_TYPE: {
+        // Handle ui8 arrays
+        content_cstr = (char *)content_array->content + sizeof(sm_space);
+        content_size = content_array->size * sizeof(ui8); // Size in bytes
+        break;
+      }
+      case SM_F64_TYPE: {
+        // Handle f64 arrays
+        content_cstr = (char *)content_array->content + sizeof(sm_space);
+        content_size = content_array->size * sizeof(f64); // Size in bytes
+        break;
+      }
+      default: {
+        // Unknown type; return an error
+        sm_symbol *title   = sm_new_symbol("unsupportedTypeError", strlen("unsupportedTypeError"));
+        sm_string *message = sm_new_string(strlen("Unsupported array type for writing"),
+                                           "Unsupported array type for writing");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      }
+      // Open the file for writing
+      FILE *fptr = fopen(fname_cstr, "wb");
+      if (fptr == NULL) {
+        char error_msg[256];
+        snprintf(error_msg, sizeof(error_msg), "fileWrite failed to open: %s", fname_cstr);
+        sm_symbol *title   = sm_new_symbol("fileOpenError", strlen("fileOpenError"));
+        sm_string *message = sm_new_string(strlen(error_msg), error_msg);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Write content to file in chunks of 1024 bytes
+      size_t       total_written = 0;
+      const size_t CHUNK_SIZE    = 1024;
+      while (total_written < content_size) {
+        size_t to_write = CHUNK_SIZE;
+        if (total_written + CHUNK_SIZE > content_size)
+          to_write = content_size - total_written;
+        size_t written = fwrite(content_cstr + total_written, 1, to_write, fptr);
+        if (written != to_write) {
+          fclose(fptr);
+          sm_symbol *title   = sm_new_symbol("fileWriteError", strlen("fileWriteError"));
+          sm_string *message = sm_new_string(strlen("fileWrite failed during write operation"),
+                                             "fileWrite failed during write operation");
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        total_written += written;
+      }
+      // Close the file
+      fclose(fptr);
+      return (sm_object *)sms_true;
+    }
     case SM_FILE_WRITETGA_EXPR: {
       // Check and retrieve the filename
       sm_string *filename = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
