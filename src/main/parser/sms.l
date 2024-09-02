@@ -131,20 +131,21 @@ cxImport     {return CX_IMPORT;}
 cxMap        {return CX_MAP;}
 cxReduce     {return CX_REDUCE;}
 
-fileParse    {return FILE_PARSE;}
-fileRun      {return FILE_RUN;}
-fileReadStr     {return FILE_READ;}
-filePart     {return FILE_PART;}
-fileTomem    {return FILE_TOMEM;}
-fileExists   {return FILE_EXISTS;}
-fileStat     {return FILE_STAT;}
-fileCp       {return FILE_CP;}
-fileMv       {return FILE_MV;}
-fileRm       {return FILE_RM;}
-fileSize     {return FILE_SIZE;}
-fileWriteStr {return FILE_WRITESTR;}
-fileWriteTga {return FILE_WRITETGA;}
-fileAppend   {return FILE_APPEND;}
+fileParse      {return FILE_PARSE;}
+fileRun        {return FILE_RUN;}
+fileReadStr    {return FILE_READ;}
+filePart       {return FILE_PART;}
+fileTomem      {return FILE_TOMEM;}
+fileExists     {return FILE_EXISTS;}
+fileStat       {return FILE_STAT;}
+fileCp         {return FILE_CP;}
+fileMv         {return FILE_MV;}
+fileRm         {return FILE_RM;}
+fileSize       {return FILE_SIZE;}
+fileWriteStr   {return FILE_WRITESTR;}
+fileWriteArr   {return FILE_WRITEARR;}
+fileWriteTga   {return FILE_WRITETGA;}
+fileAppend     {return FILE_APPEND;}
 
 zeros       {return ZEROS;}
 cat         {return CAT;}
