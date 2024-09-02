@@ -2,55 +2,19 @@
 
 #include "../sms.h"
 
+extern sm_heap *sms_symbol_heap;
+
 // Create a new sm_node
 sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
-                     struct sm_node *children) {
-  sm_node *node  = sm_malloc(sizeof(sm_node));
-  node->my_type  = SM_NODE_TYPE;
-  node->value    = value;
-  node->next     = next;
-  node->map      = map;
-  node->children = children;
+                     struct sm_node *children, uint32_t sym_id) {
+  sm_node *node   = sm_malloc(sizeof(sm_node));
+  node->my_type   = SM_NODE_TYPE;
+  node->value     = value;
+  node->next      = next;
+  node->map       = map;
+  node->children  = children;
+  node->symbol_id = sym_id;
   return node;
-}
-
-// Return the sm_node child index correlating to this character
-// Char   ASCII   Group_Size
-// '   is 39      1
-// 0-9 is 48-57   10
-// A-Z is 65-90   26
-// _   is 95      1
-// a-z is 98-122  26
-// Total: 64
-int sm_node_map_index(char c) {
-  int code = (int)c;
-  if (code == 39)
-    return 0;
-  if (code >= 48 && code <= 57)
-    return code - 48 + 1;
-  if (code >= 65 && code <= 90)
-    return code - 65 + 11;
-  if (code == 95)
-    return code - 95 + 37;
-  if (code >= 97 && code <= 122)
-    return code - 97 + 38;
-  return -1;
-}
-
-// Inverse of sm_map_index
-// Expects 0-63, else, returns NULL
-char sm_node_bit_unindex(int i) {
-  if (i == 0)
-    return '\'';
-  if (i >= 1 && i <= 10)
-    return i - 1 + '0';
-  if (i >= 11 && i <= 36)
-    return i - 11 + 'A';
-  if (i == 37)
-    return '_';
-  if (i >= 38 && i <= 63)
-    return i - 38 + 'a';
-  return '\0';
 }
 
 // Return the child node, specified by index
@@ -106,7 +70,7 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
 #ifdef __x86_64__
 int popcountll(uint64_t num) { return __builtin_popcountll(num); }
 #else
-// Manually counting the bits in the long long int, efficiently
+// Manually counting the bits in the 64 bit int, efficiently
 int popcountll(uint64_t num) {
   int count = 0;
   for (count = 0; num; count++)
@@ -125,7 +89,7 @@ sm_node *sm_node_subnode(sm_node *self, char *needle, int len) {
   sm_node *curr_node  = self;
   int      char_index = 0;
   while (char_index < len && curr_node != NULL) {
-    int      map_index = sm_node_map_index(needle[char_index]);
+    int      map_index = needle[char_index];
     uint64_t map       = curr_node->map;
     uint64_t bit       = 1ULL << map_index;
     if ((map & bit) == 0) {
@@ -148,7 +112,7 @@ sm_node *sm_node_parent_node(sm_node *self, char *needle, int len) {
   int      child_index = 0;
   int      char_index  = 0;
   for (; char_index < len && curr_node != NULL; char_index++) {
-    map_index = sm_node_map_index(needle[char_index]);
+    map_index = needle[char_index];
     if (sm_node_map_get(curr_node->map, map_index) == false)
       return NULL;
     child_index = sm_node_map_left_count(curr_node->map, map_index);
@@ -189,20 +153,18 @@ sm_node *sm_node_get_container(sm_node *self, char *needle, int len) {
 // Report of the node has not value and no children
 bool sm_node_is_empty(sm_node *node) { return node->value == NULL && node->map == 0LL; }
 
-
 // Print all of the key-value pairs in this node recursively
 // Uses the stack to recall path to current node, for full key name
-int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack) {
+int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack_obj *char_stack) {
   int cursor = 0;
   if (node->value != NULL) {
-    // var name
-    for (uint32_t i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
-      sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
-      if (!fake)
-        buffer[i] = sm_node_bit_unindex(num_obj->value);
-    }
-    cursor = sm_stack_size(char_stack);
-    // equals sign
+    // first, write the symbol name
+    uint32_t   sym_id = node->symbol_id;
+    sm_symbol *sym    = &(((sm_symbol *)sms_symbol_heap->storage)[sym_id]);
+    if (!fake)
+      sm_strncpy(buffer, &sym->name->content, sym->name->size);
+    cursor = sym->name->size;
+    // arrow sign
     if (!fake) {
       buffer[cursor]     = '-';
       buffer[cursor + 1] = '>';
@@ -224,9 +186,9 @@ int sm_node_sprint(sm_node *node, char *buffer, bool fake, sm_stack *char_stack)
         if (sm_node_map_get(node->map, current_bit) == true) {
           int      child_index = sm_node_child_index(node->map, current_bit);
           sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
-          sm_stack_push(char_stack, sm_new_double(current_bit));
+          sm_stack_obj_push(char_stack, sm_new_f64(current_bit));
           cursor += sm_node_sprint(child_here, &(buffer[cursor]), fake, char_stack);
-          sm_stack_pop(char_stack);
+          sm_stack_obj_pop(char_stack);
           items_to_do--;
         }
       }
@@ -289,25 +251,15 @@ int sm_node_size(sm_node *node) {
   return size;
 }
 
-
 // Returns the keys under this node(recursive)
-sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) {
+sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collection) {
   if (node == NULL)
-    return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
+    return sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, NULL);
 
   if (node->value != NULL) {
-    // Build the key string
-    int  len = sm_stack_size(char_stack);
-    char buffer[len + 1]; // Increase the buffer size to accommodate the null terminator
-    buffer[len] = '\0';   // Add the null terminator at the end
-
-    for (uint32_t i = sm_stack_size(char_stack) - 1; i + 1 > 0; i--) {
-      sm_double *num_obj = *((sm_stack_empty_top(char_stack) + i + 1));
-      buffer[i]          = sm_node_bit_unindex(num_obj->value);
-    }
-
+    sm_symbol *found_sym = &((sm_symbol *)sms_symbol_heap->storage)[node->symbol_id];
     // Add the key to the collection
-    collection = sm_expr_append(collection, (sm_object *)sm_new_symbol(sm_new_string(len, buffer)));
+    collection = sm_expr_append(collection, (sm_object *)found_sym);
   }
 
   // If there are no more children, we are done
@@ -318,17 +270,16 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
   uint64_t map = node->map; // Get the bitmap
 
   while (map != 0) {
-    uint64_t bit       = map & -map; // Get the rightmost set bit using two's complement trick
+    uint64_t bit       = map & -map; // Get the rightmost set bit using two's compliment
     int      bit_index = __builtin_ctzll(
       bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
 
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
 
-    sm_stack_push(char_stack, sm_new_double(bit_index));
+    sm_stack_obj_push(char_stack, sm_new_f64(bit_index));
     collection = sm_node_keys(child_here, char_stack, collection);
-    sm_stack_pop(char_stack);
-
+    sm_stack_obj_pop(char_stack);
     map ^= bit; // Clear the current bit
   }
 
@@ -338,15 +289,12 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack *char_stack, sm_expr *collection) 
 // Returns the keys under this node(recursive)
 sm_expr *sm_node_values(sm_node *node, sm_expr *collection) {
   if (node == NULL)
-    return sm_new_expr_n(SM_ARRAY_EXPR, 0, 0);
-  if (node->value != NULL) {
-    // var name
+    return sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, NULL);
+  if (node->value != NULL)
     collection = sm_expr_append(collection, node->value);
-  }
   // If there are not more children, we are done
-  if (sm_node_is_empty(node)) {
+  if (sm_node_is_empty(node))
     return collection;
-  }
   int items_to_do = sm_node_map_size(node->map);
   for (int i = 0; items_to_do > 0 && i < 64; i++) {
     if (sm_node_map_get(node->map, i) == true) {

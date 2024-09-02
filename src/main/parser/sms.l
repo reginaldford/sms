@@ -18,8 +18,26 @@ digit [0-9]
 %%
 
 [ \t\f\v\n\\]  { ; }
+_version     {return VERSION;}
 exit         {return EXIT;}
 help         {return HELP;}
+
+f64 {return NEW_F64;}
+
+"_+" {return IPLUS;}
+"_-" {return IMINUS;}
+"_*" {return ITIMES;}
+"_/" {return IDIVIDE;}
+"_^" {return IPOW;}
+"_xor" {return IXOR;}
+"_or"  {return IOR;}
+"_and" {return IAND;}
+
+"+=" {return PLUSEQ;}
+"-=" {return MINUSEQ;}
+"*=" {return TIMESEQ;}
+"/=" {return DIVIDEEQ;}
+"^=" {return POWEREQ;}
 
 sin          {return SIN;}
 cos          {return COS;}
@@ -33,18 +51,20 @@ tanh         {return TANH;}
 sec          {return SEC;}
 csc          {return CSC;}
 cot          {return COT;}
-asec          {return ASEC;}
-acsc          {return ACSC;}
-acot          {return ACOT;}
-asech         {return ASECH;}
-acsch         {return ACSCH;}
-acoth         {return ACOTH;}
+asec         {return ASEC;}
+acsc         {return ACSC;}
+acot         {return ACOT;}
+asech        {return ASECH;}
+acsch        {return ACSCH;}
+acoth        {return ACOTH;}
 exp          {return EXP;}
 ln           {return LN;}
 log          {return LOG;}
 sqrt         {return SQRT;}
 abs          {return ABS;}
 
+"++"         {return INC;}
+"--"         {return DEC;}
 diff         {return DIFF;}
 simp         {return SIMP;}
 int          {return INT;}
@@ -53,15 +73,13 @@ if           {return IF;}
 else         {return ELSE;}
 while        {return WHILE;}
 for          {return FOR;}
+forEach      {return FOR;}
 doWhile      {return DO_WHILE;}
 return       {return RETURN;}
 eval         {return EVAL;}
 cxEval       {return CX_EVAL;}
-evalFast     {return EVAL_FAST;}
-evalFastInCX {return EVAL_FAST_IN_CX;}
-fails        {return FAILS;}
 parse        {return PARSE;}
-toStr        {return TO_STR;}
+str          {return NEW_STR;}
 toStrFmt     {return TO_STRFMT;}
 
 "->"         {return ASSOCIATE;}
@@ -69,6 +87,10 @@ toStrFmt     {return TO_STRFMT;}
 !=           {return NOTEQ;}
 "<="         {return LT_EQ;}
 ">="         {return GT_EQ;}
+
+isNan        {return ISNAN;};
+isInf        {return ISINF;};
+
 is           {return IS;}
 
 not          {return NOT;}
@@ -78,17 +100,21 @@ and          {return AND;}
 
 input        {return INPUT;}
 put          {return PUT;}
-putln        {return PUTLN;}
+putLn        {return PUTLN;}
 
 let          {return LET;}
 self         {return SELF;}
+args         {return ARGS;}
 clear        {return CLEAR;}
 "."          {return DOT;}
 parent       {return PARENT;}
 rm           {return RM;}
 
+"f64["       {return F64_ARRAY_OPEN;}
+"ui8["       {return UI8_ARRAY_OPEN;}
+
 newCx        {return NEW_CX;}
-cxDot        {return CX_DOT;}
+cxSetParent  {return CX_SETPARENT;}
 cxLet        {return CX_LET;}
 cxGet        {return CX_GET;}
 cxHas        {return CX_HAS;}
@@ -107,7 +133,7 @@ cxReduce     {return CX_REDUCE;}
 
 fileParse    {return FILE_PARSE;}
 fileRun      {return FILE_RUN;}
-fileRead     {return FILE_READ;}
+fileReadStr     {return FILE_READ;}
 filePart     {return FILE_PART;}
 fileTomem    {return FILE_TOMEM;}
 fileExists   {return FILE_EXISTS;}
@@ -116,16 +142,13 @@ fileCp       {return FILE_CP;}
 fileMv       {return FILE_MV;}
 fileRm       {return FILE_RM;}
 fileSize     {return FILE_SIZE;}
-fileWrite    {return FILE_WRITE;}
+fileWriteStr {return FILE_WRITESTR;}
+fileWriteTga {return FILE_WRITETGA;}
 fileAppend   {return FILE_APPEND;}
 
-csvToArr   {return CSV_TOARR;}
-arrToCsv   {return ARR_TOCSV;}
-memToFile  {return MEM_TOFILE;}
-
-newArr      {return NEW_ARR;}
-arrCat      {return ARR_CAT;}
-arrRpt      {return ARR_REPEAT;}
+zeros       {return ZEROS;}
+cat         {return CAT;}
+repeat      {return REPEAT;}
 part        {return PART;}
 size        {return SIZE;}
 map         {return MAP;}
@@ -139,7 +162,6 @@ ceil        {return CEIL;}
 mod         {return MOD;}
 
 =>          {return ARROW;}
-newFn       {return NEW_FN;}
 fnXp        {return FN_XP;}
 fnSetXp     {return FN_SETXP;}
 fnParams    {return FN_PARAMS;}
@@ -150,21 +172,7 @@ fnSetParent {return FN_SETPARENT;}
 newXp       {return NEW_XP;}
 xpOp        {return XP_OP;}
 xpSetOp     {return XP_SETOP;}
-xpOpStr     {return XP_OPSTR;}
-
-newMem     {return NEW_MEM;}
-memSet     {return MEM_SET;}
-memSize    {return MEM_SIZE;}
-memGet     {return MEM_GET;}
-memUnite   {return MEM_UNITE;}
-memPart    {return MEM_PART;}
-memPrint   {return MEM_PRINT;}
-memTonums  {return MEM_TONUMS;}
-memMap     {return MEM_MAP;}
-memTostr   {return MEM_TOSTR;}
-
-memAlloc   {return MALLOC_OBJ;}
-memFree    {return FREE_OBJ;}
+xpOpSym     {return XP_OPSYM;}
 
 cpy         {return COPY;}
 deepCpy     {return DEEP_COPY;}
@@ -173,25 +181,19 @@ symName     {return SYM_NAME;}
 
 newStr      {return NEW_STR;}
 "str\+"     {return STR_CAT;}
-strRpt      {return STR_REPEAT;}
+strRepeat   {return STR_REPEAT;}
 strEscape   {return STR_ESCAPE;}
 strUnescape {return STR_UNESCAPE;}
 strSize     {return STR_SIZE;}
+strMut      {return STR_MUT;}
 strFind     {return STR_FIND;}
-strFindr    {return STR_FINDR;}
+strFindR    {return STR_FINDR;}
 strGet      {return STR_GET;}
 strSet      {return STR_SET;}
 strSplit    {return STR_SPLIT;}
 strPart     {return STR_PART;}
 strCmp      {return STR_CMP;}
-strToNums   {return STR_TONUMS;}
 strMap      {return STR_MAP;}
-strToMem    {return STR_TOMEM;}
-
-newNums    {return NEW_NUMS;}
-numsToMem  {return NUMS_TOMEM;}
-numsToStr  {return NUMS_TOSTR;}
-numsToCsv  {return NUMS_TOSTR;}
 
 meta       {return RUNTIME_META;}
 
@@ -202,7 +204,8 @@ sleep      {return SLEEP;}
 
 osFork        {return FORK;}
 osWait        {return WAIT;}
-osExec        {return EXEC;}
+osExec        {return OS_EXEC;}
+osExecToStr   {return OS_EXECTOSTR;}
 osGetEnv      {return OS_GETENV;}
 osSetEnv      {return OS_SETENV;}
 
@@ -210,28 +213,57 @@ pwd          	 {return PWD;}
 ls           	 {return LS;}
 cd           	 {return CD;}
 
+isErr         {return IS_ERR;}
+errTitle      {return ERR_TITLE;}
+errMessage    {return ERR_MESSAGE;}
+errSource     {return ERR_SOURCE;}
+errLine       {return ERR_LINE;}
+errNotes      {return ERR_NOTES;}
+
 _thisProcess   {return THISPROCESS;}
 _getOptions    {return GETOPTIONS;}
 _setOptions    {return SETOPTIONS;}
-_resetOptions  {return RESETOPTIONS;}
 _gc            {return GC;}
-_mem_saveFile  {return MEM_SAVEFILE;}
-_mem_readFile  {return MEM_READFILE;}
-_mem_checkFile {return MEM_CHECKFILE;}
 
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}
 
+([0-9]+) {
+ yylval.integer = atoi(yytext);
+ return INTEGER;
+}
+
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
-   yylval.num = sm_new_double(atof(yytext));
-   return NUM;
+   yylval.num = atof(yytext);
+   return F64;
   }
+
+ui8\((-?[0-9]+)\) {
+    char *num_str = yytext + 4;  // Skip "ui8("
+    // Find the position of the closing parenthesis
+    char *end_paren = strchr(num_str, ')');
+    if (!end_paren) {
+        fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
+        return 0;
+    }   
+    // Temporarily terminate the string at the closing parenthesis
+    *end_paren = '\0';
+    // Trim spaces from the start and end of num_str
+    char *end = num_str + strlen(num_str) - 1;
+    end[1] = '\0';  // Null-terminate the trimmed string
+    int number = atoi(num_str);  // Convert the trimmed number string to an integer
+    yylval.ui8 = number;
+    return UI8;
+}
+
+
 [\<\>\=] { return yytext[0]; }
 
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
 
-({alpha}?+{digit}?+_?+)?+\'?+ {
-    yylval.sym = sm_new_symbol(sm_new_string(yyleng,yytext));
+
+({alpha}?+{digit}?+_?+\'?+)?+ {
+    yylval.sym = sm_new_symbol(yytext,yyleng);
     return SYM;
   }
 

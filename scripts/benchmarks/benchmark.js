@@ -1,5 +1,5 @@
 #!/usr/local/bin/node
-const n = 30;
+const n = 31;
 
 function fibonacciRecursive(n) {
   if (n <= 1) {

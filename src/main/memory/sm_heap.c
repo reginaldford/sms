@@ -6,120 +6,45 @@ extern sm_heap   *sms_heap;
 extern sm_heap   *sms_other_heap;
 extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
+extern sm_heap   *sms_symbol_heap;
+extern sm_heap   *sms_symbol_name_heap;
 
 // For rounding up object size to the next multiple of 4 bytes.
-int sm_round_size(int size) { return ((size) + 3) & ~3; }
+uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
+uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~7; }
 
 // Create a new heap of some capacity
 sm_heap *sm_new_heap(uint32_t capacity) {
-  sm_heap *new_heap  = (sm_heap *)malloc(sizeof(sm_heap));
+  sm_heap *new_heap  = (sm_heap *)malloc(sizeof(sm_heap) + capacity);
   new_heap->capacity = capacity;
   new_heap->used     = 0;
-  new_heap->storage  = malloc(capacity);
+  new_heap->storage  = (char *)(new_heap + 1);
   return new_heap;
 }
 
-// Check for adequate space size
-// If it is acceptable,  remove it from the space array and return the space, else return NULL
-sm_space *check_space(uint32_t size, uint32_t index) {
-  if (index + 1 <= sm_global_space_array(NULL)->size) {
-    uint32_t space_size =
-      sm_get_space_array(sm_global_space_array(NULL))[index]->my_type - SM_SPACE_TYPE;
-    if (space_size >= size) {
-      sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[index];
-      return good_space;
-    }
-    return NULL;
-  }
-  return NULL;
-}
-
-// Binary search for space in a size ordered space array
-sm_search_result find_space_within_bounds(sm_space_array *ssa, uint32_t size, uint32_t lower_limit,
-                                          uint32_t upper_limit) {
-  sm_space **space_array = sm_get_space_array(ssa);
-  int        comparison  = 1;
-  uint32_t   guess_point = (upper_limit + lower_limit) / 2.0;
-  while (lower_limit < upper_limit && comparison != 0) {
-    comparison = space_array[guess_point]->my_type - SM_SPACE_TYPE - size;
-    if (comparison == 0)
-      return (sm_search_result){.found = true, .index = guess_point};
-    else if (comparison > 0)
-      upper_limit = guess_point == 0 ? 0 : guess_point - 1;
-    else
-      lower_limit = guess_point + 1;
-    guess_point = (upper_limit + lower_limit) / 2.0;
-  }
-  comparison = space_array[guess_point]->my_type - SM_SPACE_TYPE - size;
-  if (comparison == 0)
-    return (sm_search_result){.found = true, .index = guess_point};
-  if (comparison < 0) {
-    return (sm_search_result){.found = false, .index = guess_point + 1};
-  } else // comparison > 0
-    return (sm_search_result){.found = false, .index = guess_point};
-}
-
-// Sort the space array that is unsorted by the 1 space at off_index
-void sort_1_off(sm_space_array *ssa, uint32_t off_index) {
-  uint32_t space_size = sm_get_space_array(ssa)[off_index]->my_type - SM_SPACE_TYPE;
-  // Now, to binary search the remaining portion of the array
-  sm_search_result sr = find_space_within_bounds(ssa, space_size, 0, off_index - 1);
-  // Use search result to sort this 1-off array
-  sm_space **space_array = sm_get_space_array(ssa);
-  sm_space  *off_space   = space_array[off_index];
-  uint32_t   upper_index = off_index;
-  uint32_t   lower_index = sr.index;
-  for (uint32_t i = upper_index; i > lower_index; i--) {
-    space_array[i] = space_array[i - 1];
-  }
-  space_array[lower_index] = off_space;
-}
-
-// Find a space from the global space array or NULL
-void *sm_malloc_from_spaces(uint32_t size) {
-  if (sm_global_space_array(NULL)->size > 0) {
-    sm_search_result sr = sm_space_array_find(sm_global_space_array(NULL), size);
-    // sr.found is true for exact matches
-    if (sr.found == true) {
-      sm_space *good_space = sm_get_space_array(sm_global_space_array(NULL))[sr.index];
-      // Deleting space by its index
-      sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
-      return good_space;
-    }
-    sm_space *result_space = check_space(size, sr.index);
-    if (result_space != NULL) {
-      uint32_t remaining_size = (result_space->my_type - SM_SPACE_TYPE) - size;
-      if (remaining_size >= sizeof(sm_space)) {
-        sm_space *new_space = (sm_space *)((char *)result_space) + size;
-        new_space->my_type  = SM_SPACE_TYPE + remaining_size;
-        sm_get_space_array(sm_global_space_array(NULL))[sr.index] = new_space;
-        sort_1_off(sm_global_space_array(NULL), sr.index);
-      } else {
-        sm_space_rm_by_index(sm_global_space_array(NULL), sr.index);
-      }
-      return result_space;
-    }
-  }
-  return NULL;
-}
-
-// Internal 'malloc'. Checks space array first, else move the 'used' integer up
+// Internal 'malloc'
 void *sm_malloc(uint32_t size) {
-  // void        *space_search = sm_malloc_from_spaces(size);
   uint32_t bytes_used = sms_heap->used;
-  // Try space array, where we kept deallocated space
-  // if (space_search != NULL)
-  // return space_search;
-  // If no spaces were found, default to classic copy gc allocation
-  // else {
   sms_heap->used += size;
   return (void *)(((char *)sms_heap->storage) + bytes_used);
-  // }
+}
+
+// Internal 'malloc' with alternative heap
+void *sm_malloc_at(struct sm_heap *heap, uint32_t size) {
+  uint32_t bytes_used = heap->used;
+  heap->used += size;
+  return (void *)(((char *)heap->storage) + bytes_used);
 }
 
 // Reallocate memory space for resizing or recreating objects
 void *sm_realloc(void *obj, uint32_t size) {
   sm_object *new_space = sm_malloc(size);
+  return memcpy(new_space, obj, sm_sizeof(obj));
+}
+
+// Reallocate memory space for resizing or recreating objects, at specified heap
+void *sm_realloc_at(struct sm_heap *dest, void *obj, uint32_t size) {
+  sm_object *new_space = sm_malloc_at(dest, size);
   return memcpy(new_space, obj, size);
 }
 
@@ -136,6 +61,7 @@ int sm_mem_dump(sm_heap *heap, char *name) {
   FILE *fp = fopen(name, "wb");
   // Write the data to the file
   fwrite(buffer, 1, buffer_length, fp);
+  fflush(fp);
   // Close the file
   // Returns 0 if there are no problems
   return fclose(fp);
@@ -159,6 +85,12 @@ void sm_mem_cleanup() {
     free(sms_heap);
   if (sms_other_heap != NULL)
     free(sms_other_heap);
+  if (sms_symbol_heap != NULL)
+    free(sms_symbol_heap);
+  if (sms_symbol_name_heap != NULL)
+    free(sms_symbol_name_heap);
+  if (sm_global_lex_stack(NULL))
+    free(sm_global_lex_stack(NULL));
 }
 
 // Print every object in current heap
@@ -174,7 +106,7 @@ void sm_sprint_dump() {
     if (current_obj->my_type <= SM_SPACE_TYPE)
       scan_cursor += sm_sizeof(current_obj);
     else {
-      DEBUG_HERE("Error: Stopping on unrecognized object type.");
+      DEBUG("Error: Stopping on unrecognized object type.");
       return;
     }
   }

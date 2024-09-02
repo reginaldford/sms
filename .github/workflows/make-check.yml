@@ -1,4 +1,4 @@
-name: Run make check
+name: make check test
 
 on:
   push:
@@ -8,10 +8,17 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: make check
-      run: git clone https://github.com/reginaldford/sms && cd sms && make check
+    - name: Clone repository
+      run: git clone https://github.com/reginaldford/sms
+
+    - name: Initialize and update submodules
+      working-directory: ./sms
+      run: git submodule update --recursive --init
+
+    - name: Run make check
+      working-directory: ./sms
+      run: make check
 

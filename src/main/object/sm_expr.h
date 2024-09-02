@@ -2,7 +2,9 @@
 
 // Denotes the type of expression
 // Must be in the same order as sm_global_fn_name
+
 enum SM_EXPR_TYPE {
+  SM_VERSION_EXPR,
   SM_EXIT_EXPR,
   SM_HELP_EXPR,
   SM_CLEAR_EXPR,
@@ -11,6 +13,8 @@ enum SM_EXPR_TYPE {
   SM_CD_EXPR,
   SM_PWD_EXPR,
   SM_LET_EXPR,
+  SM_NEW_F64_EXPR,
+  SM_NEW_UI8_EXPR,
   SM_ASSIGN_EXPR,
   SM_ASSIGN_DOT_EXPR,
   SM_ASSIGN_LOCAL_EXPR,
@@ -23,6 +27,19 @@ enum SM_EXPR_TYPE {
   SM_TIMES_EXPR,
   SM_DIVIDE_EXPR,
   SM_POW_EXPR,
+  SM_IPLUS_EXPR,
+  SM_IMINUS_EXPR,
+  SM_ITIMES_EXPR,
+  SM_IDIVIDE_EXPR,
+  SM_IPOW_EXPR,
+  SM_IXOR_EXPR,
+  SM_IAND_EXPR,
+  SM_IOR_EXPR,
+  SM_PLUSEQ_EXPR,
+  SM_MINUSEQ_EXPR,
+  SM_TIMESEQ_EXPR,
+  SM_DIVIDEEQ_EXPR,
+  SM_POWEREQ_EXPR,
   SM_SIN_EXPR,
   SM_COS_EXPR,
   SM_TAN_EXPR,
@@ -52,6 +69,8 @@ enum SM_EXPR_TYPE {
   SM_EXP_EXPR,
   SM_SQRT_EXPR,
   SM_ABS_EXPR,
+  SM_INC_EXPR,
+  SM_DEC_EXPR,
   SM_DIFF_EXPR,
   SM_SIMP_EXPR,
   SM_INT_EXPR,
@@ -78,18 +97,17 @@ enum SM_EXPR_TYPE {
   SM_GT_EXPR,
   SM_LT_EQ_EXPR,
   SM_GT_EQ_EXPR,
-
+  SM_ISNAN_EXPR,
+  SM_ISINF_EXPR,
   SM_INDEX_EXPR,
   SM_BLOCK_EXPR,
-  SM_ARRAY_EXPR,
-
-  SM_TO_STRING_EXPR,
+  SM_TUPLE_EXPR,
   SM_PUT_EXPR,
   SM_PUTLN_EXPR,
+  SM_ARGS_EXPR,
   SM_INPUT_EXPR,
-
   SM_NEW_CX_EXPR,
-  SM_CX_DOT_EXPR,
+  SM_CX_SETPARENT_EXPR,
   SM_CX_LET_EXPR,
   SM_CX_GET_EXPR,
   SM_CX_HAS_EXPR,
@@ -104,29 +122,23 @@ enum SM_EXPR_TYPE {
   SM_CX_SIZE_EXPR,
   SM_CX_IMPORT_EXPR,
   SM_CX_MAP_EXPR,
-
   SM_FILE_PARSE_EXPR,
-  SM_FILE_READ_EXPR,
+  SM_FILE_READSTR_EXPR,
   SM_FILE_RUN_EXPR,
   SM_FILE_PART_EXPR,
   SM_FILE_EXISTS_EXPR,
   SM_FILE_STAT_EXPR,
-  SM_FILE_TOBLK_EXPR,
   SM_FILE_CP_EXPR,
   SM_FILE_MV_EXPR,
   SM_FILE_RM_EXPR,
-  SM_FILE_WRITE_EXPR,
+  SM_FILE_WRITESTR_EXPR,
+  SM_FILE_WRITETGA_EXPR,
   SM_FILE_APPEND_EXPR,
-
-  SM_CSV_TOARR_EXPR,
-  SM_ARR_TOCSV_EXPR,
-
-  SM_NEW_ARR_EXPR,
-  SM_ARR_CAT_EXPR,
-  SM_ARR_REPEAT_EXPR,
+  SM_ZEROS_EXPR,
   SM_PART_EXPR,
   SM_SIZE_EXPR,
-
+  SM_CAT_EXPR,
+  SM_REPEAT_EXPR,
   SM_RANDOM_EXPR,
   SM_SEED_EXPR,
   SM_ROUND_EXPR,
@@ -137,19 +149,17 @@ enum SM_EXPR_TYPE {
   SM_OR_EXPR,
   SM_AND_EXPR,
   SM_XOR_EXPR,
-
   SM_FN_XP_EXPR,
   SM_FN_SETXP_EXPR,
   SM_FN_PARAMS_EXPR,
   SM_FN_SETPARAMS_EXPR,
   SM_FN_PARENT_EXPR,
   SM_FN_SETPARENT_EXPR,
-
   SM_XP_OP_EXPR,
   SM_XP_SET_OP_EXPR,
-  SM_XP_OP_STR_EXPR,
-
+  SM_XP_OP_SYM_EXPR,
   SM_STR_SIZE_EXPR,
+  SM_STR_MUT_EXPR,
   SM_STR_GET_EXPR,
   SM_STR_SET_EXPR,
   SM_STR_MAP_EXPR,
@@ -163,27 +173,10 @@ enum SM_EXPR_TYPE {
   SM_STR_TONUMS_EXPR,
   SM_STR_CMP_EXPR,
   SM_STR_REPEAT_EXPR,
-  SM_STR_TOBLK_EXPR,
   SM_NEW_STR_EXPR,
-  SM_TO_STR_EXPR,
   SM_TO_STRFMT_EXPR,
-
-  SM_NEW_BLK_EXPR,
-  SM_BLK_MAP_EXPR,
-  SM_BLK_UNITE_EXPR,
-  SM_BLK_PART_EXPR,
-  SM_BLK_TONUMS_EXPR,
-  SM_NUMS_TOBLK_EXPR,
-  SM_BLK_TOFILE_EXPR,
-  SM_BLK_PRINT_EXPR,
-  SM_BLK_SET_EXPR,
-  SM_BLK_GET_EXPR,
-  SM_BLK_TOSTR_EXPR,
-  SM_BLK_SIZE_EXPR,
-
   SM_FUN_CALL_EXPR,
   SM_PARAM_LIST_EXPR,
-
   SM_SIBLINGS_EXPR,
   SM_PRIM_EXPR,
   SM_DATE_STR_EXPR,
@@ -193,29 +186,46 @@ enum SM_EXPR_TYPE {
   SM_FORK_EXPR,
   SM_WAIT_EXPR,
   SM_EXEC_EXPR,
+  SM_EXECTOSTR_EXPR,
   SM_OS_GETENV_EXPR,
   SM_OS_SETENV_EXPR,
   SM_GC_EXPR,
-  SM_UNKNOWN_EXPR
+  SM_ISERR_EXPR,
+  SM_ERRTITLE_EXPR,
+  SM_ERRMESSAGE_EXPR,
+  SM_ERRSOURCE_EXPR,
+  SM_ERRLINE_EXPR,
+  SM_ERRNOTES_EXPR,
+  SM_UNKNOWN_EXPR,
 };
 
-// Head of an expression
-// Assumed to have pointers following the structure for each argument
-// Size denotes the number of trailing pointers.
+/// Head of an expression
+/// Assumed to have pointers following the structure for each argument
+/// Size denotes the number of trailing pointers.
 typedef struct sm_expr {
-  int16_t           my_type;
+  int32_t           my_type;
   enum SM_EXPR_TYPE op;
   uint32_t          capacity;
   uint32_t          size;
-  short             filler;
+  /// note: dependancy cycle prevents us from using sm_cx* as type for notes
+  /// We use NULL to signify no notes.
+  void *notes;
 } sm_expr;
 
-sm_expr   *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg);
-sm_expr   *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2);
-sm_expr   *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3);
-sm_expr   *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
-                         sm_object *arg4);
-sm_expr   *sm_new_expr_n(enum SM_EXPR_TYPE op1, uint32_t size, uint32_t capacity);
+/// New Expression with no args
+sm_expr *sm_new_expr_0(enum SM_EXPR_TYPE op1, void *notes);
+/// New Expression with 1 arg
+sm_expr *sm_new_expr(enum SM_EXPR_TYPE op1, sm_object *arg, void *notes);
+/// New Expression with 2 args
+sm_expr *sm_new_expr_2(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, void *notes);
+/// New Expression with 3 args
+sm_expr *sm_new_expr_3(enum SM_EXPR_TYPE op1, sm_object *arg1, sm_object *arg2, sm_object *arg3,
+                       void *notes);
+/// New Expression with 4 args
+sm_expr *sm_new_expr_4(enum SM_EXPR_TYPE op, sm_object *arg1, sm_object *arg2, sm_object *arg3,
+                       sm_object *arg4, void *notes);
+/// New Expression with size args
+sm_expr   *sm_new_expr_n(enum SM_EXPR_TYPE op2, uint32_t size, uint32_t capacity, void *notes);
 sm_expr   *sm_expr_append(sm_expr *expr, sm_object *arg);
 uint32_t   sm_prefix_sprint(sm_expr *self, char *buffer, bool fake);
 uint32_t   sm_infix_sprint(sm_expr *expr, char *buffer, bool fake);
@@ -225,4 +235,3 @@ sm_expr   *sm_expr_set_arg(sm_expr *expr, uint32_t index, sm_object *num);
 sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index);
 bool       sm_is_infix(enum SM_EXPR_TYPE op);
 sm_object *sm_expr_pop(sm_expr *sme);
-sm_object *sm_expr_pop_recycle(sm_expr *sme);

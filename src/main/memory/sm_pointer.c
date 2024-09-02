@@ -3,9 +3,9 @@
 #include "../sms.h"
 
 // This function overwrites an object and leaves a pointer to the new location.
-sm_pointer *sm_new_pointer(sm_object *old_object, sm_object *new_address) {
+sm_pointer *sm_new_pointer(sm_heap *origin, sm_object *old_object, sm_object *new_address) {
   sm_pointer *ptr = (sm_pointer *)old_object;
   ptr->my_type    = SM_POINTER_TYPE;
-  ptr->address    = new_address;
+  ptr->address    = (uint32_t)((uint64_t)new_address - (uint64_t)origin);
   return ptr;
 }

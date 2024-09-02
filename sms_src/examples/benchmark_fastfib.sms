@@ -1,0 +1,30 @@
+#!/usr/local/bin/sms
+# Use this to benchmark something
+# I came up with a faster fib that doesn't memoize
+
+{
+  let t1 =[];
+  let t2 =[];
+  let time_elapsed =0;
+  let a =0;
+  let benchmark = (e) => {
+    putLn("Benchmarking: " str+ str(e));
+
+    t1 = time();
+    putLn(str(eval(e)));
+    t2 = time();
+
+    putLn("Total time:");
+    time_elapsed = 1000 * (t2[0] - t1[0]) +  0.001 * (t2[1] - t1[1]);
+    putLn(str(time_elapsed) str+ " milliseconds")
+  };
+
+  let first5 = [1,1,2,3,5];
+  let f = (n) => {
+    if(n<5)
+        return first5[n];
+    return 2  *f(n-3) + f(n-4) + f(n-2) ;
+  };
+
+  benchmark(:f(31));
+};

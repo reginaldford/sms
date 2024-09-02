@@ -10,7 +10,7 @@
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/reginaldford/sms/make-check.yml)
 
 # Introduction:
-SMS (Symbolic Math System) is a math-focused scripting language for POSIX friendly operating systems. SMS has built-in functions for arithmetic, trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
+SMS (Symbolic Math System) is a math-focused scripting language for POSIX friendly environments. SMS has built-in functions for arithmetic, trigonometry, algebra, calculus, file access and more. SMS aims to become a simple general purpose programming language. SMS is still in early stages of development. SMS can be downloaded and installed from the Releases page on GitHub. The latest source code may have undocumented changes and this document is synchronized with the project at the point of the latest release: ![GitHub latest release (latest by date)](https://img.shields.io/github/v/tag/reginaldford/sms)
 
 # Details
 
@@ -171,6 +171,9 @@ Line comments start with `#`.
     17. cxRm(cx, :var); # Remove this entry from the context
 
     18. cxImport(cx1, cx2); # import the key/value pairs from cx1 into cx2. Overwrites existing key values
+
+    19. cxSetParent(cx1, cx2); # Set the parent of cx1 to cx2.
+
 </details>
 
 <details>
@@ -278,6 +281,25 @@ Line comments start with `#`.
     3. xpOpStr(17) # Get the string for an operator
 </details>
 
+<details>
+  <summary>Functions</summary>
+    1. let myFunc = (x,y)=>sqrt(x^2+y^2); # Make a function that depends on x and y
+    
+    2. let f = fnSetParent(myFunc,parent(self)); # An example of changing the parent context of a function. Check fnSetParent.sms
+    
+    3. fnXp((x)=>x^2); # Would return x^2 as an expression. same as :(x^2)
+    
+    4. fnSetXp(funcion, :(expression)); # Mutate the function to have new content
+    
+    5. fnParams(func); # returns the input params as an array of symbols
+    
+    6. fnSetParams(func,(:x,:y,:z)); # change the parameter names for a function
+    
+    7. fnParent(func); # returns the parent context of the function
+    
+    8. fnSetParent(func, cx); # returns a new function with new parent
+</details>
+
 
 # How to Download and Run/Install a Release
 - At the [ Releases page ](https:#github.com/reginaldford/sms/releases)  , under 'Assets', you can find binary executable files for Linux, OpenBSD, and FreeBSD You may rename the file to 'sms' and copy to anywhere you need. On most Linux/Unix systems, copying to somewhere like /usr/local/bin directory is a fine way to install the program. The program is small and portable, so you can have copies where necessary.
@@ -332,17 +354,21 @@ This command builds the executable and copies it to /usr/local/bin/sms
 
 
 # Plans:
-- [ ] Support for booting from a serialized memory heap.
-- [ ] Support for matices. Inversion, solving, eigenvalues, etc.
+- [ ] Terminal history support
+- [ ] Parser in C (instead of bison/flex)
+- [ ] Allow parser extention functions.
+- [ ] Manual (not just the cheat sheet).
+- [ ] Design documentation.
+- [ ] Instructions for adding primitive functions written in C
+- [ ] Ability to call dynamic library functions
 - [ ] 'Last moment' garbage collection.
+- [ ] Generational garbage collection
+- [ ] Bytecode generation and execution
 - [ ] Tail call optimization.
-- [ ] Modern terminal support
 - [ ] Dynamic heap size, with min, max, and max_emptiness specs.
-- [ ] An integral command for taking integrals.
-- [ ] Arbitrary precision support.
-- [ ] General documentation.
-- [ ] Some Unicode support.
-- [ ] Simple Webserver and networking tools.
+- [ ] An integral library for taking integrals.
+- [ ] Arbitrary precision library.
+- [ ] Simple web framework library
 - [ ] A community!
 
 # Great Ways to Contribute:

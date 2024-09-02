@@ -18,3 +18,14 @@ int sm_is_unit(char c);
 uint64_t sm_bytelength_parse(char *str, int length);
 /// Prints to stdout the number of bytes with a reasonable unit
 void sm_print_fancy_bytelength(uint64_t bytelength);
+/// Reads a file into a string. If there is any issue, returns NULL
+struct sm_string *sm_read_file(char *filePath, int filePathLen);
+/// Whether a character is allowed in a symbol name
+bool sm_is_symbol_char(char c);
+/// Write a log message to sms.log for debugging.
+/// Works just like printf
+void sm_log(const char *format, ...);
+/// Print a string, only regarding string size, not NULL termination
+void sm_print_string(struct sm_string *str);
+/// Print a string, trusting string size, but replacing non-printables with hex
+void sm_safe_print_string(struct sm_string *str);

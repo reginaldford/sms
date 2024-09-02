@@ -1,0 +1,22 @@
+#!/usr/local/bin/sms -m6g
+#6 gigs of memory... gc is needed
+{
+  let l=400;
+  let w=800;
+  let a = zeros(3*l*w);
+  let drawCircle = (cx,cy,r)=> {
+    for(let i=0;i<size(a);i++){
+      let c = mod(i,3);
+      let y = floor(i/(3*w));
+      let x = floor(mod(i,(3*w))/3);
+      if(sqrt((x-cx)^2+(y-cy)^2)<r)
+          a[i]=a[i]+100*random()*mod(c+2,3)^2;
+    };
+  };
+  seed(time()[1]);
+  for(let i=0;i<6;i++)
+    drawCircle(random()*w,random()*l,random()*170);
+  let success = fileWriteTga("output.tga",w,l,a);
+  putLn(str(success));
+  putLn("Completed Drawing Something. Open output.tga");
+};

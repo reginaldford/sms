@@ -6,12 +6,12 @@
   let time_to_wait_str = input();
 	let time_to_wait=eval(parse(time_to_wait_str));
 	let n = 0;
-	putln("Timer set to " str+ toStr(time_to_wait) str+ " seconds.");
+	putLn("Timer set to " str+ str(time_to_wait) str+ " seconds.");
 	while(n < time_to_wait) {
-	  put(toStr(n));
+	  put(str(n));
 	  sleep(500);
 	  put(", ");
 	  sleep(500);
 	  n=n+1;};
-	putln("DONE!");
+	putLn("DONE!");
 };

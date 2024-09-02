@@ -4,8 +4,11 @@
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
-  sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
-  return new_obj;
+  // if (sm_is_within_heap(obj,sms_heap))
+  if (obj->my_type != SM_SYMBOL_TYPE)
+    return sm_realloc(obj, sm_sizeof(obj));
+  else
+    return obj;
 }
 
 // Deep Copy the object
@@ -27,18 +30,22 @@ sm_object *sm_deep_copy(sm_object *obj) {
 sm_object *sm_move_to_new_heap(sm_object *obj) {
   sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
   // Overwrite the old object. sm_pointer is NOT larger
-  sm_new_pointer(obj, new_obj);
+  sm_new_pointer(sms_heap, obj, new_obj);
   return new_obj;
 }
 
 // If obj is an sm_pointer, the object was already moved to the new heap
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_object *obj) {
-  uint16_t obj_type = obj->my_type;
-  if (obj_type == SM_POINTER_TYPE)
-    return ((sm_pointer *)obj)->address;
-  else
-    return sm_move_to_new_heap(obj);
+  // Only gc objects from sms_other_heap, which used to be sms_heap
+  if (sm_is_within_heap(obj, sms_other_heap)) {
+    uint32_t obj_type = obj->my_type;
+    if (obj_type == SM_POINTER_TYPE)
+      return (sm_object *)(((uint64_t)sms_heap) + (uint64_t)((sm_pointer *)obj)->address);
+    else
+      return sm_move_to_new_heap(obj);
+  } else
+    return obj;
 }
 
 // Copy the objects referenced by the current_obj into the new heap
@@ -47,54 +54,42 @@ void sm_inflate_heap() {
   // Inflate new space. 'meet' every ptr
   // Meeting will copy to new heap if necessary
   char *scan_cursor = (char *)sms_heap->storage;
-  while (scan_cursor < ((char *)sms_heap->storage) + sms_heap->used) {
+  while (scan_cursor < sms_heap->storage + sms_heap->used) {
     sm_object *current_obj = (sm_object *)scan_cursor;
     // scan_cursor is not referred to for the rest of the loop
     scan_cursor += sm_sizeof(current_obj);
     switch (current_obj->my_type) {
-    case SM_LINK_TYPE: {
-      struct sm_link *link = (struct sm_link *)current_obj;
-      // Meet the value
-      link->value = sm_meet_object((sm_object *)link->value);
-      // Meet the next
-      if (link->next != NULL)
-        link->next = (struct sm_link *)sm_meet_object((sm_object *)link->next);
-      break;
-    }
     case SM_CX_TYPE: {
       sm_cx *cx = (sm_cx *)current_obj;
       // Meet the parent
-      if (cx->parent != NULL)
+      if (cx->parent)
         cx->parent = (sm_cx *)sm_meet_object((sm_object *)cx->parent);
       // Meet the top cx node
-      if (cx->content != NULL)
+      if (cx->content)
         cx->content = (sm_node *)sm_meet_object((sm_object *)cx->content);
       break;
     }
     case SM_NODE_TYPE: {
       sm_node *node = (sm_node *)current_obj;
       // Meet the value
-      if (node->value != NULL)
+      if (node->value)
         node->value = sm_meet_object((sm_object *)node->value);
       // Meet the next node
-      if (node->next != NULL)
+      if (node->next)
         node->next = (struct sm_node *)sm_meet_object((sm_object *)node->next);
       // Meet the children
-      if (node->children != NULL)
+      if (node->children)
         node->children = (struct sm_node *)sm_meet_object((sm_object *)node->children);
       break;
     }
     case SM_EXPR_TYPE: {
       sm_expr *expr = (sm_expr *)current_obj;
+      if (expr->notes)
+        expr->notes = sm_meet_object(expr->notes);
       for (uint32_t i = 0; i < expr->size; i++) {
         sm_object *new_obj = sm_meet_object(sm_expr_get_arg(expr, i));
         sm_expr_set_arg(expr, i, (sm_object *)new_obj);
       }
-      break;
-    }
-    case SM_SYMBOL_TYPE: {
-      sm_symbol *sym = (sm_symbol *)current_obj;
-      sym->name      = (sm_string *)sm_meet_object((sm_object *)sym->name);
       break;
     }
     case SM_META_TYPE: {
@@ -105,21 +100,30 @@ void sm_inflate_heap() {
     case SM_FUN_TYPE: {
       sm_fun *fun  = (sm_fun *)current_obj;
       fun->content = sm_meet_object((sm_object *)fun->content);
-      if (fun->parent != NULL)
+      if (fun->parent)
         fun->parent = (sm_cx *)sm_meet_object((sm_object *)fun->parent);
-      for (uint16_t i = 0; i < fun->num_params; i++) {
+      for (uint32_t i = 0; i < fun->num_params; i++) {
         sm_fun_param *param = sm_fun_get_param(fun, i);
         param->name         = (sm_string *)sm_meet_object((sm_object *)param->name);
-        if (param->default_val != NULL) {
+        if (param->default_val) {
           param->default_val = sm_meet_object(param->default_val);
         }
       }
       break;
     }
+    case SM_ERR_TYPE: {
+      sm_error *err = (sm_error *)current_obj;
+      // Title is a singleton. This speeds up if(errTitle(e) is :whatever) to find err category
+      err->message = (sm_string *)sm_meet_object((sm_object *)err->message);
+      err->source  = (sm_string *)sm_meet_object((sm_object *)err->source);
+      if (err->notes)
+        err->notes = (sm_cx *)sm_meet_object((sm_object *)err->notes);
+      break;
+    }
     case SM_FUN_PARAM_TYPE: {
       sm_fun_param_obj *param = (sm_fun_param_obj *)current_obj;
       param->name             = (sm_string *)sm_meet_object((sm_object *)param->name);
-      if (param->default_val != NULL) {
+      if (param->default_val) {
         param->default_val = sm_meet_object((sm_object *)param->default_val);
       }
       break;
@@ -132,6 +136,17 @@ void sm_inflate_heap() {
     case SM_RETURN_TYPE: {
       sm_return *return_obj = (sm_return *)current_obj;
       return_obj->address   = sm_meet_object((sm_object *)return_obj->address);
+      break;
+    }
+    case SM_STACK_OBJ_TYPE: {
+      sm_stack_obj *stack = (sm_stack_obj *)current_obj;
+      for (uint32_t i = 0; i < sm_stack_obj_size(stack); i++)
+        ((sm_object **)&stack[1])[i] = sm_meet_object(((sm_object **)&stack[1])[i]);
+      break;
+    }
+    case SM_ARRAY_TYPE: {
+      sm_array *a = (sm_array *)current_obj;
+      a->content  = sm_meet_object(a->content);
       break;
     }
     default:
@@ -155,20 +170,13 @@ void sm_garbage_collect() {
     // Consider this heap empty now
     sms_heap->used = 0;
 
-    // Reset the space array
-    // sm_global_space_array(NULL)->size = 0;
-
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
       (sm_cx *)sm_move_to_new_heap((sm_object *)*sm_global_lex_stack(NULL)->top);
 
-    // Copy root (true and false singletons)
-    sms_true  = (sm_symbol *)sm_meet_object((sm_object *)sms_true);
-    sms_false = (sm_symbol *)sm_meet_object((sm_object *)sms_false);
-
-    // Parser output is a root
+    // Parser output never gets saved. Ptrs would get broken, so set it to a literal
     if (sm_global_parser_output(NULL))
-      sm_global_parser_output(sm_meet_object(((sm_object *)sm_global_parser_output(NULL))));
+      sm_global_parser_output((sm_object *)sms_false);
 
     // Inflate
     sm_inflate_heap();
@@ -176,7 +184,7 @@ void sm_garbage_collect() {
     // For tracking purposes
     sm_gc_count(1);
   }
-  // This will be a global variable
+  // Report memory stat
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
     const uint32_t KB = 1024;
     putc('\n', stdout);

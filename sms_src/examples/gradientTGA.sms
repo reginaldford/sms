@@ -1,0 +1,19 @@
+#!/usr/local/bin/sms -qm128
+# Produces a tga file with an artistic design
+{
+  let width = 200;
+  let height = 200;
+  let pixels = zeros(3 * width * height);
+  # Fill the pixels array with data
+  for (let i = 0; i < 3 * width * height; i++) 
+    pixels[i] = mod(i / 3, 255);
+  # Second pass
+  for (let i = 0; i < 3 * width * height; i++) 
+    pixels[i] = mod(pixels[i] * floor(sqrt( i / 3 )), 255);
+  # Third pass
+  for (let i = 0; i < 3 * width * height; i++) 
+    pixels[i] = mod(pixels[mod( i + 99, size(pixels))] - floor(sqrt( i / 3 )), 255);
+  # Call the fileWriteTga function
+  fileWriteTga("output.tga", width, height, pixels);
+  putLn("Successfully wrote to output.tga");
+};

@@ -6,7 +6,7 @@
       put("Give me a number to fib. -1 to stop: ");
       let x = input();
       if(not(x=="-1"))
-        putln(toStr(fib(parse(x))))
+        putLn(str(fib(parse(x))))
       else return :done;
     };
   };

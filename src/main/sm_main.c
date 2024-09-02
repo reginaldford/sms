@@ -1,7 +1,6 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
-#include "unistd.h"
 #include "../bison_flex/y.tab.h"
 
 extern int yylineno;
@@ -10,16 +9,17 @@ extern int yylineno;
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
          sm_terminal_fg_color(SM_TERM_B_BLUE));
-  printf("%sVersion 0.202%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE), sm_terminal_reset());
+  printf("%sVersion %s%s\n", sm_terminal_fg_color(SM_TERM_B_WHITE),
+         &(sms_global_version()->content), sm_terminal_reset());
 }
 
 // Initialize the heap, etc, if necessary
 void check_init(sm_env *env, int num_args, char **argv) {
   if (env->initialized == false) {
+    sm_global_environment(env);
+    sm_init(env, num_args, argv);
     if (env->quiet_mode == false)
       print_intro();
-    sm_init(env, num_args, argv);
-    sm_global_environment(env);
   }
 }
 
@@ -31,24 +31,24 @@ void clean_exit(sm_env *env, int code) {
 }
 
 // Run user command line
-void start_repl() {
+void start_repl(sm_env *env) {
   // Reset the line counter
   yylineno = 1;
   // Read, Evaluate, Print Loop
   while (true) {
-    // Prompt
-    sm_terminal_print_prompt();
-    sm_parse_result pr = sm_parse_file("/dev/stdin");
     // Read
-    if (pr.return_val == 0 && pr.parsed_object != NULL) {
+    sm_parse_result pr = sm_terminal_prompt(env->plain_mode);
+    if (!pr.return_val && pr.parsed_object) {
       // Evaluate
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       // Print
       sm_string *result_str = sm_object_to_string(result);
-      printf("%s%s%s", sm_terminal_fg_color(SM_TERM_B_WHITE), &(result_str->content),
-             sm_terminal_reset());
+      printf("%s", sm_terminal_fg_color(SM_TERM_B_WHITE));
+      sm_safe_print_string(result_str);
+      printf("%s", sm_terminal_reset());
       // Cleanup
       sm_garbage_collect();
+      fflush(stdout);
       // Count this as a line
       yylineno++;
     } else {
@@ -78,23 +78,32 @@ int main(int num_args, char *argv[]) {
   static struct sm_env env = {0}; // global environment structure
   opterr                   = 0;   // Disable error messages for unknown options
   int opt;
-  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:")) != -1) {
+  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:l:p")) != -1) {
     switch (opt) {
     case 'h':
       printf("SMS Help\n");
       printf("Running sms with no flags will start the command line.\n");
-      printf(" Flag:                                           Example:\n");
-      printf("-h Help.                                          sms -h\n");
-      printf("-q Quiet mode, does not print intro/outro.        sms -q -s script.sms\n");
-      printf("-m Set memory usage. Units: kmgt. Default is 64m. sms -m 150m\n");
-      printf("-e Print the evaluation of an expression.         sms -e \"2*sin(PI/4)\"\n");
-      printf("-s Run Script file.                               sms -s script.sms\n");
-      printf("-i Run a file, then start the REPL.               sms -i script.sms\n");
-      printf("-c Custom argument. Accessed via _args            sms -c \"a single string\"\n");
-      printf("\nIf the -m flag is used, it must be first.       sms -m 4 -s x1.sms -i x2.sms\n");
-      printf("Some flags can be repeated and all flags are executed in order.\n");
+      printf(" FLAG:                                             EXAMPLE:\n");
+      printf("-h Help.                                            sms -h\n");
+      printf("-q Quiet mode, does not print intro/outro.          sms -q -s script.sms\n");
+      printf("-m Set memory usage. Units: kmgt. Default is 64m.   sms -m 150m\n");
+      printf("-e Print the evaluation of an expression.           sms -e \"2*sin(PI/4)\"\n");
+      printf("-s Run Script file.                                 sms -s script.sms\n");
+      printf("-i Run a file, then start the REPL.                 sms -i script.sms\n");
+      printf("-l Set the command history file. Disable with 'off' sms -l history.txt\n");
+      printf("-c Custom argument. Accessed via _args. sms -c \"a single string\"\n");
       clean_exit(&env, 0);
       break;
+    case 'p':
+      env.plain_mode = true;
+      break;
+    case 'l':
+      if (!strcmp(optarg, "none")) {
+        env.no_history_file = true;
+        break;
+      }
+      env.history_file_len = strlen(optarg);
+      sm_strncpy(env.history_file, optarg, env.history_file_len);
     case 'q':
       env.quiet_mode = true;
       break;
@@ -112,7 +121,7 @@ int main(int num_args, char *argv[]) {
       env.mem_bytes = sm_bytelength_parse(env.mem_str, strlen(optarg));
       // SMS needs at least 2.5k (good luck with that) and might work with up to 4 terrabytes
       // (untested) For very basic programs, 1m is usually fine.
-      if ((env.mem_bytes < 2.5 * 1024) || (env.mem_bytes >= 4398046511104)) {
+      if ((env.mem_bytes < 2.5 * 1024) || (env.mem_bytes > 4 * 10E12)) {
         printf("Invalid memory heap size: %s\n", env.mem_str);
         printf("%s\n", valid_values);
         printf("Try -h for help.\n");
@@ -121,7 +130,7 @@ int main(int num_args, char *argv[]) {
       if (env.quiet_mode == false) {
         printf("Custom Heap Size: ");
         printf("%lld Bytes (", (long long)env.mem_bytes);
-        sm_print_fancy_bytelength((long long)env.mem_bytes);
+        sm_print_fancy_bytelength(env.mem_bytes);
         printf(")\n");
       }
       break;
@@ -134,7 +143,7 @@ int main(int num_args, char *argv[]) {
       env.eval_cmd[optarg_len++] = '\0';
       env.eval_cmd_len           = optarg_len;
       if (env.quiet_mode == false)
-        printf("parsing: %s\n", env.eval_cmd);
+        printf("Parsing: %s\n", env.eval_cmd);
       sm_parse_result pr = sm_parse_cstr(env.eval_cmd, env.eval_cmd_len);
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i\n", pr.return_val);
@@ -149,6 +158,7 @@ int main(int num_args, char *argv[]) {
       sm_string *response = sm_object_to_string(evaluated);
       printf("%s\n", &(response->content));
       fflush(stdout);
+      clean_exit(&env, 0);
       break;
     }
     case 's':
@@ -162,7 +172,7 @@ int main(int num_args, char *argv[]) {
       if (env.quiet_mode == false)
         printf("Loading: %s... \n", optarg);
       run_file(optarg, &env);
-      start_repl();
+      start_repl(&env);
       break;
     case '?':
       if (optopt == 'm') {
@@ -187,7 +197,7 @@ int main(int num_args, char *argv[]) {
     run_file(input_file, &env);
   } else { // No filename provided
     check_init(&env, num_args, argv);
-    start_repl();
+    start_repl(&env);
   }
   clean_exit(&env, 0);
 }

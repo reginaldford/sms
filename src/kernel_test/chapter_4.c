@@ -13,13 +13,12 @@ void test0() {
     for (int j = 0; j < 64; j++) {
       // If spaces work correctly, new function takes the space of last one
       sm_fun *junk = sm_new_fun(NULL, 0, (sm_object *)sm_new_cx(NULL));
-      sm_new_space(junk, sizeof(sm_fun));
     }
   }
   printf("We survived.\n");
 }
 
-// Testing space arrays
+// Testing space tuples
 int chapter_4(int test) {
   int current_test = 0;
   TEST(test0());

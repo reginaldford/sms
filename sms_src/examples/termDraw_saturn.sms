@@ -1,14 +1,7 @@
-#!/usr/local/bin/sms -qm128
+#!/usr/local/bin/sms -qm16
 # Uses tput to get terminal dimensions, 
 # Then runs a for loop to fill up the screen with numbers
 {
-  # Function to get a number from a command
-  let getOutput = cmd => {
-    osExec(cmd str+ " > _tmp.dat" );
-    let output = fileRead("_tmp.dat");
-    osExec("rm _tmp.dat");
-    return parse(output);
-  };
   # Artistic engine
   let printChar=(x,y)=>{
     x=x^1.5/3;
@@ -20,13 +13,13 @@
     if(v <= 3) v = 0;
     v = mod(v,6);
     let s = if(not(v < 3) and not(v == 9))
-      toStr(v) else " ";
+      str(v) else " ";
     put(s);
   };
   
-  # Run the double for loop
-  let tWidth = getOutput("tput cols");
-  let tHeight = getOutput("tput lines")-2;
+  # Run the f64 for loop
+  let tWidth = parse(osExecToStr("tput cols")[1]);
+  let tHeight = parse(osExecToStr("tput lines")[1])-2;
   for(let x=0;x<tHeight;x=x+1)
     for(let y=0;y<tWidth;y=y+1)
       printChar(x,y);

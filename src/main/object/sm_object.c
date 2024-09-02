@@ -2,17 +2,21 @@
 
 #include "../sms.h"
 
-// Return true if the object is a literal
-// This means the object evaluates to itself
-bool sm_object_is_literal(uint16_t t) {
-  switch (t) {
-  case SM_DOUBLE_TYPE:
-  case SM_STRING_TYPE:
-    return true;
+extern sm_heap *sms_symbol_heap;
+extern sm_heap *sms_symbol_name_heap;
+
+// Whether an object is an integer (eventually, 8, 16, 32, or 64 bit)
+// Returns 0 if it's not an int, and returns the number of bytes in the int otherwise
+uint32_t sm_object_is_int(sm_object *obj1) {
+  switch (obj1->my_type) {
+  case SM_F64_TYPE:
+  case SM_UI8_TYPE:
+    return sm_sizeof(obj1);
   default:
-    return false;
+    return 0;
   }
 }
+
 
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
@@ -26,8 +30,8 @@ sm_string *sm_object_to_string(sm_object *obj1) {
 // Return the length of the string
 uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   switch (obj1->my_type) {
-  case SM_DOUBLE_TYPE:
-    return sm_double_sprint((sm_double *)obj1, buffer, fake);
+  case SM_F64_TYPE:
+    return sm_f64_sprint((sm_f64 *)obj1, buffer, fake);
   case SM_STRING_TYPE:
     return sm_string_sprint((sm_string *)obj1, buffer, fake);
   case SM_EXPR_TYPE:
@@ -42,32 +46,37 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
     return sm_fun_sprint((sm_fun *)obj1, buffer, fake);
   case SM_LOCAL_TYPE:
     return sm_local_sprint((sm_local *)obj1, buffer, fake);
-  case SM_ERROR_TYPE:
-    return sm_error_sprint((sm_error *)obj1, buffer, fake);
+  case SM_ERR_TYPE:
+    return sm_err_sprint((sm_error *)obj1, buffer, fake);
   case SM_RETURN_TYPE:
     return sm_return_sprint((sm_return *)obj1, buffer, fake);
   case SM_SELF_TYPE:
     return sm_self_sprint((sm_self *)obj1, buffer, fake);
+  case SM_ARRAY_TYPE:
+    return sm_array_sprint((sm_array *)obj1, buffer, fake);
+  case SM_UI8_TYPE:
+    return sm_ui8_sprint((sm_ui8 *)obj1, buffer, fake);
   default: {
-    int len = 5 + log(obj1->my_type) / log(10);
-    if (!fake)
-      snprintf(buffer, len, "?(%i)", obj1->my_type);
-    return len;
+    if (fake)
+      return sprintf(buffer, "?(%i)", obj1->my_type);
+    else {
+      char fake_buffer[10];
+      return sprintf(fake_buffer, "?(%i)", obj1->my_type);
+    }
   }
   }
 }
 // Return the size of the object in bytes
-int sm_sizeof(sm_object *obj1) {
-  // printf("type: %i\n",obj1->my_type); fflush(stdout);
+uint32_t sm_sizeof(sm_object *obj1) {
   switch (obj1->my_type) {
-  case SM_DOUBLE_TYPE:
-    return sizeof(sm_double);
+  case SM_F64_TYPE:
+    return sizeof(sm_f64);
   case SM_EXPR_TYPE:
     return sizeof(sm_expr) + sizeof(sm_object *) * ((sm_expr *)obj1)->capacity;
   case SM_PRIMITIVE_TYPE:
     return sizeof(sm_expr);
   case SM_STRING_TYPE:
-    return sm_round_size(sizeof(sm_string) + ((sm_string *)obj1)->size + 1);
+    return sizeof(sm_string) + sm_round_size(((sm_string *)obj1)->size);
   case SM_SYMBOL_TYPE:
     return sizeof(sm_symbol);
   case SM_CX_TYPE:
@@ -85,20 +94,41 @@ int sm_sizeof(sm_object *obj1) {
   case SM_LOCAL_TYPE:
     return sizeof(sm_local);
   case SM_SPACE_TYPE:
-    return ((sm_space *)obj1)->size;
-  case SM_LINK_TYPE:
-    return sizeof(struct sm_link);
+    return sizeof(sm_space) + sm_round_size(((sm_space *)obj1)->size);
   case SM_SELF_TYPE:
     return sizeof(struct sm_self);
-  case SM_ERROR_TYPE:
+  case SM_ERR_TYPE:
     return sizeof(sm_error);
   case SM_RETURN_TYPE:
     return sizeof(sm_return);
-
-  default:
-    printf("Cannot determine size of object of type %d\n", obj1->my_type);
-    // sm_sprint_dump();
+  case SM_STACK_OBJ_TYPE:
+    return sizeof(sm_stack) + sizeof(void *) * sm_stack_obj_size((sm_stack_obj *)obj1);
+  case SM_ARRAY_TYPE:
+    return sizeof(sm_array);
+  case SM_UI8_TYPE:
+    return sizeof(sm_ui8);
+  default: {
+    fprintf(stderr, "\nBAD OBJECT CASE: \n");
+    fprintf(stderr, "Type: %u\n", obj1->my_type);
+    fprintf(stderr, "Bad Object Position Ptr      : %p\n", obj1);
+    fprintf(stderr, "Bad Object Is in symbol  heap: %i\n",
+            sm_is_within_heap(obj1, sms_symbol_heap));
+    fprintf(stderr, "Bad Object Is in symname heap: %i\n",
+            sm_is_within_heap(obj1, sms_symbol_name_heap));
+    if (sm_is_within_heap(obj1, sms_other_heap)) {
+      fprintf(stderr, "Bad Object Position in Heap  : %ld\n",
+              ((char *)obj1) - sms_other_heap->storage);
+      fprintf(stderr, "Heap Start Position          : %p\n", sms_other_heap->storage);
+      fprintf(stderr, "Heap cap : %u\n", sms_other_heap->capacity);
+      fprintf(stderr, "Heap used: %u\n", sms_other_heap->used);
+    }
+    sm_dump_and_count();
+    fprintf(stderr, "Memory dumped\n");
+    sm_mem_cleanup();
+    fprintf(stderr, "Exiting with 1\n");
+    fflush(stdout);
     exit(1);
+  }
   }
 }
 
@@ -109,9 +139,17 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
   if (self->my_type != other->my_type)
     return false;
   switch (self->my_type) {
-  case SM_DOUBLE_TYPE: {
-    double value1 = ((sm_double *)self)->value;
-    double value2 = ((sm_double *)other)->value;
+  case SM_F64_TYPE: {
+    f64 value1 = ((sm_f64 *)self)->value;
+    f64 value2 = ((sm_f64 *)other)->value;
+    if (value1 == value2)
+      return true;
+    else
+      return false;
+  }
+  case SM_UI8_TYPE: {
+    ui8 value1 = ((sm_ui8 *)self)->value;
+    ui8 value2 = ((sm_ui8 *)other)->value;
     if (value1 == value2)
       return true;
     else
@@ -135,6 +173,30 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
   }
   case SM_PRIMITIVE_TYPE:
     return (void *)self == (void *)other;
+  case SM_CX_TYPE: {
+    sm_cx *self_cx    = (sm_cx *)self;
+    sm_cx *other_cx   = (sm_cx *)other;
+    int    my_size    = sm_cx_size(self_cx);
+    int    their_size = sm_cx_size(other_cx);
+    if (my_size != their_size)
+      return false;
+    // TODO: create iterators, to avoid allocating heap memory just to compute equality
+    sm_expr *my_keys = sm_node_keys(self_cx->content, sm_new_stack_obj(32),
+                                    sm_new_expr_n(SM_TUPLE_EXPR, 0, my_size, NULL));
+    sm_expr *my_values =
+      sm_node_values(self_cx->content, sm_new_expr_n(SM_TUPLE_EXPR, 0, my_size, NULL));
+    sm_expr *their_keys = sm_node_keys(other_cx->content, sm_new_stack_obj(32),
+                                       sm_new_expr_n(SM_TUPLE_EXPR, 0, their_size, NULL));
+    sm_expr *their_values =
+      sm_node_values(other_cx->content, sm_new_expr_n(SM_TUPLE_EXPR, 0, their_size, NULL));
+    for (int i = 0; i < my_size; i++) {
+      if (!sm_object_eq(sm_expr_get_arg(my_keys, i), sm_expr_get_arg(their_keys, i)))
+        return false;
+      if (!sm_object_eq(sm_expr_get_arg(my_values, i), sm_expr_get_arg(their_values, i)))
+        return false;
+    }
+    return true;
+  }
   default:
     return self == other;
   }

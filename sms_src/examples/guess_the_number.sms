@@ -4,14 +4,19 @@
   seed(time()[1]);
   let answer = round(100*random());
   let user_guess = -1;
+  let tries = 0;
   while(not(user_guess==answer)) {
+    tries = tries + 1;
     put("Guess the number: ");
     user_guess = parse(input());
     if(user_guess>answer)
-      put("You guessed too high.\n")
+      putLn("You guessed too high.")
     else if(user_guess<answer)
-      put("You guessed too low.\n");
+      putLn("You guessed too low.");
   };
-  put("Congratulations! You WON!\n");
-  putln("The answer is: " str+ toStr(answer));
+  putLn("Congratulations! You WON!");
+  putLn("The answer is: " str+ str(answer) str+ ".");
+  putLn("You took " str+ str(tries) str+ " guesses.");
+  let scoreStr = str( ceil(1000/tries)/10 );
+  putLn("Your score is " str+ scoreStr str+ " %.");
 };

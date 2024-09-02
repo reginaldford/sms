@@ -1,8 +1,8 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 // Implements a pointer stack that lives in OS malloc space.
-// The stack will grow arbitrarily large upon continuos pushing.
-// New capacity is sm_global_growth_factor*old_capacity + 1
+// The stack will grow arbitrarily large upon continuous pushing.
+// New capacity at growth is sm_global_growth_factor * old_capacity + 1
 
 #include "sms.h"
 
@@ -24,8 +24,8 @@ sm_stack *sm_stack_push(sm_stack *self, void *ptr) {
     current_stack     = malloc(sizeof(sm_stack) + sizeof(void *) * self->capacity);
     memcpy(current_stack, self, sizeof(sm_stack) + sizeof(void *) * old_size);
   }
-  void **array                        = sm_stack_content(current_stack);
-  array[sm_stack_size(current_stack)] = ptr;
+  void **tuple                        = sm_stack_content(current_stack);
+  tuple[sm_stack_size(current_stack)] = ptr;
   current_stack->top += 1;
   return current_stack;
 }
@@ -40,8 +40,4 @@ sm_stack *sm_stack_pop(sm_stack *self) {
 // which means that the stack is empty.
 void **sm_stack_empty_top(sm_stack *self) { return ((void **)&(self[1])) - 1; }
 
-uint32_t sm_stack_size(sm_stack *self) {
-  if (self->top == sm_stack_empty_top(self))
-    return 0;
-  return ((void **)self->top) - (void **)&(self[1]) + 1;
-}
+uint32_t sm_stack_size(sm_stack *self) { return ((void **)self->top) - sm_stack_empty_top(self); }

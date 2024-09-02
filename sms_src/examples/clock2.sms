@@ -1,9 +1,9 @@
-#!/usr/local/bin/sms -q
+#!/usr/local/bin/sms -qm16
 #Simply puts the time every second
 
 # Print the time with constant width
 while(true){
   osExec("clear");
-  putln(strPart(dateStr(),11,8));
+  putLn(strPart(dateStr(),11,8));
   sleep(1000);
 };

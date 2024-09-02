@@ -77,23 +77,23 @@ int get_alignment(int chapter, int subchapter, int test) {
 }
 
 // Returns 0 if pr contains a successfully paired context
-// with an array assigned to 'test'
+// with a tuple assigned to 'test'
 sm_cx *check_parsed_object(sm_parse_result pr) {
-  // We expect an array of arrays, each with 3 objects.
+  // We expect a tuple of tuples, each with 3 objects.
   if (pr.parsed_object->my_type != SM_CX_TYPE) {
     printf("Top level object is not a context. Aborting.\n");
     return NULL;
   }
-  sm_cx     *test_env = (sm_cx *)pr.parsed_object;
-  sm_object *sr       = sm_cx_get(test_env, "tests", 5);
+  sm_cx     *test_env  = (sm_cx *)pr.parsed_object;
+  sm_symbol *tests_sym = sm_new_symbol("tests", 5);
+  sm_object *sr        = sm_cx_get(test_env, tests_sym);
   if (sr == NULL) {
-    printf("Top level context must contain a key 'tests' associated to a nested array.");
+    printf("Top level context must contain a key 'tests' associated to a nested tuple.");
     printf("Aborting.\n");
     return NULL;
   }
-  // sm_object *found = sm_cx_get(src.context,);
   if (sr->my_type != SM_EXPR_TYPE) {
-    printf("Value under 'test' should be an array.\n");
+    printf("Value under 'test' should be a tuple.\n");
     return NULL;
   }
   return (sm_cx *)test_env;
@@ -110,12 +110,12 @@ int check_specific_test(sm_expr *test_list, int test) {
     exit(-1);
   }
   if (obj->my_type != SM_EXPR_TYPE) {
-    printf("Top level array should only contain arrays. Aborting.\n");
+    printf("Top level tuple should only contain tuples. Aborting.\n");
     exit(-1);
   }
   sm_expr *test_triplet = (sm_expr *)obj;
   if (test_triplet->size < 3) {
-    printf("Not enough elements: %i. Each test array needs 3 elements.\n", test_triplet->size);
+    printf("Not enough elements: %i. Each test tuple needs 3 elements.\n", test_triplet->size);
     exit(-1);
   }
   return 0;
@@ -194,7 +194,8 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
       printf("Something was wrong with the format of the file.\n");
       return -1;
     }
-    sm_expr *test_list = (sm_expr *)sm_cx_get(test_env, "tests", 5);
+    sm_symbol *tests_sym = sm_new_symbol("tests", 5);
+    sm_expr   *test_list = (sm_expr *)sm_cx_get(test_env, tests_sym);
 
     if (test == -1) {
       global_num_tests(test_list->size);

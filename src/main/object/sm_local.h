@@ -2,7 +2,7 @@
 
 /// Local variable, specifying the index of the stack frame tuple to reference
 typedef struct sm_local {
-  int16_t           my_type;
+  uint32_t          my_type;
   struct sm_string *name;
   uint16_t          index;
 } sm_local;

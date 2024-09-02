@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux-clang",
+            "includePath": [
+                "${workspaceFolder}/src/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "intelliSenseMode": "linux-clang-x64",
+            "browse":{
+                "path":["${workspaceFolder}"],
+                "limitSymbolsToIncludedHeaders":true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version" : 4
+}

@@ -7,3 +7,5 @@
 /// @note When an SM_SYMBOL is evaluated, it will loook into the current_cx for the variable.
 /// @note If an SM_LOCAL is evaluated, it will refer to an element in the stack frame (sf).
 sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf);
+// Execute an sms function
+sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf);

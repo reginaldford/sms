@@ -1,0 +1,31 @@
+#!/usr/local/bin/sms
+# User sms -i colorPrint.sms , then
+# For convenience, let c=colorPrint, and use c.draw(int, msg)
+{
+  let esc = "\x1b";
+  let black = esc str+ "[40m";
+  let red = esc str+ "[41m";
+  let green = esc str+ "[42m";
+  let yellow = esc str+ "[43m";
+  let blue = esc str+ "[44m";
+  let magenta = esc str+ "[45m";
+  let cyan = esc str+ "[46m";
+  let white = esc str+ "[47m";
+  let fg_black = esc str+ "[90m";
+  let fg_red = esc str+ "[91m";
+  let fg_green = esc str+ "[92m";
+  let fg_yellow = esc str+ "[93m";
+  let fg_blue = esc str+ "[94m";
+  let fg_magenta = esc str+ "[95m";
+  let fg_cyan = esc str+ "[96m";
+  let fg_white = esc str+ "[97m";
+  # We want a list of all of the colors, without esc
+  rm esc;
+  let colors = cxValues(self);
+  # Not in the colors array:
+  let reset_color = "\x1b[0m";
+  # Careful not to include the colors in the msg
+  let print = (num,msg) => put(colors[mod(round(num),size(colors)-1)] str+ msg);
+  # Put this in the parent of _scratch
+  cxLet(parent(_scratch),:colorPrint,self);
+};

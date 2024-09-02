@@ -24,7 +24,7 @@ char sm_to_lowercase(char c) {
 }
 
 // Returns -1 if lowercase(c) is not found within the string "bkmgt"
-// Otherwise, returns the index of
+// Otherwise, returns the index of c in the string
 int sm_is_unit(char c) {
   c                 = sm_to_lowercase(c);
   const char *units = "bkmgt"; // memory units
@@ -36,47 +36,107 @@ int sm_is_unit(char c) {
 
 // Parse a c string into an integer specifying a number of bytes.
 uint64_t sm_bytelength_parse(char *str, int length) {
-  char buffer[32]; // 16 characters for the numeric value
-  for (int i = 0; i < 32; i++) {
+  char buffer[length]; // 16 characters for the numeric value
+  int  j = 0;          // j is index, skipping spaces
+  for (int i = 0; i <= length; i++) {
     char current_char = str[i];
     if (current_char == 0) {
-      buffer[i] = 0;
+      buffer[j] = 0;
       // If no unit is given, assume megabytes (m)
-      return (uint64_t)atof(buffer) * 1024 * 1024;
+      uint64_t l = atof(buffer) * 1024 * 1024;
+      return (f64)atof(buffer) * 1024 * 1024;
     }
-    if (sm_is_digit(current_char) || current_char == '.')
-      buffer[i] = current_char;
-    else if (sm_is_unit(current_char) != -1) {
+    if (sm_is_digit(current_char) || current_char == '.') {
+      buffer[j] = current_char;
+      j++;
+    } else if (sm_is_unit(current_char) != -1) {
       // 0 means b, 1 means k, etc.
-      int unit          = sm_is_unit(current_char);
-      int unit_in_bytes = pow(1024, unit);
-      buffer[i]         = 0;
+      int  unit          = sm_is_unit(current_char);
+      long unit_in_bytes = pow(1024, unit);
+      buffer[j]          = 0;
+      j++;
       return unit_in_bytes * atof(buffer);
-    } else if (current_char == 0) {
-      buffer[i] = 0;
-      return (uint64_t)atof(buffer);
-    } else
-      break;
+    } else if (current_char == ' ')
+      continue;
+    else
+      continue;
   }
-  return -1;
+  return atof(buffer);
 }
 
+// Prints to screen the byte length, into reasonable units
 void sm_print_fancy_bytelength(uint64_t bytelength) {
   const uint64_t KB = 1024;
   if (bytelength < KB)
-    printf("%.3gB", (double)bytelength);
+    printf("%.4gB", (f64)bytelength);
   else if (bytelength < KB * KB)
-    printf("%.3gKB", (double)bytelength / KB);
+    printf("%.4gKB", (f64)bytelength / KB);
   else if (bytelength < (KB * KB * KB))
-    printf("%.3gMB", (double)bytelength / (KB * KB));
+    printf("%.4gMB", (f64)bytelength / (KB * KB));
   else if (bytelength < (KB * KB * KB * KB))
-    printf("%.3gGB", (double)bytelength / (KB * KB * KB));
+    printf("%.4gGB", (f64)bytelength / (KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB))
-    printf("%.3gTB", (double)bytelength / (KB * KB * KB * KB * KB));
+    printf("%.4gTB", (f64)bytelength / (KB * KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB * KB))
-    printf("%.3gEB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
+    printf("%.4gEB", (f64)bytelength / (KB * KB * KB * KB * KB));
   else if (bytelength < (KB * KB * KB * KB * KB * KB * KB))
-    printf("%.3gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB * KB));
+    printf("%.4gPB", (f64)bytelength / (KB * KB * KB * KB * KB * KB));
   else
     printf("lots");
+}
+
+// Reads a file into a string. If there is any issue, returns sms_false
+sm_string *sm_read_file(char *filePath, int filePathLen) {
+  sm_string *fname_str;
+  char      *fname_cstr = filePath;
+  if (access(fname_cstr, F_OK) != 0) {
+    printf("fileReadStrStr failed because the file, %s ,does not exist.\n", fname_cstr);
+    return (sm_string *)sms_false;
+  }
+  FILE *fptr = fopen(fname_cstr, "r");
+  fseek(fptr, 0, SEEK_END);
+  long       len    = ftell(fptr);
+  sm_string *output = sm_new_string_manual(len);
+  fseek(fptr, 0, SEEK_SET);
+  fread(&(output->content), 1, len, fptr);
+  fclose(fptr);
+  *(&output->content + len) = '\0';
+  return output;
+}
+
+bool sm_is_symbol_char(char c) {
+  return (sm_is_digit(c) || sm_is_letter(c) || c == '\'' || c == '_');
+}
+
+void sm_log(const char *format, ...) {
+  static uint32_t msg_number = 0;
+  FILE           *fp         = fopen("sms.log", "a");
+  if (!fp) {
+    perror("Failed to open log file");
+    return;
+  }
+  fprintf(fp, "%u: ", msg_number++);
+  va_list args;
+  va_start(args, format);
+  vfprintf(fp, format, args);
+  fflush(fp);
+  va_end(args);
+  fclose(fp);
+}
+
+void sm_print_string(sm_string *str) {
+  for (int i = 0; i < str->size; i++)
+    putc((&str->content)[i], stdout);
+}
+
+void sm_safe_print_string(sm_string *str) {
+  for (int i = 0; i < str->size; i++) {
+    char ch = (&str->content)[i];
+    if (isprint(ch) || isspace(ch))
+      putc(ch, stdout);
+    else
+      // Escape non-printable characters
+      printf("\\x%02X", (unsigned char)ch);
+  }
+  fflush(stdout);
 }

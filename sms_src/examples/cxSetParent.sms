@@ -1,0 +1,18 @@
+#!/usr/local/bin/sms -qm1
+# Demonstrates cxSetParent
+# cxSetParent sets the parent scope of a context,
+# overriding the lexical scope.
+{
+  # Making a person
+  let personA = { age -> 22; name -> "George" };
+  # Making an older person
+  let personB = { age -> 56; name -> "Martha"; phone_number->5555555555; };
+  # Setting George's parent to Martha (functional design)
+  personA = cxSetParent(personA,personB);
+  # Show both objects:
+  putLn("George: " str+ str(personA) str+ " . Martha: " str+ str(personB));
+  # Printing the result
+  putLn("The parent of " str+ personA.name str+ " is " str+ parent(personA).name);
+  # Test the automatic parent searching
+  putLn("George.phone_number gives " str+ str(personA.phone_number));
+};

@@ -2,7 +2,7 @@
 
 #include "../sms.h"
 
-// A local variable stores the index of the 'stack frame' array.
+// A local variable stores the index of the 'stack frame' tuple.
 sm_local *sm_new_local(uint16_t index, sm_string *name) {
   sm_local *new_local = sm_malloc(sizeof(sm_local));
   new_local->my_type  = SM_LOCAL_TYPE;
@@ -11,16 +11,12 @@ sm_local *sm_new_local(uint16_t index, sm_string *name) {
   return new_local;
 }
 
-// If this symbol matches a parameter of the function, return which.
-// Else, return -1
+// If this symbol matches a param of the function, returns which.
+// else, returns -1
 int sym_matches_param(sm_symbol *sym, sm_fun *fun) {
-  for (uint16_t i = 0; i < fun->num_params; i++) {
-    sm_fun_param *param       = sm_fun_get_param(fun, i);
-    sm_string    *param_str   = param->name;
-    char         *param_cstr  = &param_str->content;
-    sm_string    *symbol_str  = sym->name;
-    char         *symbol_cstr = &symbol_str->content;
-    if (strcmp(param_cstr, symbol_cstr) == 0)
+  for (uint32_t i = 0; i < fun->num_params; i++) {
+    sm_fun_param *param = sm_fun_get_param(fun, i);
+    if (sm_string_is_equal(param->name, sym->name))
       return i;
   }
   return -1;
@@ -67,7 +63,7 @@ sm_object *sm_unlocalize(sm_object *obj) {
     if (sme->op == SM_ASSIGN_LOCAL_EXPR) {
       sme->op         = SM_ASSIGN_EXPR;
       sm_local *local = (sm_local *)sm_expr_get_arg(sme, 0);
-      return (sm_object *)sm_new_symbol(local->name);
+      return (sm_object *)sm_new_symbol(&(local->name->content), local->name->size);
     }
     for (uint32_t i = 0; i < sme->size; i++) {
       sm_object *current_obj   = sm_expr_get_arg(sme, i);
@@ -76,7 +72,7 @@ sm_object *sm_unlocalize(sm_object *obj) {
     }
   } else if (obj->my_type == SM_LOCAL_TYPE) {
     sm_local  *local  = (sm_local *)obj;
-    sm_symbol *symbol = sm_new_symbol(local->name);
+    sm_symbol *symbol = sm_new_symbol(&(local->name->content), local->name->size);
     return (sm_object *)symbol;
   }
   return obj;

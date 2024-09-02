@@ -20,16 +20,11 @@ uint32_t sm_expr_contents_sprint(sm_expr *expr, char *buffer, enum SM_EXPR_TYPE 
   return buffer_pos;
 }
 
-// Print to a cstring buffer the description of array
+// Print to a cstring buffer the description of tuple
 // Return the resulting length
-uint32_t sm_expr_array_sprint(sm_expr *expr, char *buffer, bool fake) {
+uint32_t sm_expr_tuple_sprint(sm_expr *expr, char *buffer, bool fake) {
   if (!fake)
     buffer[0] = '[';
-  if (expr->size == 0) {
-    if (!fake)
-      buffer[1] = ']';
-    return 2;
-  }
   int len = sm_expr_contents_sprint(expr, &(buffer[1]), expr->op, fake);
   if (!fake)
     buffer[1 + len] = ']';
@@ -38,9 +33,12 @@ uint32_t sm_expr_array_sprint(sm_expr *expr, char *buffer, bool fake) {
 
 // Print description of prefix expression to buffer
 uint32_t sm_prefix_sprint(sm_expr *expr, char *buffer, bool fake) {
-  if (!fake)
-    sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
-  uint32_t cursor = sm_global_fn_name_len(expr->op);
+  uint32_t cursor = 0;
+  if (!sm_global_fn_hidden(expr->op)) {
+    if (!fake)
+      sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+    cursor = sm_global_fn_name_len(expr->op);
+  }
   if (!fake)
     buffer[cursor] = expr->op == SM_BLOCK_EXPR ? '{' : '(';
   cursor++;
@@ -137,28 +135,38 @@ uint32_t sm_for_sprint(sm_expr *expr, char *buffer, bool fake) {
   return cursor;
 }
 
-
 // Print description of let expression to buffer
 uint32_t sm_let_sprint(sm_expr *expr, char *buffer, bool fake) {
   if (!fake)
     sm_strncpy(buffer, sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
   uint32_t cursor = sm_global_fn_name_len(expr->op);
-
   if (!fake)
     buffer[cursor] = ' ';
   cursor++;
-
   cursor += sm_object_sprint(sm_expr_get_arg(expr, 0), &(buffer[cursor]), fake);
-
   if (!fake)
     buffer[cursor] = '=';
   cursor++;
-
   cursor += sm_object_sprint(sm_expr_get_arg(expr, 1), &(buffer[cursor]), fake);
-
   return cursor;
 }
-
+// Function to check if an expression contains '+' or '-' operators
+bool sm_expr_contains_terms(sm_expr *expr) {
+  // Check the current expression operator
+  if (expr->op == SM_PLUS_EXPR || expr->op == SM_MINUS_EXPR) {
+    return true;
+  }
+  // Recursively check sub-expressions
+  for (uint32_t i = 0; i < expr->size; ++i) {
+    sm_object *sub_obj = sm_expr_get_arg(expr, i);
+    if (sub_obj->my_type == SM_EXPR_TYPE) {
+      if (sm_expr_contains_terms((sm_expr *)sub_obj)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 // Print infix to c string buffer
 // Return length
@@ -173,35 +181,50 @@ uint32_t sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
     return sm_global_fn_name_len(expr->op) + 2;
   }
   if (expr->size == 1) {
-    uint32_t len  = 0;
-    uint32_t len2 = 0;
-    len           = sm_global_fn_name_len(expr->op);
-    if (!fake)
+    uint32_t len  = sm_global_fn_name_len(expr->op);
+    uint32_t len2 = sm_object_sprint(sm_expr_get_arg(expr, 0), buffer + 2 + len, fake);
+
+    if (!fake) {
       buffer[0] = '(';
-    if (!fake)
       buffer[1] = '_';
-    if (!fake)
       sm_strncpy(&(buffer[2]), sm_global_fn_name(expr->op), len);
-
-    len2 = sm_object_sprint(sm_expr_get_arg(expr, 0), buffer + 2 + len, fake);
-
-    if (!fake)
       buffer[2 + len + len2] = ')';
+    }
     return 3 + len + len2;
   }
-  if (expr->size > 2) {
+  if (expr->size > 2)
     return sm_prefix_sprint(expr, buffer, fake);
+  sm_object *o1     = sm_expr_get_arg(expr, 0);
+  sm_object *o2     = sm_expr_get_arg(expr, 1);
+  int        cursor = 0;
+  // Check if parentheses are needed for the left operand
+  if (o1->my_type == SM_EXPR_TYPE && sm_expr_contains_terms((sm_expr *)o1)) {
+    if (!fake)
+      buffer[cursor] = '(';
+    cursor++;
+    cursor += sm_object_sprint(o1, buffer + cursor, fake);
+    if (!fake)
+      buffer[cursor] = ')';
+    cursor++;
+  } else {
+    cursor += sm_object_sprint(o1, buffer + cursor, fake);
   }
-
-  sm_object *o1 = sm_expr_get_arg(expr, 0);
-  sm_object *o2 = sm_expr_get_arg(expr, 1);
-
-  // left op right
-  int cursor = sm_object_sprint(o1, buffer, fake);
-  if (!fake)
+  if (!fake) {
     sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
+  }
   cursor += sm_global_fn_name_len(expr->op);
-  cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
+  // Check if parentheses are needed for the right operand
+  if (o2->my_type == SM_EXPR_TYPE && sm_expr_contains_terms((sm_expr *)o2)) {
+    if (!fake)
+      buffer[cursor] = '(';
+    cursor++;
+    cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
+    if (!fake)
+      buffer[cursor] = ')';
+    cursor++;
+  } else {
+    cursor += sm_object_sprint(o2, &(buffer[cursor]), fake);
+  }
   return cursor;
 }
 
@@ -235,8 +258,8 @@ uint32_t sm_expr_sprint(sm_expr *expr, char *buffer, bool fake) {
     return sm_index_expr_sprint(expr, buffer, fake);
     break;
   }
-  case SM_ARRAY_EXPR: {
-    return sm_expr_array_sprint(expr, buffer, fake);
+  case SM_TUPLE_EXPR: {
+    return sm_expr_tuple_sprint(expr, buffer, fake);
     break;
   }
   case SM_FUN_CALL_EXPR: {

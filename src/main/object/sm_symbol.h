@@ -2,14 +2,20 @@
 
 /// Object for a symbol which references a value in a context if evaluated
 typedef struct sm_symbol {
-  int16_t    my_type;
+  int32_t    my_type;
   sm_string *name;
+  sm_string *code_id;
 } sm_symbol;
 
-/// Create a new symbol without checking for true/false singletons
-sm_symbol *sm_new_symbol_manual(sm_string *sym_name);
-/// Create a new symbol. If sym_name is "true" or "false", return correlating singletons
-sm_symbol *sm_new_symbol(sm_string *sym_name);
+/// Encodes the id of the symbol and returns a string
+/// The string will be stored in sms_symbol_name_heap
+/// Acts as a nickname for the symbol, speeding up sms mapped tries
+sm_string *sm_symbol_encode_id(sm_symbol *sym);
+/// Decode the id of the symbol
+/// id is the tuple index of the symbol in the symbol heap
+sm_symbol *sm_symbol_decode_id(char *code_id, int code_id_len);
+/// Returns a new or existing symbol from the symbol heap
+sm_symbol *sm_new_symbol(char *name, int name_len);
 /// Returns the symbol name
 sm_string *sm_symbol_to_string(sm_symbol *self);
 /// Print the symbol name to string buffer

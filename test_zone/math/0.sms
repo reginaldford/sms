@@ -15,5 +15,9 @@ tests->[
     [ 0.6^3       , .216, "0.6^3"],
     [ 0.6^0.3       , 0.8579172004440949, "0.6^0.3"],
     [ 6^0.3         , 1.711769859409705 , "6^0.3"],
+    [ isNan(4/0) , false, "isNan(4/0) is true" ],
+    [ isNan(0/0) , true,  "isNan(0/0) is false"],
+    [ isInf(4/0) , true,  "isInf(0/0) is false"],
+    [ isInf(0/0) , false, "isInf(0/0) is true" ],
   ];
 };

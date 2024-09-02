@@ -1,13 +1,13 @@
-#!/usr/local/bin/sms -q
+#!/usr/local/bin/sms -qm16
 # Simply puts the time every second
 {
   # Represents a number from 0 to 99
   # with 2 characters.
   let two_digits = (x) =>
     if(x<10)
-      "0" str+ toStr(x)
+      "0" str+ str(x)
     else
-      toStr(x);
+      str(x);
 
   let am_pm_str = (hr) => if(hr>11) "PM" else "AM";
 
@@ -27,7 +27,7 @@
     put(two_digits(d[1]));
     put(":");
     put(two_digits(d[0]));
-    putln(" " str+ am_pm_str(d[2]));
+    putLn(" " str+ am_pm_str(d[2]));
     sleep(1000);
   };
 };
