@@ -140,6 +140,26 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       }
       }
     }
+    case SM_NEW_UI8_EXPR: {
+      sm_object *fromObj =
+        eager_type_check3(sme, 0, SM_UI8_TYPE, SM_F64_TYPE, SM_STRING_TYPE, current_cx, sf);
+      if (fromObj->my_type == SM_ERR_TYPE)
+        return fromObj;
+      switch (fromObj->my_type) {
+      case SM_F64_TYPE:
+        return (sm_object *)sm_new_ui8(((sm_f64 *)fromObj)->value);
+      case SM_UI8_TYPE:
+        return (sm_object *)sm_new_ui8(((sm_ui8 *)fromObj)->value);
+      case SM_STRING_TYPE:
+        return (sm_object *)sm_new_ui8(((sm_string *)fromObj)->content);
+      default: {
+        sm_symbol *title   = sm_new_symbol("cannotConvertToUI8", 18);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to ui8.",
+                                               sm_type_name(fromObj->my_type));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      }
+    }
     case SM_DATE_EXPR: {
       time_t     rawtime;
       struct tm *timeinfo;
