@@ -111,9 +111,9 @@ uint32_t sm_sizeof(sm_object *obj1) {
     fprintf(stderr, "\nBAD OBJECT CASE: \n");
     fprintf(stderr, "Type: %u\n", obj1->my_type);
     fprintf(stderr, "Bad Object Position Ptr      : %p\n", obj1);
-    fprintf(stderr, "Bad Object Is in symbol  heap: %b\n",
+    fprintf(stderr, "Bad Object Is in symbol  heap: %i\n",
             sm_is_within_heap(obj1, sms_symbol_heap));
-    fprintf(stderr, "Bad Object Is in symname heap: %b\n",
+    fprintf(stderr, "Bad Object Is in symname heap: %i\n",
             sm_is_within_heap(obj1, sms_symbol_name_heap));
     if (sm_is_within_heap(obj1, sms_other_heap)) {
       fprintf(stderr, "Bad Object Position in Heap  : %ld\n",
