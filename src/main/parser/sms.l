@@ -23,6 +23,7 @@ exit         {return EXIT;}
 help         {return HELP;}
 
 f64 {return NEW_F64;}
+f64Repeat {return F64_REPEAT;}
 
 "_+" {return IPLUS;}
 "_-" {return IMINUS;}
@@ -240,7 +241,6 @@ _gc            {return GC;}
   }
 
 ui8 { return NEW_UI8; }
-
 ui8\((-?[0-9]+)\) {
     char *num_str = yytext + 4;  // Skip "ui8("
     // Find the position of the closing parenthesis
@@ -258,6 +258,7 @@ ui8\((-?[0-9]+)\) {
     yylval.ui8 = number;
     return UI8;
 }
+ui8Repeat { return UI8_REPEAT ; }
 
 
 [\<\>\=] { return yytext[0]; }

@@ -67,21 +67,49 @@ uint32_t sm_array_sprint(sm_array *a, char *buffer, bool fake) {
 }
 
 uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
-  uint32_t cursor       = 0;
-  uint32_t bufferCursor = 0;
-  uint32_t i            = 0;
-  char     fakeBuf[64]; // Temporary buffer used when fake is true
-  if (fake)
-    buffer = fakeBuf;
+  uint32_t cursor = 0;
+  uint32_t i      = 0;
+
   for (i = 0; i < array->size; i++) {
-    if (fake)
-      bufferCursor = 0; // Reset bufferCursor to 0 if we are faking
     f64 value = sm_f64_array_get_bare(array, i);
-    // Write the value to the buffer, ensuring no overflow
-    bufferCursor = snprintf(&buffer[cursor], 25, "%.16g", value); // Write value to the buffer
-    if (bufferCursor >= 25)
-      bufferCursor = 24; // Safeguard against overflow from snprintf
-    cursor += bufferCursor;
+    // Estimate maximum buffer size needed for one float
+    char num_buf[36]; // Enough to hold any formatted float
+    int  len = snprintf(num_buf, sizeof(num_buf), "%.16g", value);
+
+    if (!fake)
+      if (len > 0)
+        memcpy(&buffer[cursor], num_buf, len); // Copy the formatted string to the buffer
+    cursor += len;
+    // Add a comma if it's not the last element
+    if (i + 1 < array->size) {
+      if (!fake)
+        buffer[cursor] = ',';
+      cursor++;
+    }
+  }
+
+  // Null-terminate the buffer if not faking
+  if (!fake) {
+    buffer[cursor] = '\0';
+  }
+
+  return cursor;
+}
+
+uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
+  if (array->size == 0)
+    return 0;
+  uint32_t cursor = 0;
+  uint32_t i      = 0;
+  for (i = 0; i < array->size; i++) {
+    uint8_t value = sm_ui8_array_get_bare(array, i);
+    // Calculate the length needed to print the integer
+    uint32_t len = (value == 0) ? 1 : (uint32_t)log10(value) + 1;
+    if (!fake)
+      cursor += sprintf(&buffer[cursor], "%u", value);
+    else
+      cursor += len; // Only increment cursor by the length if faking
+
     // Add a comma if it's not the last element
     if (i + 1 < array->size) {
       if (!fake)
@@ -95,24 +123,6 @@ uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
   return cursor;
 }
 
-uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
-  if (array->size == 0)
-    return 0;
-  uint32_t cursor = 0;
-  uint32_t i      = 0;
-  char     tmp[array->size];
-  if (fake)
-    buffer = tmp;
-  for (; i + 1 < array->size; i++) {
-    cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, i));
-    if (!fake)
-      buffer[cursor] = ',';
-    cursor++;
-  }
-  if (array->size > 0)
-    cursor += sprintf(&buffer[cursor], "%i", sm_ui8_array_get_bare(array, array->size - 1));
-  return cursor;
-}
 
 uint32_t sm_array_contents_sprint(sm_array *a, char *buffer, bool fake) {
   uint32_t cursor = 0;

@@ -81,9 +81,11 @@ int parsing_fpath_len;
 %token IS
 %token DOT
 %token <expr> NEW_F64
+%token <expr> F64_REPEAT
 %token <num> F64
 %token <ui8> UI8
 %token <ui8> NEW_UI8
+%token <expr> UI8_REPEAT
 %token <integer> INTEGER
 %token <expr> IPLUS
 %token <expr> IMINUS
@@ -361,6 +363,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | F64 { $$ = (sm_expr*)sm_new_f64($1);}
 | UI8 { $$ = (sm_expr*)sm_new_ui8($1);}
 | NEW_UI8 '(' EXPR ')' {$$ = sm_new_expr(SM_NEW_UI8_EXPR, (sm_object *)$3, _note()); }
+| UI8_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_UI8_REPEAT_EXPR, (sm_object *)$3, (sm_object*)$5, _note()); }
 | INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
@@ -473,6 +476,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | XP_SETOP '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_XP_SET_OP_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | XP_OPSYM '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_SYM_EXPR,(sm_object*)$3, _note());}
 | NEW_F64 '(' EXPR ')' { $$ = sm_new_expr(SM_NEW_F64_EXPR, (sm_object*)$3 , _note()); }
+| F64_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_F64_REPEAT_EXPR, (sm_object *)$3, (sm_object*)$5, _note()); }
 | F64_ARRAY { }
 | UI8_ARRAY { }
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3, _note());}
