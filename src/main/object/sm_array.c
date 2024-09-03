@@ -100,7 +100,7 @@ uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
     return 0;
   uint32_t cursor = 0;
   uint32_t i      = 0;
-  char     tmp[20];
+  char     tmp[array->size];
   if (fake)
     buffer = tmp;
   for (; i + 1 < array->size; i++) {
