@@ -1,0 +1,62 @@
+{
+  # Image dimensions
+  let width  = 256;
+  let height = 256;
+  
+  # TGA file header size is 18 bytes
+  let headerSize = 18;
+  
+  # Create a blank buffer with header size + width * height bytes for the image
+  let buffer = ui8Repeat([ui8(0)], headerSize + width * height);
+
+  # Write the TGA header to the buffer
+  # ID length (1 byte), Color Map Type (1 byte), Image Type (1 byte)
+  buffer[0] = ui8(0);       # No image ID field
+  buffer[1] = ui8(0);       # No color map
+  buffer[2] = ui8(3);       # Uncompressed black-and-white image (grayscale)
+
+  # Color Map Specification (5 bytes)
+  buffer[3] = ui8(0);       # First entry index (2 bytes)
+  buffer[4] = ui8(0);
+  buffer[5] = ui8(0);       # Color map length (2 bytes)
+  buffer[6] = ui8(0);
+  buffer[7] = ui8(0);       # Color map entry size (1 byte)
+
+  # Image Specification (10 bytes)
+  buffer[8] = ui8(0);       # X-origin (2 bytes)
+  buffer[9] = ui8(0);
+  buffer[10] = ui8(0);      # Y-origin (2 bytes)
+  buffer[11] = ui8(0);
+  buffer[12] = ui8(mod(width, 256));     # Width (2 bytes)
+  buffer[13] = ui8(width / 256);
+  buffer[14] = ui8(mod(height, 256));    # Height (2 bytes)
+  buffer[15] = ui8(height / 256);
+  buffer[16] = ui8(8);       # Pixel depth (1 byte, 8 bits for grayscale)
+  buffer[17] = ui8(0);       # Image descriptor (1 byte)
+
+  # Fill the image buffer with a gradient
+  let i = 0;
+  while (i < height) {
+    let j = 0;
+    while (j < width) {
+      # Calculate the pixel index after the header
+      let pixelIndex = headerSize + i * width + j;
+
+      # Create a gradient from black to white
+      buffer[pixelIndex] = ui8(i * 255 / height); # Vertical gradient
+
+      j ++;
+    };
+    i ++;
+  };
+
+  # Write the buffer to a file
+  let success = fileWriteArr("gradient.tga", buffer);
+  if(success)
+    putLn("Gradient TGA file 'gradient.tga' has been created.")
+  else {
+   putLn("Something went wrong...");
+   putLn(str(success));
+  };
+};
+
