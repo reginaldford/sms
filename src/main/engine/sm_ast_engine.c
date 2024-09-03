@@ -558,7 +558,71 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (sm_object *)new_list;
       break;
     }
-    case SM_REPEAT_EXPR: {
+    case SM_UI8_REPEAT_EXPR: {
+      sm_expr *obj =
+        (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
+      if (obj->my_type == SM_ERR_TYPE)
+        return (sm_object *)obj;
+
+      sm_f64 *repeat_count_obj = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
+      if (!repeat_count_obj || repeat_count_obj->my_type == SM_ERR_TYPE)
+        return (sm_object *)repeat_count_obj;
+      uint32_t repeat_count = (uint32_t)repeat_count_obj->value;
+
+      if (repeat_count == 0)
+        return (sm_object *)sm_new_array(SM_UI8_TYPE, 0, NULL, sizeof(sm_space));
+
+      uint32_t  total_size = 0;
+      sm_space *new_space  = NULL;
+      ui8      *dst_data   = NULL;
+
+      switch (obj->my_type) {
+      case SM_EXPR_TYPE: {
+        sm_expr *arr = (sm_expr *)obj;
+        total_size   = arr->size * repeat_count;
+        new_space    = sm_new_space(total_size);
+        dst_data     = (ui8 *)(new_space + 1);
+        for (uint32_t i = 0; i < repeat_count; i++)
+          for (uint32_t j = 0; j < arr->size; j++)
+            dst_data[i * arr->size + j] = (ui8)(uintptr_t)sm_expr_get_arg(arr, j);
+        break;
+      }
+      case SM_ARRAY_TYPE: {
+        sm_array *arr = (sm_array *)obj;
+        total_size    = arr->size * repeat_count;
+        new_space     = sm_new_space(total_size);
+        dst_data      = (ui8 *)(new_space + 1);
+        switch (arr->inner_type) {
+        case SM_UI8_TYPE: {
+          ui8 *src_data = sm_ui8_array_get_start(arr);
+          for (uint32_t i = 0; i < repeat_count; i++)
+            memcpy(dst_data + i * arr->size, src_data, arr->size);
+          break;
+        }
+        case SM_F64_TYPE: {
+          f64 *src_data = sm_f64_array_get_start(arr);
+          for (uint32_t i = 0; i < repeat_count; i++)
+            for (uint32_t j = 0; j < arr->size; j++)
+              dst_data[i * arr->size + j] = (ui8)src_data[j];
+          break;
+        }
+        default:
+          return (sm_object *)sm_new_error_from_strings(
+            sm_new_symbol("InvalidType", 11),
+            sm_new_string(29, "Unsupported array type for ui8 repeat"), NULL, 0, NULL);
+        }
+        break;
+      }
+      default:
+        return (sm_object *)sm_new_error_from_strings(
+          sm_new_symbol("InvalidType", 11), sm_new_string(26, "Invalid type for ui8 repeat"), NULL,
+          0, NULL);
+      }
+
+      return (sm_object *)sm_new_array(SM_UI8_TYPE, total_size, (sm_object *)new_space,
+                                       sizeof(sm_space));
+    }
+    case SM_F64_REPEAT_EXPR: {
       sm_expr *obj =
         (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
       if (!obj || obj->my_type == SM_ERR_TYPE)
@@ -570,83 +634,66 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       uint32_t repeat_count = (uint32_t)repeat_count_obj->value;
 
       if (repeat_count == 0)
-        return (obj->my_type == SM_EXPR_TYPE)
-                 ? (sm_object *)sm_new_expr_n(((sm_expr *)obj)->op, 0, 0, NULL)
-                 : (sm_object *)sm_new_array(((sm_array *)obj)->inner_type, 0, NULL,
-                                             sizeof(sm_space));
+        return (sm_object *)sm_new_array(SM_F64_TYPE, 0, NULL, sizeof(sm_space));
+
+      uint32_t  total_size = 0;
+      sm_space *new_space  = NULL;
+      f64      *dst_data   = NULL;
 
       switch (obj->my_type) {
       case SM_EXPR_TYPE: {
-        sm_expr *arr         = (sm_expr *)obj;
-        uint32_t new_size    = arr->size * repeat_count;
-        sm_expr *result_expr = sm_new_expr_n(arr->op, new_size, new_size, NULL);
-        if (!result_expr)
-          return (sm_object *)sm_new_error_from_strings(
-            sm_new_symbol("MemoryError", 10),
-            sm_new_string(44, "Failed to allocate memory for repeated tuple"), NULL, 0, NULL);
-
-        // Repeating the expression arguments
-        for (uint32_t i = 0; i < repeat_count; i++) {
-          for (uint32_t j = 0; j < arr->size; j++) {
-            sm_object *arg = sm_expr_get_arg(arr, j);
-            if (!arg)
-              return (sm_object *)sm_new_error_from_strings(
-                sm_new_symbol("InvalidMemoryAccess", 19),
-                sm_new_string(40, "Invalid memory access during repetition"), NULL, 0, NULL);
-            sm_expr_set_arg(result_expr, i * arr->size + j, arg);
-          }
-        }
-        return (sm_object *)result_expr;
-      }
-      case SM_ARRAY_TYPE: {
-        sm_array *arr          = (sm_array *)obj;
-        uint32_t  element_size = (arr->inner_type == SM_UI8_TYPE) ? sizeof(ui8) : sizeof(f64);
-        uint32_t  new_size     = arr->size * repeat_count * element_size;
-        sm_space *new_space    = sm_new_space(new_size);
+        sm_expr *arr = (sm_expr *)obj;
+        total_size   = arr->size * repeat_count;
+        new_space    = sm_new_space(total_size * sizeof(f64));
         if (!new_space)
           return (sm_object *)sm_new_error_from_strings(
             sm_new_symbol("MemoryError", 10),
-            sm_new_string(44, "Failed to allocate memory for repeated array"), NULL, 0, NULL);
-
-        void *src_data, *dst_data = (char *)(new_space + 1); // Start of data after sm_space header
+            sm_new_string(44, "Failed to allocate memory for f64 repeat from expr"), NULL, 0, NULL);
+        dst_data = (f64 *)(new_space + 1);
+        for (uint32_t i = 0; i < repeat_count; i++)
+          for (uint32_t j = 0; j < arr->size; j++)
+            dst_data[i * arr->size + j] = (f64)(uintptr_t)sm_expr_get_arg(arr, j);
+        break;
+      }
+      case SM_ARRAY_TYPE: {
+        sm_array *arr = (sm_array *)obj;
+        total_size    = arr->size * repeat_count;
+        new_space     = sm_new_space(total_size * sizeof(f64));
+        if (!new_space)
+          return (sm_object *)sm_new_error_from_strings(
+            sm_new_symbol("MemoryError", 10),
+            sm_new_string(44, "Failed to allocate memory for f64 repeat from array"), NULL, 0,
+            NULL);
+        dst_data = (f64 *)(new_space + 1);
         switch (arr->inner_type) {
-        case SM_F64_TYPE:
-          src_data = sm_f64_array_get_start(arr); // Get pointer to actual f64 data
-          if (!src_data)
-            return (sm_object *)sm_new_error_from_strings(
-              sm_new_symbol("InvalidMemoryAccess", 19),
-              sm_new_string(27, "Invalid f64 array access"), NULL, 0, NULL);
+        case SM_UI8_TYPE: {
+          ui8 *src_data = sm_ui8_array_get_start(arr);
           for (uint32_t i = 0; i < repeat_count; i++)
-            memcpy((char *)dst_data + i * arr->size * sizeof(f64), src_data,
-                   arr->size * sizeof(f64));
+            for (uint32_t j = 0; j < arr->size; j++)
+              dst_data[i * arr->size + j] = (f64)src_data[j];
           break;
-        case SM_UI8_TYPE:
-          src_data = sm_ui8_array_get_start(arr); // Get pointer to actual ui8 data
-          if (!src_data)
-            return (sm_object *)sm_new_error_from_strings(
-              sm_new_symbol("InvalidMemoryAccess", 19),
-              sm_new_string(27, "Invalid ui8 array access"), NULL, 0, NULL);
+        }
+        case SM_F64_TYPE: {
+          f64 *src_data = sm_f64_array_get_start(arr);
           for (uint32_t i = 0; i < repeat_count; i++)
-            memcpy((char *)dst_data + i * arr->size * sizeof(ui8), src_data,
-                   arr->size * sizeof(ui8));
+            memcpy(dst_data + i * arr->size, src_data, arr->size * sizeof(f64));
           break;
-        default: {
-          sm_symbol *title = sm_new_symbol("arrayTypeUnknownError", 19);
-          sm_string *message =
-            sm_new_fstring_at(sms_heap, "Unsupported array inner type %i", (int)arr->inner_type);
-          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
         }
+        default:
+          return (sm_object *)sm_new_error_from_strings(
+            sm_new_symbol("InvalidType", 11),
+            sm_new_string(29, "Unsupported array type for f64 repeat"), NULL, 0, NULL);
         }
-        return (sm_object *)sm_new_array(arr->inner_type, new_size / element_size,
-                                         (sm_object *)new_space, sizeof(sm_space));
+        break;
       }
-      default: {
-        sm_symbol *title = sm_new_symbol("invalidExpressionType", 19);
-        sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid expression type %i", (int)obj->my_type);
-        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      default:
+        return (sm_object *)sm_new_error_from_strings(
+          sm_new_symbol("InvalidType", 11), sm_new_string(26, "Invalid type for f64 repeat"), NULL,
+          0, NULL);
       }
-      }
+
+      return (sm_object *)sm_new_array(SM_F64_TYPE, total_size, (sm_object *)new_space,
+                                       sizeof(sm_space));
     }
     case SM_CAT_EXPR: {
       sm_expr *list0 = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE, current_cx, sf);
@@ -1137,7 +1184,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       case SM_UI8_TYPE: {
         // Handle ui8 arrays
         content_cstr = (char *)content_array->content + sizeof(sm_space);
-        content_size = content_array->size * sizeof(ui8); // Size in bytes
+        content_size = content_array->size; // Size in bytes
         break;
       }
       case SM_F64_TYPE: {
