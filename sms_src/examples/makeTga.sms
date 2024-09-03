@@ -1,11 +1,14 @@
+#!/usr/local/bin/sms -qm125
+# Demonstrates generating a black and white gradient TGA image
+
 {
   # Image dimensions
-  let width  = 256;
+  let width = 256;
   let height = 256;
-  
+
   # TGA file header size is 18 bytes
   let headerSize = 18;
-  
+
   # Create a blank buffer with header size + width * height bytes for the image
   let buffer = ui8Repeat([ui8(0)], headerSize + width * height);
 
@@ -35,28 +38,23 @@
   buffer[17] = ui8(0);       # Image descriptor (1 byte)
 
   # Fill the image buffer with a gradient
-  let i = 0;
-  while (i < height) {
-    let j = 0;
-    while (j < width) {
+  for (let i = 0; i < height; i++) {
+    for (let j = 0; j < width; j++) {
       # Calculate the pixel index after the header
       let pixelIndex = headerSize + i * width + j;
-
+      
       # Create a gradient from black to white
       buffer[pixelIndex] = ui8(i * 255 / height); # Vertical gradient
-
-      j ++;
     };
-    i ++;
   };
 
   # Write the buffer to a file
   let success = fileWriteArr("gradient.tga", buffer);
-  if(success)
-    putLn("Gradient TGA file 'gradient.tga' has been created.")
-  else {
-   putLn("Something went wrong...");
-   putLn(str(success));
+  if (success) {
+    putLn("Gradient TGA file 'gradient.tga' has been created.");
+  } else {
+    putLn("Something went wrong...");
+    putLn(str(success));
   };
 };
 
