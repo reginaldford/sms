@@ -563,28 +563,44 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
       if (obj->my_type == SM_ERR_TYPE)
         return (sm_object *)obj;
-
       sm_f64 *repeat_count_obj = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      if (!repeat_count_obj || repeat_count_obj->my_type == SM_ERR_TYPE)
+      if (repeat_count_obj->my_type == SM_ERR_TYPE)
         return (sm_object *)repeat_count_obj;
       uint32_t repeat_count = (uint32_t)repeat_count_obj->value;
-
       if (repeat_count == 0)
         return (sm_object *)sm_new_array(SM_UI8_TYPE, 0, NULL, sizeof(sm_space));
-
       uint32_t  total_size = 0;
       sm_space *new_space  = NULL;
       ui8      *dst_data   = NULL;
-
       switch (obj->my_type) {
       case SM_EXPR_TYPE: {
         sm_expr *arr = (sm_expr *)obj;
         total_size   = arr->size * repeat_count;
         new_space    = sm_new_space(total_size);
         dst_data     = (ui8 *)(new_space + 1);
-        for (uint32_t i = 0; i < repeat_count; i++)
-          for (uint32_t j = 0; j < arr->size; j++)
-            dst_data[i * arr->size + j] = (ui8)(uintptr_t)sm_expr_get_arg(arr, j);
+        for (uint32_t i = 0; i < repeat_count; i++) {
+          for (uint32_t j = 0; j < arr->size; j++) {
+            sm_object *element = sm_expr_get_arg(arr, j);
+            switch (element->my_type) {
+            case SM_F64_TYPE:
+              dst_data[i * arr->size + j] = (ui8)((sm_f64 *)element)->value;
+              break;
+            case SM_UI8_TYPE:
+              dst_data[i * arr->size + j] = ((sm_ui8 *)element)->value;
+              break;
+            case SM_STRING_TYPE:
+              dst_data[i * arr->size + j] =
+                (ui8)(((sm_string *)element)->content); // Convert first character
+              break;
+            default: {
+              sm_symbol *title   = sm_new_symbol("InvalidElementType", 17);
+              sm_string *message = sm_new_fstring_at(
+                sms_heap, "Unsupported element type %i in tuple", (int)element->my_type);
+              return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+            }
+            }
+          }
+        }
         break;
       }
       case SM_ARRAY_TYPE: {
@@ -625,11 +641,11 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     case SM_F64_REPEAT_EXPR: {
       sm_expr *obj =
         (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
-      if (!obj || obj->my_type == SM_ERR_TYPE)
+      if (obj->my_type == SM_ERR_TYPE)
         return (sm_object *)obj;
 
       sm_f64 *repeat_count_obj = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      if (!repeat_count_obj || repeat_count_obj->my_type == SM_ERR_TYPE)
+      if (repeat_count_obj->my_type == SM_ERR_TYPE)
         return (sm_object *)repeat_count_obj;
       uint32_t repeat_count = (uint32_t)repeat_count_obj->value;
 
