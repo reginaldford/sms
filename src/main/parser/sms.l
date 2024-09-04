@@ -145,7 +145,6 @@ fileRm         {return FILE_RM;}
 fileSize       {return FILE_SIZE;}
 fileWriteStr   {return FILE_WRITESTR;}
 fileWriteArr   {return FILE_WRITEARR;}
-fileWriteTga   {return FILE_WRITETGA;}
 fileAppend     {return FILE_APPEND;}
 
 zeros       {return ZEROS;}

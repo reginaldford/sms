@@ -1,0 +1,48 @@
+#!/usr/local/bin/sms -qm225
+# Demonstrates generating a black and white striped TGA image with 3 shades
+
+{
+  # Include the bwImg library
+  eval(fileParse("bwImg.sms"));
+
+  # Image dimensions
+  let width = 256;
+  let height = 256;
+
+  # Create an array for the striped pattern
+  let grayscaleArray = ui8Repeat(ui8[0], width * height);
+
+  # Define 3 shades of gray
+  let shade1 = ui8(85);   # Light gray
+  let shade2 = ui8(170);  # Medium gray
+  let shade3 = ui8(255);  # White
+
+  # Size of each stripe
+  let stripeSize = 32;
+
+  # Fill the array with a striped pattern
+  for (let i = 0; i < height; i++) {
+    for (let j = 0; j < width; j++) {
+      # Determine the column position, rounding to the nearest integer
+      let blockCol = round(j / stripeSize);
+
+      # Alternate between shades based on column position
+      if (mod(blockCol, 3) == 0) {
+        grayscaleArray[i * width + j] = shade1;
+      } else if (mod(blockCol, 3) == 1) {
+        grayscaleArray[i * width + j] = shade2;
+      } else {
+        grayscaleArray[i * width + j] = shade3;
+      };
+    };
+  };
+
+  # Use the bwImg.write function to create the TGA file
+  let result = bwImg.write("striped_pattern.tga", width, height, grayscaleArray);
+  if (result == true) {
+    putLn("Striped pattern TGA file 'striped_pattern.tga' has been created.");
+  } else {
+    putLn("Error: " str+ result);
+  };
+};
+
