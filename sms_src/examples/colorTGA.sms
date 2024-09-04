@@ -1,0 +1,74 @@
+#!/usr/local/bin/sms
+# Usage: sms -i colorTGA.sms, then call colorTGA.write(filename, width, height, rgbArray)
+{
+  # Function to convert RGB array to TGA format (BGR)
+  let write = (filename, width, height, rgbArray) => {
+    # TGA file header size is 18 bytes
+    let headerSize = 18;
+    let bytesPerPixel = 3;
+
+    # Ensure that rgbArray length matches the expected size
+    let expectedSize = width * height * bytesPerPixel;
+    if (not(size(rgbArray) == expectedSize)) 
+      return <tgaFileContentSizeMismatch,"Error: RGB array size does not match width and height.">;
+
+    # Create a buffer for TGA file with header + image data
+    let buffer = ui8Repeat([ui8(0)], headerSize + width * height * bytesPerPixel);
+
+    # Write the TGA header
+    buffer[0] = ui8(0);       # No image ID field
+    buffer[1] = ui8(0);       # No color map
+    buffer[2] = ui8(2);       # Uncompressed, true-color image
+
+    # Color Map Specification (5 bytes)
+    buffer[3] = ui8(0);       # First entry index (2 bytes)
+    buffer[4] = ui8(0);
+    buffer[5] = ui8(0);       # Color map length (2 bytes)
+    buffer[6] = ui8(0);
+    buffer[7] = ui8(0);       # Color map entry size (1 byte)
+
+    # Image Specification (10 bytes)
+    buffer[8] = ui8(0);       # X-origin (2 bytes)
+    buffer[9] = ui8(0);
+    buffer[10] = ui8(0);      # Y-origin (2 bytes)
+    buffer[11] = ui8(0);
+    buffer[12] = ui8(mod(width, 256));     # Width (2 bytes)
+    buffer[13] = ui8(width / 256);
+    buffer[14] = ui8(mod(height, 256));    # Height (2 bytes)
+    buffer[15] = ui8(height / 256);
+    buffer[16] = ui8(24);      # Pixel depth (1 byte, 24 bits for BGR color)
+    buffer[17] = ui8(0);       # Image descriptor (1 byte)
+
+    # Convert RGB to BGR and fill the buffer
+    for (let i = 0; i < height; i++) {
+      for (let j = 0; j < width; j++) {
+        # Calculate the pixel index for the input RGB array
+        let rgbIndex = (i * width + j) * bytesPerPixel;
+        
+        # Calculate the pixel index for the output buffer (TGA format)
+        let pixelIndex = headerSize + (i * width + j) * bytesPerPixel;
+        
+        # Extract RGB components
+        let r = rgbArray[rgbIndex];
+        let g = rgbArray[rgbIndex + 1];
+        let b = rgbArray[rgbIndex + 2];
+
+        # Write the BGR values to the buffer
+        buffer[pixelIndex] = b;
+        buffer[pixelIndex + 1] = g;
+        buffer[pixelIndex + 2] = r;
+      };
+    };
+
+    # Write the buffer to a TGA file
+    let success = fileWriteArr(filename, buffer);
+    if (success) {
+      putLn("TGA file '" str+ filename str+ "' has been created.");
+      return true;
+    } else return <tgaWriteErr,"Error: Failed to create TGA file.">;
+  };
+
+  # Expose the write function for usage
+  cxLet(parent(_scratch), :colorTGA, self);
+};
+

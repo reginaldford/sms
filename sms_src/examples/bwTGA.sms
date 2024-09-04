@@ -1,0 +1,66 @@
+#!/usr/local/bin/sms
+# Usage: sms -i bwTGA.sms, then call bwTGA.write(filename, width, height, grayscaleArray)
+{
+  # Function to convert grayscale array to TGA format (black and white)
+  let write = (filename, width, height, grayscaleArray) => {
+    # TGA file header size is 18 bytes
+    let headerSize = 18;
+    let bytesPerPixel = 1; # 1 byte per pixel for grayscale
+
+    # Ensure that grayscaleArray length matches the expected size
+    let expectedSize = width * height * bytesPerPixel;
+    if (not(size(grayscaleArray) == expectedSize))
+      return <tgaFileContentSizeMismatch,"Error: Grayscale array size does not match width and height.">;
+
+    # Create a buffer for TGA file with header + image data
+    let buffer = ui8Repeat(ui8[0], headerSize + width * height * bytesPerPixel);
+
+    # Write the TGA header
+    buffer[0] = ui8(0);       # No image ID field
+    buffer[1] = ui8(0);       # No color map
+    buffer[2] = ui8(3);       # Uncompressed black-and-white image (grayscale)
+
+    # Color Map Specification (5 bytes)
+    buffer[3] = ui8(0);       # First entry index (2 bytes)
+    buffer[4] = ui8(0);
+    buffer[5] = ui8(0);       # Color map length (2 bytes)
+    buffer[6] = ui8(0);
+    buffer[7] = ui8(0);       # Color map entry size (1 byte)
+
+    # Image Specification (10 bytes)
+    buffer[8] = ui8(0);       # X-origin (2 bytes)
+    buffer[9] = ui8(0);
+    buffer[10] = ui8(0);      # Y-origin (2 bytes)
+    buffer[11] = ui8(0);
+    buffer[12] = ui8(mod(width, 256));     # Width (2 bytes)
+    buffer[13] = ui8(width / 256);
+    buffer[14] = ui8(mod(height, 256));    # Height (2 bytes)
+    buffer[15] = ui8(height / 256);
+    buffer[16] = ui8(8);      # Pixel depth (1 byte, 8 bits for grayscale)
+    buffer[17] = ui8(0);      # Image descriptor (1 byte)
+
+    # Fill the buffer with grayscale data
+    for (let i = 0; i < height; i++) {
+      for (let j = 0; j < width; j++) {
+        # Calculate the pixel index in the grayscale array
+        let grayIndex = i * width + j;
+
+        # Calculate the pixel index for the output buffer (TGA format)
+        let pixelIndex = headerSize + grayIndex;
+
+        # Copy the grayscale value to the buffer
+        buffer[pixelIndex] = grayscaleArray[grayIndex];
+      };
+    };
+
+    # Write the buffer to a TGA file
+    let success = fileWriteArr(filename, buffer);
+    if (success) {
+      putLn("TGA file '" str+ filename str+ "' has been created.");
+      return true;
+    } else return <tgaWriteErr,"Error: Failed to create TGA file.">;
+  };
+  # Expose the write function for usage
+  let success = cxLet(parent(_scratch), :bwTGA, self);
+};
+
