@@ -1,0 +1,42 @@
+#!/usr/local/bin/sms -m196
+# Usage: This script demonstrates creating a rainbow gradient using colorImg.write
+
+{
+  # Evaluate and include the colorImg library
+  eval(fileParse("colorImg.sms"));
+
+  # Image dimensions
+  let width = 256;
+  let height = 256;
+  let bytesPerPixel = 3;
+
+  # Create an RGB array for the rainbow gradient
+  let rgbArray = ui8Repeat([ui8(0)], width * height * bytesPerPixel);
+
+  # Fill the RGB array with a rainbow gradient
+  for (let i = 0; i < height; i++) {
+    for (let j = 0; j < width; j++) {
+      # Calculate the pixel index in the RGB array
+      let rgbIndex = (i * width + j) * bytesPerPixel;
+
+      # Create a gradient with varying colors (RGB order)
+      let r = ui8((i * 255) / height);   # Red varies by height
+      let g = ui8((j * 255) / width);    # Green varies by width
+      let b = ui8(((i + j) * 255) / (width + height)); # Blue varies by combined position
+
+      # Assign the RGB values to the array
+      rgbArray[rgbIndex] = r;
+      rgbArray[rgbIndex + 1] = g;
+      rgbArray[rgbIndex + 2] = b;
+    };
+  };
+
+  # Call the colorImg.write function to create the TGA file
+  let result = colorImg.write("rainbow.tga", width, height, rgbArray);
+  if (result == true) {
+    putLn("Rainbow gradient TGA file 'rainbow_gradient.tga' has been created.");
+  } else {
+    putLn("Error: " str+ result);
+  };
+};
+
