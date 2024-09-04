@@ -2,8 +2,8 @@
 # Demonstrates generating a black and white striped TGA image with 3 shades
 
 {
-  # Include the bwImg library
-  eval(fileParse("bwImg.sms"));
+  # Include the bwTGA library
+  eval(fileParse("bwTGA.sms"));
 
   # Image dimensions
   let width = 256;
@@ -37,8 +37,8 @@
     };
   };
 
-  # Use the bwImg.write function to create the TGA file
-  let result = bwImg.write("striped_pattern.tga", width, height, grayscaleArray);
+  # Use the bwTGA.write function to create the TGA file
+  let result = bwTGA.write("striped_pattern.tga", width, height, grayscaleArray);
   if (result == true) {
     putLn("Striped pattern TGA file 'striped_pattern.tga' has been created.");
   } else {
