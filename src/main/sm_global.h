@@ -2,7 +2,6 @@
 
 #ifndef SMS_GLOBALS
 #define SMS_GLOBALS
-
 /// The currently used memory heap
 extern sm_heap *sms_heap;
 /// The next heap to jump to for copying gc
@@ -11,7 +10,8 @@ extern sm_heap *sms_other_heap;
 extern sm_symbol *sms_true;
 /// The singleton for false
 extern sm_symbol *sms_false;
-
+/// Explicit callstack
+extern sm_stack *sms_callstack;
 #endif /* SMS_GLOBALS */
 
 /// Increase the global garbage collection count by 1, report the result
