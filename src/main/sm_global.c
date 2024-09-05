@@ -12,6 +12,8 @@ sm_heap *sms_symbol_heap;
 // Symbol names are in alpabetical order, correlating with the symbol
 sm_heap *sms_symbol_name_heap;
 uint32_t sms_num_symbols;
+// Explicit callstack
+sm_stack *sms_callstack;
 
 /* GLOBALS as functions
  The following globals use functions f(x):
@@ -55,6 +57,7 @@ bool sm_global_fn_hidden(uint32_t which) {
   switch (which) {
   case SM_FN_PARAMS_EXPR:
   case SM_PARAM_LIST_EXPR:
+  case SM_BLOCK_EXPR:
     return true;
     break;
   }

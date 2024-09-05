@@ -23,6 +23,8 @@ sm_stack *sm_stack_push(sm_stack *self, void *ptr) {
     self->capacity    = self->capacity * sm_global_growth_factor(0) + 1;
     current_stack     = malloc(sizeof(sm_stack) + sizeof(void *) * self->capacity);
     memcpy(current_stack, self, sizeof(sm_stack) + sizeof(void *) * old_size);
+    free(self);
+    current_stack->top = sm_stack_empty_top(current_stack) + old_size;
   }
   void **tuple                        = sm_stack_content(current_stack);
   tuple[sm_stack_size(current_stack)] = ptr;
