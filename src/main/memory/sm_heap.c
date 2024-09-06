@@ -11,6 +11,7 @@ extern sm_heap   *sms_symbol_name_heap;
 
 // For rounding up object size to the next multiple of 4 bytes.
 uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
+// For rounding up object size to the next multiple of 8 bytes.
 uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~7; }
 
 // Create a new heap of some capacity
@@ -24,13 +25,25 @@ sm_heap *sm_new_heap(uint32_t capacity) {
 
 // Internal 'malloc'
 void *sm_malloc(uint32_t size) {
-  uint32_t bytes_used = sms_heap->used;
-  sms_heap->used += size;
+  uint32_t bytes_used      = sms_heap->used;
+  uint32_t next_bytes_used = sms_heap->used + size;
+  if (next_bytes_used > sms_heap->capacity) {
+    sm_garbage_collect();
+    next_bytes_used = sms_heap->used + size;
+    if (next_bytes_used > sms_heap->capacity) {
+      // TODO: dynamic heap size
+      fprintf(stderr, "Exhausted heap memory.\n");
+      exit(1);
+    }
+  }
+  sms_heap->used = next_bytes_used;
   return (void *)(((char *)sms_heap->storage) + bytes_used);
 }
 
 // Internal 'malloc' with alternative heap
 void *sm_malloc_at(struct sm_heap *heap, uint32_t size) {
+  if (heap == sms_heap)
+    return sm_malloc(size);
   uint32_t bytes_used = heap->used;
   heap->used += size;
   return (void *)(((char *)heap->storage) + bytes_used);

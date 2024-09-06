@@ -174,6 +174,13 @@ void sm_garbage_collect() {
     *sm_global_lex_stack(NULL)->top =
       (sm_cx *)sm_move_to_new_heap((sm_object *)*sm_global_lex_stack(NULL)->top);
 
+    // Explicit callstack currently stores ptr triplets
+    // They point to input, current_cx, and sf variables in the c callstack
+    sm_object ***ptr_array = (sm_object ***)sm_stack_empty_top(sms_callstack);
+    for (int i = 0; i < sm_stack_size(sms_callstack); i++) {
+      *ptr_array[i] = sm_move_to_new_heap(*ptr_array[i]);
+    }
+
     // Parser output never gets saved. Ptrs would get broken, so set it to a literal
     if (sm_global_parser_output(NULL))
       sm_global_parser_output((sm_object *)sms_false);
@@ -186,7 +193,6 @@ void sm_garbage_collect() {
   }
   // Report memory stat
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
-    const uint32_t KB = 1024;
     putc('\n', stdout);
     printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
     putc('(', stdout);
