@@ -67,8 +67,11 @@ struct sm_string *sm_new_fstring_at(struct sm_heap *heap, const char *format, ..
 
 // Return a new empty string (does not nullify contents)
 sm_string *sm_new_string_manual_at(struct sm_heap *heap, uint32_t size) {
-  struct sm_string *newstr =
-    (sm_string *)sm_malloc_at(heap, sizeof(sm_string) + sm_round_size(size));
+  struct sm_string *newstr;
+  if (heap == sms_heap)
+    newstr = (sm_string *)sm_malloc(sizeof(sm_string) + sm_round_size(size));
+  else
+    newstr = (sm_string *)sm_malloc_at(heap, sizeof(sm_string) + sm_round_size(size));
   newstr->my_type = SM_STRING_TYPE;
   newstr->size    = size;
   return newstr;
