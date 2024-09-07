@@ -25,14 +25,47 @@ help         {return HELP;}
 f64 {return NEW_F64;}
 f64Repeat {return F64_REPEAT;}
 
+ui8 { return NEW_UI8; }
+ui8\((-?[0-9]+)\) {
+    char *num_str = yytext + 4;  // Skip "ui8("
+    // Find the position of the closing parenthesis
+    char *end_paren = strchr(num_str, ')');
+    if (!end_paren) {
+        fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
+        return 0;
+    }   
+    // Temporarily terminate the string at the closing parenthesis
+    *end_paren = '\0';
+    // Trim spaces from the start and end of num_str
+    char *end = num_str + strlen(num_str) - 1;
+    end[1] = '\0';  // Null-terminate the trimmed string
+    int number = atoi(num_str);  // Convert the trimmed number string to an integer
+    yylval.ui8 = number;
+    return UI8;
+}
+ui8Repeat { return UI8_REPEAT ; }
+
+"_xor=" {return IXOR_EQ;}
+"_or="  {return IOR_EQ;}
+"_and=" {return IAND_EQ;}
+
 "_+" {return IPLUS;}
 "_-" {return IMINUS;}
 "_*" {return ITIMES;}
 "_/" {return IDIVIDE;}
 "_^" {return IPOW;}
-"_xor" {return IXOR;}
-"_or"  {return IOR;}
-"_and" {return IAND;}
+
+"_+="   {return IPLUSEQ;}
+"_-="   {return IMINUSEQ;}
+"_*="   {return ITIMESEQ;}
+"_/="   {return IDIVIDEEQ;}
+"_^="   {return IPOWEREQ;}
+
+"+"  {return PLUS;}
+"-"  {return MINUS;}
+"*"  {return TIMES;}
+"/"  {return DIVIDE;}
+"^"  {return POW;}
 
 "+=" {return PLUSEQ;}
 "-=" {return MINUSEQ;}
@@ -66,6 +99,9 @@ abs          {return ABS;}
 
 "++"         {return INC;}
 "--"         {return DEC;}
+"_++"         {return IINC;}
+"_--"         {return IDEC;}
+
 diff         {return DIFF;}
 simp         {return SIMP;}
 int          {return INT;}
@@ -239,25 +275,6 @@ _gc            {return GC;}
    return F64;
   }
 
-ui8 { return NEW_UI8; }
-ui8\((-?[0-9]+)\) {
-    char *num_str = yytext + 4;  // Skip "ui8("
-    // Find the position of the closing parenthesis
-    char *end_paren = strchr(num_str, ')');
-    if (!end_paren) {
-        fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
-        return 0;
-    }   
-    // Temporarily terminate the string at the closing parenthesis
-    *end_paren = '\0';
-    // Trim spaces from the start and end of num_str
-    char *end = num_str + strlen(num_str) - 1;
-    end[1] = '\0';  // Null-terminate the trimmed string
-    int number = atoi(num_str);  // Convert the trimmed number string to an integer
-    yylval.ui8 = number;
-    return UI8;
-}
-ui8Repeat { return UI8_REPEAT ; }
 
 
 [\<\>\=] { return yytext[0]; }

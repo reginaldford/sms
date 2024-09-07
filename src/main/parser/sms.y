@@ -87,21 +87,36 @@ int parsing_fpath_len;
 %token <ui8> NEW_UI8
 %token <expr> UI8_REPEAT
 %token <integer> INTEGER
+
+
 %token <expr> IPLUS
 %token <expr> IMINUS
 %token <expr> ITIMES
 %token <expr> IDIVIDE
 %token <expr> IPOW
-%token <expr> IXOR
-%token <expr> IAND
-%token <expr> IOR
+
+%token <expr> IPLUSEQ
+%token <expr> IMINUSEQ
+%token <expr> ITIMESEQ
+%token <expr> IDIVIDEEQ
+%token <expr> IPOWEREQ
+
+%token <expr> PLUS
+%token <expr> MINUS
+%token <expr> TIMES
+%token <expr> DIVIDE
+%token <expr> POW
+
 %token <expr> PLUSEQ
 %token <expr> MINUSEQ
 %token <expr> TIMESEQ
 %token <expr> DIVIDEEQ
 %token <expr> POWEREQ
+
 %token <expr> INC 
 %token <expr> DEC
+%token <expr> IINC 
+%token <expr> IDEC
 %token <expr> PIPE
 %token <expr> EQEQ
 %token <expr> ASSOCIATE
@@ -233,6 +248,24 @@ int parsing_fpath_len;
 %token <expr> GT_EQ
 %token <expr> ISNAN
 %token <expr> ISINF
+%token <expr> IFLOOR
+%token <expr> ICEIL
+%token <expr> IMOD
+%token <expr> ILT
+%token <expr> IGT
+%token <expr> ILT_EQ
+%token <expr> IGT_EQ
+
+
+%token <expr> IXOR_EQ
+%token <expr> IOR_EQ
+%token <expr> IAND_EQ
+
+%token <expr> INOTEQ
+%token <expr> INOT
+%token <expr> IOR
+%token <expr> IAND
+%token <expr> IXOR
 
 %token <expr> NOTEQ
 %token <expr> NOT
@@ -303,6 +336,7 @@ int parsing_fpath_len;
 %token <expr> SETOPTIONS
 %token <expr> RESETOPTIONS
 %token <expr> GC
+%token <expr> GC_WHILE
 %token <expr> THISPROCESS
 
 %token DONE
@@ -315,9 +349,9 @@ int parsing_fpath_len;
 %nonassoc ','
 %left IF WHILE FOR DOWHILE
 %left OR AND NOT
-%left DOT '+' '-'
-%left '*' '/'
-%left '^'
+%left DOT PLUS MINUS
+%left TIMES DIVIDE
+%left POW
 %left ';'
 
 %%
@@ -341,11 +375,11 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | SYM{}
 | SYM DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3, _note()); }
 | EXPR DOT SYM {$$ = sm_new_expr_2(SM_DOT_EXPR,(sm_object*)$1,(sm_object*)$3, _note()); }
-| EXPR '+' EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR '-' EXPR { $$ = sm_new_expr_2(SM_MINUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR '*' EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR '/' EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR '^' EXPR { $$ = sm_new_expr_2(SM_POW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR PLUS EXPR { $$ = sm_new_expr_2(SM_PLUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR MINUS EXPR { $$ = sm_new_expr_2(SM_MINUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR TIMES EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR DIVIDE EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR POW EXPR { $$ = sm_new_expr_2(SM_POW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IPLUS EXPR { $$ = sm_new_expr_2(SM_IPLUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IMINUS EXPR { $$ = sm_new_expr_2(SM_IMINUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR ITIMES EXPR { $$ = sm_new_expr_2(SM_ITIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
@@ -366,7 +400,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
-| '-' EXPR {
+| MINUS EXPR {
   switch (((sm_object *)$2)->my_type) {
     case SM_F64_TYPE:
       ((sm_f64 *)$2)->value *= -1;
