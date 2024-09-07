@@ -45,9 +45,13 @@ ui8\((-?[0-9]+)\) {
 }
 ui8Repeat { return UI8_REPEAT ; }
 
-"_xor=" {return IXOR_EQ;}
-"_or="  {return IOR_EQ;}
+"_and" {return IAND;}
+"_or"  {return IOR;}
+"_xor" {return IXOR;}
+
 "_and=" {return IAND_EQ;}
+"_or="  {return IOR_EQ;}
+"_xor=" {return IXOR_EQ;}
 
 "_+" {return IPLUS;}
 "_-" {return IMINUS;}
