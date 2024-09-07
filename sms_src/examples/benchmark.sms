@@ -1,6 +1,7 @@
 #!/usr/local/bin/sms -qm550
 #Use this to benchmark something
 {
+  let _errHandler=(x)=>{putLn(str(x));x;};
   let t1 =[];
   let t2 =[];
   let time_elapsed =0;

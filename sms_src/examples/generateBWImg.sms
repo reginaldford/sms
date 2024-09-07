@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm225
+#!/usr/local/bin/sms -qm64
 # Demonstrates generating a black and white striped TGA image with 3 shades
 
 {

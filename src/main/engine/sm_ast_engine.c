@@ -110,17 +110,10 @@ static inline sm_object *eager_type_check3(sm_expr *sme, int operand, int param_
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
 
 #define ENGINE_RETURN(x)                                                                           \
-  {                                                                                                \
-    for (int i = 0; i < 3; i++)                                                                    \
-      sm_stack_pop(sms_callstack);                                                                 \
-    return x;                                                                                      \
-  }
+  { return x; }
 
 // Recursive engine
 inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
-  sms_callstack = sm_stack_push(sms_callstack, &input);
-  sms_callstack = sm_stack_push(sms_callstack, &current_cx);
-  sms_callstack = sm_stack_push(sms_callstack, &sf);
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;
