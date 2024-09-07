@@ -112,6 +112,12 @@ bool sm_is_infix(enum SM_EXPR_TYPE op) {
   case SM_LT_EXPR:
   case SM_GT_EXPR:
   case SM_DOT_EXPR:
+  case SM_IAND_EXPR:
+  case SM_IOR_EXPR:
+  case SM_IXOR_EXPR:
+  case SM_AND_EXPR:
+  case SM_OR_EXPR:
+  case SM_XOR_EXPR:
   case SM_STR_CAT_EXPR:
     return true;
   default:
