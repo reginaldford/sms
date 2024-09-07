@@ -32,9 +32,9 @@
   };
 
   # Call the colorTGA.write function to create the TGA file
-  let result = colorTGA.write("rainbow.tga", width, height, rgbArray);
+  let result = colorTGA.write("gradient.tga", width, height, rgbArray);
   if (result == true) {
-    putLn("Rainbow gradient TGA file 'rainbow_gradient.tga' has been created.");
+    putLn("Rainbow gradient TGA file 'gradient.tga' has been created.");
   } else {
     putLn("Error: " str+ result);
   };
