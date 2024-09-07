@@ -210,18 +210,18 @@ uint32_t sm_infix_sprint(sm_expr *expr, char *buffer, bool fake) {
     cursor += sm_object_sprint(o1, buffer + cursor, fake);
   }
   // space
-  if(!fake)
-    buffer[cursor]=' ';
-  cursor ++;
+  if (!fake)
+    buffer[cursor] = ' ';
+  cursor++;
   // Infix function name
   if (!fake) {
     sm_strncpy(&(buffer[cursor]), sm_global_fn_name(expr->op), sm_global_fn_name_len(expr->op));
   }
   cursor += sm_global_fn_name_len(expr->op);
   // space
-  if(!fake)
-    buffer[cursor]=' ';
-  cursor ++;
+  if (!fake)
+    buffer[cursor] = ' ';
+  cursor++;
   // Check if parentheses are needed for the right operand
   if (o2->my_type == SM_EXPR_TYPE && sm_expr_contains_terms((sm_expr *)o2)) {
     if (!fake)
