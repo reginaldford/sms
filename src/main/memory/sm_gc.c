@@ -174,18 +174,11 @@ void sm_garbage_collect() {
     *sm_global_lex_stack(NULL)->top =
       (sm_cx *)sm_move_to_new_heap((sm_object *)*sm_global_lex_stack(NULL)->top);
 
-    // Explicit callstack currently stores ptr triplets
-    // They point to input, current_cx, and sf variables in the c callstack
-    // sm_object ***ptr_array = (sm_object ***)sm_stack_empty_top(sms_callstack);
-    // for (int i = 0; i < sm_stack_size(sms_callstack); i++)
-    //  if (*ptr_array[i])
-    //    *ptr_array[i] = sm_meet_object(*ptr_array[i]);
-
     // Parser output never gets saved. Ptrs would get broken, so set it to a literal
     // TODO: parser output goes into its own heap
-    if (sm_global_parser_output(NULL))
-      sm_global_parser_output(sm_meet_object(sm_global_parser_output(NULL)));
-    // sm_global_parser_output((sm_object *)sms_false);
+    // if (sm_global_parser_output(NULL))
+    //  sm_global_parser_output(sm_meet_object(sm_global_parser_output(NULL)));
+    sm_global_parser_output((sm_object *)sms_false);
 
     // Inflate
     sm_inflate_heap();

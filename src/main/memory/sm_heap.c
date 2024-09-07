@@ -28,7 +28,7 @@ void *sm_malloc(uint32_t size) {
   uint32_t bytes_used      = sms_heap->used;
   uint32_t next_bytes_used = sms_heap->used + size;
   if (next_bytes_used > sms_heap->capacity) {
-    //sm_garbage_collect();
+    // sm_garbage_collect();
     next_bytes_used = sms_heap->used + size;
     if (next_bytes_used > sms_heap->capacity) {
       // TODO: dynamic heap size
