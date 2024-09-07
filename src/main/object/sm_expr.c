@@ -108,6 +108,21 @@ bool sm_is_infix(enum SM_EXPR_TYPE op) {
   case SM_TIMES_EXPR:
   case SM_DIVIDE_EXPR:
   case SM_POW_EXPR:
+  case SM_PLUSEQ_EXPR:
+  case SM_MINUSEQ_EXPR:
+  case SM_TIMESEQ_EXPR:
+  case SM_DIVIDEEQ_EXPR:
+  case SM_POWEREQ_EXPR:
+  case SM_IPLUS_EXPR:
+  case SM_IMINUS_EXPR:
+  case SM_ITIMES_EXPR:
+  case SM_IDIVIDE_EXPR:
+  case SM_IPOW_EXPR:
+  case SM_IPLUSEQ_EXPR:
+  case SM_IMINUSEQ_EXPR:
+  case SM_ITIMESEQ_EXPR:
+  case SM_IDIVIDEEQ_EXPR:
+  case SM_IPOWEREQ_EXPR:
   case SM_EQEQ_EXPR:
   case SM_LT_EXPR:
   case SM_GT_EXPR:
