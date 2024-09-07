@@ -125,24 +125,19 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         eager_type_check3(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, SM_STRING_TYPE, current_cx, sf);
       if (fromObj->my_type == SM_ERR_TYPE)
         return (fromObj);
-      ;
 
       switch (fromObj->my_type) {
       case SM_F64_TYPE:
         return ((sm_object *)sm_new_f64(((sm_f64 *)fromObj)->value));
-        ;
       case SM_UI8_TYPE:
         return ((sm_object *)sm_new_f64(((sm_ui8 *)fromObj)->value));
-        ;
       case SM_STRING_TYPE:
         return ((sm_object *)sm_new_f64(((sm_string *)fromObj)->content));
-        ;
       default: {
         sm_symbol *title   = sm_new_symbol("cannotConvertToF64", 18);
         sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to f64.",
                                                sm_type_name(fromObj->my_type));
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-        ;
       }
       }
     }
@@ -151,23 +146,18 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         eager_type_check3(sme, 0, SM_UI8_TYPE, SM_F64_TYPE, SM_STRING_TYPE, current_cx, sf);
       if (fromObj->my_type == SM_ERR_TYPE)
         return (fromObj);
-      ;
       switch (fromObj->my_type) {
       case SM_F64_TYPE:
         return ((sm_object *)sm_new_ui8(((sm_f64 *)fromObj)->value));
-        ;
       case SM_UI8_TYPE:
         return ((sm_object *)sm_new_ui8(((sm_ui8 *)fromObj)->value));
-        ;
       case SM_STRING_TYPE:
         return ((sm_object *)sm_new_ui8(((sm_string *)fromObj)->content));
-        ;
       default: {
         sm_symbol *title   = sm_new_symbol("cannotConvertToUI8", 18);
         sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to ui8.",
                                                sm_type_name(fromObj->my_type));
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-        ;
       }
       }
     }
@@ -574,15 +564,12 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
       if (obj->my_type == SM_ERR_TYPE)
         return ((sm_object *)obj);
-      ;
       sm_f64 *repeat_count_obj = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (repeat_count_obj->my_type == SM_ERR_TYPE)
         return ((sm_object *)repeat_count_obj);
-      ;
       uint32_t repeat_count = (uint32_t)repeat_count_obj->value;
       if (repeat_count == 0)
         return ((sm_object *)sm_new_array(SM_UI8_TYPE, 0, NULL, sizeof(sm_space)));
-      ;
       uint32_t  total_size = 0;
       sm_space *new_space  = NULL;
       ui8      *dst_data   = NULL;
@@ -611,7 +598,6 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
               sm_string *message = sm_new_fstring_at(
                 sms_heap, "Unsupported element type %i in tuple", (int)element->my_type);
               return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-              ;
             }
             }
           }
@@ -658,17 +644,14 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
       if (obj->my_type == SM_ERR_TYPE)
         return ((sm_object *)obj);
-      ;
 
       sm_f64 *repeat_count_obj = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (repeat_count_obj->my_type == SM_ERR_TYPE)
         return ((sm_object *)repeat_count_obj);
-      ;
       uint32_t repeat_count = (uint32_t)repeat_count_obj->value;
 
       if (repeat_count == 0)
         return ((sm_object *)sm_new_array(SM_F64_TYPE, 0, NULL, sizeof(sm_space)));
-      ;
 
       uint32_t  total_size = 0;
       sm_space *new_space  = NULL;
@@ -1233,7 +1216,6 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_string *message = sm_new_string(strlen("Unsupported array type for writing"),
                                            "Unsupported array type for writing");
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-        ;
       }
       }
       // Open the file for writing
@@ -1244,7 +1226,6 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_symbol *title   = sm_new_symbol("fileOpenError", strlen("fileOpenError"));
         sm_string *message = sm_new_string(strlen(error_msg), error_msg);
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-        ;
       }
       // Write content to file in chunks of 1024 bytes
       size_t       total_written = 0;
@@ -1260,14 +1241,12 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
           sm_string *message = sm_new_string(strlen("fileWrite failed during write operation"),
                                              "fileWrite failed during write operation");
           return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-          ;
         }
         total_written += written;
       }
       // Close the file
       fclose(fptr);
       return ((sm_object *)sms_true);
-      ;
     }
     case SM_FILE_WRITETGA_EXPR: {
       // Check and retrieve the filename
