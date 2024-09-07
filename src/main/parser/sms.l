@@ -26,7 +26,7 @@ f64 {return NEW_F64;}
 f64Repeat {return F64_REPEAT;}
 
 ui8 { return NEW_UI8; }
-ui8\((-?[0-9]+)\) {
+ui8\((-?{digit}+)\) {
     char *num_str = yytext + 4;  // Skip "ui8("
     // Find the position of the closing parenthesis
     char *end_paren = strchr(num_str, ')');
@@ -269,7 +269,7 @@ _gc            {return GC;}
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}
 
-([0-9]+) {
+({digit}+) {
  yylval.integer = atoi(yytext);
  return INTEGER;
 }
