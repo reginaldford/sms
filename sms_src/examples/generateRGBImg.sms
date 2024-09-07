@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -m196
+#!/usr/local/bin/sms -m128
 # Usage: This script demonstrates creating a rainbow gradient using colorTGA.write
 
 {
@@ -20,14 +20,10 @@
       let rgbIndex = (i * width + j) * bytesPerPixel;
 
       # Create a gradient with varying colors (RGB order)
-      let r = ui8((i * 255) / height);   # Red varies by height
-      let g = ui8((j * 255) / width);    # Green varies by width
-      let b = ui8(((i + j) * 255) / (width + height)); # Blue varies by combined position
-
       # Assign the RGB values to the array
-      rgbArray[rgbIndex] = r;
-      rgbArray[rgbIndex + 1] = g;
-      rgbArray[rgbIndex + 2] = b;
+      rgbArray[rgbIndex]     = ui8((i * 255) / height);   # Red varies by height;
+      rgbArray[rgbIndex + 1] = ui8((j * 255) / width);    # Green varies by width;
+      rgbArray[rgbIndex + 2] = ui8(((i + j) * 255) / (width + height)); # Blue varies by combined position;
     };
   };
 
