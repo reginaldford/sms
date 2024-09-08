@@ -1786,6 +1786,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (value);
       break;
     }
+
+
     case SM_ASSIGN_INDEX_EXPR: {
       // Expecting a[4]=value => =index_expr(a,4,value);
       sm_object *value = sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
@@ -2019,6 +2021,36 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       }
       return (result);
     }
+    case SM_IXOREQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value) {
+        sm_symbol *title   = sm_new_symbol("valueNotFound", 13);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Symbol is not associated with a value in the current context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Ensure both operands are of type ui8
+      if (current_value->my_type != SM_UI8_TYPE || value->my_type != SM_UI8_TYPE) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for ^= operation. Expected ui8 numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Perform XOR operation
+      sm_ui8    *current_ui8  = (sm_ui8 *)current_value;
+      sm_ui8    *value_ui8    = (sm_ui8 *)value;
+      uint8_t    result_value = current_ui8->value ^ value_ui8->value;
+      sm_object *result       = (sm_object *)sm_new_ui8(result_value);
+      // Update the context with the new value
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return result;
+    }
     case SM_IPLUS_EXPR: {
       sm_ui8 *obj0 = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
       if (obj0->my_type != SM_UI8_TYPE)
@@ -2068,6 +2100,37 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return ((sm_object *)obj1);
       return ((sm_object *)sm_new_ui8(pow(obj0->value, obj1->value)));
       break;
+    }
+    case SM_IPOWEREQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value) {
+        sm_symbol *title   = sm_new_symbol("valueNotFound", 13);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Symbol is not associated with a value in the current context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Ensure both operands are of type ui8
+      if (current_value->my_type != SM_UI8_TYPE || value->my_type != SM_UI8_TYPE) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for ^= operation. Expected ui8 numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Perform power operation
+      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+      sm_ui8 *value_ui8   = (sm_ui8 *)value;
+      uint8_t result_value =
+        (uint8_t)pow(current_ui8->value, value_ui8->value); // Calculate the power
+      sm_object *result = (sm_object *)sm_new_ui8(result_value);
+      // Update the context with the new value
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return result;
     }
     case SM_PLUS_EXPR: {
       sm_f64 *obj0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);

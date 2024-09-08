@@ -386,6 +386,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR IDIVIDE EXPR { $$ = sm_new_expr_2(SM_IDIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IPOW EXPR { $$ = sm_new_expr_2(SM_IPOW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IXOR EXPR { $$ = sm_new_expr_2(SM_IXOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR IXOR_EQ EXPR { $$ = sm_new_expr_2(SM_IXOREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IOR EXPR { $$ = sm_new_expr_2(SM_IOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IAND EXPR { $$ = sm_new_expr_2(SM_IAND_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM IPLUSEQ EXPR { $$ = sm_new_expr_2(SM_IPLUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
