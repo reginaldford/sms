@@ -1994,32 +1994,36 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_object *current_value = sm_cx_get(current_cx, sym);
-      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+
+      if (!current_value) {
+        sm_symbol *title   = sm_new_symbol("valueNotFound", 13);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Symbol is not associated with a value in the current context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Ensure both operands are of type f64
+      if (current_value->my_type != SM_F64_TYPE || value->my_type != SM_F64_TYPE) {
         sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
         sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid types for /= operation. Expected numbers.");
-        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+          sm_new_fstring_at(sms_heap, "Invalid types for ^= operation. Expected f64 numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-      sm_f64 *current_f64 = (sm_f64 *)current_value;
-      sm_f64 *value_f64   = (sm_f64 *)value;
-      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
-        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Operands must be of type %s for /= operation.", sm_type_name(SM_F64_TYPE));
-        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-      }
-      if (value_f64->value == 0.0) {
-        sm_symbol *title   = sm_new_symbol("divisionByZero", 15);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Division by zero in /= operation.");
-        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-      }
-      sm_object *result = (sm_object *)sm_new_f64(pow(current_f64->value, value_f64->value));
+
+      // Perform power operation
+      sm_f64    *current_f64  = (sm_f64 *)current_value;
+      sm_f64    *value_f64    = (sm_f64 *)value;
+      double     result_value = pow(current_f64->value, value_f64->value);
+      sm_object *result       = (sm_object *)sm_new_f64(result_value);
+
+      // Update the context with the new value
       if (!sm_cx_set(current_cx, sym, result)) {
         sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
         sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-      return (result);
+
+      return result;
     }
     case SM_IXOREQ_EXPR: {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
@@ -2042,6 +2046,66 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       sm_ui8    *current_ui8  = (sm_ui8 *)current_value;
       sm_ui8    *value_ui8    = (sm_ui8 *)value;
       uint8_t    result_value = current_ui8->value ^ value_ui8->value;
+      sm_object *result       = (sm_object *)sm_new_ui8(result_value);
+      // Update the context with the new value
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return result;
+    }
+    case SM_IANDEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value) {
+        sm_symbol *title   = sm_new_symbol("valueNotFound", 13);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Symbol is not associated with a value in the current context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Ensure both operands are of type ui8
+      if (current_value->my_type != SM_UI8_TYPE || value->my_type != SM_UI8_TYPE) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for &= operation. Expected ui8 numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Perform AND operation
+      sm_ui8    *current_ui8  = (sm_ui8 *)current_value;
+      sm_ui8    *value_ui8    = (sm_ui8 *)value;
+      uint8_t    result_value = current_ui8->value & value_ui8->value; // Perform bitwise AND
+      sm_object *result       = (sm_object *)sm_new_ui8(result_value);
+      // Update the context with the new value
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return result;
+    }
+    case SM_IOREQ_EXPR: { // bitwise or
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value) {
+        sm_symbol *title   = sm_new_symbol("valueNotFound", 13);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Symbol is not associated with a value in the current context.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Ensure both operands are of type ui8
+      if (current_value->my_type != SM_UI8_TYPE || value->my_type != SM_UI8_TYPE) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for |= operation. Expected ui8 numbers.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Perform OR operation
+      sm_ui8    *current_ui8  = (sm_ui8 *)current_value;
+      sm_ui8    *value_ui8    = (sm_ui8 *)value;
+      uint8_t    result_value = current_ui8->value | value_ui8->value; // Perform bitwise OR
       sm_object *result       = (sm_object *)sm_new_ui8(result_value);
       // Update the context with the new value
       if (!sm_cx_set(current_cx, sym, result)) {
