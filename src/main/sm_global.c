@@ -3,17 +3,22 @@
 #include "sms.h"
 
 // Global object pointers
-sm_heap   *sms_heap;
-sm_heap   *sms_other_heap;
+// Heaps
+sm_heap *sms_heap;
+sm_heap *sms_other_heap;
+sm_heap *sms_symbol_heap;
+sm_heap *sms_symbol_name_heap;
+sm_heap *sms_ast_heap;
+
+// Number of symbols
+uint32_t sms_num_symbols;
+
+// Live object stack
+sm_stack *sms_stack;
+
+// True and False singletons
 sm_symbol *sms_true;
 sm_symbol *sms_false;
-// Symbols including the 2 above live in a symbol heap
-sm_heap *sms_symbol_heap;
-// Symbol names are in alpabetical order, correlating with the symbol
-sm_heap *sms_symbol_name_heap;
-uint32_t sms_num_symbols;
-// Explicit callstack
-sm_stack *sms_callstack;
 
 /* GLOBALS as functions
  The following globals use functions f(x):

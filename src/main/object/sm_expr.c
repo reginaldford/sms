@@ -2,10 +2,13 @@
 
 #include "../sms.h"
 
+extern sm_heap *sms_ast_heap;
+
 // New expression object with n arguments
 // Make sure to fill in the arguments afterward
 sm_expr *sm_new_expr_n(enum SM_EXPR_TYPE op, uint32_t size, uint32_t capacity, void *notes) {
-  sm_expr *new_expr  = (sm_expr *)sm_malloc(sizeof(sm_expr) + sizeof(void *) * capacity);
+  sm_expr *new_expr =
+    (sm_expr *)sm_malloc_at(sms_ast_heap, sizeof(sm_expr) + sizeof(void *) * capacity);
   new_expr->my_type  = SM_EXPR_TYPE;
   new_expr->op       = op;
   new_expr->size     = size;
