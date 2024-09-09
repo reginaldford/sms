@@ -1881,6 +1881,115 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return ((sm_object *)sm_new_ui8(obj0->value | obj1->value));
       break;
     }
+    case SM_IPLUSEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for += operation. Expected numbers.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+      sm_ui8 *value_ui8   = (sm_ui8 *)value;
+      if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for _+= operation.", sm_type_name(SM_UI8_TYPE));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value + value_ui8->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      return (result);
+    }
+    case SM_IMINUSEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for _-= operation. Expected numbers.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+      sm_ui8 *value_ui8   = (sm_ui8 *)value;
+      if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for -= operation.", sm_type_name(SM_UI8_TYPE));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value - value_ui8->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      return (result);
+    }
+    case SM_ITIMESEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for *= operation. Expected numbers.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+      sm_ui8 *value_ui8   = (sm_ui8 *)value;
+      if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for *= operation.", sm_type_name(SM_UI8_TYPE));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value * value_ui8->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      return (result);
+    }
+    case SM_IDIVIDEEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for /= operation. Expected numbers.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+      sm_ui8 *value_ui8   = (sm_ui8 *)value;
+      if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for /= operation.", sm_type_name(SM_UI8_TYPE));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      if (value_ui8->value == 0.0) {
+        sm_symbol *title   = sm_new_symbol("divisionByZero", 15);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Division by zero in /= operation.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value / value_ui8->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      return (result);
+    }
     case SM_PLUSEQ_EXPR: {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
@@ -2420,6 +2529,40 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (num->my_type != SM_F64_TYPE)
         return ((sm_object *)num);
       sm_f64 *output = sm_new_f64(num->value - 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      return ((sm_object *)output);
+      break;
+    }
+    case SM_IINC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply ++ to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_ui8 *num = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (num->my_type != SM_UI8_TYPE)
+        return ((sm_object *)num);
+      sm_ui8 *output = sm_new_ui8(num->value + 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      return ((sm_object *)output);
+      break;
+    }
+    case SM_IDEC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply -- to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_ui8 *num = (sm_ui8 *)eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      if (num->my_type != SM_UI8_TYPE)
+        return ((sm_object *)num);
+      sm_ui8 *output = sm_new_ui8(num->value - 1);
       sm_cx_set(current_cx, sym, (sm_object *)output);
       return ((sm_object *)output);
       break;

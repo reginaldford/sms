@@ -103,8 +103,8 @@ abs          {return ABS;}
 
 "++"         {return INC;}
 "--"         {return DEC;}
-"_++"         {return IINC;}
-"_--"         {return IDEC;}
+"_++"        {return IINC;}
+"_--"        {return IDEC;}
 
 diff         {return DIFF;}
 simp         {return SIMP;}
