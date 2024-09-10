@@ -41,7 +41,7 @@ BIN_NAME_PROF   := sms_prof
 THREADS         := 8 #match the number of threads on your machine
 DOCS_CONFIG     := docs/docs.conf
 
-MAKE := make -s
+MAKE := $(MAKE) -s
 
 # sms executable
 main:
