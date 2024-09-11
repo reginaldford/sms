@@ -114,7 +114,7 @@ if           {return IF;}
 else         {return ELSE;}
 while        {return WHILE;}
 for          {return FOR;}
-forEach      {return FOR;}
+in           {return IN;}
 doWhile      {return DO_WHILE;}
 return       {return RETURN;}
 eval         {return EVAL;}

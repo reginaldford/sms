@@ -1556,6 +1556,22 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (result);
       break;
     }
+    case SM_FOR_IN_EXPR: {
+      sm_symbol *handle             = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *possibleCollection = sm_expr_get_arg(sme, 1);
+      sm_expr   *expression         = (sm_expr *)sm_expr_get_arg(sme, 2);
+      sm_expr   *collectionExpr = (sm_expr *)possibleCollection; // implementing expr case first
+      sm_cx     *inner_cx       = sm_new_cx(current_cx);
+      sm_object *result         = (sm_object *)sms_false;
+      for (uint32_t i = 0; i < collectionExpr->size; i++) {
+        sm_cx_let(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
+        result = sm_engine_eval((sm_object *)expression, inner_cx, sf);
+        if (result->my_type == SM_RETURN_TYPE)
+          return (result);
+      }
+      return (result);
+      break;
+    }
     case SM_DO_WHILE_EXPR: {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
       sm_object *expression = sm_expr_get_arg(sme, 0);
