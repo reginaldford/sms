@@ -32,6 +32,7 @@ int parsing_fpath_len;
   sm_array         *array;
 };
 
+%type <expr> FOR_IN
 %type <fun> FUN
 %type <err> ERROR
 %type <fun> FUN_INTRO
@@ -80,6 +81,8 @@ int parsing_fpath_len;
 
 %token IS
 %token DOT
+%token IN
+
 %token <expr> NEW_F64
 %token <expr> F64_REPEAT
 %token <num> F64
@@ -347,7 +350,7 @@ int parsing_fpath_len;
 %left ':'
 %left  '='
 %nonassoc ','
-%left IF WHILE FOR DOWHILE
+%left IF WHILE FOR FOR_IN DOWHILE
 %left OR AND NOT
 %left DOT PLUS MINUS
 %left TIMES DIVIDE
@@ -482,6 +485,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | PARENT '(' EXPR ')' {$$ = sm_new_expr(SM_PARENT_EXPR,(sm_object*)$3, _note());}
 | WHILE '(' EXPR ')' EXPR {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FOR '(' EXPR ';' EXPR ';' EXPR ')' EXPR { $$ = sm_new_expr_4(SM_FOR_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,(sm_object*)$9,_note());}
+| FOR '(' SYM IN EXPR ')' EXPR { $$ = sm_new_expr_3(SM_FOR_IN_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,_note());}
 | DO_WHILE '(' EXPR ')' EXPR {$$ = sm_new_expr_2(SM_DO_WHILE_EXPR,(sm_object*)$5,(sm_object*)$3, _note());}
 | RETURN EXPR {$$ = sm_new_expr(SM_RETURN_EXPR,(sm_object*)$2, _note());}
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3, _note());}
