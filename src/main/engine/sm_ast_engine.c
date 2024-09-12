@@ -1503,13 +1503,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       sm_string *str;
       sm_object *evaluated;
       for (int i = 0; i < sme->size; i++) {
-        evaluated = sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
-        if (!expect_type(evaluated, SM_STRING_TYPE)) {
-          sm_symbol *title   = sm_new_symbol("typeMismatch", 12);
-          sm_string *message = sm_new_fstring_at(
-            sms_heap, "putLn function takes strings, but parameter %i was not a string", i);
-          return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
-        }
+        evaluated = eager_type_check(sme, i, SM_STRING_TYPE, current_cx, sf);
+        if (evaluated->my_type == SM_ERR_TYPE)
+          return evaluated;
         str = (sm_string *)evaluated;
         for (uint32_t i = 0; i < str->size; i++)
           putchar((&str->content)[i]);
