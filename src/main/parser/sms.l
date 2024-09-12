@@ -115,6 +115,7 @@ else         {return ELSE;}
 while        {return WHILE;}
 for          {return FOR;}
 in           {return IN;}
+where        {return WHERE;}
 doWhile      {return DO_WHILE;}
 return       {return RETURN;}
 eval         {return EVAL;}
