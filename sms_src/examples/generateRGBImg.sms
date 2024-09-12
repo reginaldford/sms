@@ -21,9 +21,9 @@
 
       # Create a gradient with varying colors (RGB order)
       # Assign the RGB values to the array
-      rgbArray[rgbIndex]     = ui8((i * 255) / height);   # Red varies by height;
-      rgbArray[rgbIndex + 1] = ui8((j * 255) / width);    # Green varies by width;
-      rgbArray[rgbIndex + 2] = ui8(((i + j) * 255) / (width + height)); # Blue varies by combined position;
+      rgbArray[rgbIndex]     = ui8(255*sin(PI*3*i/height)); # Red
+      rgbArray[rgbIndex + 1] = ui8(255*cos(PI*7*j/width));  # Green
+      rgbArray[rgbIndex + 2] = ui8(255*tan(PI*5*i/height)); # Blue
     };
   };
 
