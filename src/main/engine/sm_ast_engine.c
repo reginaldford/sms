@@ -1574,8 +1574,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       case SM_EXPR_TYPE: {
         sm_cx   *inner_cx       = sm_new_cx(current_cx);
         sm_expr *collectionExpr = (sm_expr *)evalResult;
+        sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < collectionExpr->size; i++) {
-          sm_cx_let(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
+          sm_cx_set(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
           result = sm_engine_eval((sm_object *)expression, inner_cx, sf);
         }
         return (result);
@@ -1584,10 +1585,70 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       case SM_STRING_TYPE: {
         sm_cx     *inner_cx = sm_new_cx(current_cx);
         sm_string *str      = (sm_string *)evalResult;
+        sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < str->size; i++) {
-          sm_cx_let(inner_cx, handle,
+          sm_cx_set(inner_cx, handle,
                     (sm_object *)sm_new_fstring_at(sms_heap, "%c", (&str->content)[i]));
           result = sm_engine_eval((sm_object *)expression, inner_cx, sf);
+        }
+        return (result);
+        break;
+      }
+      default: {
+        sm_string *message = sm_new_fstring_at(sms_heap,
+                                               "Applying for-in to object that is not a collection "
+                                               "(expr, array, string). Instead, object type is: %s",
+                                               sm_type_name(evalResult->my_type));
+        sm_symbol *title   = sm_new_symbol("typeMismatchForIn", 17);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      }
+    }
+    case SM_FOR_IN_WHERE_EXPR: {
+      sm_symbol *handle             = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *possibleCollection = sm_expr_get_arg(sme, 1);
+      sm_expr   *expression         = (sm_expr *)sm_expr_get_arg(sme, 3);
+      sm_expr   *whereCondition     = (sm_expr *)sm_expr_get_arg(sme, 2);
+      sm_object *result             = (sm_object *)sms_false;
+      sm_object *evalResult         = sm_engine_eval(possibleCollection, current_cx, sf);
+      switch (evalResult->my_type) {
+      case SM_ARRAY_TYPE: {
+        sm_cx     *inner_cx = sm_new_cx(current_cx);
+        sm_object *result   = (sm_object *)sms_false;
+        sm_array  *arr      = (sm_array *)evalResult;
+        sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
+        for (uint32_t i = 0; i < arr->size; i++) {
+          sm_cx_set(inner_cx, handle, sm_array_get(arr, i));
+          sm_object *conditionResult = sm_engine_eval((sm_object *)whereCondition, inner_cx, sf);
+          if (!IS_FALSE(conditionResult))
+            result = sm_engine_eval((sm_object *)expression, inner_cx, sf);
+        }
+        return (result);
+        break;
+      }
+      case SM_EXPR_TYPE: {
+        sm_cx   *inner_cx       = sm_new_cx(current_cx);
+        sm_expr *collectionExpr = (sm_expr *)evalResult;
+        sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
+        for (uint32_t i = 0; i < collectionExpr->size; i++) {
+          sm_cx_set(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
+          sm_object *conditionResult = sm_engine_eval((sm_object *)whereCondition, inner_cx, sf);
+          if (!IS_FALSE(conditionResult))
+            result = sm_engine_eval((sm_object *)expression, inner_cx, sf);
+        }
+        return (result);
+        break;
+      }
+      case SM_STRING_TYPE: {
+        sm_cx     *inner_cx = sm_new_cx(current_cx);
+        sm_string *str      = (sm_string *)evalResult;
+        sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
+        for (uint32_t i = 0; i < str->size; i++) {
+          sm_cx_set(inner_cx, handle,
+                    (sm_object *)sm_new_fstring_at(sms_heap, "%c", (&str->content)[i]));
+          sm_object *conditionResult = sm_engine_eval((sm_object *)whereCondition, inner_cx, sf);
+          if (!IS_FALSE(conditionResult))
+            result = sm_engine_eval((sm_object *)expression, inner_cx, sf);
         }
         return (result);
         break;

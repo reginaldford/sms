@@ -82,6 +82,7 @@ int parsing_fpath_len;
 %token IS
 %token DOT
 %token IN
+%token WHERE
 
 %token <expr> NEW_F64
 %token <expr> F64_REPEAT
@@ -486,6 +487,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | WHILE '(' EXPR ')' EXPR {$$ = sm_new_expr_2(SM_WHILE_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FOR '(' EXPR ';' EXPR ';' EXPR ')' EXPR { $$ = sm_new_expr_4(SM_FOR_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,(sm_object*)$9,_note());}
 | FOR '(' SYM IN EXPR ')' EXPR { $$ = sm_new_expr_3(SM_FOR_IN_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,_note());}
+| FOR '(' SYM IN EXPR WHERE EXPR ')' EXPR { $$ = sm_new_expr_4(SM_FOR_IN_WHERE_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,(sm_object*)$9,_note());}
 | DO_WHILE '(' EXPR ')' EXPR {$$ = sm_new_expr_2(SM_DO_WHILE_EXPR,(sm_object*)$5,(sm_object*)$3, _note());}
 | RETURN EXPR {$$ = sm_new_expr(SM_RETURN_EXPR,(sm_object*)$2, _note());}
 | EVAL '(' EXPR ')' {$$ = sm_new_expr(SM_EVAL_EXPR,(sm_object*)$3, _note());}
