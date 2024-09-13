@@ -175,7 +175,8 @@ cxReduce     {return CX_REDUCE;}
 
 fileParse      {return FILE_PARSE;}
 fileRun        {return FILE_RUN;}
-fileReadStr    {return FILE_READ;}
+fileReadStr    {return FILE_READSTR;}
+fileRead       {return FILE_READ;}
 filePart       {return FILE_PART;}
 fileTomem      {return FILE_TOMEM;}
 fileExists     {return FILE_EXISTS;}

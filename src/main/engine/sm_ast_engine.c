@@ -1283,7 +1283,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (access(fname_cstr, F_OK) != 0) {
         char error_msg[256];
         snprintf(error_msg, sizeof(error_msg),
-                 "fileReadStrStr failed because the file, %s, does not exist.", fname_cstr);
+                 "fileReadStr failed because the file, %s, does not exist.", fname_cstr);
         sm_symbol *title   = sm_new_symbol("fileNotFoundError", strlen("fileNotFoundError"));
         sm_string *message = sm_new_string(strlen(error_msg), error_msg);
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
@@ -1292,7 +1292,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       FILE *fptr = fopen(fname_cstr, "r");
       if (fptr == NULL) {
         char error_msg[256];
-        snprintf(error_msg, sizeof(error_msg), "fileReadStrStr failed to open: %s", fname_cstr);
+        snprintf(error_msg, sizeof(error_msg), "fileReadStr failed to open: %s", fname_cstr);
         sm_symbol *title   = sm_new_symbol("fileOpenError", strlen("fileOpenError"));
         sm_string *message = sm_new_string(strlen(error_msg), error_msg);
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
@@ -1303,8 +1303,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (len < 0) {
         fclose(fptr);
         sm_symbol *title   = sm_new_symbol("fileReadStrError", strlen("fileReadStrError"));
-        sm_string *message = sm_new_string(strlen("fileReadStrStr failed to determine file length"),
-                                           "fileReadStrStr failed to determine file length");
+        sm_string *message = sm_new_string(strlen("fileReadStr failed to determine file length"),
+                                           "fileReadStr failed to determine file length");
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       // Read the file contents
@@ -1314,14 +1314,75 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (read_count != len) {
         fclose(fptr);
         sm_symbol *title   = sm_new_symbol("fileReadStrError", strlen("fileReadStrError"));
-        sm_string *message = sm_new_string(strlen("fileReadStrStr failed during read operation"),
-                                           "fileReadStrStr failed during read operation");
+        sm_string *message = sm_new_string(strlen("fileReadStr failed during read operation"),
+                                           "fileReadStr failed during read operation");
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       fclose(fptr);
       // Null-terminate the output string
       (&output->content)[len] = '\0';
       return ((sm_object *)output);
+    }
+    case SM_FILE_READ_EXPR: {
+      // Evaluate and check if the first argument is a string (file name)
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (fname_str->my_type == SM_ERR_TYPE)
+        return (sm_object *)fname_str; // Return the error if type check fails
+
+      char *fname_cstr = &(fname_str->content);
+
+      // Check if the file exists
+      if (access(fname_cstr, F_OK) != 0) {
+        char error_msg[256];
+        snprintf(error_msg, sizeof(error_msg),
+                 "fileRead failed because the file, %s, does not exist.", fname_cstr);
+        sm_symbol *title   = sm_new_symbol("fileNotFoundError", strlen("fileNotFoundError"));
+        sm_string *message = sm_new_string(strlen(error_msg), error_msg);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Open the file for reading in binary mode
+      FILE *fptr = fopen(fname_cstr, "rb");
+      if (fptr == NULL) {
+        char error_msg[256];
+        snprintf(error_msg, sizeof(error_msg), "fileRead failed to open: %s", fname_cstr);
+        sm_symbol *title   = sm_new_symbol("fileOpenError", strlen("fileOpenError"));
+        sm_string *message = sm_new_string(strlen(error_msg), error_msg);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Determine the file length
+      fseek(fptr, 0, SEEK_END);
+      long len = ftell(fptr);
+      if (len < 0) {
+        fclose(fptr);
+        sm_symbol *title   = sm_new_symbol("fileReadError", strlen("fileReadError"));
+        sm_string *message = sm_new_string(strlen("fileRead failed to determine file length"),
+                                           "fileRead failed to determine file length");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Create a new ui8 array to store the file contents
+      sm_space *file_content_space = sm_new_space(len);
+      uint8_t  *file_content       = (uint8_t *)(&file_content_space[1]);
+
+      // Read the file contents
+      fseek(fptr, 0, SEEK_SET);
+      size_t read_count = fread(file_content, 1, len, fptr);
+      if (read_count != len) {
+        fclose(fptr);
+        sm_symbol *title   = sm_new_symbol("fileReadError", strlen("fileReadError"));
+        sm_string *message = sm_new_string(strlen("fileRead failed during read operation"),
+                                           "fileRead failed during read operation");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      fclose(fptr);
+
+      // Create a new ui8 array object
+      sm_array *ui8_array =
+        sm_new_array(SM_UI8_TYPE, len, (sm_object *)file_content_space, sizeof(sm_space));
+      return (sm_object *)ui8_array;
     }
 
     case SM_FILE_PART_EXPR: {
