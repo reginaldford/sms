@@ -211,18 +211,12 @@ int parsing_fpath_len;
 %token <expr> NEW_STR
 %token <expr> TO_STRFMT
 
-%token <expr> NEW_MEM
-%token <expr> MEM_MAP
-%token <expr> MEM_UNITE
-%token <expr> MEM_PART
-%token <expr> MEM_TONUMS
-%token <expr> NUMS_TOMEM
-
 %token <expr> PUT
 %token <expr> PUTLN
 %token <expr> INPUT
 
 %token <expr> FILE_PARSE
+%token <expr> FILE_READSTR
 %token <expr> FILE_READ
 %token <expr> FILE_RUN
 %token <expr> FILE_PART
@@ -312,11 +306,6 @@ int parsing_fpath_len;
 %token <expr> DEEP_COPY
 
 %token <expr> SYM_NAME
-
-%token <expr> MEM_SAVEFILE
-%token <expr> MEM_READFILE
-%token <expr> MEM_CHECKFILE
-
 
 %token <expr> IS_ERR
 %token <expr> ERR_TITLE
@@ -527,7 +516,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | F64_ARRAY { }
 | UI8_ARRAY { }
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3, _note());}
-| FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READSTR_EXPR,(sm_object*)$3, _note());}
+| FILE_READSTR '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READSTR_EXPR,(sm_object*)$3, _note());}
+| FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3, _note());}
 | FILE_RUN '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_READSTR_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FILE_PART '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_FILE_PART_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7, _note());}
 | FILE_WRITESTR '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_FILE_WRITESTR_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
