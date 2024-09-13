@@ -3,13 +3,13 @@
 #Does not require a semicolon, but
 #Only allows single line commands
 {
-  let in = "";
+  let userInput = "";
   let ans = [];
   let env = _scratch;
   while(true){
     put("> ");
-    in = input();
-    ans = cxEval(env,parse(in));
+    userInput = input();
+    ans = cxEval(env,parse(userInput));
     putLn(str(ans))
   };
 };
