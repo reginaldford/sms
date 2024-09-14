@@ -2,7 +2,7 @@
   a->-1;
   b->2;
   c->3;
-  f->(x)=>a*x^2+b*x+c;
+  f->(x)=>a*x**2+b*x+c;
   g->(x,y)=>f(x)/y;
   # farray->[!f,!g];
   # We are missing parse time eval

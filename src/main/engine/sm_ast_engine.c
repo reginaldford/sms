@@ -1605,7 +1605,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       }
       while (!IS_FALSE(sm_engine_eval((sm_object *)condition, inner_cx, sf))) {
         result = sm_engine_eval(expression, inner_cx, sf);
-        if (result->my_type == SM_RETURN_TYPE)
+        if (result->my_type == SM_RETURN_TYPE || result->my_type == SM_ERR_TYPE)
           return (result);
         // Run increment after each loop
         sm_engine_eval((sm_object *)increment, inner_cx, sf);
