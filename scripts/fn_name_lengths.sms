@@ -3,7 +3,7 @@
 {
   let cmdStr = "python3 fn_names.py";
   let results = osExecToStr(cmdStr);
-  if(not(results[0] == 0)){
+  if(~ (results[0] == 0)){
       putLn("Could not run \"" str+ cmdStr str+ "\".");
       exit(1);
   };
@@ -14,7 +14,7 @@
   put("{ ");
   for(let i=0;i<size(list);i=i +1){
     put(str(list[i]));
-    if(not(i==(size(list)-1)))
+    if(~ (i == (size(list)-1)))
       put(",");
   };
   putLn(" }");

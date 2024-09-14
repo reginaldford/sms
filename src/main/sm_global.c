@@ -93,7 +93,7 @@ char *sm_global_fn_name(uint32_t which) {
     "-",             // SM_MINUS_EXPR
     "*",             // SM_TIMES_EXPR
     "/",             // SM_DIVIDE_EXPR
-    "^",             // SM_POW_EXPR
+    "**",            // SM_POW_EXPR
     "_+",            // SM_IPLUS_EXPR
     "_-",            // SM_IMINUS_EXPR
     "_*",            // SM_ITIMES_EXPR
@@ -285,7 +285,7 @@ char *sm_global_fn_name(uint32_t which) {
 // Corresponding string length of the string that would come from the sm_global_fn_name(which)
 uint32_t sm_global_fn_name_len(uint32_t which) {
   static uint16_t response_len[] = {
-    8, 4, 4, 5,  4,  2, 2,  3, 3,  3, 9, 3,  9,  1,  1,  1, 1, 1, 2,  1,  1,  1, 1, 1,  1, 2,
+    8, 4, 4, 5,  4,  2, 2,  3, 3,  3, 9, 3,  9,  1,  1,  1, 1, 1, 2,  1,  1,  1, 1, 1,  2, 2,
     2, 2, 2, 2,  1,  1, 1,  2, 2,  2, 2, 2,  2,  2,  3,  3, 3, 3, 3,  2,  3,  3, 3, 4,  4, 4,
     4, 4, 4, 5,  5,  5, 3,  3, 3,  4, 4, 4,  4,  4,  4,  5, 5, 5, 2,  3,  3,  4, 3, 3,  3, 4,
     4, 4, 4, 3,  2,  2, 3,  6, 6,  5, 3, 5,  10, 7,  6,  4, 6, 8, 12, 5,  5,  4, 2, 2,  2, 1,
