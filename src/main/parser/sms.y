@@ -401,6 +401,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
+| SYM IINC { $$ = sm_new_expr(SM_IINC_EXPR,(sm_object*)$1,_note()); }
+| SYM IDEC { $$ = sm_new_expr(SM_IDEC_EXPR,(sm_object*)$1,_note()); }
 | MINUS EXPR {
   switch (((sm_object *)$2)->my_type) {
     case SM_F64_TYPE:
@@ -532,7 +534,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | CEIL '(' EXPR ')' { $$ = sm_new_expr(SM_CEIL_EXPR,(sm_object*)$3, _note());}
 | MOD '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_MOD_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | FLOOR '(' EXPR ')' { $$ = sm_new_expr(SM_FLOOR_EXPR,(sm_object*)$3, _note());}
-| NOT   '(' EXPR ')' { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$3, _note());}
+| NOT EXPR { $$ = sm_new_expr(SM_NOT_EXPR,(sm_object*)$2, _note());}
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | EXPR AND EXPR   { $$ = sm_new_expr_2(SM_AND_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | STR_ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_STR_ESCAPE_EXPR,(sm_object*)$3, _note());}

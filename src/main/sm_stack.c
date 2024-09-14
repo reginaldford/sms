@@ -32,10 +32,12 @@ sm_stack *sm_stack_push(sm_stack *self, void *ptr) {
   return current_stack;
 }
 
-sm_stack *sm_stack_pop(sm_stack *self) {
-  void *previous_top_obj = *(self->top);
+void *sm_stack_pop(sm_stack *self) {
+  if (sm_stack_size(self) == 0) {
+    return NULL;
+  }
   self->top--;
-  return previous_top_obj;
+  return *(self->top);
 }
 
 // Special pointer location relative to the stack object
