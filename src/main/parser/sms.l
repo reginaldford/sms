@@ -53,17 +53,17 @@ ui8Repeat { return UI8_REPEAT ; }
 "|=" {return IOR_EQ;}
 "^=" {return IXOR_EQ;}
 
-"_+" {return IPLUS;}
-"_-" {return IMINUS;}
-"_*" {return ITIMES;}
-"_/" {return IDIVIDE;}
-"_^" {return IPOW;}
+"_+"  {return IPLUS;}
+"_-"  {return IMINUS;}
+"_*"  {return ITIMES;}
+"_/"  {return IDIVIDE;}
+"_**" {return IPOW;}
 
 "_+="   {return IPLUSEQ;}
 "_-="   {return IMINUSEQ;}
 "_*="   {return ITIMESEQ;}
 "_/="   {return IDIVIDEEQ;}
-"_\^="  {return IPOWEREQ;}
+"_**="  {return IPOWEREQ;}
 
 "+"  {return PLUS;}
 "-"  {return MINUS;}
@@ -137,8 +137,8 @@ is           {return IS;}
 
 "~"          {return NOT;}
 "||"         {return OR;}
-xor          {return XOR;}
-&&           {return AND;}
+"^^"         {return XOR;}
+"&& "        {return AND;}
 
 input        {return INPUT;}
 put          {return PUT;}
