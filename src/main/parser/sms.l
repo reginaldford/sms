@@ -45,13 +45,13 @@ ui8\((-?{digit}+)\) {
 }
 ui8Repeat { return UI8_REPEAT ; }
 
-"_and" {return IAND;}
-"_or"  {return IOR;}
-"_xor" {return IXOR;}
+"&" {return IAND;}
+"|" {return IOR;}
+"^" {return IXOR;}
 
-"_and=" {return IAND_EQ;}
-"_or="  {return IOR_EQ;}
-"_xor=" {return IXOR_EQ;}
+"&=" {return IAND_EQ;}
+"|=" {return IOR_EQ;}
+"^=" {return IXOR_EQ;}
 
 "_+" {return IPLUS;}
 "_-" {return IMINUS;}
@@ -63,19 +63,19 @@ ui8Repeat { return UI8_REPEAT ; }
 "_-="   {return IMINUSEQ;}
 "_*="   {return ITIMESEQ;}
 "_/="   {return IDIVIDEEQ;}
-"_^="   {return IPOWEREQ;}
+"_\^="  {return IPOWEREQ;}
 
 "+"  {return PLUS;}
 "-"  {return MINUS;}
 "*"  {return TIMES;}
 "/"  {return DIVIDE;}
-"^"  {return POW;}
+"**" {return POW;}
 
-"+=" {return PLUSEQ;}
-"-=" {return MINUSEQ;}
-"*=" {return TIMESEQ;}
-"/=" {return DIVIDEEQ;}
-"^=" {return POWEREQ;}
+"+="  {return PLUSEQ;}
+"-="  {return MINUSEQ;}
+"*="  {return TIMESEQ;}
+"/="  {return DIVIDEEQ;}
+"**=" {return POWEREQ;}
 
 sin          {return SIN;}
 cos          {return COS;}
@@ -126,7 +126,7 @@ toStrFmt     {return TO_STRFMT;}
 
 "->"         {return ASSOCIATE;}
 ==           {return EQEQ;}
-!=           {return NOTEQ;}
+~=           {return NOTEQ;}
 "<="         {return LT_EQ;}
 ">="         {return GT_EQ;}
 
@@ -135,10 +135,10 @@ isInf        {return ISINF;};
 
 is           {return IS;}
 
-not          {return NOT;}
-or           {return OR;}
+"~"          {return NOT;}
+"||"         {return OR;}
 xor          {return XOR;}
-and          {return AND;}
+&&           {return AND;}
 
 input        {return INPUT;}
 put          {return PUT;}

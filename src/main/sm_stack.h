@@ -14,9 +14,9 @@ sm_stack *sm_new_stack(uint32_t capacity);
 void **sm_stack_content(sm_stack *self);
 /// Push a pointer onto the stack
 sm_stack *sm_stack_push(sm_stack *self, void *ptr);
-/// Push a pointer onto the stack
-sm_stack *sm_stack_pop(sm_stack *self);
-/// Push a pointer onto the stack
+/// Pop an element off the stack
+void *sm_stack_pop(sm_stack *self);
+/// Number of elements in the stack
 uint32_t sm_stack_size(sm_stack *self);
 /// If the stack was empty, the top is a special pointer that goes into the stack's struct
 void **sm_stack_empty_top(sm_stack *self);

@@ -99,17 +99,17 @@ char *sm_global_fn_name(uint32_t which) {
     "_*",            // SM_ITIMES_EXPR
     "_/",            // SM_IDIVIDE_EXPR
     "_^",            // SM_IPOW_EXPR
-    "_xor",          // SM_IXOR_EXPR
-    "_and",          // SM_IAND_EXPR
-    "_or",           // SM_IOR_EXPR
-    "_xor=",         // SM_IXOREQ_EXPR
-    "_and=",         // SM_IANDEQ_EXPR
-    "_or=",          // SM_IOREQ_EXPR
+    "^",             // SM_IXOR_EXPR
+    "&",             // SM_IAND_EXPR
+    "|",             // SM_IOR_EXPR
+    "^=",            // SM_IXOREQ_EXPR
+    "&=",            // SM_IANDEQ_EXPR
+    "|=",            // SM_IOREQ_EXPR
     "+=",            // SM_PLUSEQ_EXPR
     "-=",            // SM_MINUSEQ_EXPR
     "*=",            // SM_TIMESEQ_EXPR
     "/=",            // SM_DIVIDEEQ_EXPR
-    "^=",            // SM_POWEREQ_EXPR
+    "**=",           // SM_POWEREQ_EXPR
     "_+=",           // SM_IPLUSEQ_EXPR
     "_-=",           // SM_IMINUSEQ_EXPR
     "_*=",           // SM_ITIMESEQ_EXPR
@@ -286,7 +286,7 @@ char *sm_global_fn_name(uint32_t which) {
 uint32_t sm_global_fn_name_len(uint32_t which) {
   static uint16_t response_len[] = {
     8, 4, 4, 5,  4,  2, 2,  3, 3,  3, 9, 3,  9,  1,  1,  1, 1, 1, 2,  1,  1,  1, 1, 1,  1, 2,
-    2, 2, 2, 2,  4,  4, 3,  5, 5,  4, 2, 2,  2,  2,  2,  3, 3, 3, 3,  2,  3,  3, 3, 4,  4, 4,
+    2, 2, 2, 2,  1,  1, 1,  2, 2,  2, 2, 2,  2,  2,  3,  3, 3, 3, 3,  2,  3,  3, 3, 4,  4, 4,
     4, 4, 4, 5,  5,  5, 3,  3, 3,  4, 4, 4,  4,  4,  4,  5, 5, 5, 2,  3,  3,  4, 3, 3,  3, 4,
     4, 4, 4, 3,  2,  2, 3,  6, 6,  5, 3, 5,  10, 7,  6,  4, 6, 8, 12, 5,  5,  4, 2, 2,  2, 1,
     1, 2, 2, 5,  5,  5, 5,  5, 3,  5, 4, 5,  2,  11, 5,  5, 5, 8, 8,  12, 5,  4, 7, 6,  8, 6,
