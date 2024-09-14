@@ -264,9 +264,8 @@ errLine       {return ERR_LINE;}
 errNotes      {return ERR_NOTES;}
 
 _thisProcess   {return THISPROCESS;}
-_getOptions    {return GETOPTIONS;}
-_setOptions    {return SETOPTIONS;}
 _gc            {return GC;}
+_imgSave     {return IMAGESAVE;}
 
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}

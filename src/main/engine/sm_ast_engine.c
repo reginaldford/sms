@@ -173,6 +173,14 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return ((sm_object *)result);
       break;
     }
+    case SM_IMAGESAVE_EXPR: {
+      // Obtain the file name using eager_type_check
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (fname_str->my_type == SM_ERR_TYPE)
+        return ((sm_object *)fname_str); // Return the error if type check fails;
+      char *fname_cstr = &(fname_str->content);
+      return (sm_object *)sm_new_f64(sm_mem_dump(sms_heap, fname_cstr));
+    }
     case SM_GC_EXPR: {
       // This fails because it changes all of the pointers before the function returns.
       // sm_garbage_collect();
