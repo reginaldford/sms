@@ -328,6 +328,7 @@ int parsing_fpath_len;
 %token <expr> GETOPTIONS
 %token <expr> SETOPTIONS
 %token <expr> RESETOPTIONS
+%token <expr> IMAGESAVE
 %token <expr> GC
 %token <expr> GC_WHILE
 %token <expr> THISPROCESS
@@ -563,6 +564,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | PWD '(' ')' { $$ = sm_new_expr_n(SM_PWD_EXPR,0,0, _note());}
 | RUNTIME_META '(' EXPR ')' { $$ = sm_new_expr(SM_RUNTIME_META_EXPR, (sm_object*)$3, _note());}
 | GC '(' ')' { $$ = sm_new_expr_n(SM_GC_EXPR, 0,0, _note()); }
+| IMAGESAVE '(' EXPR ')' { $$ = sm_new_expr(SM_IMAGESAVE_EXPR,(sm_object*)$3, _note()); }
 | IS_ERR '(' EXPR ')' { $$ = sm_new_expr(SM_ISERR_EXPR,(sm_object*)$3,_note());}
 | ERR_TITLE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRTITLE_EXPR,(sm_object*)$3,_note());}
 | ERR_MESSAGE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRMESSAGE_EXPR,(sm_object*)$3,_note());}

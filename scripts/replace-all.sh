@@ -1,6 +1,6 @@
 #!/bin/bash
 # Backup your code before you do this
-str='s/SM_FILE_READSTRSTR_EXPR/SM_FILE_READSTR_EXPR/g'
+str='s/_saveImage/_imgSave/g'
 find ../src/ -name "*.c" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.h" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.y" -exec sed -i -e "$str" {} +
