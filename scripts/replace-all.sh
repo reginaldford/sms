@@ -1,6 +1,6 @@
 #!/bin/bash
 # Backup your code before you do this
-str='s/_saveImage/_imgSave/g'
+str='s/_imgSave/_heapSave/g'
 find ../src/ -name "*.c" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.h" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.y" -exec sed -i -e "$str" {} +

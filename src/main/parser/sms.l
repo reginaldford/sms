@@ -265,7 +265,7 @@ errNotes      {return ERR_NOTES;}
 
 _thisProcess   {return THISPROCESS;}
 _gc            {return GC;}
-_imgSave     {return IMAGESAVE;}
+_heapSave      {return IMAGESAVE;}
 
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}

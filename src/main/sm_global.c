@@ -269,7 +269,7 @@ char *sm_global_fn_name(uint32_t which) {
     "osExecToStr",   // SM_EXECTOSTR_EXPR
     "osGetEnv",      // SM_OS_GETENV_EXPR
     "osSetEnv",      // SM_OS_SETENV_EXPR
-    "_imgSave",      // SM_IMAGESAVE_EXPR
+    "_heapSave",     // SM_IMAGESAVE_EXPR
     "_gc",           // SM_GC_EXPR
     "isErr",         // SM_ISERR_EXPR
     "errTitle",      // SM_ERRTITLE_EXPR
