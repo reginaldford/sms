@@ -346,6 +346,9 @@ int parsing_fpath_len;
 %left DOT PLUS MINUS
 %left TIMES DIVIDE
 %left POW
+%left IPLUS IMINUS
+%left ITIMES IDIVIDE
+%left IPOW
 %left ';'
 
 %%
