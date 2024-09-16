@@ -122,3 +122,4 @@ enum sm_object_type {
 #include "object/sm_return.h"
 #include "engine/sm_ast_engine.h"
 #include "engine/op/stack.h"
+#include "memory/sm_heap_set.h"
