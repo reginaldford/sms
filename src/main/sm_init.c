@@ -2,13 +2,14 @@
 
 #include "sms.h"
 
-extern struct sm_heap *sms_heap;
-extern struct sm_heap *sms_symbol_heap;
-extern struct sm_heap *sms_symbol_name_heap;
-extern uint32_t        sms_num_symbols;
-extern sm_stack       *sms_callstack;
-extern const char     *sms_version;
-extern const int       sms_version_len;
+extern struct sm_heap_set *sms_all_heaps;
+extern struct sm_heap     *sms_heap;
+extern struct sm_heap     *sms_symbol_heap;
+extern struct sm_heap     *sms_symbol_name_heap;
+extern uint32_t            sms_num_symbols;
+extern sm_stack           *sms_callstack;
+extern const char         *sms_version;
+extern const int           sms_version_len;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Set version number. Major.Minor.Patch
@@ -18,6 +19,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   env->version_len = sms_version_len;
   // Register the signal handler
   sm_register_signals();
+  sms_all_heaps = sm_new_heap_set(1024, 0, malloc(sizeof(sm_heap *) * 1024));
   // Default (inner) environment variables
   f64 mem_bytes      = 64 * 1024 * 1024;
   env->script_fp[0]  = '\0';

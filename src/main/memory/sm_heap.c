@@ -2,12 +2,13 @@
 
 #include "../sms.h"
 
-extern sm_heap   *sms_heap;
-extern sm_heap   *sms_other_heap;
-extern sm_symbol *sms_true;
-extern sm_symbol *sms_false;
-extern sm_heap   *sms_symbol_heap;
-extern sm_heap   *sms_symbol_name_heap;
+extern sm_heap     *sms_heap;
+extern sm_heap     *sms_other_heap;
+extern sm_symbol   *sms_true;
+extern sm_symbol   *sms_false;
+extern sm_heap     *sms_symbol_heap;
+extern sm_heap     *sms_symbol_name_heap;
+extern sm_heap_set *sms_all_heaps;
 
 // For rounding up object size to the next multiple of 4 bytes.
 uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
@@ -20,6 +21,7 @@ sm_heap *sm_new_heap(uint32_t capacity) {
   new_heap->capacity = capacity;
   new_heap->used     = 0;
   new_heap->storage  = (char *)(new_heap + 1);
+  sm_heap_set_add(sms_all_heaps, new_heap);
   return new_heap;
 }
 
@@ -94,14 +96,7 @@ void sm_dump_and_count() {
 
 // Free the heaps, preparing for closing or restarting
 void sm_mem_cleanup() {
-  if (sms_heap != NULL)
-    free(sms_heap);
-  if (sms_other_heap != NULL)
-    free(sms_other_heap);
-  if (sms_symbol_heap != NULL)
-    free(sms_symbol_heap);
-  if (sms_symbol_name_heap != NULL)
-    free(sms_symbol_name_heap);
+  sm_heap_set_free(sms_all_heaps);
   if (sm_global_lex_stack(NULL))
     free(sm_global_lex_stack(NULL));
 }
