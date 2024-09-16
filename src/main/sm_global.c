@@ -3,10 +3,11 @@
 #include "sms.h"
 
 // Global object pointers
-sm_heap   *sms_heap;
-sm_heap   *sms_other_heap;
-sm_symbol *sms_true;
-sm_symbol *sms_false;
+sm_heap_set sms_all_heaps;
+sm_heap    *sms_heap;
+sm_heap    *sms_other_heap;
+sm_symbol  *sms_true;
+sm_symbol  *sms_false;
 // Symbols including the 2 above live in a symbol heap
 sm_heap *sms_symbol_heap;
 // Symbol names are in alpabetical order, correlating with the symbol

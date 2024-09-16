@@ -3,9 +3,10 @@
 
 // Set of heaps
 sm_heap_set *sm_new_heap_set(uint64_t capacity, uint64_t size, sm_heap **heaps) {
-  sm_heap_set *new_set = malloc(sizeof(sm_heap_set) + sm_round_size(capacity));
+  sm_heap_set *new_set = malloc(sizeof(sm_heap_set) + sizeof(sm_heap *) * sm_round_size(capacity));
   new_set->capacity    = capacity;
   new_set->size        = size;
+  new_set->heaps       = (sm_heap **)(&(new_set[1]));
   for (uint64_t i = 0; i < size; i++)
     new_set->heaps[i] = heaps[i];
   return new_set;

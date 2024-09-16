@@ -15,9 +15,8 @@ sm_object *sm_copy(sm_object *obj) {
 sm_object *sm_deep_copy(sm_object *obj) {
   if (obj->my_type == SM_EXPR_TYPE) {
     sm_expr *expr = (sm_expr *)sm_copy(obj);
-    for (uint32_t i = 0; i < expr->size; i++) {
+    for (uint32_t i = 0; i < expr->size; i++)
       sm_expr_set_arg(expr, i, sm_deep_copy(sm_expr_get_arg(expr, i)));
-    }
     return obj;
   } else {
     sm_object *new_obj = sm_realloc(obj, sm_sizeof(obj));
