@@ -5,6 +5,8 @@
 // Globals from sm_global.c
 extern sm_heap   *sms_heap;
 extern sm_heap   *sms_other_heap;
+extern sm_heap   *sms_symbol_heap;
+extern sm_heap   *sms_symbol_name_heap;
 extern sm_symbol *sms_true;
 extern sm_symbol *sms_false;
 extern sm_stack  *sms_callstack;
@@ -173,13 +175,47 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return ((sm_object *)result);
       break;
     }
-    case SM_IMAGESAVE_EXPR: {
+    case SM_HEAPSAVE_EXPR: {
       // Obtain the file name using eager_type_check
       sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
       if (fname_str->my_type == SM_ERR_TYPE)
         return ((sm_object *)fname_str); // Return the error if type check fails;
       char *fname_cstr = &(fname_str->content);
       return (sm_object *)sm_new_f64(sm_mem_dump(sms_heap, fname_cstr));
+    }
+    case SM_IMAGESAVE_EXPR: {
+      // Obtain the file name using eager_type_check
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (fname_str->my_type == SM_ERR_TYPE)
+        return ((sm_object *)fname_str); // Return the error if type check fails;
+      char *fname_cstr = &(fname_str->content);
+      // Create and populate the sm_img structure with the current globals
+      sm_img img;
+      img.env                  = *sm_global_environment(NULL); // Copy the current environment
+      img.sms_heap             = *sms_heap;                    // Copy the main heap
+      img.sms_symbol_heap      = *sms_symbol_heap;             // Copy the symbol heap
+      img.sms_symbol_name_heap = *sms_symbol_name_heap;        // Copy the symbol name heap
+      img.sms_true             = *sms_true;                    // Copy the true symbol
+      img.sms_false            = *sms_false;                   // Copy the false symbol
+      // Open the file for writing
+      FILE *file = fopen(fname_cstr, "wb");
+      if (!file) {
+        fprintf(stderr, "Failed to open file for writing: %s\n", fname_cstr);
+        sm_symbol *title   = sm_new_symbol("imgSaveFailed", 13);
+        sm_string *message = sm_new_string(36, "Failed to open for saving the image.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // Write the sm_img structure to the file
+      if (fwrite(&img, sizeof(sm_img), 1, file) != 1) {
+        fclose(file);
+        fprintf(stderr, "Failed to open file for writing: %s\n", fname_cstr);
+        sm_symbol *title   = sm_new_symbol("imgSaveFailed", 13);
+        sm_string *message = sm_new_string(26, "Failed to write the image.");
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      fclose(file);
+      // Return a success indicator, typically a float (or another type if needed)
+      return (sm_object *)sm_new_f64(1.0); // Return success code
     }
     case SM_GC_EXPR: {
       // This fails because it changes all of the pointers before the function returns.

@@ -265,7 +265,8 @@ errNotes      {return ERR_NOTES;}
 
 _thisProcess   {return THISPROCESS;}
 _gc            {return GC;}
-_heapSave      {return IMAGESAVE;}
+_heapSave      {return HEAPSAVE;}
+_imgSave       {return HEAPSAVE;}
 
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}
@@ -280,12 +281,9 @@ _heapSave      {return IMAGESAVE;}
    return F64;
   }
 
-
-
 [\<\>\=] { return yytext[0]; }
 
 [-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
-
 
 ({alpha}?+{digit}?+_?+\'?+)?+ {
     yylval.sym = sm_new_symbol(yytext,yyleng);
@@ -293,7 +291,6 @@ _heapSave      {return IMAGESAVE;}
   }
 
 "#".* {/*comment*/};
-
 
 \"([^"\\]|\\.)*\" {
   // Text after the first quotation will be at &(yytext[1])
@@ -345,7 +342,6 @@ _heapSave      {return IMAGESAVE;}
   yylval.str = sm_new_string(final_i, text);
   return STRING;
 }
-
 
 
 %%
