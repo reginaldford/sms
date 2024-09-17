@@ -89,10 +89,16 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   env->initialized = true;
 }
 
-// YOU ARE HERE
+// Load an image
 void sm_init_from_img(sm_env *env, int num_args, char **argv, const char *img_file_path) {
   sm_img img;
-  FILE  *file = fopen(img_file_path, "rb");
+  printf("file path: %s\n", img_file_path);
+  printf("len path: %lu\n", strlen(img_file_path));
+  FILE *file = fopen(img_file_path, "rb");
+  printf("file is %p\n", file);
+  printf("sizeof img is %lu\n", sizeof(sm_img));
+  // Image will have dynamic size
+  // YOU ARE HERE
   if (!file || fread(&img, sizeof(sm_img), 1, file) != 1) {
     fprintf(stderr, "Failed to open or read image file: %s\n", img_file_path);
     if (file)
@@ -119,7 +125,7 @@ void sm_init_from_img(sm_env *env, int num_args, char **argv, const char *img_fi
   sms_num_symbols      = img.num_symbols; // Correctly restore the symbol count
 
   // Initialize heap set and add restored heaps
-  sms_all_heaps = sm_new_heap_set(1024, 0, malloc(sizeof(void *) * 2014)); // Initialize heap set
+  sms_all_heaps = sm_new_heap_set(1024, 0, malloc(sizeof(void *) * 1024)); // Initialize heap set
   sm_heap_set_add(sms_all_heaps, sms_heap);
   sm_heap_set_add(sms_all_heaps, sms_other_heap);
   sm_heap_set_add(sms_all_heaps, sms_symbol_heap);

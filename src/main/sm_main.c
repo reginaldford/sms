@@ -78,7 +78,7 @@ int main(int num_args, char *argv[]) {
   static struct sm_env env = {0}; // global environment structure
   opterr                   = 0;   // Disable error messages for unknown options
   int opt;
-  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:l:p")) != -1) {
+  while ((opt = getopt(num_args, argv, "qhm:e:s:i:c:l:pf:")) != -1) {
     switch (opt) {
     case 'h':
       printf("SMS Help\n");
@@ -92,7 +92,16 @@ int main(int num_args, char *argv[]) {
       printf("-i Run a file, then start the REPL.                 sms -i script.sms\n");
       printf("-l Set the command history file. Disable with 'off' sms -l history.txt\n");
       printf("-c Custom argument. Accessed via _args. sms -c \"a single string\"\n");
+      printf("-f Load an image from a file.                       sms -f img.fli\n");
       clean_exit(&env, 0);
+      break;
+    case 'f':
+      if (env.initialized == false) {
+        sm_global_environment(&env);
+        sm_init_from_img(&env, num_args, argv, optarg);
+        if (env.quiet_mode == false)
+          print_intro();
+      }
       break;
     case 'p':
       env.plain_mode = true;
