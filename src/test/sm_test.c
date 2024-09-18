@@ -275,7 +275,8 @@ int main(int num_args, char **argv) {
             exit(test_result);
           }
           num_fails += test_result;
-          sm_garbage_collect();
+          sm_garbage_collect(sms_heap, sms_other_heap);
+          sm_swap_heaps(&sms_heap, &sms_other_heap);
         }
       }
     }
@@ -292,7 +293,8 @@ int main(int num_args, char **argv) {
           exit(test_result);
         }
         num_fails += test_result;
-        sm_garbage_collect();
+        sm_garbage_collect(sms_heap, sms_other_heap);
+        sm_swap_heaps(&sms_heap, &sms_other_heap);
       }
     }
   } else if (test == -1) {
