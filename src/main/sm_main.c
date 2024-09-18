@@ -52,9 +52,7 @@ void start_repl(sm_env *env) {
       sm_garbage_collect(sms_heap, sms_other_heap);
 
       // Empty this heap and Swap heaps
-      sm_heap *temp  = sms_heap;
-      sms_heap       = sms_other_heap;
-      sms_other_heap = temp;
+      sm_swap_heaps(&sms_heap, &sms_other_heap);
 
       fflush(stdout);
       // Count this as a line

@@ -12,6 +12,8 @@ int chapter_1(int test) {
   for (int i = 0; i < 100; i++)
     sm_new_cx(NULL);
   printf("Running GC.\n");
+  if (!sms_other_heap)
+    sms_other_heap = sm_new_heap(sms_heap->capacity);
   sm_garbage_collect(sms_heap, sms_other_heap);
   sm_swap_heaps(&sms_heap, &sms_other_heap);
   sm_string      *s  = sm_new_string(0, "");
