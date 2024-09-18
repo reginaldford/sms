@@ -47,7 +47,15 @@ void start_repl(sm_env *env) {
       sm_safe_print_string(result_str);
       printf("%s", sm_terminal_reset());
       // Cleanup
-      sm_garbage_collect();
+      if (!sms_other_heap)
+        sms_other_heap = sm_new_heap(sms_heap->capacity);
+      sm_garbage_collect(sms_heap, sms_other_heap);
+
+      // Empty this heap and Swap heaps
+      sm_heap *temp  = sms_heap;
+      sms_heap       = sms_other_heap;
+      sms_other_heap = temp;
+
       fflush(stdout);
       // Count this as a line
       yylineno++;

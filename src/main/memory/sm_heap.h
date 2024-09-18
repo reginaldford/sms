@@ -36,3 +36,5 @@ void sm_mem_cleanup();
 void sm_sprint_dump();
 /// Dumps the memory with a counting file name. current_#.mem and  other_#.mem starting with 1
 void sm_dump_and_count();
+/// Swap the ptrs of these two heaps
+void sm_swap_heaps(sm_heap **, sm_heap **);
