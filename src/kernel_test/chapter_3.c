@@ -24,7 +24,8 @@ int chapter_3(int test) {
   sm_cx_let(test_cx, sm_new_symbol("ab", 2), (sm_object *)sm_new_f64(9));
 
   sm_object *a = sm_cx_get(test_cx, sm_new_symbol("a", 1));
-
+  if (!sms_other_heap)
+    sms_other_heap = sm_new_heap(sms_heap->capacity);
   sm_garbage_collect(sms_heap, sms_other_heap);
   sm_swap_heaps(&sms_heap, &sms_other_heap);
 
