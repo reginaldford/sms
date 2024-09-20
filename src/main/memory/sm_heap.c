@@ -122,7 +122,7 @@ void sm_sprint_dump() {
 
 // Swap the ptrs to these heaps
 void sm_swap_heaps(sm_heap **a, sm_heap **b) {
-  sm_heap **temp = a;
-  *a             = *b;
-  *b             = *temp;
+  sm_heap *temp = *a;
+  *a            = *b;
+  *b            = temp;
 }
