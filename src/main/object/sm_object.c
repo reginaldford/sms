@@ -115,12 +115,11 @@ uint32_t sm_sizeof(sm_object *obj1) {
             sm_is_within_heap(obj1, sms_symbol_heap));
     fprintf(stderr, "Bad Object Is in symname heap: %i\n",
             sm_is_within_heap(obj1, sms_symbol_name_heap));
-    if (sm_is_within_heap(obj1, sms_other_heap)) {
-      fprintf(stderr, "Bad Object Position in Heap  : %ld\n",
-              ((char *)obj1) - sms_other_heap->storage);
-      fprintf(stderr, "Heap Start Position          : %p\n", sms_other_heap->storage);
-      fprintf(stderr, "Heap cap : %u\n", sms_other_heap->capacity);
-      fprintf(stderr, "Heap used: %u\n", sms_other_heap->used);
+    if (sm_is_within_heap(obj1, sms_heap)) {
+      fprintf(stderr, "Bad Object Position in Heap  : %ld\n", ((char *)obj1) - sms_heap->storage);
+      fprintf(stderr, "Heap Start Position          : %p\n", sms_heap->storage);
+      fprintf(stderr, "Heap cap : %u\n", sms_heap->capacity);
+      fprintf(stderr, "Heap used: %u\n", sms_heap->used);
     }
     sm_dump_and_count();
     fprintf(stderr, "Memory dumped\n");
