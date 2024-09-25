@@ -52,6 +52,7 @@ ui8Repeat { return UI8_REPEAT ; }
 "&=" {return IAND_EQ;}
 "|=" {return IOR_EQ;}
 "^=" {return IXOR_EQ;}
+"_~=" {return INOT_EQ;}
 
 "_+"  {return IPLUS;}
 "_-"  {return IMINUS;}
@@ -126,7 +127,6 @@ toStrFmt     {return TO_STRFMT;}
 
 "->"         {return ASSOCIATE;}
 ==           {return EQEQ;}
-~=           {return NOTEQ;}
 "<="         {return LT_EQ;}
 ">="         {return GT_EQ;}
 
@@ -139,6 +139,11 @@ is           {return IS;}
 "||"         {return OR;}
 "^^"         {return XOR;}
 "&& "        {return AND;}
+
+"~="         {return NOT_EQ;}
+"||="        {return OR_EQ;}
+"^^="        {return XOR_EQ;}
+"&&="        {return AND_EQ;}
 
 input        {return INPUT;}
 put          {return PUT;}

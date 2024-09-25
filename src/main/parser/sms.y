@@ -254,22 +254,23 @@ int parsing_fpath_len;
 %token <expr> ILT_EQ
 %token <expr> IGT_EQ
 
-
-%token <expr> IXOR_EQ
-%token <expr> IOR_EQ
-%token <expr> IAND_EQ
-
-%token <expr> INOTEQ
 %token <expr> INOT
+%token <expr> INOT_EQ
 %token <expr> IOR
+%token <expr> IOR_EQ
 %token <expr> IAND
+%token <expr> IAND_EQ
 %token <expr> IXOR
+%token <expr> IXOR_EQ
 
-%token <expr> NOTEQ
 %token <expr> NOT
+%token <expr> NOT_EQ
 %token <expr> OR
+%token <expr> OR_EQ
 %token <expr> AND
+%token <expr> AND_EQ
 %token <expr> XOR
+%token <expr> XOR_EQ
 
 %token <expr> NEW_CX
 %token <expr> CX_SETPARENT
@@ -387,8 +388,10 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR IXOR_EQ EXPR { $$ = sm_new_expr_2(SM_IXOREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IOR EXPR { $$ = sm_new_expr_2(SM_IOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IOR_EQ EXPR { $$ = sm_new_expr_2(SM_IOREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IAND_EQ EXPR { $$ = sm_new_expr_2(SM_IAND_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| EXPR IAND_EQ EXPR { $$ = sm_new_expr_2(SM_IANDEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR IAND EXPR { $$ = sm_new_expr_2(SM_IAND_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
+| INOT EXPR { $$ = sm_new_expr(SM_INOT_EXPR, (sm_object *)$2, _note()); }
+| EXPR INOT_EQ EXPR { $$ = sm_new_expr_2(SM_INOTEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM IPLUSEQ EXPR { $$ = sm_new_expr_2(SM_IPLUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM IMINUSEQ EXPR { $$ = sm_new_expr_2(SM_IMINUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM ITIMESEQ EXPR { $$ = sm_new_expr_2(SM_ITIMESEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
@@ -543,6 +546,10 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR OR EXPR   { $$ = sm_new_expr_2(SM_OR_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | EXPR AND EXPR   { $$ = sm_new_expr_2(SM_AND_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | EXPR XOR EXPR   { $$ = sm_new_expr_2(SM_XOR_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
+| SYM NOT_EQ EXPR { $$ = sm_new_expr_2(SM_NOTEQ_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
+| SYM OR_EQ EXPR   { $$ = sm_new_expr_2(SM_OREQ_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
+| SYM AND_EQ EXPR   { $$ = sm_new_expr_2(SM_ANDEQ_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
+| SYM XOR_EQ EXPR   { $$ = sm_new_expr_2(SM_XOREQ_EXPR,(sm_object*)$1,(sm_object*)$3, _note());}
 | STR_ESCAPE '(' EXPR ')' { $$ = sm_new_expr(SM_STR_ESCAPE_EXPR,(sm_object*)$3, _note());}
 | STR_SIZE '(' EXPR ')' {$$ = sm_new_expr(SM_STR_SIZE_EXPR,(sm_object*)$3, _note());}
 | STR_MUT '(' EXPR ',' EXPR ',' EXPR ')' {$$ = sm_new_expr_3(SM_STR_MUT_EXPR,(sm_object*)$3,(sm_object*)$5,(sm_object*)$7,    _note());}

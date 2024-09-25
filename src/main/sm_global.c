@@ -101,6 +101,8 @@ char *sm_global_fn_name(uint32_t which) {
     "^",             // SM_IXOR_EXPR
     "&",             // SM_IAND_EXPR
     "|",             // SM_IOR_EXPR
+    "_~",            // SM_INOT_EXPR
+    "_~=",           // SM_INOTEQ_EXPR
     "^=",            // SM_IXOREQ_EXPR
     "&=",            // SM_IANDEQ_EXPR
     "|=",            // SM_IOREQ_EXPR
@@ -228,6 +230,9 @@ char *sm_global_fn_name(uint32_t which) {
     "||",            // SM_OR_EXPR
     "&&",            // SM_AND_EXPR
     "^^",            // SM_XOR_EXPR
+    "~=",            // SM_NOTEQ_EXPR
+    "||=",           // SM_OREQ_EXPR
+    "&&=",           // SM_ANDEQ_EXPR
     "fnXp",          // SM_FNXP_EXPR
     "fnSetXp",       // SM_FNSETXP_EXPR
     "fnParams",      // SM_FN_PARAMS_EXPR
@@ -287,21 +292,21 @@ char *sm_global_fn_name(uint32_t which) {
 // Corresponding string length of the string that would come from the sm_global_fn_name(which)
 uint32_t sm_global_fn_name_len(uint32_t which) {
   static uint16_t response_len[] = {
-    8, 4,  4,  5,  4, 2, 2, 3,  3,  3,  9, 3, 9, 1, 1, 1,  1,  1, 2,  1, 1, 1, 1, 1, 2,  2,  2,
-    2, 2,  3,  1,  1, 1, 2, 2,  2,  2,  2, 2, 2, 3, 3, 3,  3,  3, 4,  3, 3, 3, 4, 4, 4,  4,  4,
-    4, 5,  5,  5,  3, 3, 3, 4,  4,  4,  4, 4, 4, 5, 5, 5,  2,  3, 3,  4, 3, 3, 3, 4, 4,  4,  4,
-    3, 2,  2,  3,  6, 6, 5, 3,  5,  10, 7, 6, 4, 6, 8, 12, 5,  5, 4,  2, 2, 2, 1, 1, 2,  2,  5,
-    5, 5,  5,  5,  3, 5, 4, 5,  2,  11, 5, 5, 5, 8, 8, 12, 5,  4, 7,  6, 8, 6, 8, 5, 9,  11, 8,
-    7, 8,  10, 8,  6, 6, 6, 12, 12, 10, 5, 4, 4, 3, 6, 6,  4,  5, 5,  4, 3, 1, 2, 2, 2,  4,  7,
-    8, 11, 8,  11, 4, 7, 7, 7,  6,  6,  6, 6, 7, 8, 4, 8,  7,  9, 11, 8, 6, 9, 3, 6, 12, 13, 8,
-    9, 7,  4,  4,  5, 6, 6, 6,  11, 8,  8, 9, 8, 3, 5, 8,  10, 9, 7,  8, 1};
+    8,  4, 4,  5,  4,  2, 2,  3, 3,  3,  9,  3,  9, 1,  1, 1, 1, 1,  2, 1, 1, 1,  1, 1,  2, 2, 2,
+    2,  2, 3,  1,  1,  1, 2,  3, 2,  2,  2,  2,  2, 2,  2, 3, 3, 3,  3, 3, 4, 3,  3, 3,  4, 4, 4,
+    4,  4, 4,  5,  5,  5, 3,  3, 3,  4,  4,  4,  4, 4,  4, 5, 5, 5,  2, 3, 3, 4,  3, 3,  3, 4, 4,
+    4,  4, 3,  2,  2,  3, 6,  6, 5,  3,  5,  10, 7, 6,  4, 6, 8, 12, 5, 5, 4, 2,  2, 2,  1, 1, 2,
+    2,  5, 5,  5,  5,  5, 3,  5, 4,  5,  2,  11, 5, 5,  5, 8, 8, 12, 5, 4, 7, 6,  8, 6,  8, 5, 9,
+    11, 8, 7,  8,  10, 8, 6,  6, 6,  12, 12, 10, 5, 4,  4, 3, 6, 6,  4, 5, 5, 4,  3, 1,  2, 2, 2,
+    2,  3, 3,  4,  7,  8, 11, 8, 11, 4,  7,  7,  7, 6,  6, 6, 6, 7,  8, 4, 8, 7,  9, 11, 8, 6, 9,
+    3,  6, 12, 13, 8,  9, 7,  4, 4,  5,  6,  6,  6, 11, 8, 8, 9, 8,  3, 5, 8, 10, 9, 7,  8, 1};
   if (which >= sm_global_num_fns())
     return 1; // "?"
   return response_len[which];
 }
 
 uint32_t sm_global_num_fns() {
-  static const uint32_t num_fns = 210;
+  static const uint32_t num_fns = 215;
   return num_fns;
 }
 

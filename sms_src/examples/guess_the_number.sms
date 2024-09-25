@@ -5,7 +5,7 @@
   let answer = round(100*random());
   let user_guess = -1;
   let tries = 0;
-  while(not(user_guess==answer)) {
+  while(user_guess ~= answer) {
     tries = tries + 1;
     put("Guess the number: ");
     user_guess = parse(input());
