@@ -1163,6 +1163,71 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return ((sm_object *)sms_false);
       return ((sm_object *)sms_true);
     }
+    case SM_OREQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+
+      if (current_value != (sm_object *)sms_false || value != (sm_object *)sms_false) {
+        if (!sm_cx_set(current_cx, sym, (sm_object *)sms_true)) {
+          sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+          sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+          return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+        }
+        return (sm_object *)sms_true;
+      } else {
+        return (sm_object *)sms_false;
+      }
+    }
+
+    case SM_ANDEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+
+      if (current_value == (sm_object *)sms_false || value == (sm_object *)sms_false) {
+        if (!sm_cx_set(current_cx, sym, (sm_object *)sms_false)) {
+          sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+          sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+          return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+        }
+        return (sm_object *)sms_false;
+      } else {
+        return (sm_object *)sms_true;
+      }
+    }
+    case SM_XOREQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      sm_object *value         = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+
+      bool is_current_true = (current_value != (sm_object *)sms_false);
+      bool is_value_true   = (value != (sm_object *)sms_false);
+
+      if (is_current_true != is_value_true) {
+        if (!sm_cx_set(current_cx, sym, (sm_object *)sms_true)) {
+          sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+          sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+          return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+        }
+        return (sm_object *)sms_true;
+      } else {
+        return (sm_object *)sms_false;
+      }
+    }
+    case SM_NOTEQ_EXPR: {
+      // Perform eager type checking for both arguments
+      sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      sm_object *obj1 = sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      // Check if the two objects are equal
+      if (sm_object_eq(obj0, obj1)) {
+        // They are equal, return sms_false
+        return (sm_object *)sms_false;
+      } else {
+        // They are not equal, return sms_true
+        return (sm_object *)sms_true;
+      }
+    }
     case SM_ROUND_EXPR: {
       sm_object *obj0 = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_f64    *number;
