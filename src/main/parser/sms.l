@@ -54,17 +54,17 @@ ui8Repeat { return UI8_REPEAT ; }
 "^=" {return IXOR_EQ;}
 "_~=" {return INOT_EQ;}
 
-"_+"  {return IPLUS;}
-"_-"  {return IMINUS;}
-"_*"  {return ITIMES;}
-"_/"  {return IDIVIDE;}
-"_**" {return IPOW;}
+"!+"  {return IPLUS;}
+"!-"  {return IMINUS;}
+"!*"  {return ITIMES;}
+"!/"  {return IDIVIDE;}
+"!**" {return IPOW;}
 
-"_+="   {return IPLUSEQ;}
-"_-="   {return IMINUSEQ;}
-"_*="   {return ITIMESEQ;}
-"_/="   {return IDIVIDEEQ;}
-"_**="  {return IPOWEREQ;}
+"!+="   {return IPLUSEQ;}
+"!-="   {return IMINUSEQ;}
+"!*="   {return ITIMESEQ;}
+"!/="   {return IDIVIDEEQ;}
+"!**="  {return IPOWEREQ;}
 
 "+"  {return PLUS;}
 "-"  {return MINUS;}
@@ -104,8 +104,8 @@ abs          {return ABS;}
 
 "++"         {return INC;}
 "--"         {return DEC;}
-"_++"        {return IINC;}
-"_--"        {return IDEC;}
+"!++"        {return IINC;}
+"!--"        {return IDEC;}
 
 diff         {return DIFF;}
 simp         {return SIMP;}

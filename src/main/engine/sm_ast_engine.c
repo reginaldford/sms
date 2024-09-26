@@ -2207,7 +2207,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
         sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
         sm_string *message = sm_new_fstring_at(
-          sms_heap, "Operands must be of type %s for _+= operation.", sm_type_name(SM_UI8_TYPE));
+          sms_heap, "Operands must be of type %s for !+= operation.", sm_type_name(SM_UI8_TYPE));
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value + value_ui8->value);
@@ -2225,7 +2225,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
         sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
         sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid types for _-= operation. Expected numbers.");
+          sm_new_fstring_at(sms_heap, "Invalid types for !-= operation. Expected numbers.");
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
