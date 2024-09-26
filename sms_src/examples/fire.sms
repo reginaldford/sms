@@ -9,5 +9,5 @@
   seed(time()[1]);
   for(let i=128;i>=0;i--)
     for(let j=0;j<200;j++)
-      c.print(max(0,random()*1500/max(1,i^2-j))," ")
+      c.print(max(0,random()*1500/max(1,i**2-j))," ")
 };
