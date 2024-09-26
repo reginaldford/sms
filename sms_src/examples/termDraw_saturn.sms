@@ -4,15 +4,15 @@
 {
   # Artistic engine
   let printChar=(x,y)=>{
-    x=x^1.5/3;
-    y=y^1.15/3;
+    x=x**1.5/3;
+    y=y**1.15/3;
     let v = abs(
       floor(
-        9*sin(((x+tWidth/2)/10+y^1.5/20))
+        9*sin(((x+tWidth/2)/10+y**1.5/20))
       ));
     if(v <= 3) v = 0;
     v = mod(v,6);
-    let s = if(not(v < 3) and not(v == 9))
+    let s = if((v >= 3) && (v ~= 9))
       str(v) else " ";
     put(s);
   };

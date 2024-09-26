@@ -10,7 +10,7 @@
         9*sin(((x+tWidth/2)+y)/9)
         *sin(y*3/(x/3+1))));
     if(v <= 2) v = 0;
-    let s = if(not(v == 0) and not(v == 9))
+    let s = if((v ~= 0) && (v ~= 9))
       str(v) else " ";
     put(s);
   };
