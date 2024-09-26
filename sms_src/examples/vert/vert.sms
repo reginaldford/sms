@@ -5,8 +5,10 @@
 # If you call this with sms, use sms -i vert.sms
 
 cxLet(parent(_scratch), :vert, (x,u1,u2)=>{
+    cxLet(parent(self),:_errHandler,(x)=>{putLn(str(x));x});
+    
     # Import the tools for each dimension if necessary
-    if(not(cxHasFar(self,:mratios))){
+    if(~(cxHasFar(self,:mratios))){
       let mratios=fileParse("mvert.sms");
       let lratios=fileParse("lvert.sms");
       let tratios=fileParse("tvert.sms");
@@ -25,15 +27,15 @@ cxLet(parent(_scratch), :vert, (x,u1,u2)=>{
     # Find a CX that contains both units u1 and u2
 
     # Mass
-    if(cxGet(mratios,u1) and cxGet(mratios,u2))
+    if(cxHas(mratios,u1) && cxHas(mratios,u2))
      return convert(x,u1,u2,mratios);
 
     # Length
-    if(cxGet(lratios,u1) and cxGet(lratios,u2))
+    if(cxHas(lratios,u1) && cxHas(lratios,u2))
       return convert(x,u1,u2,lratios);
 
     # Time
-    if(cxGet(tratios,u1) and cxGet(tratios,u2))
+    if(cxHas(tratios,u1) && cxHas(tratios,u2))
      return convert(x,u1,u2,tratios);
 
     # We must have supplied something invalid
