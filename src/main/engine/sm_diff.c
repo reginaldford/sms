@@ -29,7 +29,19 @@ bool has_symbol(sm_expr *self, sm_symbol *sym) {
     case SM_COT_EXPR:
     case SM_CSCH_EXPR:
     case SM_SECH_EXPR:
-    case SM_COTH_EXPR: {
+    case SM_COTH_EXPR:
+    case SM_ASIN_EXPR:
+    case SM_ACOS_EXPR:
+    case SM_ATAN_EXPR:
+    case SM_ASINH_EXPR:
+    case SM_ACOSH_EXPR:
+    case SM_ATANH_EXPR:
+    case SM_ACSC_EXPR:
+    case SM_ASEC_EXPR:
+    case SM_ACOT_EXPR:
+    case SM_ACSCH_EXPR:
+    case SM_ASECH_EXPR:
+    case SM_ACOTH_EXPR: {
       for (uint32_t i = 0; i < self->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(self, i);
         switch (current_obj->my_type) {
@@ -284,6 +296,187 @@ sm_object *sm_diff(sm_object *obj, sm_symbol *wrt) {
       } else
         return (sm_object *)sm_new_f64(0);
     }
+
+    case SM_ASIN_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *one         = (sm_object *)sm_new_f64(1);
+        sm_object *arg_squared = (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, one, NULL); // x^2
+        sm_object *denominator = (sm_object *)sm_new_expr(
+          SM_SQRT_EXPR, (sm_object *)sm_new_expr_2(SM_MINUS_EXPR, one, arg_squared, NULL),
+          NULL); // sqrt(1 - x^2)
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, denominator, NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ACOS_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *one         = (sm_object *)sm_new_f64(1);
+        sm_object *arg_squared = (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, one, NULL); // x^2
+        sm_object *denominator = (sm_object *)sm_new_expr(
+          SM_SQRT_EXPR, (sm_object *)sm_new_expr_2(SM_MINUS_EXPR, one, arg_squared, NULL),
+          NULL); // sqrt(1 - x^2)
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(
+          SM_TIMES_EXPR, diff_inside,
+          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1), denominator, NULL),
+          NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ATAN_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *one         = (sm_object *)sm_new_f64(1);
+        sm_object *arg_squared = (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, one, NULL); // x^2
+        sm_object *denominator = (sm_object *)sm_new_expr_2(SM_PLUS_EXPR, one, arg_squared,
+                                                            NULL); // 1 + x^2
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(
+          SM_TIMES_EXPR, diff_inside,
+          (sm_object *)sm_new_expr_2(SM_DIVIDE_EXPR, one, denominator, NULL), NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ASINH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *denominator = (sm_object *)sm_new_expr(
+          SM_SQRT_EXPR,
+          (sm_object *)sm_new_expr_2(
+            SM_PLUS_EXPR,
+            (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, (sm_object *)sm_new_f64(2), NULL),
+            (sm_object *)sm_new_f64(1), NULL),
+          NULL); // sqrt(x^2 + 1)
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, denominator, NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ACOSH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *denominator = (sm_object *)sm_new_expr(
+          SM_SQRT_EXPR,
+          (sm_object *)sm_new_expr_2(
+            SM_MINUS_EXPR,
+            (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, (sm_object *)sm_new_f64(2), NULL),
+            (sm_object *)sm_new_f64(1), NULL),
+          NULL); // sqrt(x^2 - 1)
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside, denominator, NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ATANH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *denominator = (sm_object *)sm_new_expr_2(
+          SM_MINUS_EXPR, (sm_object *)sm_new_f64(1),
+          (sm_object *)sm_new_expr_2(SM_POW_EXPR, arg, (sm_object *)sm_new_f64(2), NULL),
+          NULL); // 1 - x^2
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(
+          SM_TIMES_EXPR, diff_inside,
+          (sm_object *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_f64(1), denominator, NULL),
+          NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ACSC_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *sec         = (sm_object *)sm_new_expr(SM_SEC_EXPR, arg, NULL);
+        sm_object *cot         = (sm_object *)sm_new_expr(SM_COT_EXPR, arg, NULL);
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside,
+                                          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, cot, sec, NULL),
+                                          NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ASEC_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *sec         = (sm_object *)sm_new_expr(SM_SEC_EXPR, arg, NULL);
+        sm_object *tan         = (sm_object *)sm_new_expr(SM_TAN_EXPR, arg, NULL);
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, diff_inside,
+                                          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, tan, sec, NULL),
+                                          NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ACOT_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg = sm_expr_get_arg(expr, 0);
+        sm_object *csc_sq =
+          (sm_object *)sm_new_expr_2(SM_POW_EXPR, (sm_object *)sm_new_expr(SM_CSC_EXPR, arg, NULL),
+                                     (sm_object *)sm_new_f64(2), NULL); // csc^2(x)
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(
+          SM_TIMES_EXPR, diff_inside,
+          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1), csc_sq, NULL),
+          NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ACSCH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *csch        = (sm_object *)sm_new_expr(SM_CSCH_EXPR, arg, NULL);
+        sm_object *cotanh      = (sm_object *)sm_new_expr(SM_COTH_EXPR, arg, NULL);
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(
+          SM_TIMES_EXPR, diff_inside, (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, csch, cotanh, NULL),
+          NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ASECH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg         = sm_expr_get_arg(expr, 0);
+        sm_object *sec         = (sm_object *)sm_new_expr(SM_SEC_EXPR, arg, NULL);
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(
+          SM_TIMES_EXPR, diff_inside,
+          (sm_object *)sm_new_expr_2(
+            SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1),
+            (sm_object *)sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)sm_new_f64(1), sec, NULL),
+            NULL),
+          NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+    case SM_ACOTH_EXPR: {
+      if (has_symbol(expr, wrt)) {
+        sm_object *arg = sm_expr_get_arg(expr, 0);
+        sm_object *sec_sq =
+          (sm_object *)sm_new_expr_2(SM_POW_EXPR, (sm_object *)sm_new_expr(SM_SEC_EXPR, arg, NULL),
+                                     (sm_object *)sm_new_f64(2), NULL); // sec^2(x)
+        sm_object *diff_inside = sm_diff(arg, wrt);
+        return (sm_object *)sm_new_expr_2(
+          SM_TIMES_EXPR, diff_inside,
+          (sm_object *)sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)sm_new_f64(-1), sec_sq, NULL),
+          NULL);
+      }
+      return (sm_object *)sm_new_f64(0);
+    }
+
+
     default: {
       return (sm_object *)sm_new_f64(0);
     }

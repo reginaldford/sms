@@ -87,6 +87,10 @@ atan         {return ATAN;}
 sinh         {return SINH;}
 cosh         {return COSH;}
 tanh         {return TANH;}
+asinh        {return ASINH;}
+acosh        {return ACOSH;}
+atanh        {return ATANH;}
+
 sec          {return SEC;}
 csc          {return CSC;}
 cot          {return COT;}
