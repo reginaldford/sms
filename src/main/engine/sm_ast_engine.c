@@ -3032,6 +3032,59 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return ((sm_object *)obj0->notes);
       return ((sm_object *)sms_false);
     }
+
+
+    case SM_IMPORT_EXPR: {
+      // Type check the argument and ensure it is a string
+      sm_string *filePath = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (filePath->my_type != SM_STRING_TYPE) {
+        sm_symbol *title = sm_new_symbol("invalidImportArgument", 21);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Import argument must be a string. Object type is %s instead",
+                            sm_type_name(filePath->my_type));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Check if the file exists using stat
+      struct stat buffer;
+      if (stat(&filePath->content, &buffer) != 0) {
+        sm_symbol *title   = sm_new_symbol("fileNotFound", 12);
+        sm_string *message = sm_new_fstring_at(sms_heap, "File not found: %s", &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+
+      // Attempt to parse the file
+      sm_parse_result presult = sm_parse_file(&(filePath->content));
+      switch (presult.return_val) {
+      case 0:
+        printf("Parsing succeeded.\n");
+        // Return the parsed object if successful (adjust as per your requirements)
+        return sm_engine_eval(presult.parsed_object, current_cx, sf);
+      case 1: {
+        sm_symbol *title = sm_new_symbol("semanticError", 13);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Semantic error encountered in file: %s", &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      case 2: {
+        sm_symbol *title = sm_new_symbol("parsingFailed", 13);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Parsing failed for file: %s", &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      default: {
+        sm_symbol *title   = sm_new_symbol("unknownParsingError", 19);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "An unknown parsing error occurred for file: %s", &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      }
+
+      // Added return to cover all paths
+      return NULL; // Adjust as needed based on your language requirements
+    }
+
+
     default: // unrecognized expr gets returned without evaluation
       return (input);
     } // End of expr case
