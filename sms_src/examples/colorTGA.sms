@@ -9,8 +9,8 @@
 
     # Ensure that rgbArray length matches the expected size
     let expectedSize = width * height * bytesPerPixel;
-    #if (not(size(rgbArray) == expectedSize)) 
-    #  return <tgaFileContentSizeMismatch,"Error: RGB array size does not match width and height.">;
+    if (size(rgbArray) ~= expectedSize) 
+      return <tgaFileContentSizeMismatch,"Error: RGB array size does not match width and height.">;
 
     # Create a buffer for TGA file with header + image data
     let buffer = ui8Repeat([ui8(0)], headerSize + width * height * bytesPerPixel);
