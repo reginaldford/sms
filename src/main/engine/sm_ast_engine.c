@@ -3032,8 +3032,6 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return ((sm_object *)obj0->notes);
       return ((sm_object *)sms_false);
     }
-
-
     case SM_IMPORT_EXPR: {
       // Type check the argument and ensure it is a string
       sm_string *filePath = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
@@ -3044,20 +3042,17 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
                             sm_type_name(filePath->my_type));
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
-
-      // Check if the file exists using stat
-      struct stat buffer;
-      if (stat(&filePath->content, &buffer) != 0) {
-        sm_symbol *title   = sm_new_symbol("fileNotFound", 12);
-        sm_string *message = sm_new_fstring_at(sms_heap, "File not found: %s", &filePath->content);
-        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      // If sm_path_find returns a string, the file was found
+      // If it returns sms_false, the file was not fount
+      sm_string *searchResult = (sm_string *)sm_path_find(filePath);
+      if (searchResult->my_type != SM_STRING_TYPE) {
+        fprintf(stderr, "search didnt find file in local or path\n");
+        return (sm_object *)sms_false;
       }
-
       // Attempt to parse the file
-      sm_parse_result presult = sm_parse_file(&(filePath->content));
+      sm_parse_result presult = sm_parse_file(&searchResult->content);
       switch (presult.return_val) {
       case 0:
-        printf("Parsing succeeded.\n");
         // Return the parsed object if successful (adjust as per your requirements)
         return sm_engine_eval(presult.parsed_object, current_cx, sf);
       case 1: {
@@ -3079,12 +3074,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       }
-
       // Added return to cover all paths
       return NULL; // Adjust as needed based on your language requirements
     }
-
-
     default: // unrecognized expr gets returned without evaluation
       return (input);
     } // End of expr case

@@ -123,3 +123,4 @@ enum sm_object_type {
 #include "engine/op/stack.h"
 #include "memory/sm_heap_set.h"
 #include "memory/sm_img.h"
+#include "engine/sm_find_source.h"
