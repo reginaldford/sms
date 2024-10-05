@@ -2,6 +2,10 @@
 
 #include "../sms.h"
 
+extern void *gbptr1;
+extern void *gbptr2;
+
+
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
   // if (sm_is_within_heap(obj,sms_heap))
@@ -171,10 +175,24 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
     // Unlink parser output
     sm_global_parser_output((sm_object *)sms_false);
 
+    // fix c ptrs
+    // lldb note:
+    // sms_dbg`sm_new_error(title_len=12, title_str="typeMismatch", message_len=73,
+    // message_str="Wrong type for argument 1 on +. Argument type is: ptr , but Expected: f64",
+    // sourceLen=13, source="benchmark.sms", line=25) at sm_error.c:29:32
+    uint64_t x = 0;
+    gbptr2     = &x;
+    for (sm_object **ptr = gbptr1; ptr > (sm_object **)gbptr2;
+         ptr             = (sm_object **)((char *)ptr) - 4) {
+      sm_object *found = *ptr;
+      if (sm_is_within_heap(found, from_heap) && found->my_type < 20) {
+        printf(".");
+        *ptr = sm_meet_object(to_heap, from_heap, found);
+      }
+    }
 
     // Inflate
     sm_inflate_heap(from_heap, to_heap);
-
 
     // For tracking purposes
     sm_gc_count(1);

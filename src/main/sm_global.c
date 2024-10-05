@@ -3,6 +3,8 @@
 #include "sms.h"
 
 // Global object pointers
+void       *gbptr1;
+void       *gbptr2;
 sm_heap_set sms_all_heaps;
 sm_heap    *sms_heap;
 sm_heap    *sms_other_heap;

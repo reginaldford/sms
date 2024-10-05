@@ -9,6 +9,9 @@ extern sm_symbol   *sms_false;
 extern sm_heap     *sms_symbol_heap;
 extern sm_heap     *sms_symbol_name_heap;
 extern sm_heap_set *sms_all_heaps;
+extern void        *gbptr1;
+extern void        *gbptr2;
+
 
 // For rounding up object size to the next multiple of 4 bytes.
 uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
@@ -30,10 +33,16 @@ void *sm_malloc(uint32_t size) {
   uint32_t bytes_used      = sms_heap->used;
   uint32_t next_bytes_used = sms_heap->used + size;
   if (next_bytes_used > sms_heap->capacity) {
-    // sm_garbage_collect();
-    next_bytes_used = sms_heap->used + size;
+    // Cleanup
+    gbptr2 = &bytes_used;
+    if (!sms_other_heap)
+      sms_other_heap = sm_new_heap(sms_heap->capacity);
+    sm_garbage_collect(sms_heap, sms_other_heap);
+    // Empty this heap and Swap heaps
+    sm_swap_heaps(&sms_heap, &sms_other_heap);
+    sms_other_heap->used = 0;
+    next_bytes_used      = sms_heap->used + size;
     if (next_bytes_used > sms_heap->capacity) {
-      // TODO: dynamic heap size
       fprintf(stderr, "Exhausted heap memory.\n");
       exit(1);
     }

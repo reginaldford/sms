@@ -3,8 +3,9 @@
 #include "sms.h"
 #include "../bison_flex/y.tab.h"
 
-extern int yylineno;
-
+extern int   yylineno;
+extern void *gbptr1;
+extern void *gbptr2;
 // Prints intro
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
@@ -39,6 +40,9 @@ void start_repl(sm_env *env) {
     // Read
     sm_parse_result pr = sm_terminal_prompt(env->plain_mode);
     if (!pr.return_val && pr.parsed_object) {
+      // Before we eval, let's save a ptr to stack frame.
+      int x  = 4;
+      gbptr1 = &x;
       // Evaluate
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       // Print
@@ -50,10 +54,8 @@ void start_repl(sm_env *env) {
       if (!sms_other_heap)
         sms_other_heap = sm_new_heap(sms_heap->capacity);
       sm_garbage_collect(sms_heap, sms_other_heap);
-
       // Empty this heap and Swap heaps
       sm_swap_heaps(&sms_heap, &sms_other_heap);
-
       fflush(stdout);
       // Count this as a line
       yylineno++;
@@ -75,6 +77,8 @@ void run_file(char *file_path, sm_env *env) {
     clean_exit(env, 1);
   }
   if (pr.parsed_object != NULL) {
+    // Before we eval, let's save a ptr to stack frame.
+    gbptr1 = &pr;
     sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
   }
 }
