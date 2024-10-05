@@ -180,8 +180,8 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
     gbptr2     = &x;
     for (sm_object **ptr = gbptr1; ptr > (sm_object **)gbptr2; ptr -= 1) {
       sm_object *found = *ptr;
+      // We are updating pointers in the c callstack. Watch for false alerts.
       if (sm_is_within_heap(found, from_heap) && found->my_type <= 20) {
-        printf(".");
         *ptr = sm_meet_object(from_heap, to_heap, found);
       }
     }

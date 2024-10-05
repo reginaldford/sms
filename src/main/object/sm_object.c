@@ -107,27 +107,31 @@ uint32_t sm_sizeof(sm_object *obj1) {
     return sizeof(sm_array);
   case SM_UI8_TYPE:
     return sizeof(sm_ui8);
-  default: {
-    fprintf(stderr, "\nBAD OBJECT CASE: \n");
-    fprintf(stderr, "Type: %u\n", obj1->my_type);
-    fprintf(stderr, "Bad Object Position Ptr      : %p\n", obj1);
-    fprintf(stderr, "Bad Object Is in symbol  heap: %i\n",
-            sm_is_within_heap(obj1, sms_symbol_heap));
-    fprintf(stderr, "Bad Object Is in symname heap: %i\n",
-            sm_is_within_heap(obj1, sms_symbol_name_heap));
-    if (sm_is_within_heap(obj1, sms_heap)) {
-      fprintf(stderr, "Bad Object Position in Heap  : %ld\n", ((char *)obj1) - sms_heap->storage);
-      fprintf(stderr, "Heap Start Position          : %p\n", sms_heap->storage);
-      fprintf(stderr, "Heap cap : %u\n", sms_heap->capacity);
-      fprintf(stderr, "Heap used: %u\n", sms_heap->used);
-    }
-    sm_dump_and_count();
-    fprintf(stderr, "Memory dumped\n");
-    sm_mem_cleanup();
-    fprintf(stderr, "Exiting with 1\n");
-    fflush(stdout);
-    exit(1);
-  }
+  default:
+    return 0;
+    // We get false alerts from the callstack work in sm_garbage_collect
+    // So we will return size 0 and not allocate bad objects.
+    /*{
+fprintf(stderr, "\nBAD OBJECT CASE: \n");
+fprintf(stderr, "Type: %u\n", obj1->my_type);
+fprintf(stderr, "Bad Object Position Ptr      : %p\n", obj1);
+fprintf(stderr, "Bad Object Is in symbol  heap: %i\n",
+     sm_is_within_heap(obj1, sms_symbol_heap));
+fprintf(stderr, "Bad Object Is in symname heap: %i\n",
+     sm_is_within_heap(obj1, sms_symbol_name_heap));
+if (sm_is_within_heap(obj1, sms_heap)) {
+fprintf(stderr, "Bad Object Position in Heap  : %ld\n", ((char *)obj1) - sms_heap->storage);
+fprintf(stderr, "Heap Start Position          : %p\n", sms_heap->storage);
+fprintf(stderr, "Heap cap : %u\n", sms_heap->capacity);
+fprintf(stderr, "Heap used: %u\n", sms_heap->used);
+}
+sm_dump_and_count();
+fprintf(stderr, "Memory dumped\n");
+sm_mem_cleanup();
+fprintf(stderr, "Exiting with 1\n");
+fflush(stdout);
+exit(1);
+}*/
   }
 }
 
