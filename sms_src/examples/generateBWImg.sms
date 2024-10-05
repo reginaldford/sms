@@ -3,7 +3,9 @@
 
 {
   # Include the bwTGA library
-  eval(fileParse("bwTGA.sms"));
+  let bwTGA = import "bwTGA.sms";
+
+  cxLet(parent(_scratch),:_errHandler,(x)=>{putLn(str(x));x});
 
   # Image dimensions
   let width = 256;
