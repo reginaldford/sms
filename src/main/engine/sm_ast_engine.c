@@ -3046,14 +3046,21 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       // If it returns sms_false, the file was not fount
       sm_string *searchResult = (sm_string *)sm_path_find(filePath);
       if (searchResult->my_type != SM_STRING_TYPE) {
-        fprintf(stderr, "search didnt find file in local or path\n");
+        fprintf(stderr, "search didnt find file in current working directory or SMS_PATH\n");
+        sm_symbol *title = sm_new_symbol("importError", 11);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap,
+                            "could not find file after searching current working directory and "
+                            "paths in SMS_PATH environment variable: %s",
+                            &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
         return (sm_object *)sms_false;
       }
       // Attempt to parse the file
       sm_parse_result presult = sm_parse_file(&searchResult->content);
       switch (presult.return_val) {
       case 0:
-        // Return the parsed object if successful (adjust as per your requirements)
+        // Return the parsed object if successful
         return sm_engine_eval(presult.parsed_object, current_cx, sf);
       case 1: {
         sm_symbol *title = sm_new_symbol("semanticError", 13);
@@ -3068,14 +3075,12 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       default: {
-        sm_symbol *title   = sm_new_symbol("unknownParsingError", 19);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "An unknown parsing error occurred for file: %s", &filePath->content);
+        sm_symbol *title = sm_new_symbol("parsingError", 12);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "A parsing error occurred for file: %s", &filePath->content);
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       }
-      // Added return to cover all paths
-      return NULL; // Adjust as needed based on your language requirements
     }
     default: // unrecognized expr gets returned without evaluation
       return (input);
