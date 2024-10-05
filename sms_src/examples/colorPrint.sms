@@ -1,5 +1,7 @@
 #!/usr/local/bin/sms
-# User sms -i colorPrint.sms , then
+# Import this library with a line like:
+# let c = import "colorPrint.sms";
+# Then use commands like c.print(c.red,"Test");
 # For convenience, let c=colorPrint, and use c.draw(int, msg)
 {
   let esc = "\x1b";
@@ -26,6 +28,6 @@
   let reset_color = "\x1b[0m";
   # Careful not to include the colors in the msg
   let print = (num,msg) => put(colors[mod(round(num),size(colors)-1)] str+ msg);
-  # Put this in the parent of _scratch
-  cxLet(parent(_scratch),:colorPrint,self);
+  # Return this context as a library
+  self;
 };

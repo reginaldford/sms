@@ -1,9 +1,6 @@
 %{
 // The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "../main/sms.h"
 #include "y.tab.h"
 
@@ -271,6 +268,8 @@ errMessage    {return ERR_MESSAGE;}
 errSource     {return ERR_SOURCE;}
 errLine       {return ERR_LINE;}
 errNotes      {return ERR_NOTES;}
+
+import { return IMPORT; }
 
 _thisProcess   {return THISPROCESS;}
 _gc            {return GC;}

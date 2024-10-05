@@ -60,7 +60,7 @@
       return true;
     } else return <tgaWriteErr,"Error: Failed to create TGA file.">;
   };
-  # Expose the write function for usage
-  let success = cxLet(parent(_scratch), :bwTGA, self);
+  # Return this context as a library
+  self;
 };
 

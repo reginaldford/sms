@@ -12,10 +12,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/wait.h>
 #include <termios.h>
 #include <time.h>
-#include <sys/time.h>
 #include <unistd.h>
 
 #define f64 double
@@ -27,7 +27,7 @@
 #endif
 
 // Set version number. Major.Minor.Patch
-#define SMS_VERSION "0.21.47"
+#define SMS_VERSION "0.21.48"
 #define SMS_VERSION_LEN 7
 
 /// These are the major object types of SMS
@@ -123,3 +123,4 @@ enum sm_object_type {
 #include "engine/op/stack.h"
 #include "memory/sm_heap_set.h"
 #include "memory/sm_img.h"
+#include "engine/sm_find_source.h"

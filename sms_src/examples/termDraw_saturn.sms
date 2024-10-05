@@ -3,7 +3,7 @@
 # Then runs a for loop to fill up the screen with numbers
 {
   # Artistic engine
-  let printChar=(x,y)=>{
+  let printChar=(x,y,tWidth)=>{
     x=x**1.5/3;
     y=y**1.15/3;
     let v = abs(
@@ -17,10 +17,16 @@
     put(s);
   };
   
-  # Run the f64 for loop
-  let tWidth = parse(osExecToStr("tput cols")[1]);
-  let tHeight = parse(osExecToStr("tput lines")[1])-2;
-  for(let x=0;x<tHeight;x=x+1)
-    for(let y=0;y<tWidth;y=y+1)
-      printChar(x,y);
+  let draw = () => {
+    # Run the f64 for loop
+    let tWidth = parse(osExecToStr("tput cols")[1]);
+    let tHeight = parse(osExecToStr("tput lines")[1])-2;
+    for(let x=0;x<tHeight;x=x+1)
+      for(let y=0;y<tWidth;y=y+1)
+        printChar(x,y,tWidth);
+  };
+  draw();
+
+  # Return this context as a library
+  self;
 };

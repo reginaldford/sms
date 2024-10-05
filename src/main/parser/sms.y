@@ -314,7 +314,8 @@ int parsing_fpath_len;
 %token <expr> ERR_SOURCE
 %token <expr> ERR_LINE
 %token <expr> ERR_NOTES
-%token <expr> ERR_CASE
+
+%token <expr> IMPORT
 
 %token <expr> DATE_STR
 %token <expr> DATE
@@ -583,6 +584,7 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | ERR_SOURCE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRSOURCE_EXPR,(sm_object*)$3,_note());}
 | ERR_LINE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRLINE_EXPR,(sm_object*)$3,_note());}
 | ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERRNOTES_EXPR,(sm_object*)$3,_note());}
+| IMPORT STRING  { $$ = sm_new_expr(SM_IMPORT_EXPR,(sm_object*)$2,_note());}
 
 ERROR : '<' '>' { $$ = sm_new_error(0,NULL,0 ,NULL,parsing_fpath_len,parsing_fpath,yylineno);}
 | '<' SYM '>' {
