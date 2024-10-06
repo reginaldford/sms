@@ -9,8 +9,8 @@ extern sm_symbol   *sms_false;
 extern sm_heap     *sms_symbol_heap;
 extern sm_heap     *sms_symbol_name_heap;
 extern sm_heap_set *sms_all_heaps;
-extern void        *gbptr1;
-extern void        *gbptr2;
+extern void        *memory_marker1;
+extern void        *memory_marker2;
 
 
 // For rounding up object size to the next multiple of 4 bytes.
@@ -34,7 +34,7 @@ void *sm_malloc(uint32_t size) {
   uint32_t next_bytes_used = sms_heap->used + size;
   if (next_bytes_used > sms_heap->capacity) {
     // Cleanup
-    gbptr2 = &bytes_used;
+    memory_marker2 = &bytes_used;
     if (!sms_other_heap)
       sms_other_heap = sm_new_heap(sms_heap->capacity);
     sm_garbage_collect(sms_heap, sms_other_heap);

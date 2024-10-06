@@ -109,8 +109,7 @@ uint32_t sm_sizeof(sm_object *obj1) {
     return sizeof(sm_ui8);
   default:
     return 0;
-    // We get false alerts from the callstack work in sm_garbage_collect
-    // So we will return size 0 and not allocate bad objects.
+    // We get false alerts from the callstack scan in sm_garbage_collect
     /*{
 fprintf(stderr, "\nBAD OBJECT CASE: \n");
 fprintf(stderr, "Type: %u\n", obj1->my_type);

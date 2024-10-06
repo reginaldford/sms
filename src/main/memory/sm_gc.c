@@ -2,8 +2,17 @@
 
 #include "../sms.h"
 
-extern void *gbptr1;
-extern void *gbptr2;
+extern void **memory_marker1;
+extern void **memory_marker2;
+
+bool sm_is_sensible_object(sm_object *obj) {
+  if (sm_is_within_heap(obj, sms_heap) && obj->my_type <= 20) {
+    size_t size = sm_sizeof(obj);
+    if (size)
+      return true;
+  }
+  return false;
+}
 
 
 // Copy the object
@@ -50,6 +59,18 @@ sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
   } else
     return obj;
 }
+sm_object *sm_meet_object_safely(sm_heap *source, sm_heap *dest, sm_object *obj) {
+  // Only gc objects from sms_other_heap, which used to be sms_heap
+  if (sm_is_sensible_object(obj)) {
+    uint32_t obj_type = obj->my_type;
+    if (obj_type == SM_POINTER_TYPE)
+      return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
+    else
+      return sm_move_to_new_heap(dest, obj);
+  } else
+    return obj;
+}
+
 
 // Copy the objects referenced by the current_obj into the new heap
 // and copy all referenced objects until all possible references are copied
@@ -165,26 +186,22 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
     if (to_heap == NULL)
       to_heap = sm_new_heap(from_heap->capacity);
 
-    // Empty the original from_heap
-    to_heap->used = 0;
+    // fix c ptrs
+    void *x                  = NULL;
+    memory_marker2           = &x;
+    ptrdiff_t scan_direction = memory_marker1 > memory_marker2 ? -1 : 1;
+    for (void **ptr = memory_marker1; ptr > memory_marker2; ptr += scan_direction) {
+      // We are updating pointers in the c callstack. Watch for false alerts.
+      if (sm_is_sensible_object(*ptr))
+        *ptr = sm_meet_object(from_heap, to_heap, *ptr);
+    }
 
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
-      (sm_cx *)sm_move_to_new_heap(to_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
+      sm_meet_object(from_heap, to_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
 
     // Unlink parser output
     sm_global_parser_output((sm_object *)sms_false);
-
-    // fix c ptrs
-    uint64_t x = 0;
-    gbptr2     = &x;
-    for (sm_object **ptr = gbptr1; ptr > (sm_object **)gbptr2; ptr -= 1) {
-      sm_object *found = *ptr;
-      // We are updating pointers in the c callstack. Watch for false alerts.
-      if (sm_is_within_heap(found, from_heap) && found->my_type <= 20) {
-        *ptr = sm_meet_object(from_heap, to_heap, found);
-      }
-    }
 
     // Inflate
     sm_inflate_heap(from_heap, to_heap);
