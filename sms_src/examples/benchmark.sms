@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm64
+#!/usr/local/bin/sms -qm128
 #Use this to benchmark something
 {
   let _errHandler=(x)=>{putLn(str(x));x;};
