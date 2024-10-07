@@ -83,7 +83,9 @@ void run_file(char *file_path, sm_env *env) {
   if (pr.parsed_object != NULL) {
     // Before we eval, let's save a ptr to stack frame.
     memory_marker1 = &pr;
+    evaluating     = true;
     sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+    evaluating = false;
   }
 }
 
