@@ -15,7 +15,7 @@ sm_object *sm_path_find(sm_string *needle) {
     return (sm_object *)sms_false; // Invalid needle
   }
 
-  char cwd[PATH_MAX];
+  char cwd[pathconf("/", _PC_PATH_MAX)];
   if (getcwd(cwd, sizeof(cwd)) == NULL) {
     return (sm_object *)sms_false; // Failed to get the current working directory
   }
