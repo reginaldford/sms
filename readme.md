@@ -1,5 +1,4 @@
 ![GitHub](https://img.shields.io/github/license/reginaldford/sms)
-![Lines of code](https://img.shields.io/tokei/lines/github/reginaldford/sms)
 ![GitHub top language](https://img.shields.io/github/languages/top/reginaldford/sms) 
 ![GitHub language count](https://img.shields.io/github/languages/count/reginaldford/sms)
 ![GitHub all releases](https://img.shields.io/github/downloads/reginaldford/sms/total)
@@ -27,12 +26,9 @@ For example, taking a derivative of `sin(x)` with respect to `x` may be done wit
 
 The following is 'hello world' in SMS:
 
-`putln("Hello world!");`
+`putLn("Hello world!");`
 
-SMS versions have 2 significant figures (like 0.190) during a milestone point. During these versions, development focuses on documentation, unit tests, and bugs.
-
-SMS versions with 3 significant figures (like 0.191) are in feature development, so they may lack documentation for new features, and might have unannounced changes to existing features, are are generally less stable than the milestone versions. This readme is only syncronized with the last milestone version.
-
+SMS Versions have 3 numbers: the Major, Minor and Patch numbers.
 
 # Cheat Sheet
 
@@ -50,7 +46,7 @@ Line comments start with `#`.
 
     4. a / b ; # Divide a by b
 
-    5. a ^ b; # Raise a to the power of b
+    5. a ** b; # Raise a to the power of b
 
     6. sin(x); cos(x); tan(x); # Trig functions
 
@@ -122,11 +118,11 @@ Line comments start with `#`.
 
     9. map( function, expression ) # return a new array where each element is the result of applying function to the correlating element of the given expression
 
-    10. not( boolean ) # if boolean is false, returns true, otherwise, returns false
+    10. ~x # if boolean is false, returns true, otherwise, returns false
 
-    11. EXPR or EXPR # returns true of either expression is true, else false
+    11. EXPR || EXPR # returns true of either expression is true, else false
 
-    12. EXPR and EXPR # returns true of both expressions are true, else false
+    12. EXPR && EXPR # returns true of both expressions are true, else false
 
     13. exit(n); # quit SMS and return this integer to the OS as the command return value
 
@@ -214,7 +210,7 @@ Line comments start with `#`.
 
     9. put(s1); # Print the string s1
 
-    10. putln(s1); # Print the string s1 and go to the next line
+    10. putLn(s1); # Print the string s1 and go to the next line
 
     11. strSplit(haystack,needle); # Return an array of strings which are the parts of haystack, split up by instances of needle
 
@@ -223,9 +219,9 @@ Line comments start with `#`.
 <details>
   <summary>Files</summary>
 
-    1. fileRead("test.txt"); #reads test.txt , paths are relative to the working directory
+    1. fileReadStr("test.txt"); #reads test.txt , paths are relative to the working directory
 
-    2. fileWrite(fname, content); # takes a string for the file name to write to, and a string for the content to write
+    2. fileWriteStr(fname, content); # takes a string for the file name to write to, and a string for the content to write
 
     3. fileParse(fname); # Parses the file into a single object
 
@@ -234,6 +230,8 @@ Line comments start with `#`.
     5. pwd(); # returns the working directory
 
     6. ls() ; # show files and directories at the current working directory
+
+    7. import "filename.sms" # will find the file in PATH, execute it and return the result
 
 </details>
 
@@ -283,11 +281,11 @@ Line comments start with `#`.
 
 <details>
   <summary>Functions</summary>
-    1. let myFunc = (x,y)=>sqrt(x^2+y^2); # Make a function that depends on x and y
+    1. let myFunc = (x,y)=>sqrt(x**2+y**2); # Make a function that depends on x and y
     
     2. let f = fnSetParent(myFunc,parent(self)); # An example of changing the parent context of a function. Check fnSetParent.sms
     
-    3. fnXp((x)=>x^2); # Would return x^2 as an expression. same as :(x^2)
+    3. fnXp((x)=>x**2); # Would return x**2 as an expression. same as :(x^2)
     
     4. fnSetXp(funcion, :(expression)); # Mutate the function to have new content
     
@@ -344,24 +342,23 @@ This command builds the executable and copies it to /usr/local/bin/sms
 - [x] Turing completeness.
 - [x] Recursive function calls.
 - [x] Local variables are implemented as array indices, making them relatively fast.
-- [x] Large expressions can be parsed and processed with this program. If a collection item is too large to parse, it's because: 1) The memory available at the time of execution is too low. 2) You are parsing more than 4.29 billion elements/characters into a single array or string, or: 3) You are using `-m 4000000` to provide the maximum heap size (4 terrabytes), and have used all of the memory while parsing. Also, contexts have a max capacity of 64^32 entries and contexts do not need to be moved in memory to grow to any size.
 - [x] `diff` command for automatic differentiation. Use `diff(:(any_expression),:any_symbol)` and SMS will return the derivative of `any_expression` with respect to `any_symbol`.
 - [x] `simp` command for simplifying expressions. Use `simp(:(any_expression))` and SMS will return a simplified version of `any_expression` or it will return the input.
 - [x] Example scripts are located in `sms_src` directory.
 - [x] Process forking support. Use the osFork() command to build multiprocessing SMS programs. Also, use osExec to run other programs.
 - [x] Variable mapping uses mapped tries. Variable lookup times are reasonably fast and remain constant for any size context.
 - [x] Syntax errors are useful and line-specific, whether from terminal or interpreting a file.
+- [x] 'Last moment' garbage collection.
+- [x] Terminal history support
 
 
 # Plans:
-- [ ] Terminal history support
 - [ ] Parser in C (instead of bison/flex)
 - [ ] Allow parser extention functions.
 - [ ] Manual (not just the cheat sheet).
 - [ ] Design documentation.
 - [ ] Instructions for adding primitive functions written in C
 - [ ] Ability to call dynamic library functions
-- [ ] 'Last moment' garbage collection.
 - [ ] Generational garbage collection
 - [ ] Bytecode generation and execution
 - [ ] Tail call optimization.
