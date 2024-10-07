@@ -4,6 +4,7 @@
 
 extern void **memory_marker1;
 extern void **memory_marker2;
+extern bool   evaluating;
 
 bool sm_is_sensible_object(sm_object *obj) {
   if (sm_is_within_heap(obj, sms_heap) && ((intptr_t)obj) % (sizeof(size_t) / 2) == 0 &&
@@ -176,15 +177,18 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
       to_heap = sm_new_heap(from_heap->capacity);
     // For when we recycle a heap...
     to_heap->used = 0;
-    // fix c ptrs
-    void *x          = NULL;
-    memory_marker2   = &x;
-    void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
-    void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-    for (char **ptr = (char **)lowerPtr; ptr < (char **)higherPtr; ptr++) {
-      // We are updating pointers in the c callstack. Watch for false alerts.
-      if (sm_is_sensible_object((sm_object *)*ptr))
-        *ptr = (char *)sm_meet_object(from_heap, to_heap, (sm_object *)*ptr);
+
+    if (evaluating) {
+      // Fix c callstack ptrs
+      void *x          = NULL;
+      memory_marker2   = &x;
+      void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
+      void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
+      for (char **ptr = (char **)lowerPtr; ptr < (char **)higherPtr; ptr++) {
+        // We are updating pointers in the c callstack. Watch for false alerts.
+        if (sm_is_sensible_object((sm_object *)*ptr))
+          *ptr = (char *)sm_meet_object(from_heap, to_heap, (sm_object *)*ptr);
+      }
     }
 
     // Copy root (global context)
@@ -192,8 +196,11 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
       sm_meet_object(from_heap, to_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
 
     // Treat parser output as root
-    // sm_global_parser_output(sm_meet_object(from_heap, to_heap, sm_global_parser_output(NULL)));
-    sm_global_parser_output((sm_object *)sms_false);
+    if (evaluating)
+      sm_global_parser_output(sm_meet_object(from_heap, to_heap, sm_global_parser_output(NULL)));
+    // Or set parser output to false
+    else
+      sm_global_parser_output((sm_object *)sms_false);
 
     // Inflate
     sm_inflate_heap(from_heap, to_heap);

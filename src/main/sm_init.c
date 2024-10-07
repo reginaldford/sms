@@ -10,6 +10,7 @@ extern uint32_t            sms_num_symbols;
 extern sm_stack           *sms_callstack;
 extern const char         *sms_version;
 extern const int           sms_version_len;
+extern bool                evaluating;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Set version number. Major.Minor.Patch
@@ -84,6 +85,9 @@ void sm_init(sm_env *env, int num_args, char **argv) {
 
   // linenoise setup
   linenoiseSetCompletionCallback(sm_terminal_completion);
+
+  // Set Evaluating global
+  evaluating = false;
 
   // Done
   env->initialized = true;

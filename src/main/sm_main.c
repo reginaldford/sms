@@ -6,6 +6,8 @@
 extern int   yylineno;
 extern void *memory_marker1;
 extern void *memory_marker2;
+extern bool  evaluating;
+
 // Prints intro
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
@@ -44,7 +46,9 @@ void start_repl(sm_env *env) {
       int x          = 4;
       memory_marker1 = &x;
       // Evaluate
+      evaluating        = true;
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      evaluating        = false;
       // Print
       sm_string *result_str = sm_object_to_string(result);
       printf("%s", sm_terminal_fg_color(SM_TERM_B_WHITE));
