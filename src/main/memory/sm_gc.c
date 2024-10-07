@@ -6,8 +6,9 @@ extern void **memory_marker1;
 extern void **memory_marker2;
 
 bool sm_is_sensible_object(sm_object *obj) {
-  if (sm_is_within_heap(obj, sms_heap) && obj->my_type <= 20) {
-    size_t size = sm_sizeof(obj);
+  if (sm_is_within_heap(obj, sms_heap) && ((intptr_t)obj) % (sizeof(size_t) / 2) == 0 &&
+      obj->my_type <= SM_UNKNOWN_TYPE) {
+    uint32_t size = sm_sizeof(obj);
     if (size)
       return true;
   }
@@ -59,18 +60,6 @@ sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
   } else
     return obj;
 }
-sm_object *sm_meet_object_safely(sm_heap *source, sm_heap *dest, sm_object *obj) {
-  // Only gc objects from sms_other_heap, which used to be sms_heap
-  if (sm_is_sensible_object(obj)) {
-    uint32_t obj_type = obj->my_type;
-    if (obj_type == SM_POINTER_TYPE)
-      return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
-    else
-      return sm_move_to_new_heap(dest, obj);
-  } else
-    return obj;
-}
-
 
 // Copy the objects referenced by the current_obj into the new heap
 // and copy all referenced objects until all possible references are copied
@@ -185,22 +174,25 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
     // Build "to" heap if necessary, same size as current
     if (to_heap == NULL)
       to_heap = sm_new_heap(from_heap->capacity);
-
+    // For when we recycle a heap...
+    to_heap->used = 0;
     // fix c ptrs
-    void *x                  = NULL;
-    memory_marker2           = &x;
-    ptrdiff_t scan_direction = memory_marker1 > memory_marker2 ? -1 : 1;
-    for (void **ptr = memory_marker1; ptr > memory_marker2; ptr += scan_direction) {
+    void *x          = NULL;
+    memory_marker2   = &x;
+    void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
+    void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
+    for (char **ptr = (char **)lowerPtr; ptr < (char **)higherPtr; ptr++) {
       // We are updating pointers in the c callstack. Watch for false alerts.
-      if (sm_is_sensible_object(*ptr))
-        *ptr = sm_meet_object(from_heap, to_heap, *ptr);
+      if (sm_is_sensible_object((sm_object *)*ptr))
+        *ptr = (char *)sm_meet_object(from_heap, to_heap, (sm_object *)*ptr);
     }
 
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
       sm_meet_object(from_heap, to_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
 
-    // Unlink parser output
+    // Treat parser output as root
+    // sm_global_parser_output(sm_meet_object(from_heap, to_heap, sm_global_parser_output(NULL)));
     sm_global_parser_output((sm_object *)sms_false);
 
     // Inflate

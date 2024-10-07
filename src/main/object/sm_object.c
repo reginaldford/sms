@@ -76,7 +76,7 @@ uint32_t sm_sizeof(sm_object *obj1) {
   case SM_PRIMITIVE_TYPE:
     return sizeof(sm_expr);
   case SM_STRING_TYPE:
-    return sizeof(sm_string) + sm_round_size(((sm_string *)obj1)->size);
+    return sizeof(sm_string) + sm_round_size64(((sm_string *)obj1)->size);
   case SM_SYMBOL_TYPE:
     return sizeof(sm_symbol);
   case SM_CX_TYPE:
@@ -94,7 +94,7 @@ uint32_t sm_sizeof(sm_object *obj1) {
   case SM_LOCAL_TYPE:
     return sizeof(sm_local);
   case SM_SPACE_TYPE:
-    return sizeof(sm_space) + sm_round_size(((sm_space *)obj1)->size);
+    return sizeof(sm_space) + sm_round_size64(((sm_space *)obj1)->size);
   case SM_SELF_TYPE:
     return sizeof(struct sm_self);
   case SM_ERR_TYPE:
