@@ -34,9 +34,9 @@ void *sm_malloc(uint32_t size) {
   uint32_t next_bytes_used = sms_heap->used + size;
   if (next_bytes_used > sms_heap->capacity) {
     // Cleanup
-    memory_marker2 = &bytes_used;
     if (!sms_other_heap)
       sms_other_heap = sm_new_heap(sms_heap->capacity);
+    memory_marker2 = __builtin_frame_address(0);
     sm_garbage_collect(sms_heap, sms_other_heap);
     // Empty this heap and Swap heaps
     sm_swap_heaps(&sms_heap, &sms_other_heap);
