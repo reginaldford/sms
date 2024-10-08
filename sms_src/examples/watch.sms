@@ -1,8 +1,16 @@
-#!/usr/local/bin/sms -qm 1.1
-# Tiny rendition of the linux 'watch' program
+#!/usr/local/bin/sms -qm18k
+#Tiny rendition of the linux 'watch' program
 {
   let cmd = _args[size(_args) - 1];
-  while(true){
+  let firstChar = strPart(cmd, 0, 1);
+  let firstWord = strSplit(cmd," ")[0];
+  # Checking if a realistic command was provided. 
+  if((firstWord == "./watch.sms") || (firstChar == "-")){
+    putLn("provide a command to execute every 1 second.");
+    exit(1);
+  };
+
+  while (true) {
     osExec("clear");
     osExec(cmd);
     sleep(1000);

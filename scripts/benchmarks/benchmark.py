@@ -2,7 +2,7 @@
 #!/usr/local/bin/python
 import time
 
-num_to_fib=31;
+num_to_fib=36;
 
 def fibonacci_recursive(n):
     if n <= 1:

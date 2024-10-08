@@ -180,8 +180,7 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
 
     if (evaluating) {
       // Fix c callstack ptrs
-      void *x          = NULL;
-      memory_marker2   = &x;
+      memory_marker2   = __builtin_frame_address(0);
       void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
       void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
       for (char **ptr = (char **)lowerPtr; ptr < (char **)higherPtr; ptr++) {
@@ -210,7 +209,8 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
   }
   // Report memory stat
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
-    putc('\n', stdout);
+    if (!evaluating)
+      putc('\n', stdout);
     printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
     putc('(', stdout);
     sm_print_fancy_bytelength((long long)to_heap->used);
@@ -218,5 +218,7 @@ void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
     sm_print_fancy_bytelength((long long)to_heap->capacity);
     putc(')', stdout);
     printf("%s", sm_terminal_reset());
+    if (evaluating)
+      putc('\n', stdout);
   }
 }

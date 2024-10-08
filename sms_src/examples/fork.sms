@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -m300
+#!/usr/local/bin/sms -m16
 
 # Requires lots of RAM until last moment gc is implemented.
 # We run fib twice simultaneously with different size jobs
@@ -22,7 +22,7 @@
       putLn("Child 2: answer: " str+ str(fib(n2)));
   };
 
-  if( not( pid1 == 0) and not(pid2==0) )
+  if( (pid1 ~= 0) && (pid2~=0) )
   { putLn("Parent: Child 1 has pid " str+ str(pid1));
     putLn("Parent: Child 2 has pid " str+ str(pid2));
     let done1 = osWait();
@@ -30,7 +30,7 @@
       " Completed with Return Code: " str+ str(done1[1]));
   };
 
-  if(  not( pid1 == 0) and not(pid2==0) )
+  if( ( pid1 ~= 0) && (pid2 ~= 0) )
   { let done2 = osWait();
     putLn("Parent: Program with pid " str+ str(done2[0]) str+
       " Completed with Return Code: " str+ str(done2[1]));

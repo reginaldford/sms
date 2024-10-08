@@ -43,8 +43,9 @@ void start_repl(sm_env *env) {
     sm_parse_result pr = sm_terminal_prompt(env->plain_mode);
     if (!pr.return_val && pr.parsed_object) {
       // Before we eval, let's save a ptr to stack frame.
-      int x          = 4;
-      memory_marker1 = &x;
+      void *x = NULL;
+      // memory_marker1 = &x;
+      memory_marker1 = __builtin_frame_address(0);
       // Evaluate
       evaluating        = true;
       sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
@@ -178,8 +179,11 @@ int main(int num_args, char *argv[]) {
         printf("Parser returned nothing.\n");
         clean_exit(&env, 1);
       }
+      memory_marker1 = &pr;
+      evaluating     = true;
       sm_object *evaluated =
         sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      evaluating          = false;
       sm_string *response = sm_object_to_string(evaluated);
       printf("%s\n", &(response->content));
       fflush(stdout);

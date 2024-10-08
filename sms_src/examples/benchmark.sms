@@ -1,11 +1,19 @@
-#!/usr/local/bin/sms -qm128
+#!/usr/local/bin/sms -m8
 #Use this to benchmark something
 {
-  let _errHandler=(x)=>{putLn(str(x));x;};
-  let t1 =[];
-  let t2 =[];
-  let time_elapsed =0;
-  let a =0;
+  let _errHandler = (x) => {
+    putLn(str(x));
+    x;
+  };
+  if (isErr(parse(_args[size(_args) - 1]) + 0)) {
+    putLn("Provide an integer as command line argument");
+    exit(1);
+  };
+
+  let t1           = [];
+  let t2           = [];
+  let time_elapsed = 0;
+  let a            = 0;
   let benchmark = (e) => {
     putLn("Benchmarking: " str+ str(e));
 
@@ -14,14 +22,10 @@
     t2 = time();
 
     putLn("Total time:");
-    time_elapsed = 1000 * (t2[0] - t1[0]) +  0.001 * (t2[1] - t1[1]);
-    putLn(str(time_elapsed) str+ " milliseconds")
+    time_elapsed = 1000 * (t2[0] - t1[0]) + 0.001 * (t2[1] - t1[1]);
+    putLn(str(time_elapsed) str+ " milliseconds");
   };
 
-  let f = (n) =>
-    if( n <= 1 )
-      1
-    else
-      f(n - 1) + f(n - 2);
-  benchmark(:f(31));
+  let f = (n) => if (n <= 1) 1 else f(n - 1) + f(n - 2);
+  benchmark(:f(parse(_args[size(_args)-1])));
 };
