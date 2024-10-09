@@ -11,6 +11,8 @@ extern sm_heap     *sms_symbol_name_heap;
 extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
 extern sm_stack    *sms_callstack;
+extern void       **memory_marker1;
+extern void       **memory_marker2;
 
 // Execute a function
 inline sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
@@ -181,9 +183,36 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
       if (fname_str->my_type == SM_ERR_TYPE)
         return ((sm_object *)fname_str); // Return the error if type check fails;
-      char *fname_cstr = &(fname_str->content);
-      return (sm_object *)sm_new_f64(sm_mem_dump(sms_heap, fname_cstr));
+
+      char *fname_cstr = &fname_str->content;
+
+      // Capture the current stack frame pointer
+      void **current_stack_ptr = (void **)__builtin_frame_address(0);
+
+      // Calculate the number of bytes to save between the two stack pointers
+      size_t size_to_save = (size_t)(memory_marker1 - current_stack_ptr);
+
+      // Open file for binary writing
+      FILE *file = fopen(fname_cstr, "wb");
+      if (file == NULL) {
+        fprintf(stderr, "Error opening file %s for writing\n", fname_cstr);
+        return (sm_object *)sms_false;
+      }
+
+      // Write the memory region between memory_marker1 and current_stack_ptr
+      size_t written = fwrite(current_stack_ptr, 1, size_to_save, file);
+      if (written != size_to_save) {
+        fprintf(stderr, "Error writing stack data to file\n");
+        fclose(file);
+        return (sm_object *)sms_false;
+      }
+
+      // Close the file
+      fclose(file);
+
+      return (sm_object *)sms_true; // Return success
     }
+
 
     case SM_IMAGESAVE_EXPR: {
       // Obtain the file name using eager_type_check
