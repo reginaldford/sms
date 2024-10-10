@@ -24,23 +24,27 @@ bool sm_is_sensible_object(sm_object *obj, sm_heap *location) {
         prev    = scanner;
         scanner = (sm_object *)(((intptr_t)scanner) + size);
       } else {
-        fprintf(stderr, "Bad object in heap (obj#%i)\n", counter);
-        fprintf(stderr, "Bad object position:         %p\n", scanner);
-        fprintf(stderr, "     obj type: %u\n", scanner->my_type);
-        fprintf(stderr, "Prev  obj type: %u\n", prev->my_type);
-        fprintf(stderr, "Prev  obj size: %u\n", sm_sizeof(prev));
-        fprintf(stderr, "Prev2 obj type: %u\n", prev2->my_type);
-        fprintf(stderr, "Prev2 obj size: %u\n", sm_sizeof(prev2));
-        fprintf(stderr, "Was scanning for validity of pointer %p from callstack\n", obj);
-        // exit(1);
+        /*
+                fprintf(stderr, "Bad object in heap (obj#%i)\n", counter);
+                fprintf(stderr, "Bad object position:         %p\n", scanner);
+                fprintf(stderr, "     obj type: %u\n", scanner->my_type);
+                fprintf(stderr, "Prev  obj type: %u\n", prev->my_type);
+                fprintf(stderr, "Prev  obj size: %u\n", sm_sizeof(prev));
+                fprintf(stderr, "Prev2 obj type: %u\n", prev2->my_type);
+                fprintf(stderr, "Prev2 obj size: %u\n", sm_sizeof(prev2));
+                fprintf(stderr, "Was scanning for validity of pointer %p from callstack\n", obj);
+        */
+        scanner->my_type           = SM_F64_TYPE;
+        ((sm_f64 *)scanner)->value = 0;
         return true;
       }
     }
     return scanner == obj;
-  if (sm_is_within_heap(obj, location) && sm_sizeof(obj) &&
-      ((intptr_t)obj) % (sizeof(size_t) / 2) == 0) {
-    sm_object *next_obj = (sm_object *)(((intptr_t)obj) + sm_sizeof(obj));
-    return ((intptr_t)next_obj) <= (((intptr_t)location->storage) + location->used);
+    if (sm_is_within_heap(obj, location) && sm_sizeof(obj) &&
+        ((intptr_t)obj) % (sizeof(size_t)) == 0) {
+      sm_object *next_obj = (sm_object *)(((intptr_t)obj) + sm_sizeof(obj));
+      return ((intptr_t)next_obj) <= (((intptr_t)location->storage) + location->used);
+    }
   }
   return false;
 }
