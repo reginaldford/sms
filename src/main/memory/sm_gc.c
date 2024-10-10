@@ -7,7 +7,7 @@ extern void **memory_marker2;
 extern bool   evaluating;
 
 bool sm_is_sensible_object(sm_object *obj, sm_heap *location) {
-  if (sm_is_within_heap(obj, location) && sm_sizeof(obj) && ((intptr_t)obj) % 4 == 0) {
+  if (sm_is_within_heap(obj, location) && sm_sizeof(obj) && ((intptr_t)obj) % 8 == 0) {
     sm_object *next_obj = (sm_object *)(((intptr_t)obj) + sm_sizeof(obj));
     if (((intptr_t)next_obj) > (((intptr_t)location->storage) + location->used))
       return false;
@@ -20,14 +20,13 @@ bool sm_is_sensible_object(sm_object *obj, sm_heap *location) {
       if (size) {
         prev    = scanner;
         scanner = (sm_object *)(((intptr_t)scanner) + size);
-
       } else {
-        fprintf(stderr, "bad object already in heap (obj#%i)\n", counter);
+        fprintf(stderr, "Bad object in heap (obj#%i)\n", counter);
         fprintf(stderr, "Bad object position:         %p\n", scanner);
         fprintf(stderr, "     obj type: %u\n", scanner->my_type);
-        fprintf(stderr, "prev obj type: %u\n", prev->my_type);
-        fprintf(stderr, "prev obj size: %u\n", sm_sizeof(prev));
-        fprintf(stderr, "Was scanning for validity of %p\n", obj);
+        fprintf(stderr, "Prev obj type: %u\n", prev->my_type);
+        fprintf(stderr, "Prev obj size: %u\n", sm_sizeof(prev));
+        fprintf(stderr, "Was scanning for validity of pointer %p from callstack\n", obj);
         exit(1);
       }
     }
@@ -86,6 +85,7 @@ sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
         return sm_move_to_new_heap(dest, obj);
       else {
         fprintf(stderr, "Heap space exhausted.\n");
+        exit(1);
       }
     }
   }
