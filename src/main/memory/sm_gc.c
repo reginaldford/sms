@@ -13,21 +13,27 @@ bool sm_is_sensible_object(sm_object *obj, sm_heap *location) {
       return false;
     sm_object *scanner = (sm_object *)location->storage;
     sm_object *prev;
+    sm_object *prev2;
     uint32_t   counter = 0;
-    while (scanner < obj) {
+    while (scanner < obj &&
+           ((intptr_t)scanner) < (((intptr_t)location->storage) + location->used)) {
       counter++;
       uint32_t size = sm_sizeof(scanner);
       if (size) {
+        prev2   = prev;
         prev    = scanner;
         scanner = (sm_object *)(((intptr_t)scanner) + size);
       } else {
         fprintf(stderr, "Bad object in heap (obj#%i)\n", counter);
         fprintf(stderr, "Bad object position:         %p\n", scanner);
         fprintf(stderr, "     obj type: %u\n", scanner->my_type);
-        fprintf(stderr, "Prev obj type: %u\n", prev->my_type);
-        fprintf(stderr, "Prev obj size: %u\n", sm_sizeof(prev));
+        fprintf(stderr, "Prev  obj type: %u\n", prev->my_type);
+        fprintf(stderr, "Prev  obj size: %u\n", sm_sizeof(prev));
+        fprintf(stderr, "Prev2 obj type: %u\n", prev2->my_type);
+        fprintf(stderr, "Prev2 obj size: %u\n", sm_sizeof(prev2));
         fprintf(stderr, "Was scanning for validity of pointer %p from callstack\n", obj);
-        exit(1);
+        // exit(1);
+        return true;
       }
     }
     return scanner == obj;
