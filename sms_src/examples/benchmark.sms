@@ -1,10 +1,6 @@
 #!/usr/local/bin/sms -m8
 #Use this to benchmark something
 {
-  let _errHandler = (x) => {
-    putLn(str(x));
-    x;
-  };
   if (isErr(parse(_args[size(_args) - 1]) + 0)) {
     putLn("Provide an integer as command line argument");
     exit(1);

@@ -7,9 +7,31 @@ extern void **memory_marker2;
 extern bool   evaluating;
 
 bool sm_is_sensible_object(sm_object *obj, sm_heap *location) {
-  if (sm_is_within_heap(obj, location) && sm_sizeof(obj) &&
-      ((intptr_t)obj) % (sizeof(size_t) / 2) == 0) {
-    return true;
+  if (sm_is_within_heap(obj, location) && sm_sizeof(obj) && ((intptr_t)obj) % 4 == 0) {
+    sm_object *next_obj = (sm_object *)(((intptr_t)obj) + sm_sizeof(obj));
+    if (((intptr_t)next_obj) > (((intptr_t)location->storage) + location->used))
+      return false;
+    sm_object *scanner = (sm_object *)location->storage;
+    sm_object *prev;
+    uint32_t   counter = 0;
+    while (scanner < obj) {
+      counter++;
+      uint32_t size = sm_sizeof(scanner);
+      if (size) {
+        prev    = scanner;
+        scanner = (sm_object *)(((intptr_t)scanner) + size);
+
+      } else {
+        fprintf(stderr, "bad object already in heap (obj#%i)\n", counter);
+        fprintf(stderr, "Bad object position:         %p\n", scanner);
+        fprintf(stderr, "     obj type: %u\n", scanner->my_type);
+        fprintf(stderr, "prev obj type: %u\n", prev->my_type);
+        fprintf(stderr, "prev obj size: %u\n", sm_sizeof(prev));
+        fprintf(stderr, "Was scanning for validity of %p\n", obj);
+        exit(1);
+      }
+    }
+    return scanner == obj;
   }
   return false;
 }
@@ -40,9 +62,14 @@ sm_object *sm_deep_copy(sm_object *obj) {
 // Copy the object to the new heap
 // Leave an sm_pointer in the old space
 sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
-  sm_object *new_obj = sm_realloc_at(dest, obj, sm_sizeof(obj));
-  // Overwrite the old object. sm_pointer is NOT larger
-  sm_new_pointer(dest, obj, new_obj);
+  uint32_t   size    = sm_sizeof(obj);
+  sm_object *new_obj = sm_realloc_at(dest, obj, size);
+  // Fill in old object with sm_pointer objects, each pointing to the new object
+  // Objects should always be multiples of sizeof(sm_pointer) in size
+  for (uint32_t pos = 0; pos < size; pos += sizeof(sm_pointer)) {
+    sm_new_pointer(dest, obj, new_obj);
+    obj = (sm_object *)(((intptr_t)obj) + sizeof(sm_pointer));
+  }
   return new_obj;
 }
 
@@ -54,10 +81,15 @@ sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
     uint32_t obj_type = obj->my_type;
     if (obj_type == SM_POINTER_TYPE)
       return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
-    else
-      return sm_move_to_new_heap(dest, obj);
-  } else
-    return obj;
+    else {
+      if (sm_sizeof(obj) <= (intptr_t)(dest->capacity - dest->used))
+        return sm_move_to_new_heap(dest, obj);
+      else {
+        fprintf(stderr, "Heap space exhausted.\n");
+      }
+    }
+  }
+  return obj;
 }
 
 // Copy the objects referenced by the current_obj into the new heap
