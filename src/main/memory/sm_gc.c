@@ -39,7 +39,8 @@ bool sm_is_sensible_object(sm_object *obj, sm_heap *location) {
         return true;
       }
     }
-    return scanner == obj;
+    if (scanner != obj)
+      return false;
     if (sm_is_within_heap(obj, location) && sm_sizeof(obj) &&
         ((intptr_t)obj) % (sizeof(size_t)) == 0) {
       sm_object *next_obj = (sm_object *)(((intptr_t)obj) + sm_sizeof(obj));
