@@ -67,7 +67,9 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   }
 }
 // Return the size of the object in bytes
-uint32_t sm_sizeof(sm_object *obj1) {
+
+uint32_t        sm_sizeof(sm_object *obj1) { return sm_round_size64(sm_sizeof(obj1)); }
+inline uint32_t sm_sizeof2(sm_object *obj1) {
   switch (obj1->my_type) {
   case SM_F64_TYPE:
     return sizeof(sm_f64);

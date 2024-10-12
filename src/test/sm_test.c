@@ -276,7 +276,7 @@ int main(int num_args, char **argv) {
           }
           num_fails += test_result;
           if (!sms_other_heap)
-            sms_other_heap = sm_new_heap(sms_heap->capacity);
+            sms_other_heap = sm_new_heap(sms_heap->capacity, true);
           sm_garbage_collect(sms_heap, sms_other_heap);
           sm_swap_heaps(&sms_heap, &sms_other_heap);
         }
@@ -296,7 +296,7 @@ int main(int num_args, char **argv) {
         }
         num_fails += test_result;
         if (!sms_other_heap)
-          sms_other_heap = sm_new_heap(sms_heap->capacity);
+          sms_other_heap = sm_new_heap(sms_heap->capacity, true);
         sm_garbage_collect(sms_heap, sms_other_heap);
         sm_swap_heaps(&sms_heap, &sms_other_heap);
       }

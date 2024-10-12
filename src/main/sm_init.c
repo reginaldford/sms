@@ -45,13 +45,13 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   }
 
   // Symbol related heap allocations
-  sms_symbol_heap      = sm_new_heap(1024 * 512);
-  sms_symbol_name_heap = sm_new_heap(1024 * 1024);
+  sms_symbol_heap      = sm_new_heap(1024 * 512, true);
+  sms_symbol_name_heap = sm_new_heap(1024 * 1024, false);
   sms_num_symbols      = 0;
 
   // Initialize the current memory heap
   // During first gc, a second heap of the same size will be allocated.
-  sms_heap = sm_new_heap(mem_bytes / 2);
+  sms_heap = sm_new_heap(mem_bytes / 2, true);
 
   // Initialize the lexical stack
   sm_global_lex_stack(sm_new_stack(128));
@@ -121,7 +121,7 @@ void sm_init_from_img(sm_env *env, int num_args, char **argv, const char *img_fi
 
   // Restore global objects
   sms_heap             = &img.sms_heap;
-  sms_other_heap       = sm_new_heap(sms_heap->capacity); // Assuming a second heap for GC
+  sms_other_heap       = sm_new_heap(sms_heap->capacity, true); // Assuming a second heap for GC
   sms_symbol_heap      = &img.sms_symbol_heap;
   sms_symbol_name_heap = &img.sms_symbol_name_heap;
   sms_true             = &img.sms_true;
