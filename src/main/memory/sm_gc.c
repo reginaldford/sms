@@ -41,7 +41,7 @@ sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
 // Else, copy the object to the new heap and leave an sm_pointer
 sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
   // Only gc objects from sms_other_heap, which used to be sms_heap
-  if (sm_heap_has_object(source, obj)) {
+  if (sm_is_within_heap(obj, source)) {
     uint32_t obj_type = obj->my_type;
     if (obj_type == SM_POINTER_TYPE)
       return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
