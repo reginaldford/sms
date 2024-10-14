@@ -194,7 +194,7 @@ void sm_garbage_collect() {
     sm_inflate_heap(sms_heap, sms_other_heap);
     // For tracking purposes
     sm_gc_count(1);
-    // swap heaps
+    // swap global heap ptrs
     sm_swap_heaps(&sms_heap, &sms_other_heap);
   }
   // Report memory stat
@@ -202,9 +202,9 @@ void sm_garbage_collect() {
     putc('\n', stdout);
     printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
     putc('(', stdout);
-    sm_print_fancy_bytelength((long long)sms_other_heap->used);
+    sm_print_fancy_bytelength((long long)sms_heap->used);
     printf(" / ");
-    sm_print_fancy_bytelength((long long)sms_other_heap->capacity);
+    sm_print_fancy_bytelength((long long)sms_heap->capacity);
     putc(')', stdout);
     printf("%s", sm_terminal_reset());
   }
