@@ -163,47 +163,48 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
 }
 
 // Copying GC
-void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
-  if (from_heap->used != 0) {
+void sm_garbage_collect() {
+  if (sms_heap->used != 0) {
     // Build "to" heap if necessary, same size as current
-    if (to_heap == NULL)
-      to_heap = sm_new_heap(from_heap->capacity, true);
+    if (sms_other_heap == NULL)
+      sms_other_heap = sm_new_heap(sms_heap->capacity, true);
     // Clear for when we recycle a heap...
-    sm_heap_clear(to_heap);
+    sm_heap_clear(sms_other_heap);
     if (evaluating) {
       // Fix c callstack ptrs
+      memory_marker2   = __builtin_frame_address(0);
       void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
       void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-      // Alignment
-      lowerPtr -= ((intptr_t)lowerPtr) % sizeof(size_t);
-      // for (void **ptr = lowerPtr; ptr < higherPtr; ptr++) {
-      for (char **ptr = (char **)lowerPtr; ptr < (char **)higherPtr; ptr += 4) {
+      for (void **ptr = lowerPtr; ptr < higherPtr; ptr++) {
         // We are updating pointers in the c callstack. Watch for false alerts.
-        if (sm_heap_has_object(from_heap, (sm_object *)*ptr))
-          *ptr = (void *)sm_meet_object(from_heap, to_heap, (sm_object *)*ptr);
+        if (sm_heap_has_object(sms_heap, (sm_object *)*ptr))
+          *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
       }
     }
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
-      sm_meet_object(from_heap, to_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
+      sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
     // Treat parser output as root or set parser output to false
     if (evaluating)
-      sm_global_parser_output(sm_meet_object(from_heap, to_heap, sm_global_parser_output(NULL)));
+      sm_global_parser_output(
+        sm_meet_object(sms_heap, sms_other_heap, sm_global_parser_output(NULL)));
     else
       sm_global_parser_output((sm_object *)sms_false);
     // Inflate
-    sm_inflate_heap(from_heap, to_heap);
+    sm_inflate_heap(sms_heap, sms_other_heap);
     // For tracking purposes
     sm_gc_count(1);
+    // swap heaps
+    sm_swap_heaps(&sms_heap, &sms_other_heap);
   }
   // Report memory stat
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
     putc('\n', stdout);
     printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
     putc('(', stdout);
-    sm_print_fancy_bytelength((long long)to_heap->used);
+    sm_print_fancy_bytelength((long long)sms_other_heap->used);
     printf(" / ");
-    sm_print_fancy_bytelength((long long)to_heap->capacity);
+    sm_print_fancy_bytelength((long long)sms_other_heap->capacity);
     putc(')', stdout);
     printf("%s", sm_terminal_reset());
   }

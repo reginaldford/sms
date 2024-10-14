@@ -275,10 +275,7 @@ int main(int num_args, char **argv) {
             exit(test_result);
           }
           num_fails += test_result;
-          if (!sms_other_heap)
-            sms_other_heap = sm_new_heap(sms_heap->capacity, true);
-          sm_garbage_collect(sms_heap, sms_other_heap);
-          sm_swap_heaps(&sms_heap, &sms_other_heap);
+          sm_garbage_collect();
         }
       }
     }
@@ -295,10 +292,7 @@ int main(int num_args, char **argv) {
           exit(test_result);
         }
         num_fails += test_result;
-        if (!sms_other_heap)
-          sms_other_heap = sm_new_heap(sms_heap->capacity, true);
-        sm_garbage_collect(sms_heap, sms_other_heap);
-        sm_swap_heaps(&sms_heap, &sms_other_heap);
+        sm_garbage_collect();
       }
     }
   } else if (test == -1) {

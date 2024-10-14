@@ -45,3 +45,5 @@ void sm_sprint_dump();
 void sm_dump_and_count();
 /// Swap the ptrs of these two heaps
 void sm_swap_heaps(sm_heap **, sm_heap **);
+/// Mark this heap's map, if it has one
+void sm_heap_register_object(sm_heap *heap, void *guess);

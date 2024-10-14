@@ -202,7 +202,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
 
       // Perform garbage collection to compact the sms_heap
       sm_heap *compacted_heap = sm_new_heap(sms_heap->capacity, true); // Create a new heap for GC
-      sm_garbage_collect(sms_heap, compacted_heap); // Compact the main heap into the new one
+      // TODO: sm_heap_compact_to(from,to)
+      // sm_garbage_collect(sms_heap, compacted_heap); // Compact the main heap into the new one
 
       // Open the file for writing
       FILE *file = fopen(fname_cstr, "wb");

@@ -12,10 +12,7 @@ int chapter_1(int test) {
   for (int i = 0; i < 100; i++)
     sm_new_cx(NULL);
   printf("Running GC.\n");
-  if (!sms_other_heap)
-    sms_other_heap = sm_new_heap(sms_heap->capacity, true);
-  sm_garbage_collect(sms_heap, sms_other_heap);
-  sm_swap_heaps(&sms_heap, &sms_other_heap);
+  sm_garbage_collect();
   sm_string      *s  = sm_new_string(0, "");
   sm_parse_result pr = sm_parse_cstr(&(s->content), 0);
   printf("Evaluating empty string.\n");
