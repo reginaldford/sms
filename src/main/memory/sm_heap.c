@@ -65,7 +65,7 @@ void *sm_malloc(uint32_t size) {
   uint32_t bytes_used      = sms_heap->used;
   uint32_t next_bytes_used = sms_heap->used + size;
   if (next_bytes_used > sms_heap->capacity) {
-    // Try gc
+    // Try gc to make space
     sm_garbage_collect();
     next_bytes_used = sms_heap->used + size;
     if (next_bytes_used > sms_heap->capacity) {
@@ -81,13 +81,12 @@ void *sm_malloc(uint32_t size) {
   return output_location;
 }
 
-
-void sm_heap_print_map(sm_heap *h) {}
-
-void sm_print_byte(unsigned char byte) {
-  for (int i = 7; i >= 0; i--) {
-    printf("%u", (byte >> i) & 1);
-  }
+// Print this heap's map in binary form
+void sm_heap_print_map(sm_heap *h) {
+  uint64_t map_size = (h->capacity + 63) / 64;
+  for (uint32_t i = 0; i < map_size; i++)
+    for (int j = 7; i >= 0; i--)
+      printf("%u", (h->map[i] >> j) & 1);
 }
 
 // Return whether this pointer aims at the beginning of a registered heap object
