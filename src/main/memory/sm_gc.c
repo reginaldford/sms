@@ -60,12 +60,13 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
   while (scan_cursor < to->storage + to->used) {
     sm_object *current_obj = (sm_object *)scan_cursor;
     // Check sizeof, avoid an infinite loop
-    if (!sm_sizeof(current_obj)) {
+    size_t obj_size = sm_sizeof(current_obj);
+    if (!obj_size) {
       fprintf(stderr, "Error: Cannot determine object size.\n");
       exit(1);
     }
     // scan_cursor is not referred to for the rest of the loop
-    scan_cursor += sm_sizeof(current_obj);
+    scan_cursor += obj_size;
     switch (current_obj->my_type) {
     case SM_CX_TYPE: {
       sm_cx *cx = (sm_cx *)current_obj;
@@ -192,10 +193,10 @@ void sm_garbage_collect() {
       sm_global_parser_output((sm_object *)sms_false);
     // Inflate
     sm_inflate_heap(sms_heap, sms_other_heap);
-    // For tracking purposes
-    sm_gc_count(1);
     // swap global heap ptrs
     sm_swap_heaps(&sms_heap, &sms_other_heap);
+    // For tracking purposes
+    sm_gc_count(1);
   }
   // Report memory stat
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
