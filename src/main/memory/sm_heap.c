@@ -20,7 +20,7 @@ uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~7; }
 
 // Create a new heap of some capacity
 sm_heap *sm_new_heap(uint32_t capacity, bool map) {
-  sm_heap *new_heap = (sm_heap *)malloc(sizeof(sm_heap) + capacity);
+  sm_heap *new_heap = (sm_heap *)malloc(sizeof(sm_heap) + sm_round_size64(capacity));
   if (new_heap == NULL) {
     fprintf(stderr, "Cannot allocate memory for heap. %s:%i", __FILE__, __LINE__);
     exit(1);
@@ -100,7 +100,7 @@ bool sm_heap_has_object(sm_heap *heap, void *guess) {
 
 // Designed to be fast
 void sm_heap_register_object(sm_heap *heap, void *guess) {
-  if (sms_heap->map) {
+  if (heap->map) {
     // Calculate the position in the bitmap
     uint32_t map_pos =
       ((intptr_t *)guess - (intptr_t *)heap->storage) / 8; // Offset in the heap divided by 8 bytes
