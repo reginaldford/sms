@@ -171,17 +171,6 @@ void sm_garbage_collect() {
       sms_other_heap = sm_new_heap(sms_heap->capacity, true);
     // Clear for when we recycle a heap...
     sm_heap_clear(sms_other_heap);
-    if (evaluating) {
-      // Fix c callstack ptrs
-      memory_marker2   = __builtin_frame_address(0);
-      void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
-      void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-      for (void **ptr = lowerPtr; ptr < higherPtr; ptr++) {
-        // We are updating pointers in the c callstack. Watch for false alerts.
-        if (sm_heap_has_object(sms_heap, (sm_object *)*ptr))
-          *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
-      }
-    }
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
       sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
@@ -191,6 +180,22 @@ void sm_garbage_collect() {
         sm_meet_object(sms_heap, sms_other_heap, sm_global_parser_output(NULL)));
     else
       sm_global_parser_output((sm_object *)sms_false);
+    if (evaluating) {
+      // Fix c callstack ptrs
+      memory_marker2   = __builtin_frame_address(0);
+      void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
+      void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
+      for (void **ptr = lowerPtr; ptr < higherPtr; ptr++) {
+        // We are updating pointers in the c callstack. Watch for false alerts.
+        if (sm_is_within_heap((sm_object *)*ptr, sms_heap) && sm_sizeof((sm_object *)*ptr)) {
+          if (!sm_heap_has_object(sms_heap, (sm_object *)*ptr))
+            printf("within heap, but not registered: %p type is: %u\n", *ptr,
+                   ((sm_object *)*ptr)->my_type);
+          fflush(stdout);
+          *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
+        }
+      }
+    }
     // Inflate
     sm_inflate_heap(sms_heap, sms_other_heap);
     // swap global heap ptrs

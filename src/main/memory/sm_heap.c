@@ -48,12 +48,7 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
     fprintf(stderr, "Cannot allocate space for an object in this heap. %s:%i", __FILE__, __LINE__);
   }
   // Mark the map if necessary
-  if (h->map) {
-    uint32_t map_pos  = h->used / 8;       // Each bit represents 8 bytes
-    uint32_t byte_pos = map_pos / 8;       // Find the byte in the bitmap
-    uint32_t bit_pos  = 7 - (map_pos % 8); // Find the specific bit in the byte
-    h->map[byte_pos] |= (1 << bit_pos);    // Set the appropriate bit
-  }
+  sm_heap_register_object(h, (sm_object *)h->storage + bytes_used);
   // Final essentials
   h->used = next_bytes_used;
   return (void *)(((char *)h->storage) + bytes_used);
@@ -128,8 +123,6 @@ void *sm_realloc_at(struct sm_heap *dest, void *obj, uint32_t size) {
 
 // Clear the heap and set used to 0
 void sm_heap_clear(struct sm_heap *h) {
-  if (!h)
-    return;                           // Safety check for NULL
   memset(h->storage, 0, h->capacity); // Clear the heap storage
   h->used = 0;
   if (h->map) {
@@ -137,7 +130,6 @@ void sm_heap_clear(struct sm_heap *h) {
            (h->capacity + 63) / 64); // Clear the map (1 bit per 8 bytes, i.e., 1/64 of capacity)
   }
 }
-
 
 // Is the ptr within this heap?
 bool sm_is_within_heap(void *ptr, sm_heap *heap) {
@@ -154,7 +146,6 @@ int sm_mem_dump(sm_heap *heap, char *name) {
   fwrite(buffer, 1, buffer_length, fp);
   fflush(fp);
   // Close the file
-  // Returns 0 if there are no problems
   return fclose(fp);
 }
 
