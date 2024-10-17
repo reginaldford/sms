@@ -26,7 +26,6 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
     exit(1);
   }
   new_heap->capacity = capacity;
-  new_heap->used     = 0;
   new_heap->storage  = (char *)(new_heap + 1);
   sm_heap_set_add(sms_all_heaps, new_heap);
   if (map) {
@@ -36,8 +35,8 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
       fprintf(stderr, "Cannot allocate memory for heap map. %s:%i", __FILE__, __LINE__);
       exit(1);
     }
-    memset(new_heap->map, 0, map_size);
   }
+  sm_heap_clear(new_heap);
   return new_heap;
 }
 
@@ -47,8 +46,6 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
   if (next_bytes_used > h->capacity) {
     fprintf(stderr, "Cannot allocate space for an object in this heap. %s:%i", __FILE__, __LINE__);
   }
-  // Mark the map if necessary
-  sm_heap_register_object(h, (sm_object *)h->storage + bytes_used);
   // Final essentials
   h->used = next_bytes_used;
   return (void *)(((char *)h->storage) + bytes_used);
@@ -69,8 +66,6 @@ void *sm_malloc(uint32_t size) {
     }
   }
   void *output_location = (void *)(((char *)sms_heap->storage) + bytes_used);
-  // Mark the map if necessary
-  sm_heap_register_object(sms_heap, output_location);
   // Final essentials
   sms_heap->used = next_bytes_used;
   return output_location;
@@ -89,26 +84,26 @@ bool sm_heap_has_object(sm_heap *heap, void *guess) {
   // First check if it's in bounds
   if (!sm_is_within_heap(guess, heap))
     return false;
-
   // Calculate the position in the bitmap
   uint32_t map_pos =
     ((intptr_t *)guess - (intptr_t *)heap->storage) / 8; // Offset in the heap divided by 8 bytes
   uint32_t byte_pos = map_pos / 8;                       // Find the byte in the bitmap
-  uint32_t bit_pos  = 7 - (map_pos % 8);                 // Find the specific bit in the byte
+  uint32_t bit_pos  = map_pos % 8;                       // Find the specific bit in the byte
   return heap->map[byte_pos] & (1 << bit_pos);
 }
 
 // Designed to be fast
-void sm_heap_register_object(sm_heap *heap, void *guess) {
+void sm_heap_register_object(sm_heap *heap, void *obj) {
   if (heap->map) {
     // Calculate the position in the bitmap
     uint32_t map_pos =
-      ((intptr_t *)guess - (intptr_t *)heap->storage) / 8; // Offset in the heap divided by 8 bytes
-    uint32_t byte_pos = map_pos / 8;                       // Find the byte in the bitmap
-    uint32_t bit_pos  = 7 - (map_pos % 8);                 // Find the specific bit in the byte
+      ((intptr_t *)obj - (intptr_t *)heap->storage) / 8; // Offset in the heap divided by 8 bytes
+    uint32_t byte_pos = map_pos / 8;                     // Find the byte in the bitmap
+    uint32_t bit_pos  = map_pos % 8;                     // Find the specific bit in the byte
     heap->map[byte_pos] |= (1 << bit_pos);
   }
 }
+
 // Reallocate memory space for resizing or recreating objects
 void *sm_realloc(void *obj, uint32_t size) {
   sm_object *new_space = sm_malloc(size);
@@ -192,4 +187,36 @@ void sm_swap_heaps(sm_heap **a, sm_heap **b) {
   sm_heap *temp = *a;
   *a            = *b;
   *b            = temp;
+}
+
+// Scan the heap and generate the bitmap. Return true on success.
+bool sm_heap_scan(sm_heap *h) {
+  sm_object *obj      = (sm_object *)((intptr_t)h->storage);
+  sm_object *prev_obj = NULL; // Initialize prev_obj to track the previous object
+
+  while ((char *)obj < h->storage + h->used) {
+    // Check for valid object size
+    if (!sm_sizeof(obj)) {
+      if (prev_obj) { // Check if prev_obj is not NULL before printing
+        printf("bad obj: %p, no sizeof (prev obj: %p type %u)\n", obj, prev_obj, prev_obj->my_type);
+      } else {
+        printf("bad obj: %p, no sizeof (no previous obj)\n", obj);
+      }
+      break;
+    }
+
+    // Calculate the position in the bitmap
+    intptr_t offset   = (intptr_t)obj - (intptr_t)h->storage;
+    uint32_t map_pos  = offset / 8;  // Offset in the heap divided by 8 bytes
+    uint32_t byte_pos = map_pos / 8; // Find the byte in the bitmap
+    uint32_t bit_pos  = map_pos % 8; // Find the specific bit in the byte
+
+    // Set the corresponding bit in the bitmap
+    h->map[byte_pos] |= (1 << bit_pos);
+
+    // Move to the next object
+    prev_obj = obj; // Update prev_obj to the current object
+    obj      = (sm_object *)((char *)obj + MAX(sizeof(size_t), sm_sizeof(obj)));
+  }
+  return true;
 }

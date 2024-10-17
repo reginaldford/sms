@@ -180,38 +180,31 @@ void sm_garbage_collect() {
         sm_meet_object(sms_heap, sms_other_heap, sm_global_parser_output(NULL)));
     else
       sm_global_parser_output((sm_object *)sms_false);
+
+    // Fix c callstack ptrs if evaluating
     if (evaluating) {
-      // Fix c callstack ptrs
-      memory_marker2   = __builtin_frame_address(0);
+      // Let's affect this frame or sm_malloc (or any caller)
+      memory_marker2 = __builtin_frame_address(2);
+      // Fill in the heap bitmap
+      sm_heap_scan(sms_heap);
       void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
       void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-      for (void **ptr = lowerPtr; ptr < higherPtr; ptr++) {
-        // We are updating pointers in the c callstack. Watch for false alerts.
-        if (sm_is_within_heap((sm_object *)*ptr, sms_heap) && sm_sizeof((sm_object *)*ptr)) {
-          if (!sm_heap_has_object(sms_heap, (sm_object *)*ptr))
-            printf("within heap, but not registered: %p type is: %u\n", *ptr,
-                   ((sm_object *)*ptr)->my_type);
-          fflush(stdout);
+      // Scan callstack for valid object ptrs
+      for (void **ptr = lowerPtr; ptr < higherPtr; ptr++)
+        if (sm_heap_has_object(sms_heap, *ptr))
           *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
-        }
-      }
+      // Inflate
+      sm_inflate_heap(sms_heap, sms_other_heap);
+      // swap global heap ptrs
+      sm_swap_heaps(&sms_heap, &sms_other_heap);
+      // For tracking purposes
+      sm_gc_count(1);
     }
-    // Inflate
-    sm_inflate_heap(sms_heap, sms_other_heap);
-    // swap global heap ptrs
-    sm_swap_heaps(&sms_heap, &sms_other_heap);
-    // For tracking purposes
-    sm_gc_count(1);
-  }
-  // Report memory stat
-  if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
-    putc('\n', stdout);
-    printf("%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
-    putc('(', stdout);
-    sm_print_fancy_bytelength((long long)sms_heap->used);
-    printf(" / ");
-    sm_print_fancy_bytelength((long long)sms_heap->capacity);
-    putc(')', stdout);
-    printf("%s", sm_terminal_reset());
+
+    // Report memory stat
+    if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false)
+      printf("\n%s(%s / %s)%s\n", sm_terminal_fg_color(SM_TERM_B_BLACK),
+             sm_print_fancy_bytelength((long long)sms_heap->used),
+             sm_print_fancy_bytelength((long long)sms_heap->capacity), sm_terminal_reset());
   }
 }
