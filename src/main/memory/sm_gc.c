@@ -184,7 +184,7 @@ void sm_garbage_collect() {
     // Fix c callstack ptrs if evaluating
     if (evaluating) {
       // Let's affect this frame or sm_malloc (or any caller)
-      memory_marker2 = __builtin_frame_address(2);
+      memory_marker2 = __builtin_frame_address(0);
       // Fill in the heap bitmap
       void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
       void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
@@ -197,17 +197,16 @@ void sm_garbage_collect() {
     sm_inflate_heap(sms_heap, sms_other_heap);
     // For tracking purposes
     sm_gc_count(1);
-
+    // swap global heap ptrs
+    sm_swap_heaps(&sms_heap, &sms_other_heap);
     // Report memory stat
     if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
       char used_str[16];
       char capacity_str[16];
-      sm_sprint_fancy_bytelength(used_str, (uint64_t)sms_other_heap->used);
-      sm_sprint_fancy_bytelength(capacity_str, (uint64_t)sms_other_heap->capacity);
+      sm_sprint_fancy_bytelength(used_str, (uint64_t)sms_heap->used);
+      sm_sprint_fancy_bytelength(capacity_str, (uint64_t)sms_heap->capacity);
       printf("\n%s(%s / %s)%s\n", sm_terminal_fg_color(SM_TERM_B_BLACK), used_str, capacity_str,
              sm_terminal_reset());
     }
   }
-  // swap global heap ptrs last
-  sm_swap_heaps(&sms_heap, &sms_other_heap);
 }

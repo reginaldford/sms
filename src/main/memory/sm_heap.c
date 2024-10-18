@@ -193,23 +193,20 @@ void sm_swap_heaps(sm_heap **a, sm_heap **b) {
 bool sm_heap_scan(sm_heap *h) {
   sm_object *obj      = (sm_object *)((intptr_t)h->storage);
   sm_object *prev_obj = NULL; // Initialize prev_obj to track the previous object
-
   while ((char *)obj < h->storage + h->used) {
     // Check for valid object size
     if (!sm_sizeof(obj)) {
-      if (prev_obj) { // Check if prev_obj is not NULL before printing
+      if (prev_obj) // Check if prev_obj is not NULL before printing
         printf("bad obj: %p, no sizeof (prev obj: %p type %u)\n", obj, prev_obj, prev_obj->my_type);
-      } else {
+      else
         printf("bad obj: %p, no sizeof (no previous obj)\n", obj);
-      }
       break;
     }
     // Register in heap map if it has one
     sm_heap_register_object(sms_heap, obj);
-
     // Move to the next object
     prev_obj = obj; // Update prev_obj to the current object
-    obj      = (sm_object *)((char *)obj + MAX(sizeof(size_t), sm_sizeof(obj)));
+    obj      = (sm_object *)((char *)obj + sm_sizeof(obj));
   }
   return true;
 }
