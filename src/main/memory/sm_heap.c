@@ -204,15 +204,8 @@ bool sm_heap_scan(sm_heap *h) {
       }
       break;
     }
-
-    // Calculate the position in the bitmap
-    intptr_t offset   = (intptr_t)obj - (intptr_t)h->storage;
-    uint32_t map_pos  = offset / 8;  // Offset in the heap divided by 8 bytes
-    uint32_t byte_pos = map_pos / 8; // Find the byte in the bitmap
-    uint32_t bit_pos  = map_pos % 8; // Find the specific bit in the byte
-
-    // Set the corresponding bit in the bitmap
-    h->map[byte_pos] |= (1 << bit_pos);
+    // Register in heap map if it has one
+    sm_heap_register_object(sms_heap, obj);
 
     // Move to the next object
     prev_obj = obj; // Update prev_obj to the current object

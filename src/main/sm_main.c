@@ -148,9 +148,9 @@ int main(int num_args, char *argv[]) {
       }
       if (env.quiet_mode == false) {
         printf("Custom Heap Size: ");
-        printf("%lld Bytes (", (long long)env.mem_bytes);
-        sm_print_fancy_bytelength(env.mem_bytes);
-        printf(")\n");
+        char bytelength_str[16];
+        sm_sprint_fancy_bytelength(bytelength_str, env.mem_bytes);
+        printf("%s", bytelength_str);
       }
       break;
     }
