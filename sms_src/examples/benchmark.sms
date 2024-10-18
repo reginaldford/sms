@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -m8
+#!/usr/local/bin/sms -m1g
 #Use this to benchmark something
 {
   let _errHandler = (x) => {
