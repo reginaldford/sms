@@ -7,3 +7,4 @@ typedef struct sm_space {
 } sm_space;
 
 sm_space *sm_new_space(uint32_t size);
+sm_space *sm_new_space_at(sm_heap *h, uint32_t size);

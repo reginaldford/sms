@@ -10,6 +10,14 @@ sm_f64 *sm_new_f64(f64 value) {
   return newnum;
 }
 
+// Return new object encapsulating 64 bit floating point value
+sm_f64 *sm_new_f64_at(sm_heap *h, f64 value) {
+  struct sm_f64 *newnum = (sm_f64 *)sm_malloc_at(h, sizeof(sm_f64));
+  newnum->my_type       = SM_F64_TYPE;
+  newnum->value         = value;
+  return newnum;
+}
+
 // Return an sm_string describing this f64
 sm_string *sm_f64_to_string(sm_f64 *self) {
   sm_string *new_str = sm_new_string(sm_f64_sprint(self, NULL, true), "");
