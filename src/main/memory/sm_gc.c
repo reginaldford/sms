@@ -166,8 +166,7 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
 // Copying GC
 void sm_garbage_collect() {
   if (sms_heap->used != 0) {
-    if (evaluating)
-      sm_heap_scan(sms_heap);
+    sm_heap_scan(sms_heap);
     //  Build "to" heap if necessary, same size as current
     if (sms_other_heap == NULL)
       sms_other_heap = sm_new_heap(sms_heap->capacity, true);
