@@ -6,18 +6,8 @@ extern void **memory_marker1;
 extern void **memory_marker2;
 extern bool   evaluating;
 
-bool sm_is_sensible_object(sm_object *obj, sm_heap *location) {
-  if (sm_is_within_heap(obj, location) && sm_sizeof(obj) &&
-      ((intptr_t)obj) % (sizeof(size_t) / 2) == 0) {
-    return true;
-  }
-  return false;
-}
-
-
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
-  // if (sm_is_within_heap(obj,sms_heap))
   if (obj->my_type != SM_SYMBOL_TYPE)
     return sm_realloc(obj, sm_sizeof(obj));
   else
@@ -48,9 +38,10 @@ sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
 
 // If obj is an sm_pointer, the object was already moved to the new heap
 // Else, copy the object to the new heap and leave an sm_pointer
+// Expects sm_heap_scan to be used on this to have populated map
 sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
   // Only gc objects from sms_other_heap, which used to be sms_heap
-  if (sm_is_sensible_object(obj, source)) {
+  if (sm_heap_has_object(source, obj)) {
     uint32_t obj_type = obj->my_type;
     if (obj_type == SM_POINTER_TYPE)
       return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
@@ -69,12 +60,13 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
   while (scan_cursor < to->storage + to->used) {
     sm_object *current_obj = (sm_object *)scan_cursor;
     // Check sizeof, avoid an infinite loop
-    if (!sm_sizeof(current_obj)) {
+    size_t obj_size = sm_sizeof(current_obj);
+    if (!obj_size) {
       fprintf(stderr, "Error: Cannot determine object size.\n");
       exit(1);
     }
     // scan_cursor is not referred to for the rest of the loop
-    scan_cursor += sm_sizeof(current_obj);
+    scan_cursor += obj_size;
     switch (current_obj->my_type) {
     case SM_CX_TYPE: {
       sm_cx *cx = (sm_cx *)current_obj;
@@ -172,68 +164,48 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
 }
 
 // Copying GC
-void sm_garbage_collect(sm_heap *from_heap, sm_heap *to_heap) {
-  if (from_heap->used != 0) {
-    // Build "to" heap if necessary, same size as current
-    if (to_heap == NULL)
-      to_heap = sm_new_heap(from_heap->capacity);
-    // For when we recycle a heap...
-    to_heap->used = 0;
-    // We need to clear the memory in case of gc during building an object
-    memset(to_heap->storage, 0, to_heap->capacity);
-
-    if (evaluating) {
-      // Fix c callstack ptrs
-      memory_marker2   = __builtin_frame_address(0);
-      void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
-      void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-      // Alignment
-      lowerPtr -= ((intptr_t)lowerPtr) % sizeof(size_t);
-      for (void **ptr = lowerPtr; ptr < higherPtr; ptr++) {
-        // We are updating pointers in the c callstack. Watch for false alerts.
-        if (sm_is_sensible_object((sm_object *)*ptr, from_heap))
-          *ptr = (void *)sm_meet_object(from_heap, to_heap, (sm_object *)*ptr);
-      }
-    }
-
+void sm_garbage_collect() {
+  if (sms_heap->used != 0) {
+    sm_heap_scan(sms_heap);
+    //  Build "to" heap if necessary, same size as current
+    if (sms_other_heap == NULL)
+      sms_other_heap = sm_new_heap(sms_heap->capacity, true);
+    // Clear for when we recycle a heap
+    sm_heap_clear(sms_other_heap);
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
-      sm_meet_object(from_heap, to_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
-
-    // Treat parser output as root
+      sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
+    // Treat parser output as root or set parser output to false
     if (evaluating)
-      sm_global_parser_output(sm_meet_object(from_heap, to_heap, sm_global_parser_output(NULL)));
-    // Or set parser output to false
+      sm_global_parser_output(
+        sm_meet_object(sms_heap, sms_other_heap, sm_global_parser_output(NULL)));
     else
       sm_global_parser_output((sm_object *)sms_false);
-
+    // Fix c callstack ptrs if evaluating
+    if (evaluating) {
+      memory_marker2 = __builtin_frame_address(0);
+      // Fill in the heap bitmap
+      void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
+      void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
+      // Scan callstack for valid object ptrs
+      for (void **ptr = lowerPtr; ptr < higherPtr; ptr++)
+        if (sm_heap_has_object(sms_heap, *ptr))
+          *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
+    }
     // Inflate
-    sm_inflate_heap(from_heap, to_heap);
-
+    sm_inflate_heap(sms_heap, sms_other_heap);
     // For tracking purposes
     sm_gc_count(1);
-  }
-  // Report memory stat
-  FILE *output = sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false
-                   ? stdout
-                   : fopen("/dev/null", "w");
-  if (output) {
-    if (!evaluating)
-      putc('\n', output);
-    fprintf(output, "%s", sm_terminal_fg_color(SM_TERM_B_BLACK));
-    putc('(', output);
-    if (output == stdout)
-      sm_print_fancy_bytelength((long long)to_heap->used);
-    fprintf(output, " / ");
-    if (output == stdout)
-      sm_print_fancy_bytelength((long long)to_heap->capacity);
-    putc(')', output);
-    fprintf(output, "%s", sm_terminal_reset());
-    if (evaluating)
-      putc('\n', output);
-
-    if (output != stdout) {
-      fclose(output); // Close /dev/null if it was opened
+    // swap global heap ptrs
+    sm_swap_heaps(&sms_heap, &sms_other_heap);
+    // Report memory stat
+    if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
+      char used_str[16];
+      char capacity_str[16];
+      sm_sprint_fancy_bytelength(used_str, (uint64_t)sms_heap->used);
+      sm_sprint_fancy_bytelength(capacity_str, (uint64_t)sms_heap->capacity);
+      printf("\n%s(%s / %s)%s\n", sm_terminal_fg_color(SM_TERM_B_BLACK), used_str, capacity_str,
+             sm_terminal_reset());
     }
   }
 }

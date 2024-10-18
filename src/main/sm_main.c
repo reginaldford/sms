@@ -54,12 +54,7 @@ void start_repl(sm_env *env) {
       sm_safe_print_string(result_str);
       printf("%s", sm_terminal_reset());
       // Cleanup
-      if (!sms_other_heap)
-        sms_other_heap = sm_new_heap(sms_heap->capacity);
-      sm_garbage_collect(sms_heap, sms_other_heap);
-      // Empty this heap and Swap heaps
-      sm_swap_heaps(&sms_heap, &sms_other_heap);
-      fflush(stdout);
+      sm_garbage_collect();
       // Count this as a line
       yylineno++;
     } else {
@@ -153,9 +148,9 @@ int main(int num_args, char *argv[]) {
       }
       if (env.quiet_mode == false) {
         printf("Custom Heap Size: ");
-        printf("%lld Bytes (", (long long)env.mem_bytes);
-        sm_print_fancy_bytelength(env.mem_bytes);
-        printf(")\n");
+        char bytelength_str[16];
+        sm_sprint_fancy_bytelength(bytelength_str, env.mem_bytes);
+        printf("%s", bytelength_str);
       }
       break;
     }

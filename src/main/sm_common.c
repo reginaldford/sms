@@ -64,25 +64,25 @@ uint64_t sm_bytelength_parse(char *str, int length) {
   return atof(buffer);
 }
 
-// Prints to screen the byte length, into reasonable units
-void sm_print_fancy_bytelength(uint64_t bytelength) {
+int sm_sprint_fancy_bytelength(char *buffer, uint64_t bytelength) {
   const uint64_t KB = 1024;
-  if (bytelength < KB)
-    printf("%.4gB", (f64)bytelength);
-  else if (bytelength < KB * KB)
-    printf("%.4gKB", (f64)bytelength / KB);
-  else if (bytelength < (KB * KB * KB))
-    printf("%.4gMB", (f64)bytelength / (KB * KB));
-  else if (bytelength < (KB * KB * KB * KB))
-    printf("%.4gGB", (f64)bytelength / (KB * KB * KB));
-  else if (bytelength < (KB * KB * KB * KB * KB))
-    printf("%.4gTB", (f64)bytelength / (KB * KB * KB * KB));
-  else if (bytelength < (KB * KB * KB * KB * KB * KB))
-    printf("%.4gEB", (f64)bytelength / (KB * KB * KB * KB * KB));
-  else if (bytelength < (KB * KB * KB * KB * KB * KB * KB))
-    printf("%.4gPB", (f64)bytelength / (KB * KB * KB * KB * KB * KB));
-  else
-    printf("lots");
+  if (bytelength < KB) {
+    return snprintf(buffer, 64, "%.4gB", (double)bytelength);
+  } else if (bytelength < KB * KB) {
+    return snprintf(buffer, 64, "%.4gKB", (double)bytelength / KB);
+  } else if (bytelength < (KB * KB * KB)) {
+    return snprintf(buffer, 64, "%.4gMB", (double)bytelength / (KB * KB));
+  } else if (bytelength < (KB * KB * KB * KB)) {
+    return snprintf(buffer, 64, "%.4gGB", (double)bytelength / (KB * KB * KB));
+  } else if (bytelength < (KB * KB * KB * KB * KB)) {
+    return snprintf(buffer, 64, "%.4gTB", (double)bytelength / (KB * KB * KB * KB));
+  } else if (bytelength < (KB * KB * KB * KB * KB * KB)) {
+    return snprintf(buffer, 64, "%.4gEB", (double)bytelength / (KB * KB * KB * KB * KB));
+  } else if (bytelength < (KB * KB * KB * KB * KB * KB * KB)) {
+    return snprintf(buffer, 64, "%.4gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
+  } else {
+    return snprintf(buffer, 64, "lots");
+  }
 }
 
 // Reads a file into a string. If there is any issue, returns sms_false

@@ -12,52 +12,109 @@ extern sm_heap_set *sms_all_heaps;
 extern void        *memory_marker1;
 extern void        *memory_marker2;
 
-
 // For rounding up object size to the next multiple of 4 bytes.
 uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
+
 // For rounding up object size to the next multiple of 8 bytes.
 uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~7; }
 
 // Create a new heap of some capacity
-sm_heap *sm_new_heap(uint32_t capacity) {
-  sm_heap *new_heap  = (sm_heap *)malloc(sizeof(sm_heap) + capacity);
+sm_heap *sm_new_heap(uint32_t capacity, bool map) {
+  sm_heap *new_heap = (sm_heap *)malloc(sizeof(sm_heap) + sm_round_size64(capacity));
+  if (new_heap == NULL) {
+    fprintf(stderr, "Cannot allocate memory for heap. %s:%i", __FILE__, __LINE__);
+    exit(1);
+  }
   new_heap->capacity = capacity;
-  new_heap->used     = 0;
   new_heap->storage  = (char *)(new_heap + 1);
   sm_heap_set_add(sms_all_heaps, new_heap);
+  if (map) {
+    uint64_t map_size = (capacity + 63) / 64;
+    new_heap->map     = malloc(map_size);
+    if (new_heap->map == NULL) {
+      fprintf(stderr, "Cannot allocate memory for heap map. %s:%i", __FILE__, __LINE__);
+      exit(1);
+    }
+  }
+  sm_heap_clear(new_heap);
   return new_heap;
+}
+
+void *sm_malloc_at(sm_heap *h, uint32_t size) {
+  if (h == sms_heap)
+    return sm_malloc(size);
+  uint32_t bytes_used      = h->used;
+  uint32_t next_bytes_used = h->used + size;
+  // Check for sufficient capacity
+  if (next_bytes_used >= h->capacity) {
+    fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+    exit(1);
+  }
+  // Update the used bytes
+  h->used = next_bytes_used;
+  // Get the pointer to the newly allocated space
+  void *allocated_space = (void *)(((char *)h->storage) + bytes_used);
+  // Zero out the allocated space
+  memset(allocated_space, 0, size);
+  return allocated_space; // Return the pointer to the allocated space
 }
 
 // Internal 'malloc'
 void *sm_malloc(uint32_t size) {
-  uint32_t bytes_used      = sms_heap->used;
-  uint32_t next_bytes_used = sms_heap->used + size;
-  if (next_bytes_used > sms_heap->capacity) {
-    // Cleanup
-    if (!sms_other_heap)
-      sms_other_heap = sm_new_heap(sms_heap->capacity);
-    memory_marker2 = __builtin_frame_address(0);
-    sm_garbage_collect(sms_heap, sms_other_heap);
-    // Empty this heap and Swap heaps
-    sm_swap_heaps(&sms_heap, &sms_other_heap);
-    sms_other_heap->used = 0;
-    next_bytes_used      = sms_heap->used + size;
-    if (next_bytes_used > sms_heap->capacity) {
-      fprintf(stderr, "Exhausted heap memory.\n");
+  uint32_t bytes_used       = sms_heap->used;
+  uint32_t next_bytes_used  = bytes_used + size;
+  uint32_t upper_scan_limit = sm_round_size64(0.99 * sms_heap->capacity);
+  if (next_bytes_used > upper_scan_limit) {
+    // Try garbage collection to make space
+    sm_garbage_collect();
+    // Refresh bytes_used and next_bytes_used
+    bytes_used      = sms_heap->used;
+    next_bytes_used = bytes_used + size;
+    if (next_bytes_used >= upper_scan_limit) {
+      fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
       exit(1);
     }
   }
+  // Get the pointer to the allocated space
+  void *output_location = (void *)(((char *)sms_heap->storage) + bytes_used);
+  // Zero out the allocated space
+  memset(output_location, 0, size);
+  // Update the used bytes
   sms_heap->used = next_bytes_used;
-  return (void *)(((char *)sms_heap->storage) + bytes_used);
+  return output_location; // Return the pointer to the allocated space
 }
 
-// Internal 'malloc' with alternative heap
-void *sm_malloc_at(struct sm_heap *heap, uint32_t size) {
-  if (heap == sms_heap)
-    return sm_malloc(size);
-  uint32_t bytes_used = heap->used;
-  heap->used += size;
-  return (void *)(((char *)heap->storage) + bytes_used);
+// Print this heap's map in binary form
+void sm_heap_print_map(sm_heap *h) {
+  uint64_t map_size = (h->capacity + 63) / 64;
+  for (uint32_t i = 0; i < map_size; i++)
+    for (int j = 7; i >= 0; i--)
+      printf("%u", (h->map[i] >> j) & 1);
+}
+
+// Return whether this pointer aims at the beginning of a registered heap object
+bool sm_heap_has_object(sm_heap *heap, void *guess) {
+  // First check if it's in bounds
+  if (((intptr_t)guess & 7) || !sm_is_within_heap(guess, heap))
+    return false;
+  // Calculate the position in the bitmap
+  uint32_t map_pos =
+    ((intptr_t *)guess - (intptr_t *)heap->storage) / 8; // Offset in the heap divided by 8 bytes
+  uint32_t byte_pos = map_pos / 8;                       // Find the byte in the bitmap
+  uint32_t bit_pos  = map_pos % 8;                       // Find the specific bit in the byte
+  return heap->map[byte_pos] & (1 << bit_pos);
+}
+
+// Designed to be fast
+void sm_heap_register_object(sm_heap *heap, void *obj) {
+  if (heap->map) {
+    // Calculate the position in the bitmap
+    uint32_t map_pos =
+      ((intptr_t *)obj - (intptr_t *)heap->storage) / 8; // Offset in the heap divided by 8 bytes
+    uint32_t byte_pos = map_pos / 8;                     // Find the byte in the bitmap
+    uint32_t bit_pos  = map_pos % 8;                     // Find the specific bit in the byte
+    heap->map[byte_pos] |= (1 << bit_pos);
+  }
 }
 
 // Reallocate memory space for resizing or recreating objects
@@ -72,9 +129,19 @@ void *sm_realloc_at(struct sm_heap *dest, void *obj, uint32_t size) {
   return memcpy(new_space, obj, size);
 }
 
-// Is the object within this heap?
-bool sm_is_within_heap(void *obj, sm_heap *heap) {
-  return (obj >= (void *)heap) && (obj < (void *)((char *)heap) + heap->used);
+// Clear the heap and set used to 0
+void sm_heap_clear(struct sm_heap *h) {
+  memset(h->storage, 0, h->capacity); // Clear the heap storage
+  h->used = 0;
+  if (h->map) {
+    memset(h->map, 0,
+           (h->capacity + 63) / 64); // Clear the map (1 bit per 8 bytes, i.e., 1/64 of capacity)
+  }
+}
+
+// Is the ptr within this heap?
+bool sm_is_within_heap(void *ptr, sm_heap *heap) {
+  return (ptr >= (void *)heap->storage) && (ptr < (void *)((char *)heap->storage) + heap->used);
 }
 
 // For advanced debugging, run this at any point and examine the heap snapshot as a file
@@ -87,7 +154,6 @@ int sm_mem_dump(sm_heap *heap, char *name) {
   fwrite(buffer, 1, buffer_length, fp);
   fflush(fp);
   // Close the file
-  // Returns 0 if there are no problems
   return fclose(fp);
 }
 
@@ -134,4 +200,20 @@ void sm_swap_heaps(sm_heap **a, sm_heap **b) {
   sm_heap *temp = *a;
   *a            = *b;
   *b            = temp;
+}
+
+// Scan the heap and generate the bitmap. Return true on success.
+bool sm_heap_scan(sm_heap *h) {
+  sm_object *obj      = (sm_object *)((intptr_t)h->storage);
+  sm_object *prev_obj = NULL; // Initialize prev_obj to track the previous object
+  while ((char *)obj < h->storage + h->used) {
+    // Check for valid object size
+    // Register in heap map if it has one
+    if (sm_sizeof(obj))
+      sm_heap_register_object(sms_heap, obj);
+    // Move to the next object
+    prev_obj = obj; // Update prev_obj to the current object
+    obj      = (sm_object *)((char *)obj + MAX(sm_sizeof(obj), sizeof(size_t)));
+  }
+  return true;
 }

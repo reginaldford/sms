@@ -6,6 +6,7 @@
 typedef struct sm_string {
   uint32_t my_type;
   uint32_t size;
+  uint32_t filler;  // Adding filler to get 64 bit size on x64
   char     content; // stores NULL if nothing else
 } sm_string;
 

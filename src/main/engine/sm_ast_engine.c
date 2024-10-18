@@ -201,8 +201,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       img.sms_symbol_name_heap = *sms_symbol_name_heap;        // Copy the symbol name heap
 
       // Perform garbage collection to compact the sms_heap
-      sm_heap *compacted_heap = sm_new_heap(sms_heap->capacity); // Create a new heap for GC
-      sm_garbage_collect(sms_heap, compacted_heap); // Compact the main heap into the new one
+      sm_heap *compacted_heap = sm_new_heap(sms_heap->capacity, true); // Create a new heap for GC
+      // TODO: sm_heap_compact_to(from,to)
+      // sm_garbage_collect(sms_heap, compacted_heap); // Compact the main heap into the new one
 
       // Open the file for writing
       FILE *file = fopen(fname_cstr, "wb");
@@ -249,14 +250,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       // Return sms_true to indicate success
       return (sm_object *)sms_true;
     }
-
-
     case SM_GC_EXPR: {
-      // This fails because it changes all of the pointers before the function returns.
-      // sm_garbage_collect();
-      sm_symbol *title   = sm_new_symbol("notImplemented", 14);
-      sm_string *message = sm_new_string(33, "_gc() command is not implemented yet");
-      return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      sm_garbage_collect();
+      return (sm_object *)sms_true;
       break;
     }
     case SM_SLEEP_EXPR: {

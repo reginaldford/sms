@@ -16,8 +16,8 @@ int sm_is_unit(char c);
 /// @note Example: "123g" would be interpretted as 123 * 1024 ^ 3 bytes
 /// @note Example: "123t" would be interpretted as 123 * 1024 ^ 4 bytes
 uint64_t sm_bytelength_parse(char *str, int length);
-/// Prints to stdout the number of bytes with a reasonable unit
-void sm_print_fancy_bytelength(uint64_t bytelength);
+/// Places string expressing number of bytes with reasonable unit into buffer
+int sm_sprint_fancy_bytelength(char *buffer, uint64_t bytelength);
 /// Reads a file into a string. If there is any issue, returns NULL
 struct sm_string *sm_read_file(char *filePath, int filePathLen);
 /// Whether a character is allowed in a symbol name
