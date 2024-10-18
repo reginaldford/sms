@@ -173,7 +173,8 @@ void sm_garbage_collect() {
     // Clear for when we recycle a heap
     sm_heap_clear(sms_other_heap);
     // Try to shake off objects from callstack with some unregistered spacers
-    sm_new_space_at(sms_other_heap, (sm_gc_count(0) % 16) * 8);
+    if (evaluating)
+      sm_new_space_at(sms_other_heap, (sm_gc_count(0) % 16) * 8);
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
       sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
