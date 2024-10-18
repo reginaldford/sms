@@ -41,6 +41,8 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
 }
 
 void *sm_malloc_at(sm_heap *h, uint32_t size) {
+  if (h == sms_heap)
+    return sm_malloc(size);
   uint32_t bytes_used      = h->used;
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
