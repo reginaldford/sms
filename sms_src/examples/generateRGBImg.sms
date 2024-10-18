@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -m64
+#!/usr/local/bin/sms -m1g
 # Usage: This script demonstrates creating a rainbow gradient using colorTGA.write
 
 {
