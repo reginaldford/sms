@@ -43,32 +43,43 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
 void *sm_malloc_at(sm_heap *h, uint32_t size) {
   uint32_t bytes_used      = h->used;
   uint32_t next_bytes_used = h->used + size;
+  // Check for sufficient capacity
   if (next_bytes_used > h->capacity) {
-    fprintf(stderr, "Cannot allocate space for an object in this heap. %s:%i", __FILE__, __LINE__);
+    fprintf(stderr, "Cannot allocate space for an object in this heap. %s:%i\n", __FILE__,
+            __LINE__);
+    return NULL; // Return NULL to indicate allocation failure
   }
-  // Final essentials
+  // Update the used bytes
   h->used = next_bytes_used;
-  return (void *)(((char *)h->storage) + bytes_used);
+  // Get the pointer to the newly allocated space
+  void *allocated_space = (void *)(((char *)h->storage) + bytes_used);
+  // Zero out the allocated space
+  memset(allocated_space, 0, size);
+  return allocated_space; // Return the pointer to the allocated space
 }
-
 
 // Internal 'malloc'
 void *sm_malloc(uint32_t size) {
   uint32_t bytes_used      = sms_heap->used;
-  uint32_t next_bytes_used = sms_heap->used + size;
+  uint32_t next_bytes_used = bytes_used + size;
   if (next_bytes_used > sms_heap->capacity) {
-    // Try gc to make space
+    // Try garbage collection to make space
     sm_garbage_collect();
-    next_bytes_used = sms_heap->used + size;
+    // Refresh bytes_used and next_bytes_used
+    bytes_used      = sms_heap->used;
+    next_bytes_used = bytes_used + size;
     if (next_bytes_used > sms_heap->capacity) {
       fprintf(stderr, "Exhausted heap memory.\n");
       exit(1);
     }
   }
+  // Get the pointer to the allocated space
   void *output_location = (void *)(((char *)sms_heap->storage) + bytes_used);
-  // Final essentials
+  // Zero out the allocated space
+  memset(output_location, 0, size);
+  // Update the used bytes
   sms_heap->used = next_bytes_used;
-  return output_location;
+  return output_location; // Return the pointer to the allocated space
 }
 
 // Print this heap's map in binary form

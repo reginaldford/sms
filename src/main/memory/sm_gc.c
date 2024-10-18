@@ -170,7 +170,7 @@ void sm_garbage_collect() {
     //  Build "to" heap if necessary, same size as current
     if (sms_other_heap == NULL)
       sms_other_heap = sm_new_heap(sms_heap->capacity, true);
-    // Clear for when we recycle a heap...
+    // Clear for when we recycle a heap
     sm_heap_clear(sms_other_heap);
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
@@ -183,7 +183,6 @@ void sm_garbage_collect() {
       sm_global_parser_output((sm_object *)sms_false);
     // Fix c callstack ptrs if evaluating
     if (evaluating) {
-      // Let's affect this frame or sm_malloc (or any caller)
       memory_marker2 = __builtin_frame_address(0);
       // Fill in the heap bitmap
       void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
