@@ -67,8 +67,7 @@
       return true;
     } else return <tgaWriteErr,"Error: Failed to create TGA file.">;
   };
-
-  # Expose the write function for usage
-  cxLet(parent(_scratch), :colorTGA, self);
+  # Return this context as a library
+  self;
 };
 

@@ -26,5 +26,5 @@
     return 2  *f(n-3) + f(n-4) + f(n-2) ;
   };
 
-  benchmark(:f(31));
+  benchmark(:f(40));
 };

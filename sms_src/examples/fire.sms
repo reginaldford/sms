@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms
+#!/usr/local/bin/sms -qm16
 #Draws a fire-like image.
 #Must be run in the directory with colorPrint.sms
 {

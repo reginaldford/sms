@@ -1702,16 +1702,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     case SM_PUTLN_EXPR: {
       sm_string *str;
       sm_object *evaluated;
-      for (int i = 0; i < sme->size; i++) {
-        evaluated = eager_type_check(sme, i, SM_STRING_TYPE, current_cx, sf);
-        if (evaluated->my_type == SM_ERR_TYPE)
-          return evaluated;
-        str = (sm_string *)evaluated;
-        for (uint32_t i = 0; i < str->size; i++)
-          putchar((&str->content)[i]);
-        putchar('\n');
-        putchar('\0');
-      }
+      evaluated = eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      if (evaluated->my_type == SM_ERR_TYPE)
+        return evaluated;
+      str = (sm_string *)evaluated;
+      for (uint32_t i = 0; i < str->size; i++)
+        putchar((&str->content)[i]);
+      putchar('\n');
       fflush(stdout);
       return ((sm_object *)sms_true);
       break;

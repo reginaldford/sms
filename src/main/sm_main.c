@@ -147,10 +147,9 @@ int main(int num_args, char *argv[]) {
         clean_exit(&env, 1);
       }
       if (env.quiet_mode == false) {
-        printf("Custom Heap Size: ");
         char bytelength_str[16];
         sm_sprint_fancy_bytelength(bytelength_str, env.mem_bytes);
-        printf("%s", bytelength_str);
+        printf("Custom Heap Size: %s\n", bytelength_str);
       }
       break;
     }

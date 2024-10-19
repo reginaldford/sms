@@ -1,9 +1,9 @@
-#!/usr/local/bin/sms -m1g
+#!/usr/local/bin/sms -m1.15g
 # Usage: This script demonstrates creating a rainbow gradient using colorTGA.write
 
 {
   # Evaluate and include the colorTGA library
-  eval(fileParse("colorTGA.sms"));
+  let colorTGA = import "colorTGA.sms";
 
   # Image dimensions
   let width = 1920;
