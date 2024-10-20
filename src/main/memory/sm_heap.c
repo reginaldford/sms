@@ -45,8 +45,22 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
   if (next_bytes_used >= h->capacity) {
-    fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
-    exit(1);
+    // Only GC sms_heap
+    if (h == sms_heap) {
+      // Try gc
+      sm_garbage_collect();
+      // Refresh values
+      h               = sms_heap;
+      bytes_used      = h->used;
+      next_bytes_used = bytes_used + size;
+      if (next_bytes_used >= h->capacity) {
+        fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+        exit(1);
+      }
+    } else {
+      fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+      exit(1);
+    }
   }
   // Update the used bytes
   h->used = next_bytes_used;
