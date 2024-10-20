@@ -41,8 +41,6 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
 }
 
 void *sm_malloc_at(sm_heap *h, uint32_t size) {
-  if (h == sms_heap)
-    return sm_malloc(size);
   uint32_t bytes_used      = h->used;
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
@@ -60,29 +58,7 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
 }
 
 // Internal 'malloc'
-void *sm_malloc(uint32_t size) {
-  uint32_t bytes_used       = sms_heap->used;
-  uint32_t next_bytes_used  = bytes_used + size;
-  uint32_t upper_scan_limit = sm_round_size64(0.99 * sms_heap->capacity);
-  if (next_bytes_used > upper_scan_limit) {
-    // Try garbage collection to make space
-    sm_garbage_collect();
-    // Refresh bytes_used and next_bytes_used
-    bytes_used      = sms_heap->used;
-    next_bytes_used = bytes_used + size;
-    if (next_bytes_used >= upper_scan_limit) {
-      fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
-      exit(1);
-    }
-  }
-  // Get the pointer to the allocated space
-  void *output_location = (void *)(((char *)sms_heap->storage) + bytes_used);
-  // Zero out the allocated space
-  memset(output_location, 0, size);
-  // Update the used bytes
-  sms_heap->used = next_bytes_used;
-  return output_location; // Return the pointer to the allocated space
-}
+void *sm_malloc(uint32_t size) { return sm_malloc_at(sms_heap, size); }
 
 // Print this heap's map in binary form
 void sm_heap_print_map(sm_heap *h) {
