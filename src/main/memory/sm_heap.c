@@ -66,8 +66,10 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
   h->used = next_bytes_used;
   // Get the pointer to the newly allocated space
   void *allocated_space = (void *)(((char *)h->storage) + bytes_used);
-  // Zero out the allocated space
-  memset(allocated_space, 0, size);
+  // Give this chunk a valid sm_space header so that it survives gc
+  sm_space *space = (sm_space *)allocated_space;
+  space->my_type  = SM_SPACE_TYPE;
+  space->size     = sm_round_size64(size) - sizeof(sm_space);
   return allocated_space; // Return the pointer to the allocated space
 }
 

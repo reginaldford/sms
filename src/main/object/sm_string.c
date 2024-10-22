@@ -2,6 +2,9 @@
 
 #include "../sms.h"
 
+extern sm_heap *sms_heap;
+
+
 // string copy with known length. Does not add NULL termination
 char *sm_strncpy(char *dest, const char *src, uint32_t n) {
   uint32_t i;
@@ -75,12 +78,7 @@ sm_string *sm_new_string_manual_at(struct sm_heap *heap, uint32_t size) {
 }
 
 // Return a new empty string (does not nullify contents)
-sm_string *sm_new_string_manual(uint32_t size) {
-  struct sm_string *newstr = (sm_string *)sm_malloc(sizeof(sm_string) + sm_round_size64(size));
-  newstr->my_type          = SM_STRING_TYPE;
-  newstr->size             = size;
-  return newstr;
-}
+sm_string *sm_new_string_manual(uint32_t size) { return sm_new_string_manual_at(sms_heap,size); }
 
 // Return a new string: str1+str2
 sm_string *sm_string_add(sm_string *str1, sm_string *str2) {

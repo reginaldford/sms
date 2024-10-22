@@ -176,6 +176,15 @@ void sm_garbage_collect() {
     // Try to shake off objects from callstack with unregistered spacer
     if (evaluating)
       sm_new_space_at(sms_other_heap, (sm_gc_count(0) % 16) * 8);
+    // Fix c callstack ptrs if evaluating
+    if (evaluating) {
+      memory_marker2   = __builtin_frame_address(0) ;
+      void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
+      void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
+      for (void **ptr = lowerPtr; ptr < higherPtr; ptr++)
+        if (sm_heap_has_object(sms_heap, *ptr))
+          *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
+    }
     // Copy root (global context)
     *sm_global_lex_stack(NULL)->top =
       sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
