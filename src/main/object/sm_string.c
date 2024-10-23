@@ -78,7 +78,7 @@ sm_string *sm_new_string_manual_at(struct sm_heap *heap, uint32_t size) {
 }
 
 // Return a new empty string (does not nullify contents)
-sm_string *sm_new_string_manual(uint32_t size) { return sm_new_string_manual_at(sms_heap,size); }
+sm_string *sm_new_string_manual(uint32_t size) { return sm_new_string_manual_at(sms_heap, size); }
 
 // Return a new string: str1+str2
 sm_string *sm_string_add(sm_string *str1, sm_string *str2) {
