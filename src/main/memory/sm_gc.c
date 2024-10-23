@@ -34,8 +34,10 @@ sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
   sm_object *new_obj   = sm_realloc_at(dest, obj, sizeOfObj);
   // Overwrite the old object. sm_pointer objects
   intptr_t endPoint = (intptr_t)obj + sizeOfObj;
+  sm_new_pointer(dest, obj, new_obj);
+  obj = (sm_object *)((intptr_t)obj + sizeof(sm_pointer));
   while ((intptr_t)obj < endPoint) {
-    sm_new_pointer(dest, obj, new_obj);
+    sm_new_pointer(dest, obj, (sm_object *)sms_false);
     obj = (sm_object *)((intptr_t)obj + sizeof(sm_pointer));
   }
   return new_obj;
@@ -158,6 +160,7 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
 
       // Rely on map to update stack's top ptr
       // Trace the map leftward from the  curent stack->top for the next set bit
+      // !! YOU ARE HERE
 
 
       break;
@@ -196,8 +199,14 @@ void sm_garbage_collect() {
     void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
     void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
     for (void **ptr = lowerPtr; ptr < higherPtr; ptr++)
-      if (sm_heap_has_object(sms_heap, *ptr) && sm_sizeof((sm_object *)*ptr))
-        *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
+      if (sm_heap_has_object(sms_heap, *ptr)) {
+        sm_object *obj = *ptr;
+        // Bravely clean the runtime callstack
+        if (!sm_sizeof(obj))
+          *ptr = NULL;
+        else
+          *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
+      }
   }
   // Copy root (global context)
   *sm_global_lex_stack(NULL)->top =

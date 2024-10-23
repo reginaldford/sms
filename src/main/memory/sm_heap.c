@@ -25,7 +25,7 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
     fprintf(stderr, "Cannot allocate memory for heap. %s:%i", __FILE__, __LINE__);
     exit(1);
   }
-  new_heap->capacity = capacity;
+  new_heap->capacity = sm_round_size64(capacity);
   new_heap->storage  = (char *)(new_heap + 1);
   sm_heap_set_add(sms_all_heaps, new_heap);
   if (map) {
@@ -91,7 +91,7 @@ bool sm_heap_has_object(sm_heap *heap, void *guess) {
   uint32_t map_pos =
     ((intptr_t *)guess - (intptr_t *)heap->storage) >> 3; // Offset in the heap divided by 8 bytes
   uint32_t byte_pos = map_pos >> 3;                       // Find the byte in the bitmap
-  uint32_t bit_pos  = map_pos & 7;                        // Find the specific bit in the byte
+  uint8_t  bit_pos  = map_pos & 7;                        // Find the specific bit in the byte
   return heap->map[byte_pos] & (1 << bit_pos);
 }
 
@@ -123,7 +123,6 @@ void *sm_realloc_at(struct sm_heap *dest, void *obj, uint32_t size) {
 
 // Clear the heap and set used to 0
 void sm_heap_clear(struct sm_heap *h) {
-  memset(h->storage, 0, h->capacity); // Clear the heap storage
   h->used = 0;
   if (h->map) {
     memset(h->map, 0,
@@ -197,7 +196,7 @@ bool sm_heap_scan(sm_heap *h) {
   while ((char *)obj < h->storage + h->used) {
     // Register in heap map if it has valid object size
     uint32_t sizeOfObj = sm_sizeof(obj);
-    if (!sizeOfObj || sizeOfObj & 7) {
+    if (!sizeOfObj || sizeOfObj & 7 || obj->my_type == SM_POINTER_TYPE) {
       fprintf(stderr, "! Corrupt object. File: %s , line: %u\n", __FILE__, __LINE__);
       return false;
     }

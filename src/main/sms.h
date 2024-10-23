@@ -27,7 +27,7 @@
 #endif
 
 // Set version number. Major.Minor.Patch
-#define SMS_VERSION "0.22.3"
+#define SMS_VERSION "0.22.4"
 #define SMS_VERSION_LEN 7
 
 /// These are the major object types of SMS
