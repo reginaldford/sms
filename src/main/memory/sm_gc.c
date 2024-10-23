@@ -198,7 +198,7 @@ void sm_garbage_collect() {
     memory_marker2   = __builtin_frame_address(0);
     void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
     void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-    for (void **ptr = lowerPtr; ptr < higherPtr; ptr++)
+    for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++)
       if (sm_heap_has_object(sms_heap, *ptr)) {
         sm_object *obj = *ptr;
         // Bravely clean the runtime callstack

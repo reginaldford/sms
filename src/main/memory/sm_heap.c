@@ -126,7 +126,7 @@ void sm_heap_clear(struct sm_heap *h) {
   h->used = 0;
   if (h->map) {
     memset(h->map, 0,
-           (h->capacity + 63) / 64); // Clear the map (1 bit per 8 bytes, i.e., 1/64 of capacity)
+           h->capacity / 64); // Clear the map (1 bit per 8 bytes, i.e., 1/64 of capacity)
   }
 }
 

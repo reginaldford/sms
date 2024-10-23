@@ -1,5 +1,5 @@
-#!/usr/local/bin/sms -qm48k
-# Simply let a=s the time every second
+#!/usr/local/bin/sms -qm32k
+# Simply puts the time every second
 {
   # Represents a number from 0 to 99
   # with 2 characters.
@@ -16,16 +16,18 @@
   while(true){
     d = date();
     # Clear the screen
+    osExec("clear");
     # Convert military time to 12-hr
-    let a=(two_digits(
+    put(two_digits(
       if(d[2]>12)
         d[2]-12
       else
         d[2]));
-    let a=(":");
-    let a=(two_digits(d[1]));
-    let a=(":");
-    let a=(two_digits(d[0]));
-    let a=(" " str+ am_pm_str(d[2]));
+    put(":");
+    put(two_digits(d[1]));
+    put(":");
+    put(two_digits(d[0]));
+    putLn(" " str+ am_pm_str(d[2]));
+    sleep(10);
   };
 };
