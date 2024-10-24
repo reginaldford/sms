@@ -155,14 +155,8 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
     }
     case SM_STACK_OBJ_TYPE: {
       sm_stack_obj *stack = (sm_stack_obj *)current_obj;
-      for (uint32_t i = 0; i < sm_stack_obj_size(stack); i++)
+      for (uint32_t i = 0; i < stack->size; i++)
         ((sm_object **)&stack[1])[i] = sm_meet_object(from, to, ((sm_object **)&stack[1])[i]);
-
-      // Rely on map to update stack's top ptr
-      // Trace the map leftward from the  curent stack->top for the next set bit
-      // !! YOU ARE HERE
-
-
       break;
     }
     case SM_ARRAY_TYPE: {

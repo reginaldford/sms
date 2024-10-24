@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm32k
+#!/usr/local/bin/sms -qm256k
 # Simply puts the time every second
 {
   # Represents a number from 0 to 99
@@ -16,7 +16,6 @@
   while(true){
     d = date();
     # Clear the screen
-    osExec("clear");
     # Convert military time to 12-hr
     put(two_digits(
       if(d[2]>12)
@@ -28,6 +27,5 @@
     put(":");
     put(two_digits(d[0]));
     putLn(" " str+ am_pm_str(d[2]));
-    sleep(10);
   };
 };
