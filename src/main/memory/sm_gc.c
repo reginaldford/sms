@@ -175,7 +175,7 @@ void sm_garbage_collect() {
   if (!sms_heap->used)
     return;
   // Fill in the heap map
-  if (!sm_heap_scan(sms_heap)) {
+  if (evaluating && !sm_heap_scan(sms_heap)) {
     fprintf(stderr, "Heap scan failed. Exiting with code 1\n");
     exit(1);
   }
