@@ -19,6 +19,10 @@ struct sm_heap *sm_new_heap(uint32_t capacity, bool map);
 void *sm_malloc(uint32_t size);
 /// Provide a pointer to a newly allocated space (size specified in bytes) in the specified heap.
 void *sm_malloc_at(struct sm_heap *heap, uint32_t size);
+/// malloc with no gc possibility.
+void *sm_malloc_plain(uint32_t size);
+/// malloc_at with no gc possibility
+void *sm_malloc_plain_at(struct sm_heap *heap, uint32_t size);
 /// Return whether this pointer aims at the beginning of a registered object of provided heap
 bool sm_heap_has_object(sm_heap *heap, void *guess);
 /// Provide a pointer to a newly allocated space of the specified size and copy the data specified

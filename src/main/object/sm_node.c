@@ -7,7 +7,7 @@ extern sm_heap *sms_symbol_heap;
 // Create a new sm_node
 sm_node *sm_new_node(sm_object *value, struct sm_node *next, long long map,
                      struct sm_node *children, uint32_t sym_id) {
-  sm_node *node   = sm_malloc(sizeof(sm_node));
+  sm_node *node   = sm_malloc_plain(sizeof(sm_node));
   node->my_type   = SM_NODE_TYPE;
   node->value     = value;
   node->next      = next;

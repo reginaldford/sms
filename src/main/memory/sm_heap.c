@@ -20,7 +20,8 @@ uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~7; }
 
 // Create a new heap of some capacity
 sm_heap *sm_new_heap(uint32_t capacity, bool map) {
-  sm_heap *new_heap = (sm_heap *)malloc(sizeof(sm_heap) + sm_round_size64(capacity));
+  sm_heap *new_heap =
+    (sm_heap *)malloc(sizeof(sm_heap) + sm_round_size64(capacity) + sizeof(sm_node) * 8);
   if (new_heap == NULL) {
     fprintf(stderr, "Cannot allocate memory for heap. %s:%i", __FILE__, __LINE__);
     exit(1);
@@ -74,6 +75,26 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
 // Internal 'malloc'
 void *sm_malloc(uint32_t size) { return sm_malloc_at(sms_heap, size); }
 
+// malloc_at with no gc
+void *sm_malloc_plain_at(sm_heap *h, uint32_t size) {
+  uint32_t bytes_used      = h->used;
+  uint32_t next_bytes_used = h->used + size;
+  // Check for sufficient capacity
+  if (next_bytes_used >= h->capacity) {
+    fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+    exit(1);
+  }
+  // Update the used bytes
+  h->used = next_bytes_used;
+  // Get the pointer to the newly allocated space
+  void *allocated_space = (void *)(((char *)h->storage) + bytes_used);
+  // Give this chunk a valid sm_space header so that it survives gc
+  memset(allocated_space, 0, size);
+  return allocated_space; // Return the pointer to the allocated space
+}
+
+// Internal 'malloc'
+void *sm_malloc_plain(uint32_t size) { return sm_malloc_plain_at(sms_heap, size); }
 // Print this heap's map in binary form
 void sm_heap_print_map(sm_heap *h) {
   uint64_t map_size = (h->capacity + 63) / 64;
