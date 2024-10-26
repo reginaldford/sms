@@ -35,6 +35,7 @@ sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
   // Overwrite the old object. sm_pointer objects
   intptr_t endPoint = (intptr_t)obj + sizeOfObj;
   sm_new_pointer(dest, obj, new_obj);
+  obj = (sm_object *)((intptr_t)obj + sizeof(sm_pointer));
   return new_obj;
 }
 
@@ -43,7 +44,7 @@ sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
 // sm_pointer Expects sm_heap_scan to be used on this to have populated map
 sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
   // Only gc objects from source
-  if (sm_heap_has_object(source, obj)) {
+  if (sm_is_within_heap(obj, source)) {
     uint32_t obj_type = obj->my_type;
     if (obj_type == SM_POINTER_TYPE)
       return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
@@ -170,10 +171,11 @@ void sm_garbage_collect() {
   if (!sms_heap->used)
     return;
   // Fill in the heap map
-  if (evaluating && !sm_heap_scan(sms_heap)) {
-    fprintf(stderr, "Heap scan failed. Exiting with code 1\n");
-    exit(1);
-  }
+  if (evaluating)
+    if (!sm_heap_scan(sms_heap)) {
+      fprintf(stderr, "Heap scan failed. Exiting with code 1\n");
+      exit(1);
+    }
   //  Build "to" heap if necessary, same size as current
   if (!sms_other_heap)
     sms_other_heap = sm_new_heap(sms_heap->capacity, true);
