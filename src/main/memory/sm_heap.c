@@ -66,10 +66,7 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
   // Update the used bytes
   h->used = next_bytes_used;
   // Get the pointer to the newly allocated space
-  void *allocated_space = (void *)(((char *)h->storage) + bytes_used);
-  // Give this chunk a valid sm_space header so that it survives gc
-  memset(allocated_space, 0, size);
-  return allocated_space; // Return the pointer to the allocated space
+  return (void *)(((char *)h->storage) + bytes_used);
 }
 
 // Internal 'malloc'
@@ -87,10 +84,7 @@ void *sm_malloc_plain_at(sm_heap *h, uint32_t size) {
   // Update the used bytes
   h->used = next_bytes_used;
   // Get the pointer to the newly allocated space
-  void *allocated_space = (void *)(((char *)h->storage) + bytes_used);
-  // Give this chunk a valid sm_space header so that it survives gc
-  memset(allocated_space, 0, size);
-  return allocated_space; // Return the pointer to the allocated space
+  return (void *)(((char *)h->storage) + bytes_used);
 }
 
 // Internal 'malloc'
@@ -119,7 +113,7 @@ bool sm_heap_has_object(sm_heap *heap, void *guess) {
 // Designed to be fast
 void sm_heap_register_object(sm_heap *heap, void *obj) {
   if (((intptr_t)obj) & 7) {
-    fprintf(stderr, "Misaligned object registration. File: %s Line: %u\n", __FILE__, __LINE__);
+    fprintf(stderr, "Misaligned object registration.  %s:%u\n", __FILE__, __LINE__);
     exit(1);
   }
   // Calculate the position in the bitmap
@@ -218,7 +212,7 @@ bool sm_heap_scan(sm_heap *h) {
     // Register in heap map if it has valid object size
     uint32_t sizeOfObj = sm_sizeof(obj);
     if (!sizeOfObj || sizeOfObj & 7 || obj->my_type == SM_POINTER_TYPE) {
-      fprintf(stderr, "! Corrupt object. File: %s , line: %u\n", __FILE__, __LINE__);
+      fprintf(stderr, "! Corrupt object.  %s:%u\n", __FILE__, __LINE__);
       return false;
     }
     sm_heap_register_object(sms_heap, obj);

@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm256k
+#!/usr/local/bin/sms -qm96k
 # Simply puts the time every second
 {
   # Represents a number from 0 to 99

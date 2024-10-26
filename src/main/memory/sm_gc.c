@@ -191,11 +191,10 @@ void sm_garbage_collect() {
     void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
     for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++)
       if (sm_heap_has_object(sms_heap, *ptr)) {
-        sm_object *obj = *ptr;
-        // Bravely clean the runtime callstack
-        if (!sm_sizeof(obj))
-          *ptr = NULL;
-        else
+        if (!sm_sizeof((sm_object *)*ptr)) {
+          fprintf(stderr, "Bad object encountered during gc. %s:%u\n", __FILE__, __LINE__);
+          exit(1);
+        } else
           *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
       }
   }
