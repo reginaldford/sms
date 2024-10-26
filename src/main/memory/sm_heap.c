@@ -191,7 +191,7 @@ void sm_swap_heaps(sm_heap **a, sm_heap **b) {
 
 // Scan the heap and generate the bitmap. Return true on success.
 bool sm_heap_scan(sm_heap *h) {
-  sm_object *obj      = (sm_object *)((intptr_t)h->storage);
+  sm_object *obj      = (sm_object *)h->storage;
   sm_object *prev_obj = NULL; // Initialize prev_obj to track the previous object
   while ((char *)obj < h->storage + h->used) {
     // Register in heap map if it has valid object size

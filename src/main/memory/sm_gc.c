@@ -35,11 +35,6 @@ sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
   // Overwrite the old object. sm_pointer objects
   intptr_t endPoint = (intptr_t)obj + sizeOfObj;
   sm_new_pointer(dest, obj, new_obj);
-  obj = (sm_object *)((intptr_t)obj + sizeof(sm_pointer));
-  while ((intptr_t)obj < endPoint) {
-    sm_new_pointer(dest, obj, (sm_object *)sms_false);
-    obj = (sm_object *)((intptr_t)obj + sizeof(sm_pointer));
-  }
   return new_obj;
 }
 
