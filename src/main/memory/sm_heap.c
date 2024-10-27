@@ -138,6 +138,7 @@ void *sm_realloc_at(struct sm_heap *dest, void *obj, uint32_t size) {
 
 // Clear the heap and set used to 0
 void sm_heap_clear(struct sm_heap *h) {
+  memset(h->storage, 0, h->capacity);
   h->used = 0;
   if (h->map) {
     memset(h->map, 0,

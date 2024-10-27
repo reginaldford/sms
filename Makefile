@@ -40,8 +40,6 @@ BIN_NAME_PROF   := sms_prof
 THREADS         := 8 #match the number of threads on your machine
 DOCS_CONFIG     := docs/docs.conf
 
-MAKE := $(MAKE) -s
-
 # sms executable
 main:
 	$(MAKE) $(SRC_MAIN)/linenoise/linenoise.c

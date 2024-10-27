@@ -182,8 +182,7 @@ void sm_garbage_collect() {
   // Clear other heap for when we recycle a heap
   sm_heap_clear(sms_other_heap);
   // Try to shake off objects from callstack with unregistered spacer
-  if (evaluating)
-    sm_new_space_at(sms_other_heap, ((sms_heap > sms_other_heap) + (sm_gc_count(0) & 7)) << 3);
+  sm_new_space_at(sms_other_heap, ((sms_heap > sms_other_heap) + (sm_gc_count(0) & 7)) << 3);
   // Fix c callstack ptrs if evaluating
   if (evaluating) {
     memory_marker2   = __builtin_frame_address(0);
