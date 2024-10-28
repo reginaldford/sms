@@ -89,6 +89,7 @@ void *sm_malloc_plain_at(sm_heap *h, uint32_t size) {
 
 // Internal 'malloc'
 void *sm_malloc_plain(uint32_t size) { return sm_malloc_plain_at(sms_heap, size); }
+
 // Print this heap's map in binary form
 void sm_heap_print_map(sm_heap *h) {
   uint64_t map_size = (h->capacity + 63) / 64;
@@ -100,14 +101,21 @@ void sm_heap_print_map(sm_heap *h) {
 // Return whether this pointer aims at the beginning of a registered heap object
 bool sm_heap_has_object(sm_heap *heap, void *guess) {
   // First check if it's aligned and in bounds
-  if (((intptr_t)guess & 7) || !sm_is_within_heap(guess, heap))
+  if (((intptr_t)guess & 7) || !sm_is_within_heap(guess, heap)) {
     return false;
+  }
   // Calculate the position in the bitmap
   uint32_t map_pos =
     ((intptr_t *)guess - (intptr_t *)heap->storage) >> 3; // Offset in the heap divided by 8 bytes
-  uint32_t byte_pos = map_pos >> 3;                       // Find the byte in the bitmap
-  uint8_t  bit_pos  = map_pos & 7;                        // Find the specific bit in the byte
-  return heap->map[byte_pos] & (1 << bit_pos);
+  uint32_t byte_pos  = map_pos >> 3;                      // Find the byte in the bitmap
+  uint8_t  bit_pos   = map_pos & 7;                       // Find the specific bit in the byte
+  bool     is_in_map = heap->map[byte_pos] & (1 << bit_pos);
+  if (is_in_map)
+    if (!sm_sizeof(guess)) {
+      fprintf(stderr, "Registered object has improper header.  %s:%u\n", __FILE__, __LINE__);
+      exit(1);
+    }
+  return is_in_map;
 }
 
 // Designed to be fast
@@ -148,7 +156,7 @@ void sm_heap_clear(struct sm_heap *h) {
 
 // Is the ptr within this heap?
 bool sm_is_within_heap(void *ptr, sm_heap *heap) {
-  return (ptr >= (void *)heap->storage) && (ptr < (void *)(heap->storage) + heap->used);
+  return (ptr >= (void *)heap->storage) && ((char *)ptr < (heap->storage) + heap->used);
 }
 
 // For advanced debugging, run this at any point and examine the heap snapshot as a file
@@ -189,7 +197,7 @@ void sm_sprint_dump() {
     uint32_t   real_len = sm_object_sprint(current_obj, buf, false);
     buf[real_len]       = '\0';
     printf("%s\n", buf);
-    if (current_obj->my_type <= SM_SPACE_TYPE)
+    if (current_obj->my_type < SM_UNKNOWN_TYPE)
       scan_cursor += sm_sizeof(current_obj);
     else {
       DEBUG("Error: Stopping on unrecognized object type.");
@@ -212,9 +220,10 @@ bool sm_heap_scan(sm_heap *h) {
   while ((char *)obj < h->storage + h->used) {
     // Register in heap map if it has valid object size
     uint32_t sizeOfObj = sm_sizeof(obj);
-    if (!sizeOfObj || sizeOfObj & 7 || obj->my_type == SM_POINTER_TYPE) {
+    // SM_POINTER objects are ONLY created during inflation, after this stage
+    if (!sizeOfObj || obj->my_type == SM_POINTER_TYPE) {
       fprintf(stderr, "! Corrupt object.  %s:%u\n", __FILE__, __LINE__);
-      return false;
+      exit(1);
     }
     sm_heap_register_object(sms_heap, obj);
     // Move to the next object
