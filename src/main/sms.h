@@ -27,14 +27,14 @@
 #endif
 
 // Set version number. Major.Minor.Patch
-#define SMS_VERSION "0.22.4"
+#define SMS_VERSION "0.22.5"
 #define SMS_VERSION_LEN 7
 
 /// These are the major object types of SMS
 /// @note Must remain syncronized with function sm_type_name
 enum sm_object_type {
-  /// 0: f64 precision floating point (sm_f64.h)
-  SM_F64_TYPE,
+  /// 0: unsigned byte int (sm_ui8.h)
+  SM_UI8_TYPE,
   /// 1: Expression (sm_expr.h)
   SM_EXPR_TYPE,
   /// 2: Primitive is not used yet
@@ -73,8 +73,8 @@ enum sm_object_type {
   SM_STACK_OBJ_TYPE,
   /// 19: Array (sm_array.h)
   SM_ARRAY_TYPE,
-  /// 20: unsigned byte int (sm_ui8.h)
-  SM_UI8_TYPE,
+  /// 20: f64 precision floating point (sm_f64.h)
+  SM_F64_TYPE,
   /// 21: Unrecognized
   SM_UNKNOWN_TYPE
 };

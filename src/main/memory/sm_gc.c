@@ -43,7 +43,7 @@ sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
 // sm_pointer Expects sm_heap_scan to be used on this to have populated map
 sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
   // Only gc objects from source
-  if (sm_heap_has_object(source, obj)) {
+  if (sm_is_within_heap(obj, source)) {
     uint32_t obj_type = obj->my_type;
     if (obj_type == SM_POINTER_TYPE)
       return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
@@ -169,11 +169,9 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
 void sm_garbage_collect() {
   if (!sms_heap->used)
     return;
-  // Fill in the heap map
-  if (evaluating && !sm_heap_scan(sms_heap)) {
-    fprintf(stderr, "Heap scan failed. Exiting with code 1\n");
-    exit(1);
-  }
+  // Fill in the heap map for callstack scan if necessary
+  if (evaluating)
+    sm_heap_scan(sms_heap);
   //  Build "to" heap if necessary, same size as current
   if (!sms_other_heap)
     sms_other_heap = sm_new_heap(sms_heap->capacity, true);
@@ -181,21 +179,15 @@ void sm_garbage_collect() {
   sm_heap_clear(sms_other_heap);
   // Try to shake off objects from callstack with unregistered spacer
   if (evaluating)
-    sm_new_space_at(sms_other_heap, ((sms_heap > sms_other_heap) + (sm_gc_count(0) & 7)) << 3);
+    sm_new_space_at(sms_other_heap, (sm_gc_count(0) & 7) << 3);
   // Fix c callstack ptrs if evaluating
   if (evaluating) {
     memory_marker2   = __builtin_frame_address(0);
     void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
     void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
     for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++)
-      if (sm_heap_has_object(sms_heap, *ptr)) {
-        sm_object *obj = *ptr;
-        // Bravely clean the runtime callstack
-        if (!sm_sizeof(obj))
-          *ptr = NULL;
-        else
-          *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
-      }
+      if (sm_heap_has_object(sms_heap, *ptr))
+        *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
   }
   // Copy root (global context)
   *sm_global_lex_stack(NULL)->top =
