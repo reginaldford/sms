@@ -171,8 +171,12 @@ void sm_garbage_collect() {
   if (!sms_heap->used)
     return;
   // Fill in the heap map for callstack scan if necessary
-  if (evaluating)
+  if (evaluating) {
     sm_heap_scan(sms_heap);
+    printf("map check...\n");
+    sm_heap_scan_check(sms_heap);
+    printf("map check passed.\n");
+  }
   //  Build "to" heap if necessary, same size as current
   if (!sms_other_heap)
     sms_other_heap = sm_new_heap(sms_heap->capacity, true);
@@ -186,9 +190,14 @@ void sm_garbage_collect() {
     memory_marker2   = __builtin_frame_address(0);
     void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
     void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-    for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++)
-      if (sm_heap_has_object(sms_heap, *ptr))
+    for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++) {
+      if (sm_heap_has_object(sms_heap, *ptr)) {
         *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
+        printf("map check2: %p...\n", *ptr);
+        sm_heap_scan_check(sms_heap);
+        printf("map check passed2.\n");
+      }
+    }
   }
   // Copy root (global context)
   *sm_global_lex_stack(NULL)->top =

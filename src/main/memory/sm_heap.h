@@ -50,6 +50,8 @@ void sm_dump_and_count();
 /// Swap the ptrs of these two heaps
 void sm_swap_heaps(sm_heap **, sm_heap **);
 /// Scan the heap and generate the bitmap. Return true on success.
-bool sm_heap_scan(sm_heap *h);
+void sm_heap_scan(sm_heap *h);
+/// Scan the heap and verify the bitmap
+void sm_heap_scan_check(sm_heap *h);
 /// Mark this heap's map, if it has one
 void sm_heap_register_object(sm_heap *heap, void *guess);

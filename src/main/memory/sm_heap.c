@@ -113,7 +113,9 @@ bool sm_heap_has_object(sm_heap *heap, void *guess) {
   if (is_in_map)
     if (!sm_sizeof(guess)) {
       fprintf(stderr, "Registered object has improper header.  %s:%u\n", __FILE__, __LINE__);
-      exit(1);
+      printf("extra scan:\n");
+      sm_heap_scan_check(sms_heap);
+      // exit(1);
     }
   return is_in_map;
 }
@@ -214,7 +216,7 @@ void sm_swap_heaps(sm_heap **a, sm_heap **b) {
 }
 
 // Scan the heap and generate the bitmap. Return true on success.
-bool sm_heap_scan(sm_heap *h) {
+void sm_heap_scan(sm_heap *h) {
   sm_object *obj      = (sm_object *)h->storage;
   sm_object *prev_obj = NULL; // Initialize prev_obj to track the previous object
   while ((char *)obj < h->storage + h->used) {
@@ -230,5 +232,30 @@ bool sm_heap_scan(sm_heap *h) {
     prev_obj = obj; // Update prev_obj to the current object
     obj      = (sm_object *)((char *)obj + (sizeOfObj));
   }
-  return true;
+}
+
+// Scan the heap and generate the bitmap. Return true on success.
+void sm_heap_scan_check(sm_heap *h) {
+  sm_object *obj      = (sm_object *)h->storage;
+  sm_object *prev_obj = NULL; // Initialize prev_obj to track the previous object
+  while ((char *)obj < h->storage + h->used) {
+    // Register in heap map if it has valid object size
+    uint32_t sizeOfObj = sm_sizeof(obj);
+    // SM_POINTER objects are ONLY created during inflation, after this stage
+    if (!sizeOfObj || obj->my_type == SM_POINTER_TYPE) {
+      fprintf(stderr, "! Corrupt object.  %s:%u\n", __FILE__, __LINE__);
+      if (!sizeOfObj)
+        fprintf(stderr, "sizeof missing\n");
+      if (obj->my_type == SM_POINTER_TYPE)
+        fprintf(stderr, "ptr here\n");
+    }
+    if (!sm_heap_has_object(h, obj))
+      printf("Scan check: object not registered: %p object size: %u, %s:%u\n", obj, sm_sizeof(obj),
+             __FILE__, __LINE__);
+    // Move to the next object
+    // DEBUGGING
+    sizeOfObj = 8;
+    prev_obj  = obj; // Update prev_obj to the current object
+    obj       = (sm_object *)((char *)obj + (sizeOfObj));
+  }
 }
