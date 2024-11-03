@@ -112,8 +112,9 @@ bool sm_heap_has_object(sm_heap *heap, void *guess) {
   bool     is_in_map = heap->map[byte_pos] & (1 << bit_pos);
   if (is_in_map)
     if (!sm_sizeof(guess)) {
-      fprintf(stderr, "Registered object has improper header.  %s:%u\n", __FILE__, __LINE__);
-      exit(1);
+      // fprintf(stderr, "Registered object has improper header.  %s:%u\n", __FILE__, __LINE__);
+      // exit(1);
+      return false;
     }
   return is_in_map;
 }

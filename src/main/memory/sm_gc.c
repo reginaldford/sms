@@ -49,8 +49,8 @@ sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
       return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
     else
       return sm_move_to_new_heap(dest, obj);
-  } else
-    return obj;
+  }
+  return obj;
 }
 
 // Copy the objects referenced by the current_obj into the new heap
@@ -180,15 +180,6 @@ void sm_garbage_collect() {
   // Try to shake off objects from callstack with unregistered spacer
   if (evaluating)
     sm_new_space_at(sms_other_heap, (sm_gc_count(0) & 7) << 3);
-  // Fix c callstack ptrs if evaluating
-  if (evaluating) {
-    memory_marker2   = __builtin_frame_address(0);
-    void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
-    void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-    for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++)
-      if (sm_heap_has_object(sms_heap, *ptr))
-        *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
-  }
   // Copy root (global context)
   *sm_global_lex_stack(NULL)->top =
     sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
@@ -198,6 +189,15 @@ void sm_garbage_collect() {
       sm_meet_object(sms_heap, sms_other_heap, sm_global_parser_output(NULL)));
   else
     sm_global_parser_output((sm_object *)sms_false);
+  // Fix c callstack ptrs if evaluating
+  if (evaluating) {
+    memory_marker2   = __builtin_frame_address(0);
+    void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
+    void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
+    for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++)
+      if (sm_heap_has_object(sms_heap, *ptr))
+        *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
+  }
   // Inflate
   sm_inflate_heap(sms_heap, sms_other_heap);
   // For tracking purposes
