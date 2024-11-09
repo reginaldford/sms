@@ -179,9 +179,9 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       struct tm *timeinfo;
       time(&rawtime);
       timeinfo            = localtime(&rawtime);
-      int     *time_tuple = (int *)timeinfo;
+      int32_t *time_tuple = (int32_t *)timeinfo;
       sm_expr *result     = sm_new_expr_n(SM_TUPLE_EXPR, 9, 9, NULL);
-      for (int i = 0; i < 9; i++)
+      for (uint32_t i = 0; i < 9; i++)
         sm_expr_set_arg(result, i, (sm_object *)sm_new_f64(time_tuple[i]));
       return ((sm_object *)result);
       break;

@@ -55,11 +55,17 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
       bytes_used      = h->used;
       next_bytes_used = bytes_used + size;
       if (next_bytes_used >= h->capacity) {
-        fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+        fprintf(stderr, "Ran out of heap memory (%s:%u). Try with more memory (sms -h for help)",
+                __FILE__, __LINE__);
+        sm_dump_and_count();
         exit(1);
       }
     } else {
-      fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+      fprintf(
+        stderr,
+        "Ran out of heap memory in auxilliary heap (%s:%u). Try with more memory (sms -h for help)",
+        __FILE__, __LINE__);
+      sm_dump_and_count();
       exit(1);
     }
   }

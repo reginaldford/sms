@@ -99,6 +99,8 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
         expr->notes = sm_meet_object(from, to, expr->notes);
       for (uint32_t i = 0; i < expr->size; i++) {
         sm_object *new_obj = sm_meet_object(from, to, sm_expr_get_arg(expr, i));
+        if (!new_obj)
+          printf("null obj?\n");
         sm_expr_set_arg(expr, i, (sm_object *)new_obj);
       }
       break;
