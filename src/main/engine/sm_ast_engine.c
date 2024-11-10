@@ -43,8 +43,9 @@ static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_ty
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
-      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
-      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type));
+      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s (%s:%u)",
+      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type),
+      __FILE__, __LINE__);
     // evaluate error handler if there is one
     sm_cx *scratch = (sm_cx *)*(sm_global_lex_stack(NULL)->top);
     return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
@@ -61,11 +62,13 @@ static inline sm_object *eager_type_check(sm_expr *sme, int operand, int param_t
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
-      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
-      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type));
+      sms_heap,
+      "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s (%s:%zu)", operand,
+      sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type), __FILE__,
+      __LINE__);
     sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                                source->size, &source->content, (int)line->value);
-    return sm_engine_eval(err, current_cx, sf);
+    return (sm_object *)err;
   }
   return obj;
 }
@@ -78,11 +81,13 @@ static inline sm_object *eager_type_check2(sm_expr *sme, int operand, int param_
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
-      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s",
-      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type1));
+      sms_heap,
+      "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s or %s (%s:%zu)",
+      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type1),
+      sm_type_name(param_type2), __FILE__, __LINE__);
     sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                                source->size, &source->content, (int)line->value);
-    return sm_engine_eval(err, current_cx, sf);
+    return (sm_object *)err;
   }
   return obj;
 }
@@ -97,12 +102,13 @@ static inline sm_object *eager_type_check3(sm_expr *sme, int operand, int param_
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
       sms_heap,
-      "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s, %s, or %s",
+      "Wrong type for argument %i on %s. Argument type is: %s "
+      ", but Expected: %s, %s, or %s (%s:%zu)",
       operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type1),
-      sm_type_name(param_type2), sm_type_name(param_type3));
+      sm_type_name(param_type2), sm_type_name(param_type3), __FILE__, __LINE__);
     sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                                source->size, &source->content, (int)line->value);
-    return sm_engine_eval(err, current_cx, sf);
+    return (sm_object *)err;
   }
   return obj;
 }
@@ -1750,6 +1756,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       }
       while (!IS_FALSE(sm_engine_eval((sm_object *)condition, inner_cx, sf))) {
         result = sm_engine_eval(expression, inner_cx, sf);
+        // TODO: can be optimized to if(result->my_type>some_Type) s.t. both return and err are the
+        // only enums greater than some_type
         if (result->my_type == SM_RETURN_TYPE || result->my_type == SM_ERR_TYPE)
           return (result);
         // Run increment after each loop

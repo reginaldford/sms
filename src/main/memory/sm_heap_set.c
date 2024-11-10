@@ -26,9 +26,10 @@ bool sm_heap_set_free(sm_heap_set *hs) {
   if (hs == NULL)
     return false; // Return false if the heap set is NULL
   // Free each heap in the set
+  // The heap ptr is 1 sizeof(heap) above the malloc/free ptr, so we subtract 1 back off
   for (uint64_t i = 0; i < hs->size; i++)
     if (hs->heaps[i] != NULL)
-      free(hs->heaps[i]); // Assuming sm_heap_free is defined to free individual heaps
+      free(hs->heaps[i] - 1); // Assuming sm_heap_free is defined to free individual heaps
   // Free the heap set itself
   free(hs);
   return true; // Return true indicating successful deallocation
