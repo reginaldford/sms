@@ -18,12 +18,15 @@ uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
 // For rounding up object size to the next multiple of 8 bytes.
 uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~7; }
 
-// Create a new heap of some capacity
+// Create a new heap of specified capacity
 sm_heap *sm_new_heap(uint32_t capacity, bool map) {
   sm_heap *new_heap =
-    (sm_heap *)malloc(sizeof(sm_heap) + sm_round_size64(capacity) + sizeof(sm_node) * 8);
+    (sm_heap *)malloc(sizeof(sm_heap) + sm_round_size64(capacity) + sizeof(sm_heap) * 16);
+  // Move ptr up s.t. ptr for free() is not same ptr as heap obj ptr
+  new_heap += 1;
   if (new_heap == NULL) {
-    fprintf(stderr, "Cannot allocate memory for heap. %s:%i", __FILE__, __LINE__);
+    fprintf(stderr, "Cannot allocate memory for heap. (%s:%u)\n", __FILE__, __LINE__);
+    sm_dump_and_count();
     exit(1);
   }
   new_heap->capacity = sm_round_size64(capacity);
@@ -33,7 +36,8 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
     uint64_t map_size = (capacity + 63) / 64;
     new_heap->map     = malloc(map_size);
     if (new_heap->map == NULL) {
-      fprintf(stderr, "Cannot allocate memory for heap map. %s:%i", __FILE__, __LINE__);
+      fprintf(stderr, "Cannot allocate memory for heap map. (%s:%u)\n", __FILE__, __LINE__);
+      sm_dump_and_count();
       exit(1);
     }
   }
@@ -55,11 +59,17 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
       bytes_used      = h->used;
       next_bytes_used = bytes_used + size;
       if (next_bytes_used >= h->capacity) {
-        fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+        fprintf(stderr, "Ran out of heap memory (%s:%u). Try with more memory (sms -h for help)\n",
+                __FILE__, __LINE__);
+        sm_dump_and_count();
         exit(1);
       }
     } else {
-      fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+      fprintf(stderr,
+              "Ran out of heap memory in auxilliary heap (%s:%u). Try with more memory (sms -h for "
+              "help)\n",
+              __FILE__, __LINE__);
+      sm_dump_and_count();
       exit(1);
     }
   }
@@ -78,7 +88,11 @@ void *sm_malloc_plain_at(sm_heap *h, uint32_t size) {
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
   if (next_bytes_used >= h->capacity) {
-    fprintf(stderr, "Ran out of heap memory. Try with more memory (sms -h for help)");
+    fprintf(
+      stderr,
+      "Ran out of heap memory in auxilliary heap. Try with more memory (sms -h for help) (%s:%u)\n",
+      __FILE__, __LINE__);
+    sm_mem_dump(h, "auxilliary.mem");
     exit(1);
   }
   // Update the used bytes
@@ -151,7 +165,7 @@ void sm_heap_clear(struct sm_heap *h) {
   h->used = 0;
   if (h->map) {
     memset(h->map, 0,
-           h->capacity / 64); // Clear the map (1 bit per 8 bytes, i.e., 1/64 of capacity)
+           (h->capacity + 63) / 64); // Clear the map (1 bit per 8 bytes, i.e., 1/64 of capacity)
   }
 }
 
@@ -181,7 +195,8 @@ void sm_dump_and_count() {
   snprintf(fname, 12 + index_len, "current_%i.mem", index);
   sm_mem_dump(sms_heap, fname);
   snprintf(fname, 10 + index_len, "other_%i.mem", index);
-  sm_mem_dump(sms_other_heap, fname);
+  if (sms_other_heap)
+    sm_mem_dump(sms_other_heap, fname);
   index++;
 }
 

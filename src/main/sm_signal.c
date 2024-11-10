@@ -34,6 +34,12 @@ void sm_signal_handler(int signal_number) {
     signal_name = "SIGFPE";
     exit_code   = 128 + SIGFPE;
     break;
+  case SIGSEGV:
+    signal_name = "SIGSEGV";
+    exit_code   = 128 + SIGFPE;
+    sm_dump_and_count();
+    printf("dumped memory.\n");
+    break;
   default:
     signal_name = "unknown signal";
     exit_code   = 1;
@@ -71,6 +77,8 @@ void sm_register_signals() {
   signal(SIGTERM, sm_signal_handler);
   // Trap (for debugger)
   //  signal(SIGTRAP, sm_signal_handler);
+  //  Segfault handling
+  signal(SIGSEGV, sm_signal_handler);
 }
 
 // Exit SMS with this exit code
