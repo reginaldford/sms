@@ -3163,7 +3163,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (input);
   }
   case SM_POINTER_TYPE: {
-    printf("sm_pointer found in heap, when it does not belong.\n");
+    printf("sm_pointer found in heap, when it does not belong. (%s:%u)\n", __FILE__, __LINE__);
     exit(1);
   }
   default:
