@@ -3164,6 +3164,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
   }
   case SM_POINTER_TYPE: {
     printf("sm_pointer found in heap, when it does not belong. (%s:%u)\n", __FILE__, __LINE__);
+    printf("location: %p\n", (void *)input);
+    printf("location in heap: %p\n", (intptr_t)input - (intptr_t)sms_other_heap);
+    printf("location in heap: %zu\n", (intptr_t)input - (intptr_t)sms_other_heap);
+    sm_pointer *p       = (sm_pointer *)input;
+    sm_object  *pointee = (sm_object *)(((uint64_t)sms_other_heap) + (uint64_t)(p->address));
+    printf("points to object of type: %u\n", pointee->my_type);
+    sm_dump_and_count();
     exit(1);
   }
   default:
