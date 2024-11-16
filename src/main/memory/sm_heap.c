@@ -13,10 +13,10 @@ extern void        *memory_marker1;
 extern void        *memory_marker2;
 
 // For rounding up object size to the next multiple of 4 bytes.
-uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~3; }
+uint32_t sm_round_size(uint32_t size) { return ((size) + 3) & ~0x3; }
 
 // For rounding up object size to the next multiple of 8 bytes.
-uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~7; }
+uint32_t sm_round_size64(uint32_t size) { return ((size) + 7) & ~0x7; }
 
 // Create a new heap of specified capacity
 sm_heap *sm_new_heap(uint32_t capacity, bool map) {
