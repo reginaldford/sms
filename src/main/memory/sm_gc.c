@@ -97,6 +97,11 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
       }
       break;
     }
+    case SM_POINTER_TYPE: {
+      printf("Pointer found in wrong location. (%s:%i)\n", __FILE__, __LINE__);
+      exit(1);
+      break;
+    }
     case SM_META_TYPE: {
       sm_meta *meta = (sm_meta *)current_obj;
       meta->address = (sm_object *)sm_meet_object(from, to, meta->address);
@@ -159,6 +164,8 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
   }
 }
 
+void **lowestPointer(intptr_t x) { return x + __builtin_frame_address(0); }
+
 // Copying GC
 void sm_garbage_collect() {
   if (!sms_heap->used)
@@ -171,9 +178,6 @@ void sm_garbage_collect() {
     sms_other_heap = sm_new_heap(sms_heap->capacity, true);
   // Clear other heap for when we recycle a heap
   sm_heap_clear(sms_other_heap);
-  // Try to shake off objects from callstack with unregistered spacer
-  if (evaluating)
-    sm_new_space_at(sms_other_heap, (sm_gc_count(0) & 7) << 3);
   // Copy root (global context)
   *sm_global_lex_stack(NULL)->top =
     sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
@@ -185,9 +189,10 @@ void sm_garbage_collect() {
     sm_global_parser_output((sm_object *)sms_false);
   // Fix c callstack ptrs if evaluating
   if (evaluating) {
-    memory_marker2   = __builtin_frame_address(0);
+    memory_marker2   = lowestPointer(0);
     void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
     void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
+    higherPtr += (intptr_t)__builtin_frame_address(0) - (intptr_t)memory_marker2;
     for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++)
       if (sm_heap_has_object(sms_heap, *ptr))
         *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);

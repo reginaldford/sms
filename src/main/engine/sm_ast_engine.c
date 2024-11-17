@@ -752,11 +752,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_expr *arr = (sm_expr *)obj;
         total_size   = arr->size * repeat_count;
         new_space    = sm_new_space(total_size * sizeof(f64));
-        if (!new_space)
-          return (sm_object *)sm_new_error_from_strings(
-            sm_new_symbol("MemoryError", 10),
-            sm_new_string(44, "Failed to allocate memory for f64 repeat from expr"), NULL, 0, NULL);
-        dst_data = (f64 *)(new_space + 1);
+        dst_data     = (f64 *)(new_space + 1);
         for (uint32_t i = 0; i < repeat_count; i++)
           for (uint32_t j = 0; j < arr->size; j++)
             dst_data[i * arr->size + j] = (f64)(uintptr_t)sm_expr_get_arg(arr, j);
@@ -766,12 +762,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         sm_array *arr = (sm_array *)obj;
         total_size    = arr->size * repeat_count;
         new_space     = sm_new_space(total_size * sizeof(f64));
-        if (!new_space)
-          return (sm_object *)sm_new_error_from_strings(
-            sm_new_symbol("MemoryError", 10),
-            sm_new_string(44, "Failed to allocate memory for f64 repeat from array"), NULL, 0,
-            NULL);
-        dst_data = (f64 *)(new_space + 1);
+        dst_data      = (f64 *)(new_space + 1);
         switch (arr->inner_type) {
         case SM_UI8_TYPE: {
           ui8 *src_data = sm_ui8_array_get_start(arr);
@@ -2041,26 +2032,10 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       sm_expr        *new_args = (sm_expr *)sm_engine_eval((sm_object *)args, current_cx, sf);
       sm_object      *obj0     = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       if (obj0->my_type == SM_FUN_TYPE) {
-        sm_fun    *fun     = (sm_fun *)obj0;
-        sm_object *content = fun->content;
-        if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
-          sm_cx   *new_cx      = sm_new_cx(fun->parent);
-          uint32_t i           = 1;
-          sm_expr *content_sme = (sm_expr *)fun->content;
-          while (i < content_sme->size) {
-            result = sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, new_args);
-            if (result->my_type == SM_RETURN_TYPE)
-              break;
-            i++;
-          }
-        } else
-          result = sm_engine_eval(fun->content, fun->parent, new_args);
-        if (result->my_type == SM_RETURN_TYPE)
-          return (((sm_return *)result)->address);
-        else
-          return (result);
+        sm_fun *fun = (sm_fun *)obj0;
+        return execute_fun(fun, current_cx, new_args);
       } else
-        return (obj0);
+        return obj0;
       break;
     }
     case SM_BLOCK_EXPR: {
@@ -3158,9 +3133,20 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
     sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, sm_copy(input), NULL);
     if (fun)
-      return (execute_fun(fun, current_cx, sf));
+      return execute_fun(fun, current_cx, sf);
     else
       return (input);
+  }
+  case SM_POINTER_TYPE: {
+    printf("sm_pointer found in heap, when it does not belong. (%s:%u)\n", __FILE__, __LINE__);
+    printf("location: %p\n", (void *)input);
+    printf("location in heap: %p\n", (intptr_t)input - (intptr_t)sms_other_heap);
+    printf("location in heap: %zu\n", (intptr_t)input - (intptr_t)sms_other_heap);
+    sm_pointer *p       = (sm_pointer *)input;
+    sm_object  *pointee = (sm_object *)(((uint64_t)sms_other_heap) + (uint64_t)(p->address));
+    printf("points to object of type: %u\n", pointee->my_type);
+    sm_dump_and_count();
+    exit(1);
   }
   default:
     return (input);
