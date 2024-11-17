@@ -28,43 +28,63 @@ sm_string *sm_object_to_string(sm_object *obj1) {
 
 // Print to a string buffer the object description
 // Return the length of the string
+// @note This function is called twice: once to precalculate buffer size,
+// then, again, with an allocated buffer of that size. Functions called from here can use memory,
+// but sms_heap->used will be reset to the value it had when this functoin is called.
 uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
+  uint32_t len        = 0;
+  uint32_t used_space = sms_heap->used;
   switch (obj1->my_type) {
   case SM_F64_TYPE:
-    return sm_f64_sprint((sm_f64 *)obj1, buffer, fake);
+    len += sm_f64_sprint((sm_f64 *)obj1, buffer, fake);
+    break;
   case SM_STRING_TYPE:
-    return sm_string_sprint((sm_string *)obj1, buffer, fake);
+    len += sm_string_sprint((sm_string *)obj1, buffer, fake);
+    break;
   case SM_EXPR_TYPE:
-    return sm_expr_sprint((sm_expr *)obj1, buffer, fake);
+    len += sm_expr_sprint((sm_expr *)obj1, buffer, fake);
+    break;
   case SM_META_TYPE:
-    return sm_meta_sprint((sm_meta *)obj1, buffer, fake);
+    len += sm_meta_sprint((sm_meta *)obj1, buffer, fake);
+    break;
   case SM_CX_TYPE:
-    return sm_cx_sprint((sm_cx *)obj1, buffer, fake);
+    len += sm_cx_sprint((sm_cx *)obj1, buffer, fake);
+    break;
   case SM_SYMBOL_TYPE:
-    return sm_symbol_sprint((sm_symbol *)obj1, buffer, fake);
+    len += sm_symbol_sprint((sm_symbol *)obj1, buffer, fake);
+    break;
   case SM_FUN_TYPE:
-    return sm_fun_sprint((sm_fun *)obj1, buffer, fake);
+    len += sm_fun_sprint((sm_fun *)obj1, buffer, fake);
+    break;
   case SM_LOCAL_TYPE:
-    return sm_local_sprint((sm_local *)obj1, buffer, fake);
+    len += sm_local_sprint((sm_local *)obj1, buffer, fake);
+    break;
   case SM_ERR_TYPE:
-    return sm_err_sprint((sm_error *)obj1, buffer, fake);
+    len += sm_err_sprint((sm_error *)obj1, buffer, fake);
+    break;
   case SM_RETURN_TYPE:
-    return sm_return_sprint((sm_return *)obj1, buffer, fake);
+    len += sm_return_sprint((sm_return *)obj1, buffer, fake);
+    break;
   case SM_SELF_TYPE:
-    return sm_self_sprint((sm_self *)obj1, buffer, fake);
+    len += sm_self_sprint((sm_self *)obj1, buffer, fake);
+    break;
   case SM_ARRAY_TYPE:
-    return sm_array_sprint((sm_array *)obj1, buffer, fake);
+    len += sm_array_sprint((sm_array *)obj1, buffer, fake);
+    break;
   case SM_UI8_TYPE:
-    return sm_ui8_sprint((sm_ui8 *)obj1, buffer, fake);
+    len += sm_ui8_sprint((sm_ui8 *)obj1, buffer, fake);
+    break;
   default: {
-    if (fake)
-      return sprintf(buffer, "?(%i)", obj1->my_type);
+    if (!fake)
+      len += sprintf(buffer, "?(%i)", obj1->my_type);
     else {
       char fake_buffer[10];
-      return sprintf(fake_buffer, "?(%i)", obj1->my_type);
+      len += sprintf(fake_buffer, "?(%i)", obj1->my_type);
     }
   }
   }
+  sms_heap->used = used_space;
+  return len;
 }
 // Return the size of the object in bytes
 
