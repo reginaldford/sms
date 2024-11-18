@@ -240,14 +240,15 @@ int sm_node_size(sm_node *node) {
     size++;
   uint64_t map = node->map; // Get the bitmap
   while (map != 0) {
-    uint64_t bit    = map & -map;           // Using two's compliment trick
-    int bit_index   = __builtin_ctzll(bit); // Using built-in ctzll (count trailing zeros) function
-    int child_index = sm_node_child_index(node->map, bit_index);
-    sm_node *child_here = (sm_node *)sm_node_nth(node->children, child_index);
+    // Using two's compliment trick
+    uint64_t bit = map & -map;
+    // Using built-in ctzll (count trailing zeros) function
+    int      bit_index   = __builtin_ctzll(bit);
+    int      child_index = sm_node_child_index(node->map, bit_index);
+    sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
     size += sm_node_size(child_here);
     map ^= bit; // Clear the bit
   }
-
   return size;
 }
 
@@ -270,19 +271,16 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
   uint64_t map = node->map; // Get the bitmap
 
   while (map != 0) {
-    uint64_t bit       = map & -map; // Get the rightmost set bit using two's compliment
-    int      bit_index = __builtin_ctzll(
-      bit); // Get the index of the set bit using built-in ctzll (count trailing zeros) function
-
+    uint64_t bit = map & -map; // Get the rightmost set bit using two's compliment
+    // Get the index of the set bit using built-in ctzll (count trailing zeros) function
+    int      bit_index   = __builtin_ctzll(bit);
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
-
     sm_stack_obj_push(char_stack, sm_new_f64(bit_index));
     collection = sm_node_keys(child_here, char_stack, collection);
     sm_stack_obj_pop(char_stack);
     map ^= bit; // Clear the current bit
   }
-
   return collection;
 }
 

@@ -10,6 +10,7 @@ CC_UNIFIED      := zig cc
 CFLAGS          := -O3
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
+LDFLAGS         := -lm
 BUILD_DIR       := build
 SRC_BISON_FLEX  := src/bison_flex
 SRC_MAIN        := src/main
@@ -67,16 +68,16 @@ all:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_DBG)
 
 # sms_dbg executable
-bin/$(BIN_NAME_DBG):  $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
-	$(CC_DEBUG) -lm  $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@
+bin/$(BIN_NAME_DBG): $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
+	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@ $(LDFLAGS)
 
 # sms_test executable
-bin/$(BIN_NAME_TEST):   $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(OBJS_TEST)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm  $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@
+bin/$(BIN_NAME_TEST): $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(OBJS_TEST)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@ $(LDFLAGS) 
 
 # sms_kernel_test executable
-bin/$(BIN_NAME_KT):  $(OBJS_PARSER) $(OBJS_BASE_DBG) $(OBJS_KT)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) -lm   $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@
+bin/$(BIN_NAME_KT): $(OBJS_PARSER) $(OBJS_BASE_DBG) $(OBJS_KT)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@ $(LDFLAGS)
 
 # Bison generates the parser
 $(SRC_BISON_FLEX)/y.tab.c: $(SRC_MAIN)/parser/sms.y
@@ -152,7 +153,7 @@ docs:
 unified:
 	$(MAKE) $(SRC_BISON_FLEX)/y.tab.c
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
-	$(CC_UNIFIED) -lm $(CFLAGS) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED)
+	$(CC_UNIFIED) $(CFLAGS) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED) $(LDFLAGS)
 
 # install the unified version
 install_unified: unified
