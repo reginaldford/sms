@@ -2,12 +2,13 @@
 
 # Seems to work with zig cc, clang, gcc, egcc (OpenBSD)
 INSTALL_DIR     := /usr/local/bin
-CC              := clang
-CC_DEBUG        := clang
+CC              := zig cc
+CC_DEBUG        := zig cc
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
 # CC_UNIFIED      := zig cc -target x86_64-windows-gnu #doesnt work
-CFLAGS          := -O3
+CFLAGS          := -O3 --target=x86_64-linux --static
+#CFLAGS         := -O3 --static
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm
