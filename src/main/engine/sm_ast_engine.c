@@ -35,7 +35,7 @@ sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
 bool expect_type(sm_object *arg_n, int16_t arg_type) { return arg_n->my_type == arg_type; }
 
 // Returns the object if it's ok, returns an error if it's not
-static inline sm_object *type_check(sm_expr *sme, uint32_t operand, int param_type) {
+sm_object *type_check(sm_expr *sme, uint32_t operand, int param_type) {
   sm_object *obj = sm_expr_get_arg(sme, operand);
   if (param_type != obj->my_type) {
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
@@ -79,10 +79,9 @@ sm_object *eager_type_check2(sm_expr *sme, int operand, int param_type1, int par
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
-      sms_heap,
-      "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s or %s (%s:%zu)",
+      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s or %s",
       operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type1),
-      sm_type_name(param_type2), __FILE__, __LINE__);
+      sm_type_name(param_type2));
     sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
                                                source->size, &source->content, (int)line->value);
     return (sm_object *)err;
