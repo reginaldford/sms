@@ -2601,23 +2601,31 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return result;
     }
     case SM_PLUS_EXPR: {
-      sm_f64 *obj0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
+      sm_f64 *answer = sm_new_f64(0);
+      sm_f64 *obj0   = answer;
+      sm_f64 *obj1   = answer;
+      obj0           = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
       if (obj0->my_type != SM_F64_TYPE)
         return ((sm_object *)obj0);
-      sm_f64 *obj1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
+      obj1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (obj1->my_type != SM_F64_TYPE)
         return ((sm_object *)obj1);
-      return ((sm_object *)sm_new_f64(obj0->value + obj1->value));
+      answer->value = obj0->value + obj1->value;
+      return (sm_object *)answer;
       break;
     }
     case SM_MINUS_EXPR: {
-      sm_f64 *obj0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
+      sm_f64 *answer = sm_new_f64(0);
+      sm_f64 *obj0   = answer;
+      sm_f64 *obj1   = answer;
+      obj0           = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
       if (obj0->my_type != SM_F64_TYPE)
         return ((sm_object *)obj0);
-      sm_f64 *obj1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
+      obj1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (obj1->my_type != SM_F64_TYPE)
         return ((sm_object *)obj1);
-      return ((sm_object *)sm_new_f64(obj0->value - obj1->value));
+      answer->value = obj0->value - obj1->value;
+      return (sm_object *)answer;
       break;
     }
     case SM_TIMES_EXPR: {
