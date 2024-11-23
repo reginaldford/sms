@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm256k
+#!/usr/local/bin/sms -qm56k
 # Simply puts the time every second
 {
   # Represents a number from 0 to 99
@@ -27,6 +27,7 @@
     put(":");
     put(two_digits(d[0]));
     put(":");
+    #time()[1] gives microseconds (1e-6), we want hundredths of a second
     put(two_digits(floor(time()[1]/1e4)));
     putLn(" " str+ am_pm_str(d[2]));
     sleep(10);
