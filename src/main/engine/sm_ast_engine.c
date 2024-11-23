@@ -57,6 +57,13 @@ sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type,
                             sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type != obj->my_type) {
+    if (obj->my_type == SM_POINTER_TYPE) {
+      sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
+      sm_pointer *p        = (sm_pointer *)obj;
+      sm_object  *pointee  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+      return (pointee);
+    }
+
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
@@ -76,6 +83,12 @@ sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type
                              uint32_t param_type2, sm_cx *current_cx, sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type1 != obj->my_type && param_type2 != obj->my_type) {
+    if (obj->my_type == SM_POINTER_TYPE) {
+      sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
+      sm_pointer *p        = (sm_pointer *)obj;
+      sm_object  *pointee  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+      return (pointee);
+    }
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
@@ -95,6 +108,12 @@ sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint32_t param_type
                              sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type1 != obj->my_type && param_type2 != obj->my_type && param_type3 != obj->my_type) {
+    if (obj->my_type == SM_POINTER_TYPE) {
+      sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
+      sm_pointer *p        = (sm_pointer *)obj;
+      sm_object  *pointee  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+      return (pointee);
+    }
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
     sm_string *message = sm_new_fstring_at(
@@ -573,10 +592,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_STR_CAT_EXPR: {
       sm_string *str0 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
-      if (str0->my_type == SM_ERR_TYPE)
+      if (str0->my_type != SM_STRING_TYPE)
         return ((sm_object *)str0);
       sm_string *str1 = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
-      if (str1->my_type == SM_ERR_TYPE)
+      if (str1->my_type != SM_STRING_TYPE)
         return ((sm_object *)str1);
       sm_string *new_str = sm_new_string_manual(str0->size + str1->size);
       char      *content = &(new_str->content);
