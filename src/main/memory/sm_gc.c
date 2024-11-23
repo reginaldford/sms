@@ -205,8 +205,8 @@ void sm_garbage_collect() {
   sm_swap_heaps(&sms_heap, &sms_other_heap);
   // Report memory stat
   if (sm_global_environment(NULL) && sm_global_environment(NULL)->quiet_mode == false) {
-    char used_str[16];
-    char capacity_str[16];
+    static char used_str[16];
+    static char capacity_str[16];
     sm_sprint_fancy_bytelength(used_str, (uint64_t)sms_heap->used);
     sm_sprint_fancy_bytelength(capacity_str, (uint64_t)sms_heap->capacity);
     printf("\n%s(%s / %s)%s\n", sm_terminal_fg_color(SM_TERM_B_BLACK), used_str, capacity_str,

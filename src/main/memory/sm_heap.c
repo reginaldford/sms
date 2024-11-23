@@ -87,7 +87,7 @@ void *sm_malloc_plain_at(sm_heap *h, uint32_t size) {
   uint32_t bytes_used      = h->used;
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
-  if (next_bytes_used >= h->capacity) {
+  if (next_bytes_used > h->capacity) {
     fprintf(
       stderr,
       "Ran out of heap memory in auxilliary heap. Try with more memory (sms -h for help) (%s:%u)\n",
@@ -231,8 +231,7 @@ void sm_swap_heaps(sm_heap **a, sm_heap **b) {
 
 // Scan the heap and generate the bitmap. Return true on success.
 bool sm_heap_scan(sm_heap *h) {
-  sm_object *obj      = (sm_object *)h->storage;
-  sm_object *prev_obj = NULL; // Initialize prev_obj to track the previous object
+  sm_object *obj = (sm_object *)h->storage;
   while ((char *)obj < h->storage + h->used) {
     // Register in heap map if it has valid object size
     uint32_t sizeOfObj = sm_sizeof(obj);
@@ -243,8 +242,7 @@ bool sm_heap_scan(sm_heap *h) {
     }
     sm_heap_register_object(sms_heap, obj);
     // Move to the next object
-    prev_obj = obj; // Update prev_obj to the current object
-    obj      = (sm_object *)((char *)obj + (sizeOfObj));
+    obj = (sm_object *)((char *)obj + (sizeOfObj));
   }
   return true;
 }

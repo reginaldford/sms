@@ -7,7 +7,7 @@ CC_DEBUG        := clang
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
 #CFLAGS          := -O3 --target=x86_64-linux --static
-CFLAGS          := -O3
+CFLAGS          := -O1 -Wall
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm
