@@ -471,15 +471,17 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_TIME_EXPR: {
-      struct timeval t;
+      static struct timeval t;
       gettimeofday(&t, NULL);
+      sm_space *space  = NULL;
+      sm_array *result = NULL;
       // TODO: For all cases with multiple allocations, we need a check for early gc
       if (sms_heap->capacity - sms_heap->used <=
-          sizeof(sm_space) + sizeof(sm_array) + 2 * sizeof(f64) + 1024) {
+          sizeof(sm_space) + sizeof(sm_array) + 2 * sizeof(f64) + 1024 + 512) {
         sm_garbage_collect();
       }
-      sm_space *space  = sm_new_space(sizeof(f64) * 2);
-      sm_array *result = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
+      space  = sm_new_space(sizeof(f64) * 2);
+      result = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
       sm_f64_array_set(result, 0, t.tv_sec);
       sm_f64_array_set(result, 1, t.tv_usec);
       return ((sm_object *)result);

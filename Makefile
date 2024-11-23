@@ -53,8 +53,6 @@ main:
 $(MAKE) $(SRC_MAIN)/linenoise/linenoise.c:
 	git submodule update --recursive --init
 
-bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
-	$(CC) $(CFLAGS) -lm  $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
 
 
 # Not files
@@ -66,6 +64,10 @@ all:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_TEST)
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_KT)
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_DBG)
+
+# sms executable
+bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
+	$(CC) $(CFLAGS) $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@ $(LDFLAGS)
 
 # sms_dbg executable
 bin/$(BIN_NAME_DBG): $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
