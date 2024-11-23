@@ -26,6 +26,8 @@
     put(two_digits(d[1]));
     put(":");
     put(two_digits(d[0]));
+    put(":");
+    put(two_digits(floor(time()[1]/1e4)));
     putLn(" " str+ am_pm_str(d[2]));
     sleep(10);
   };
