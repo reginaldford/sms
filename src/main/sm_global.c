@@ -236,15 +236,16 @@ char *sm_global_fn_name(uint32_t which) {
     "~=",            // SM_NOTEQ_EXPR
     "||=",           // SM_OREQ_EXPR
     "&&=",           // SM_ANDEQ_EXPR
+    "^^=",           // SM_XOREQ_EXPR
     "fnXp",          // SM_FNXP_EXPR
     "fnSetXp",       // SM_FNSETXP_EXPR
     "fnParams",      // SM_FN_PARAMS_EXPR
     "fnSetParams",   // SM_FN_SETPARAMS_EXPR
     "fnParent",      // SM_FN_PARENT_EXPR
     "fnSetParent",   // SM_FN_SETPARENT_EXPR
-    "xpOp",          // SM_XPR_OP
-    "xpSetOp",       // SM_XPR_SETOP
-    "xpOpSym",       // SM_XPR_OPSYM
+    "xpOp",          // SM_XP_OP
+    "xpSetOp",       // SM_XP_SET_OP_EXPR
+    "xpOpSym",       // SM_XP_OP_SYM
     "strSize",       // SM_STR_SIZE_EXPR
     "strMut",        // SM_STR_MUT_EXPR
     "strGet",        // SM_STR_GET_EXPR
@@ -285,6 +286,7 @@ char *sm_global_fn_name(uint32_t which) {
     "errSource",     // SM_ERRSOURCE_EXPR
     "errLine",       // SM_ERRLINE_EXPR
     "errNotes",      // SM_ERRNOTES_EXPR
+    "import",        // SM_IMPORT_EXPR
     "?",             // SM_UNKNOWN_EXP
   };
   if (which >= num_functions)
@@ -295,14 +297,16 @@ char *sm_global_fn_name(uint32_t which) {
 // Corresponding string length of the string that would come from the sm_global_fn_name(which)
 uint32_t sm_global_fn_name_len(uint32_t which) {
   static uint16_t response_len[] = {
-    8,  4, 4,  5,  4,  2, 2,  3, 3,  3,  9,  3,  9, 1,  1, 1, 1, 1,  2, 1, 1, 1,  1, 1,  2, 2, 2,
-    2,  2, 3,  1,  1,  1, 2,  3, 2,  2,  2,  2,  2, 2,  2, 3, 3, 3,  3, 3, 4, 3,  3, 3,  4, 4, 4,
-    4,  4, 4,  5,  5,  5, 3,  3, 3,  4,  4,  4,  4, 4,  4, 5, 5, 5,  2, 3, 3, 4,  3, 3,  3, 4, 4,
-    4,  4, 3,  2,  2,  3, 6,  6, 5,  3,  5,  10, 7, 6,  4, 6, 8, 12, 5, 5, 4, 2,  2, 2,  1, 1, 2,
-    2,  5, 5,  5,  5,  5, 3,  5, 4,  5,  2,  11, 5, 5,  5, 8, 8, 12, 5, 4, 7, 6,  8, 6,  8, 5, 9,
-    11, 8, 7,  8,  10, 8, 6,  6, 6,  12, 12, 10, 5, 4,  4, 3, 6, 6,  4, 5, 5, 4,  3, 1,  2, 2, 2,
-    2,  3, 3,  4,  7,  8, 11, 8, 11, 4,  7,  7,  7, 6,  6, 6, 6, 7,  8, 4, 8, 7,  9, 11, 8, 6, 9,
-    3,  6, 12, 13, 8,  9, 7,  4, 4,  5,  6,  6,  6, 11, 8, 8, 9, 8,  3, 5, 8, 10, 9, 7,  8, 1};
+    8,  4, 4, 5,  4, 2, 2, 3, 3, 3, 9,  3,  9, 1, 1,  1, 1, 1,  2,  1,  1,  1,  1, 1,  2,
+    2,  2, 2, 2,  3, 1, 1, 1, 2, 3, 2,  2,  2, 2, 2,  2, 2, 3,  3,  3,  3,  3,  4, 3,  3,
+    3,  4, 4, 4,  4, 4, 4, 5, 5, 5, 3,  3,  3, 4, 4,  4, 4, 4,  4,  5,  5,  5,  2, 3,  3,
+    4,  3, 3, 3,  4, 4, 4, 4, 3, 2, 2,  3,  6, 6, 5,  3, 5, 10, 7,  6,  4,  6,  8, 12, 5,
+    5,  4, 2, 2,  2, 1, 1, 2, 2, 5, 5,  5,  5, 5, 3,  5, 4, 5,  2,  11, 5,  5,  5, 8,  8,
+    12, 5, 4, 7,  6, 8, 6, 8, 5, 9, 11, 8,  7, 8, 10, 8, 6, 6,  6,  12, 12, 10, 5, 4,  4,
+    3,  6, 6, 4,  5, 5, 4, 3, 1, 2, 2,  2,  2, 3, 3,  3, 4, 7,  8,  11, 8,  11, 4, 7,  7,
+    7,  6, 6, 6,  6, 7, 8, 4, 8, 7, 9,  11, 8, 6, 9,  3, 6, 12, 13, 8,  9,  7,  4, 4,  5,
+    6,  6, 6, 11, 8, 8, 9, 8, 3, 5, 8,  10, 9, 7, 8,  6, 1};
+
 
   if (which >= sm_global_num_fns())
     return 1; // "?"
@@ -310,7 +314,7 @@ uint32_t sm_global_fn_name_len(uint32_t which) {
 }
 
 uint32_t sm_global_num_fns() {
-  static const uint32_t num_fns = 215;
+  static const uint32_t num_fns = 217;
   return num_fns;
 }
 
