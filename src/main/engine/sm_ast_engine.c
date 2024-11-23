@@ -471,11 +471,10 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_TIME_EXPR: {
       struct timeval t;
       gettimeofday(&t, NULL);
-      sm_expr *result = sm_new_expr_n(SM_TUPLE_EXPR, 2, 2, NULL);
-      sm_f64  *t0     = sm_new_f64(t.tv_sec);
-      sm_f64  *t1     = sm_new_f64(t.tv_usec);
-      sm_expr_set_arg(result, 0, (sm_object *)t0);
-      sm_expr_set_arg(result, 1, (sm_object *)t1);
+      sm_space *space  = sm_new_space(sizeof(f64) * 2);
+      sm_array *result = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
+      sm_f64_array_set(result, 0, t.tv_sec);
+      sm_f64_array_set(result, 1, t.tv_usec);
       return ((sm_object *)result);
       break;
     }

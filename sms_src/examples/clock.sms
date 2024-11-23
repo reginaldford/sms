@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm56k
+#!/usr/local/bin/sms -qm32k
 # Simply puts the time every second
 {
   # Represents a number from 0 to 99
@@ -14,6 +14,8 @@
   # Print the time with constant width
   let d = false;
   while(true){
+    # Temp fix. gc is more stable this way
+    _gc();
     d = date();
     # Clear the screen
     # Convert military time to 12-hr
