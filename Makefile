@@ -6,7 +6,7 @@ CC              := clang
 CC_DEBUG        := clang
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
-#CFLAGS          := -O3 --target=x86_64-linux --static
+CFLAGS_UNIFIED  := -O3 --static
 CFLAGS          := -O3 -Wall
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
@@ -153,7 +153,7 @@ docs:
 unified:
 	$(MAKE) $(SRC_BISON_FLEX)/y.tab.c
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
-	$(CC_UNIFIED) $(CFLAGS) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED) $(LDFLAGS)
+	$(CC_UNIFIED) $(CFLAGS_UNIFIED) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED) $(LDFLAGS)
 
 # install the unified version
 install_unified: unified
