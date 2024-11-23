@@ -359,7 +359,6 @@ sm_string *sm_global_home_directory() {
 // Read only sm_string for home directory, or NULL
 sm_string *sm_global_hist_file() {
   static char hist_file_string_space[256];
-  sm_string  *str = (sm_string *)hist_file_string_space;
   if (!*hist_file_string_space) {
     sm_env     env = *sm_global_environment(NULL);
     sm_string *str = (sm_string *)hist_file_string_space;
@@ -373,7 +372,6 @@ sm_string *sm_global_hist_file() {
 // global version string
 sm_string *sms_global_version() {
   static char version_string_space[16 + sizeof(struct sm_string)];
-  sm_string  *str = (sm_string *)version_string_space;
   if (!*version_string_space) {
     sm_env     env = *sm_global_environment(NULL);
     sm_string *str = (sm_string *)version_string_space;

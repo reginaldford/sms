@@ -25,9 +25,9 @@ sm_error *sm_new_error(int title_len, char *title_str, int message_len, char *me
   new_error->source = sourceStr;
   new_error->line   = line;
   // Run the error handler if it exists
-  sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
-  sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
-  sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, (sm_object *)new_error, NULL);
+  // sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
+  // sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
+  // sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, (sm_object *)new_error, NULL);
   new_error->notes = NULL;
   return new_error;
 }

@@ -27,7 +27,6 @@ sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
   uint32_t   sizeOfObj = sm_sizeof(obj);
   sm_object *new_obj   = sm_realloc_at(dest, obj, sizeOfObj);
   // Overwrite the old object. sm_pointer objects
-  intptr_t endPoint = (intptr_t)obj + sizeOfObj;
   sm_new_pointer(dest, obj, new_obj);
   return new_obj;
 }

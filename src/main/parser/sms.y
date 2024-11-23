@@ -844,7 +844,6 @@ CONTEXT_LIST : '{' ASSOCIATION ';' ASSOCIATION {
   $$ = new_cx;
 }
 | CONTEXT_LIST ';' ASSOCIATION {
-  sm_string  *name   = ((sm_symbol *)sm_expr_get_arg($3, 0))->name;
   sm_object  *value  = (sm_object *)sm_expr_get_arg($3, 1);
   sm_cx_let($1,(sm_symbol*)sm_expr_get_arg($3,0),value);
   $$                 = $1;

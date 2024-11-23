@@ -125,7 +125,6 @@ uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
 
 
 uint32_t sm_array_contents_sprint(sm_array *a, char *buffer, bool fake) {
-  uint32_t cursor = 0;
   switch (a->inner_type) {
   case SM_F64_TYPE: {
     return sm_f64_array_contents_sprint(a, buffer, fake);

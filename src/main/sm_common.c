@@ -43,7 +43,6 @@ uint64_t sm_bytelength_parse(char *str, int length) {
     if (current_char == 0) {
       buffer[j] = 0;
       // If no unit is given, assume megabytes (m)
-      uint64_t l = atof(buffer) * 1024 * 1024;
       return (f64)atof(buffer) * 1024 * 1024;
     }
     if (sm_is_digit(current_char) || current_char == '.') {
@@ -87,8 +86,7 @@ int sm_sprint_fancy_bytelength(char *buffer, uint64_t bytelength) {
 
 // Reads a file into a string. If there is any issue, returns sms_false
 sm_string *sm_read_file(char *filePath, int filePathLen) {
-  sm_string *fname_str;
-  char      *fname_cstr = filePath;
+  char *fname_cstr = filePath;
   if (access(fname_cstr, F_OK) != 0) {
     printf("fileReadStrStr failed because the file, %s ,does not exist.\n", fname_cstr);
     return (sm_string *)sms_false;

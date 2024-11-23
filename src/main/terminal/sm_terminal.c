@@ -18,7 +18,6 @@ void add_keys(sm_cx *cx, sm_expr *keys, const char *buf, int buf_len, const char
   for (int i = 0; i < keys->size; i++) {
     sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(keys, i);
     if (!strncmp(last_sym, &sym->name->content, MIN(last_sym_len, sym->name->size))) {
-      int completion_len = (sym->name->size) + buf_len;
       sm_strncpy(concat_space + buf_len - last_sym_len, &sym->name->content, sym->name->size);
       concat_space[buf_len + sym->name->size] = '\0';
       linenoiseAddCompletion(lc, concat_space);
@@ -94,7 +93,6 @@ sm_parse_result sm_terminal_prompt_linenoise() {
     escape_attempts = 0;
     int len         = strlen(line);
     linenoiseHistoryAdd(line);
-    char historyFilePath;
     if (!env->no_history_file)
       linenoiseHistorySave(env->history_file);
     int        outputLen = len + 1;
