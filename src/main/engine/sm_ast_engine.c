@@ -1972,7 +1972,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_expr *arr = (sm_expr *)obj;
         if (arr->size < index + 1 || index_f64->value < 0) {
           sm_string *message = sm_new_fstring_at(
-            sms_heap, "Index out of range: %i . Tuple size is %i", index, arr->size);
+            sms_heap, "Index out of range: %i . Expr size is %i", index, arr->size);
           sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
           return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
         }
@@ -2871,9 +2871,12 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_IF_EXPR: {
-      sm_object *condition_result = sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      if (!IS_FALSE(condition_result)) {
-        return (sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf));
+      sm_object *a0 = sm_expr_get_arg(sme, 0);
+      a0            = sm_engine_eval(a0, current_cx, sf);
+      if (!IS_FALSE(a0)) {
+        a0 = sm_expr_get_arg(sme, 1);
+        a0 = (sm_engine_eval(a0, current_cx, sf));
+        return a0;
       }
       return ((sm_object *)sms_false);
     }
@@ -2957,14 +2960,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       return ((sm_object *)sms_false);
     }
     case SM_LT_EQ_EXPR: {
-      sm_f64 *obj0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
+      sm_f64 *obj0 = NULL;
+      sm_f64 *obj1 = NULL;
+      obj0         = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
       if (obj0->my_type == SM_ERR_TYPE)
         return ((sm_object *)obj0);
-
-      sm_f64 *obj1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
+      obj1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (obj1->my_type == SM_ERR_TYPE)
         return ((sm_object *)obj1);
-
       if (obj0->value <= obj1->value)
         return ((sm_object *)sms_true);
       return ((sm_object *)sms_false);
