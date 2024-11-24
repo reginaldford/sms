@@ -39,19 +39,24 @@
     buffer[16] = ui8(24);      # Pixel depth (1 byte, 24 bits for BGR color)
     buffer[17] = ui8(0);       # Image descriptor (1 byte)
 
+    # Preallocate nodes
+    let rgbIndex   = false;
+    let pixelIndex = false;
+    let r = let g = let b = false;
+
     # Convert RGB to BGR and fill the buffer
     for (let i = 0; i < height; i++) {
       for (let j = 0; j < width; j++) {
         # Calculate the pixel index for the input RGB array
-        let rgbIndex = (i * width + j) * bytesPerPixel;
-        
+        rgbIndex = (i * width + j) * bytesPerPixel;
+
         # Calculate the pixel index for the output buffer (TGA format)
-        let pixelIndex = headerSize + (i * width + j) * bytesPerPixel;
+        pixelIndex = headerSize + rgbIndex;
         
         # Extract RGB components
-        let r = rgbArray[rgbIndex];
-        let g = rgbArray[rgbIndex + 1];
-        let b = rgbArray[rgbIndex + 2];
+        r = rgbArray[rgbIndex];
+        g = rgbArray[rgbIndex + 1];
+        b = rgbArray[rgbIndex + 2];
 
         # Write the BGR values to the buffer
         buffer[pixelIndex] = b;
