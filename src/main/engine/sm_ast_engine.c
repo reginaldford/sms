@@ -638,7 +638,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return ((sm_object *)reps);
       f64        repetitions   = reps->value;
       uint32_t   original_size = str->size;
-      uint32_t   new_size      = (int)(original_size * repetitions);
+      uint32_t   new_size      = (uint32_t)(original_size * repetitions);
       sm_string *new_str       = sm_new_string_manual(new_size);
       char      *content       = &(new_str->content);
       for (int i = 0; i < new_size; i += original_size) {
@@ -727,7 +727,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
             default: {
               sm_symbol *title   = sm_new_symbol("InvalidElementType", 17);
               sm_string *message = sm_new_fstring_at(
-                sms_heap, "Unsupported element type %i in tuple", (int)element->my_type);
+                sms_heap, "Unsupported element type %i in tuple", (uint32_t)element->my_type);
               return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
             }
             }
@@ -1993,7 +1993,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       // obj could be sm_expr or sm_array
       sm_expr *obj =
         (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
-      if (obj->my_type == SM_ERR_TYPE)
+      if (obj->my_type != SM_EXPR_TYPE)
         return ((sm_object *)obj);
       sm_f64 *index_f64 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (index_f64->my_type != SM_F64_TYPE)
@@ -2163,7 +2163,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         default: {
           sm_symbol *title = sm_new_symbol("arrayTypeUnknownError", 19);
           sm_string *message =
-            sm_new_fstring_at(sms_heap, "Unsupported array inner type %i", (int)arr->inner_type);
+            sm_new_fstring_at(sms_heap, "Unsupported array inner type %i", (uint32_t)arr->inner_type);
           return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
         }
         }
@@ -2172,7 +2172,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       default: {
         sm_symbol *title = sm_new_symbol("invalidExpressionType", 19);
         sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid expression type %i", (int)arr_obj->my_type);
+          sm_new_fstring_at(sms_heap, "Invalid expression type %i", (uint32_t)arr_obj->my_type);
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       }
