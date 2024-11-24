@@ -1,13 +1,16 @@
 #!/usr/local/bin/sms -qm128k
 # Simply puts the time every second
 {
+    let theString = false;
   # Represents a number from 0 to 99
   # with 2 characters.
-  let two_digits = (x) =>
+  let two_digits = (x) =>{
+    theString = str(x);
     if(x<10)
-      "0" str+ str(x)
+      "0" str+ theString
     else
-      str(x);
+      theString;
+  };
 
   let am_pm_str = (hr) => if(hr>11) "PM" else "AM";
 
