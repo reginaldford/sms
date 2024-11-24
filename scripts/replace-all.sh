@@ -1,6 +1,6 @@
 #!/bin/bash
 # Backup your code before you do this
-str='s/_\//!\//g'
+str='s/sms_callstack/sms_datastack/g'
 find ../src/ -name "*.c" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.h" -exec sed -i -e "$str" {} +
 find ../src/ -name "*.y" -exec sed -i -e "$str" {} +

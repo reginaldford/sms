@@ -1736,7 +1736,6 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         str = (sm_string *)evaluated;
         for (uint32_t i = 0; i < str->size; i++)
           putchar((&str->content)[i]);
-        putchar('\0');
       }
       fflush(stdout);
       return ((sm_object *)sms_true);
