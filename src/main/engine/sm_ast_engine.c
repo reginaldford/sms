@@ -222,9 +222,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       time(&rawtime);
       timeinfo             = localtime(&rawtime);
       uint32_t *time_tuple = (uint32_t *)timeinfo;
-      sm_expr  *result     = sm_new_expr_n(SM_TUPLE_EXPR, 9, 9, NULL);
+      if (sms_heap->capacity - sms_heap->used <=
+          (sizeof(sm_space) + sizeof(sm_array) + 9 * sizeof(f64) + 1.5 * 1024)) {
+        sm_garbage_collect();
+      }
+      sm_space *space  = sm_new_space(sizeof(f64) * 9);
+      sm_array *result = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
       for (uint32_t i = 0; i < 9; i++)
-        sm_expr_set_arg(result, i, (sm_object *)sm_new_f64(time_tuple[i]));
+        sm_f64_array_set(result, i, time_tuple[i]);
       return ((sm_object *)result);
       break;
     }
