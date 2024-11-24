@@ -61,7 +61,7 @@ sm_object *type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
     // evaluate error handler if there is one
     // sm_cx *scratch = (sm_cx *)*(sm_global_lex_stack(NULL)->top);
     return (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
-                                     source->size, &source->content, (int)line->value);
+                                     source->size, &source->content, (uint32_t)line->value);
   }
   return obj;
 }
@@ -86,8 +86,9 @@ sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type,
       "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s (%s:%zu)", operand,
       sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type), __FILE__,
       __LINE__);
-    sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
-                                               source->size, &source->content, (int)line->value);
+    sm_object *err =
+      (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
+                                &source->content, (uint32_t)line->value);
     return (sm_object *)err;
   }
   return obj;
@@ -111,8 +112,9 @@ sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type
       sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s or %s",
       operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type1),
       sm_type_name(param_type2));
-    sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
-                                               source->size, &source->content, (int)line->value);
+    sm_object *err =
+      (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
+                                &source->content, (uint32_t)line->value);
     return (sm_object *)err;
   }
   return obj;
@@ -139,8 +141,9 @@ sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint32_t param_type
       ", but Expected: %s, %s, or %s (%s:%zu)",
       operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type1),
       sm_type_name(param_type2), sm_type_name(param_type3), __FILE__, __LINE__);
-    sm_object *err = (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
-                                               source->size, &source->content, (int)line->value);
+    sm_object *err =
+      (sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
+                                &source->content, (uint32_t)line->value);
     return (sm_object *)err;
   }
   return obj;
@@ -314,7 +317,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       uint32_t tms;
-      tms = (int)((sm_f64 *)obj0)->value;
+      tms = (uint32_t)((sm_f64 *)obj0)->value;
       if (tms < 0) {
         sm_symbol *title   = sm_new_symbol("negativeTime", 12);
         sm_string *message = sm_new_string(45, "sleep function was provided a negative value.");
@@ -602,7 +605,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       char *content = &(original_str->content);
       // Copy replacement string uint32_to the original string
-      sm_strncpy_unsafe(content + (int)start_index->value, &(replacement_str->content),
+      sm_strncpy_unsafe(content + (uint32_t)start_index->value, &(replacement_str->content),
                         replacement_str->size);
       // No need to copy the remainder since the string size stays the same
       return ((sm_object *)original_str);
@@ -654,7 +657,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (num0->value < 1)
         return ((sm_object *)sm_new_expr_0(SM_TUPLE_EXPR, NULL));
       sm_f64  *zero   = sm_new_f64(0);
-      sm_expr *output = sm_new_expr_n(SM_TUPLE_EXPR, (int)num0->value, (int)num0->value, NULL);
+      sm_expr *output = sm_new_expr_n(SM_TUPLE_EXPR, (uint32_t)num0->value, (int)num0->value, NULL);
       for (int i = 0; i < num0->value; i++)
         sm_expr_set_arg(output, i, (sm_object *)zero);
       return ((sm_object *)output);
@@ -673,18 +676,18 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (start->value < 0 || start->value >= list0->size) {
         sm_symbol *title   = sm_new_symbol("partIndexErr", 12);
         sm_string *message = sm_new_fstring_at(
-          sms_heap, "Calling part with out of range start value: %i", (int)start->value);
+          sms_heap, "Calling part with out of range start value: %i", (uint32_t)start->value);
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       if (len->value > list0->size - start->value) {
         sm_symbol *title   = sm_new_symbol("partLengthErr", 13);
         sm_string *message = sm_new_fstring_at(
-          sms_heap, "Calling part with out of range length value: %i", (int)len->value);
+          sms_heap, "Calling part with out of range length value: %i", (uint32_t)len->value);
         return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
-      sm_expr *new_list = sm_new_expr_n(SM_TUPLE_EXPR, (int)len->value, (int)len->value, NULL);
-      for (int i = 0; i < (int)len->value; i++) {
-        sm_object *element = sm_expr_get_arg(list0, (int)start->value + i);
+      sm_expr *new_list = sm_new_expr_n(SM_TUPLE_EXPR, (uint32_t)len->value, (int)len->value, NULL);
+      for (int i = 0; i < (uint32_t)len->value; i++) {
+        sm_object *element = sm_expr_get_arg(list0, (uint32_t)start->value + i);
         sm_expr_set_arg(new_list, i, element);
       }
       return ((sm_object *)new_list);
@@ -1132,7 +1135,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr *expression = (sm_expr *)obj0;
       expression          = (sm_expr *)sm_copy((sm_object *)expression);
       sm_f64 *given_op    = (sm_f64 *)obj1;
-      expression->op      = (int)((sm_f64 *)given_op)->value;
+      expression->op      = (uint32_t)((sm_f64 *)given_op)->value;
       return ((sm_object *)expression);
     }
     case SM_XP_OP_SYM_EXPR: {
@@ -1600,13 +1603,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
 
       if (file_length < length->value) {
         fclose(fptr);
-        printf("filePart failed because part length is out of range: %i\n", (int)length->value);
+        printf("filePart failed because part length is out of range: %i\n",
+               (uint32_t)length->value);
       }
       fseek(fptr, start_pos->value, SEEK_SET);
-      sm_string *output = sm_new_string_manual((int)length->value);
-      fread(&(output->content), 1, (int)length->value, fptr);
+      sm_string *output = sm_new_string_manual((uint32_t)length->value);
+      fread(&(output->content), 1, (uint32_t)length->value, fptr);
       fclose(fptr);
-      *(&output->content + ((int)length->value)) = '\0';
+      *(&output->content + ((uint32_t)length->value)) = '\0';
       return ((sm_object *)output);
     }
     case SM_FILE_EXISTS_EXPR: {
@@ -1993,7 +1997,7 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       // obj could be sm_expr or sm_array
       sm_expr *obj =
         (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
-      if (obj->my_type != SM_EXPR_TYPE)
+      if (obj->my_type == SM_ERR_TYPE)
         return ((sm_object *)obj);
       sm_f64 *index_f64 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (index_f64->my_type != SM_F64_TYPE)
@@ -2161,9 +2165,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           break;
         }
         default: {
-          sm_symbol *title = sm_new_symbol("arrayTypeUnknownError", 19);
-          sm_string *message =
-            sm_new_fstring_at(sms_heap, "Unsupported array inner type %i", (uint32_t)arr->inner_type);
+          sm_symbol *title   = sm_new_symbol("arrayTypeUnknownError", 19);
+          sm_string *message = sm_new_fstring_at(sms_heap, "Unsupported array inner type %i",
+                                                 (uint32_t)arr->inner_type);
           return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
         }
         }
