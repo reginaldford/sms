@@ -13,7 +13,7 @@ extern sm_symbol   *sms_false;
 extern sm_stack    *sms_callstack;
 
 // Execute a function
-sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
+inline sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   sm_object *content = fun->content;
   sm_object *result;
   sm_cx     *new_cx = sm_new_cx(fun->parent);
@@ -32,7 +32,7 @@ sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
 }
 
 // Basic type checking
-bool expect_type(sm_object *obj, uint32_t arg_type) {
+static inline bool expect_type(sm_object *obj, uint32_t arg_type) {
   if (obj->my_type == SM_POINTER_TYPE) {
     sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
     sm_pointer *p        = (sm_pointer *)obj;
@@ -42,7 +42,7 @@ bool expect_type(sm_object *obj, uint32_t arg_type) {
 }
 
 // Returns the object if it's ok, returns an error if it's not
-sm_object *type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
+static inline sm_object *type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
   sm_object *obj = sm_expr_get_arg(sme, operand);
   if (param_type != obj->my_type) {
     if (obj->my_type == SM_POINTER_TYPE) {
@@ -67,8 +67,8 @@ sm_object *type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
 }
 
 // Evaluate the argument, then run type check
-sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type, sm_cx *current_cx,
-                            sm_expr *sf) {
+static inline sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type,
+                                          sm_cx *current_cx, sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type != obj->my_type) {
     if (obj->my_type == SM_POINTER_TYPE) {
@@ -95,8 +95,8 @@ sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type,
 }
 
 // Evaluate the argument, then run type check. 2 possibilities allowed
-sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type1,
-                             uint32_t param_type2, sm_cx *current_cx, sm_expr *sf) {
+static inline sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type1,
+                                           uint32_t param_type2, sm_cx *current_cx, sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type1 != obj->my_type && param_type2 != obj->my_type) {
     if (obj->my_type == SM_POINTER_TYPE) {
@@ -121,9 +121,9 @@ sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type
 }
 
 // Evaluate the argument, then run type check. 3 possibilities allowed
-sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint32_t param_type1,
-                             uint32_t param_type2, uint32_t param_type3, sm_cx *current_cx,
-                             sm_expr *sf) {
+static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint32_t param_type1,
+                                           uint32_t param_type2, uint32_t param_type3,
+                                           sm_cx *current_cx, sm_expr *sf) {
   sm_object *obj = sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
   if (param_type1 != obj->my_type && param_type2 != obj->my_type && param_type3 != obj->my_type) {
     if (obj->my_type == SM_POINTER_TYPE) {
