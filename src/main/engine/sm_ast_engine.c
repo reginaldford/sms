@@ -49,6 +49,8 @@ sm_object *type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
       sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
       sm_pointer *p        = (sm_pointer *)obj;
       obj                  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+      if (param_type == obj->my_type)
+        return obj;
     }
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
@@ -73,6 +75,8 @@ sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type,
       sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
       sm_pointer *p        = (sm_pointer *)obj;
       obj                  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+      if (param_type == obj->my_type)
+        return obj;
     }
 
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
@@ -98,6 +102,8 @@ sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type
       sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
       sm_pointer *p        = (sm_pointer *)obj;
       obj                  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+      if (param_type1 == obj->my_type || param_type2 == obj->my_type)
+        return obj;
     }
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
@@ -122,6 +128,8 @@ sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint32_t param_type
       sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
       sm_pointer *p        = (sm_pointer *)obj;
       obj                  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+      if (param_type1 == obj->my_type || param_type2 == obj->my_type || param_type3 == obj->my_type)
+        return obj;
     }
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
@@ -244,8 +252,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       // Perform garbage collection to compact the sms_heap
       sm_heap *compacted_heap = sm_new_heap(sms_heap->capacity, true); // Create a new heap for GC
       // TODO: sm_heap_compact_to(from,to)
-      // sm_garbage_collect(sms_heap, compacted_heap); // Compact the main heap uint32_to the new
-      // one
+      // sm_garbage_collect(sms_heap, compacted_heap); // Compact the main heap uint32_to
+      // the new one
 
       // Open the file for writing
       FILE *file = fopen(fname_cstr, "wb");
@@ -274,7 +282,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
 
-      // Write the compacted sms_heap's original start point and compacted storage to the file
+      // Write the compacted sms_heap's original start point and compacted storage to the
+      // file
       if (fwrite(&sms_heap->storage, sizeof(char *), 1, file) != 1 ||
           fwrite(compacted_heap->storage, compacted_heap->used, 1, file) != 1) {
         fclose(file);
@@ -1778,8 +1787,8 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       while (!IS_FALSE(sm_engine_eval((sm_object *)condition, inner_cx, sf))) {
         result = sm_engine_eval(expression, inner_cx, sf);
-        // TODO: can be optimized to if(result->my_type>some_Type) s.t. both return and err are the
-        // only enums greater than some_type
+        // TODO: can be optimized to if(result->my_type>some_Type) s.t. both return and err
+        // are the only enums greater than some_type
         if (result->my_type == SM_RETURN_TYPE || result->my_type == SM_ERR_TYPE)
           return (result);
         // Run increment after each loop
