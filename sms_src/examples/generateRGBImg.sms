@@ -1,7 +1,9 @@
-#!/usr/local/bin/sms -m.5g
+#!/usr/local/bin/sms -qm.5g
 # Usage: This script demonstrates creating a rainbow gradient using colorTGA.write
 
 {
+  # Announce
+  putLn("Calculating the image...");
   # Evaluate and include the colorTGA library
   let colorTGA = import "colorTGA.sms";
 
@@ -12,13 +14,15 @@
 
   # Create an RGB array for the rainbow gradient
   let rgbArray = ui8Repeat([ui8(0)], width * height * bytesPerPixel);
+ 
+  # Prepare for loop
+  let rgbIndex = false;
 
   # Fill the RGB array with a rainbow gradient
   for (let i = 0; i < height; i++) {
     for (let j = 0; j < width; j++) {
       # Calculate the pixel index in the RGB array
-      let rgbIndex = (i * width + j) * bytesPerPixel;
-
+      rgbIndex = (i * width + j) * bytesPerPixel;
       # Create a gradient with varying colors (RGB order)
       # Assign the RGB values to the array
       rgbArray[rgbIndex]     = ui8(255*sin(PI*3*i/height)); # Red
@@ -27,12 +31,15 @@
     };
   };
 
+  # Announce new stage
+  putLn("Writing the image...");
+
   # Call the colorTGA.write function to create the TGA file
   let result = colorTGA.write("gradient.tga", width, height, rgbArray);
   if (result == true) {
     putLn("Rainbow gradient TGA file 'gradient.tga' has been created.");
   } else {
-    putLn("Error: " str+ result);
+    putLn("Error: " str+ str(result));
   };
 };
 
