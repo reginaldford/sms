@@ -623,6 +623,14 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_string *str1 = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
       if (str1->my_type != SM_STRING_TYPE)
         return ((sm_object *)str1);
+      uint32_t s0 = str0->size;
+      uint32_t s1 = str1->size;
+      if (sms_heap->capacity - sms_heap->used <=
+          sizeof(sm_string) + sm_round_size64(s0 + s1) + 1.5 * 1024) {
+        sm_garbage_collect();
+        str0 = (sm_string *)sm_engine_eval((sm_object *)str0, NULL, NULL);
+        str1 = (sm_string *)sm_engine_eval((sm_object *)str1, NULL, NULL);
+      }
       sm_string *new_str = sm_new_string_manual(str0->size + str1->size);
       char      *content = &(new_str->content);
       sm_strncpy(content, &(str0->content), str0->size);
@@ -2081,7 +2089,9 @@ sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_BLOCK_EXPR: {
       uint32_t   i      = 1;
       sm_object *result = (sm_object *)sms_true;
-      sm_cx     *new_cx = sm_new_cx(current_cx);
+      if (sms_heap->capacity - sms_heap->used - 1024 < sizeof(sm_cx))
+        sm_garbage_collect();
+      sm_cx *new_cx = sm_new_cx(current_cx);
       while (i < sme->size) {
         result = sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);
         if (result->my_type == SM_RETURN_TYPE)

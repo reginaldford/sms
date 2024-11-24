@@ -1,7 +1,7 @@
 #!/usr/local/bin/sms -qm128k
 # Simply puts the time every second
 {
-    let theString = false;
+  let theString = false;
   # Represents a number from 0 to 99
   # with 2 characters.
   let two_digits = (x) =>{
