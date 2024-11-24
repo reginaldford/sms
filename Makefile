@@ -7,7 +7,7 @@ CC_DEBUG        := clang
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
 CFLAGS_UNIFIED  := -Oz -static
-CFLAGS          := -Ofast -Wall
+CFLAGS          := -Ofast
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm -flto
@@ -139,7 +139,7 @@ prof:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_PROF)
 
 bin/$(BIN_NAME_PROF): $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o
-	$(CC_PROF) $(CFLAGS_PROF) -lm $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o -o $@
+	$(CC_PROF) $(CFLAGS_PROF) $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o -o $@ $(LDFLAGS)
 
 # Run the unit tests
 check: dev	
