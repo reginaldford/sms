@@ -155,7 +155,7 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
 
 // Recursive engine
-sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
+inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;
