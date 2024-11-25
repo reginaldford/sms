@@ -23,7 +23,7 @@ sm_object *sm_deep_copy(sm_object *obj) {
 
 // Copy the object to the new heap
 // Leave an sm_pointer in the old space
-sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
+inline sm_object *sm_move_to_new_heap(sm_heap *dest, sm_object *obj) {
   uint32_t   sizeOfObj = sm_sizeof(obj);
   sm_object *new_obj   = sm_realloc_at(dest, obj, sizeOfObj);
   // Overwrite the old object. sm_pointer objects
@@ -48,7 +48,7 @@ sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
 
 // Copy the objects referenced by the current_obj into the new heap
 // and copy all referenced objects until all possible references are copied
-void sm_inflate_heap(sm_heap *from, sm_heap *to) {
+inline void sm_inflate_heap(sm_heap *from, sm_heap *to) {
   // Inflate new space. 'meet' every ptr
   // Meeting will copy to new heap if necessary
   char *scan_cursor = (char *)to->storage;
@@ -166,7 +166,7 @@ void sm_inflate_heap(sm_heap *from, sm_heap *to) {
 void **lowestPointer(intptr_t x) { return x + __builtin_frame_address(0); }
 
 // Copying GC
-void sm_garbage_collect() {
+inline void sm_garbage_collect() {
   if (!sms_heap->used)
     return;
   // Fill in the heap map for callstack scan if necessary

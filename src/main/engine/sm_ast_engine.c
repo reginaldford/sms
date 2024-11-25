@@ -12,6 +12,12 @@ extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
 extern sm_stack    *sms_callstack;
 
+// GC if this much space is not available
+static inline void check_gc(uint32_t size) {
+  if (sms_heap->capacity - sms_heap->used <= (size + 1024))
+    sm_garbage_collect();
+}
+
 // Execute a function
 inline sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   sm_object *content = fun->content;
@@ -222,10 +228,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       time(&rawtime);
       timeinfo             = localtime(&rawtime);
       uint32_t *time_tuple = (uint32_t *)timeinfo;
-      if (sms_heap->capacity - sms_heap->used <=
-          (sizeof(sm_space) + sizeof(sm_array) + 9 * sizeof(f64) + 1.5 * 1024)) {
-        sm_garbage_collect();
-      }
+      check_gc(sizeof(sm_space) + sizeof(sm_array) + 9 * sizeof(f64));
       sm_space *space  = sm_new_space(sizeof(f64) * 9);
       sm_array *result = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
       for (uint32_t i = 0; i < 9; i++)
@@ -433,7 +436,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       DIR           *dir;
       struct dirent *entry;
       struct stat    file_stat;
-      const uint32_t MAX_ENTRIES = 1000;
+      const uint32_t MAX_ENTRIES = 1024;
       sm_string     *entry_names[MAX_ENTRIES];
       bool           entry_types[MAX_ENTRIES];
       uint32_t       i = 0;
@@ -466,17 +469,10 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       }
       closedir(dir);
       sm_expr *names_arr = sm_new_expr_n(SM_TUPLE_EXPR, i, i, NULL);
-      sm_expr *types_arr = sm_new_expr_n(SM_TUPLE_EXPR, i, i, NULL);
       for (uint32_t names_i = 0; names_i < i; names_i++) {
         sm_expr_set_arg(names_arr, names_i, (sm_object *)entry_names[names_i]);
-        if (entry_types[names_i] != 0)
-          sm_expr_set_arg(types_arr, names_i, (sm_object *)sms_true);
-        else
-          sm_expr_set_arg(types_arr, names_i, (sm_object *)sms_false);
       }
-      sm_expr *result =
-        sm_new_expr_2(SM_TUPLE_EXPR, (sm_object *)names_arr, (sm_object *)types_arr, NULL);
-      return ((sm_object *)result);
+      return (sm_object *)names_arr;
       break;
     }
     case SM_PWD_EXPR: {
@@ -520,11 +516,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       gettimeofday(&t, NULL);
       sm_space *space  = NULL;
       sm_array *result = NULL;
-      // TODO: For all cases with multiple allocations, we need a check for early gc
-      if (sms_heap->capacity - sms_heap->used <=
-          sizeof(sm_space) + sizeof(sm_array) + 2 * sizeof(f64) + 1024 + 512) {
-        sm_garbage_collect();
-      }
+      check_gc(sizeof(sm_space) + sizeof(sm_array) + 2 * sizeof(f64) + 1024 + 512);
       space  = sm_new_space(sizeof(f64) * 2);
       result = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
       sm_f64_array_set(result, 0, t.tv_sec);
@@ -625,12 +617,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return ((sm_object *)str1);
       uint32_t s0 = str0->size;
       uint32_t s1 = str1->size;
-      if (sms_heap->capacity - sms_heap->used <=
-          sizeof(sm_string) + sm_round_size64(s0 + s1) + 1.5 * 1024) {
-        sm_garbage_collect();
-        str0 = (sm_string *)sm_engine_eval((sm_object *)str0, NULL, NULL);
-        str1 = (sm_string *)sm_engine_eval((sm_object *)str1, NULL, NULL);
-      }
+      check_gc(sizeof(sm_string) + sm_round_size64(s0 + s1));
       sm_string *new_str = sm_new_string_manual(str0->size + str1->size);
       char      *content = &(new_str->content);
       sm_strncpy(content, &(str0->content), str0->size);
@@ -2089,8 +2076,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     case SM_BLOCK_EXPR: {
       uint32_t   i      = 1;
       sm_object *result = (sm_object *)sms_true;
-      if (sms_heap->capacity - sms_heap->used - 1024 < sizeof(sm_cx))
-        sm_garbage_collect();
+      check_gc(sizeof(sm_cx));
       sm_cx *new_cx = sm_new_cx(current_cx);
       while (i < sme->size) {
         result = sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);

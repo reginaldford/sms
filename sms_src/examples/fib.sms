@@ -5,8 +5,9 @@
     while(true){
       put("Give me a number to fib. -1 to stop: ");
       let x = input();
-      if(not(x=="-1"))
-        putLn(str(fib(parse(x))))
+      let parsedX = parse(x);
+      if(not(parsedX==-1))
+        putLn(str(fib(parsedX)))
       else return :done;
     };
   };
