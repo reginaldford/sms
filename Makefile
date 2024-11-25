@@ -6,15 +6,14 @@ CC              := clang
 CC_DEBUG        := clang
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
-#CFLAGS_UNIFIED  := -Oz -static
-#CFLAGS_UNIFIED  := -Oz -static --target=x86_64-linux
-CFLAGS_UNIFIED  := -Oz --target=x86_64-freebsd -static -I$(MUSL_PREFIX)/include 
+CFLAGS_UNIFIED  := -Oz -static
+#CFLAGS_UNIFIED := -Oz --target=x86_64-linux -static -I$(MUSL_PREFIX)/include 
 CFLAGS          := -O3 -ffast-math
-#CFLAGS          := -O3 -ffast-math -static
+#CFLAGS         := -O3 -ffast-math -static
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm -flto
-#LDFLAGS         := -lm -flto -static
+#LDFLAGS        := -lm -flto -static
 BUILD_DIR       := build
 SRC_BISON_FLEX  := src/bison_flex
 SRC_MAIN        := src/main
