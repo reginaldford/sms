@@ -1,16 +1,18 @@
 # This makefile is designed for GNU Make
 
 # Seems to work with zig cc, clang, gcc, egcc (OpenBSD)
+MUSL_PREFIX     := /usr/local/musl
 INSTALL_DIR     := /usr/local/bin
 CC              := clang
 CC_DEBUG        := clang
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
 CFLAGS_UNIFIED  := -Oz -static
-CFLAGS          := -Ofast
+CFLAGS          := -Ofast -static -I$(MUSL_PREFIX)/include
+LDFLAGS         := -lm -flto -L$(MUSL_PREFIX)/lib
+LDFLAGS_DLL     := -lm -flto
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
-LDFLAGS         := -lm -flto
 BUILD_DIR       := build
 SRC_BISON_FLEX  := src/bison_flex
 SRC_MAIN        := src/main
@@ -71,15 +73,15 @@ bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c
 
 # sms_dbg executable
 bin/$(BIN_NAME_DBG): $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
-	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@ $(LDFLAGS)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o -o $@ $(LDFLAGS_DLL)
 
 # sms_test executable
 bin/$(BIN_NAME_TEST): $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(OBJS_TEST)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@ $(LDFLAGS) 
+	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER_DBG) $(OBJS_TEST) -o $@ $(LDFLAGS_DLL) 
 
 # sms_kernel_test executable
 bin/$(BIN_NAME_KT): $(OBJS_PARSER) $(OBJS_BASE_DBG) $(OBJS_KT)
-	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@ $(LDFLAGS)
+	$(CC_DEBUG) $(CFLAGS_DEBUG) $(OBJS_BASE_DBG) $(OBJS_PARSER) $(OBJS_KT) -o $@ $(LDFLAGS_DLL)
 
 # Bison generates the parser
 $(SRC_BISON_FLEX)/y.tab.c: $(SRC_MAIN)/parser/sms.y
@@ -139,7 +141,7 @@ prof:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_PROF)
 
 bin/$(BIN_NAME_PROF): $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o
-	$(CC_PROF) $(CFLAGS_PROF) $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o -o $@ $(LDFLAGS)
+	$(CC_PROF) $(CFLAGS_PROF) $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o -o $@ $(LDFLAGS_DLL)
 
 # Run the unit tests
 check: dev	
@@ -155,7 +157,7 @@ docs:
 unified:
 	$(MAKE) $(SRC_BISON_FLEX)/y.tab.c
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
-	$(CC_UNIFIED) $(CFLAGS_UNIFIED) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED) $(LDFLAGS)
+	$(CC_UNIFIED) $(CFLAGS_UNIFIED) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED) $(LDFLAGS_DLL)
 
 # install the unified version
 install_unified: unified
