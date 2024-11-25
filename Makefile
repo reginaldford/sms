@@ -2,13 +2,14 @@
 
 # Seems to work with zig cc, clang, gcc, egcc (OpenBSD)
 INSTALL_DIR     := /usr/local/bin
-CC              := zig cc
-CC_DEBUG        := zig cc
+CC              := clang
+CC_DEBUG        := clang
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
-# CC_UNIFIED      := zig cc -target x86_64-windows-gnu #doesnt work
-CFLAGS          := -O3 --target=x86_64-linux --static
-#CFLAGS         := -O3 --static
+CFLAGS_UNIFIED  := -Oz -static
+CFLAGS          := -Ofast -static -I$(MUSL_PREFIX)/include  -fno-unwind-tables -fno-asynchronous-unwind-tables -ffunction-sections -fdata-sections -w -fno-stack-protector -fno-stack-protector -fPIC
+LDFLAGS         := -lm -flto -L$(MUSL_PREFIX)/lib -static
+LDFLAGS_DLL     := -lm -flto
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm
@@ -54,8 +55,6 @@ main:
 $(MAKE) $(SRC_MAIN)/linenoise/linenoise.c:
 	git submodule update --recursive --init
 
-bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
-	$(CC) $(CFLAGS) -lm  $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@
 
 
 # Not files
@@ -67,6 +66,10 @@ all:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_TEST)
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_KT)
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_DBG)
+
+# sms executable
+bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
+	$(CC) $(CFLAGS) $(OBJS_BASE) $(OBJS_PARSER) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o -o $@ $(LDFLAGS)
 
 # sms_dbg executable
 bin/$(BIN_NAME_DBG): $(OBJS_PARSER_DBG) $(OBJS_BASE_DBG) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.dbg.o
@@ -138,7 +141,7 @@ prof:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_PROF)
 
 bin/$(BIN_NAME_PROF): $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o
-	$(CC_PROF) $(CFLAGS_PROF) -lm $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o -o $@
+	$(CC_PROF) $(CFLAGS_PROF) $(OBJS_PARSER_PROF) $(OBJS_BASE_PROF) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.prof.o -o $@ $(LDFLAGS)
 
 # Run the unit tests
 check: dev	
@@ -154,7 +157,7 @@ docs:
 unified:
 	$(MAKE) $(SRC_BISON_FLEX)/y.tab.c
 	$(MAKE) $(SRC_BISON_FLEX)/lex.yy.c
-	$(CC_UNIFIED) $(CFLAGS) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED) $(LDFLAGS)
+	$(CC_UNIFIED) $(CFLAGS_UNIFIED) $(SRC_BISON_FLEX)/y.tab.c $(SRC_BISON_FLEX)/lex.yy.c $(SRCS_MAIN) $(SRC_MAIN)/sm_main.c -o bin/$(BIN_NAME_UNIFIED) $(LDFLAGS)
 
 # install the unified version
 install_unified: unified
