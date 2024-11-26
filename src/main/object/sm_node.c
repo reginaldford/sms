@@ -88,7 +88,7 @@ inline static int ctzll(uint64_t num) {
     num >>= 1;
     bit_index++;
   }
-  return num;
+  return bit_index;
 }
 #endif
 
