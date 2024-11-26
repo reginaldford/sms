@@ -67,17 +67,31 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
 }
 
 // Define popcountll whether or not we have the built-in instruction.
-#ifdef __x86_64__
-int popcountll(uint64_t num) { return __builtin_popcountll(num); }
+#if __has_builtin(__builtin_popcountll)
+inline static int popcountll(uint64_t num) { return __builtin_popcountll(num); }
 #else
-// Manually counting the bits in the 64 bit int, efficiently
-int popcountll(uint64_t num) {
+// Manually counting the bits in the 64 bit int efficiently
+inline static int popcountll(uint64_t num) {
   int count = 0;
   for (count = 0; num; count++)
     num &= (num - 1);
   return count;
 }
 #endif
+
+#if __has_builtin(__builtin_ctzll)
+inline static int ctzll(uint64_t num) { return __builtin_ctzll(num); }
+#else
+inline static int ctzll(uint64_t num) {
+  int bit_index = 0;
+  while ((num & 1) == 0 && num != 0) {
+    num >>= 1;
+    bit_index++;
+  }
+  return num;
+}
+#endif
+
 
 // Return the number of set bits to the left of map_index'th bit in map
 int sm_node_map_left_count(uint64_t map, int bit_index) {
@@ -242,8 +256,8 @@ int sm_node_size(sm_node *node) {
   while (map != 0) {
     // Using two's compliment trick
     uint64_t bit = map & -map;
-    // Using built-in ctzll (count trailing zeros) function
-    int      bit_index   = __builtin_ctzll(bit);
+    // Count trailing zeros
+    int      bit_index   = ctzll(bit);
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
     size += sm_node_size(child_here);
@@ -273,7 +287,7 @@ sm_expr *sm_node_keys(sm_node *node, sm_stack_obj *char_stack, sm_expr *collecti
   while (map != 0) {
     uint64_t bit = map & -map; // Get the rightmost set bit using two's compliment
     // Get the index of the set bit using built-in ctzll (count trailing zeros) function
-    int      bit_index   = __builtin_ctzll(bit);
+    int      bit_index   = ctzll(bit);
     int      child_index = sm_node_child_index(node->map, bit_index);
     sm_node *child_here  = (sm_node *)sm_node_nth(node->children, child_index);
     sm_stack_obj_push(char_stack, sm_new_f64(bit_index));

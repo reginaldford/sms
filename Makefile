@@ -1,15 +1,14 @@
 # This makefile is designed for GNU Make
 
-# Seems to work with zig cc, clang, gcc, egcc (OpenBSD)
+# Seems to work with zig cc, clang, gcc, egcc (OpenBSD), tcc
 INSTALL_DIR     := /usr/local/bin
 CC              := clang
 CC_DEBUG        := clang
 CC_PROF         := clang
 CC_UNIFIED      := zig cc
-CFLAGS_UNIFIED  := -Oz -static
+CFLAGS_UNIFIED  := -Oz
 #CFLAGS_UNIFIED := -Oz --target=x86_64-linux -static -I$(MUSL_PREFIX)/include 
 CFLAGS          := -O3 -ffast-math -fno-stack-protector
-#CFLAGS         := -O3 -ffast-math -static
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm -flto

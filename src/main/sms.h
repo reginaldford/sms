@@ -22,12 +22,12 @@
 #define ui8 uint8_t
 
 // We use __builtin_popcount_ll in sm_node.c
-#if defined(__x86_64__)
+#if defined(__x86intrin__)
 #include <x86intrin.h>
 #endif
 
 // Set version number. Major.Minor.Patch
-#define SMS_VERSION "0.22.8"
+#define SMS_VERSION "0.22.9"
 #define SMS_VERSION_LEN 7
 
 /// These are the major object types of SMS
