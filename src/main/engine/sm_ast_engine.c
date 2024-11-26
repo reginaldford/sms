@@ -10,12 +10,14 @@ extern sm_heap     *sms_symbol_heap;
 extern sm_heap     *sms_symbol_name_heap;
 extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
-extern sm_stack    *sms_callstack;
 
-// GC if this much space is not available
-static inline void check_gc(uint32_t size) {
-  if (sms_heap->capacity - sms_heap->used <= (size + 1024))
+// GC if necessary
+static inline bool check_gc() {
+  if (sms_heap->safe_capacity <= sms_heap->used) {
     sm_garbage_collect();
+    return true;
+  }
+  return false;
 }
 
 // Execute a function
@@ -25,12 +27,10 @@ inline sm_object *execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   sm_cx     *new_cx = sm_new_cx(fun->parent);
   if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
     sm_expr *content_sme = (sm_expr *)fun->content;
-    uint32_t i           = 1;
-    while (i < content_sme->size) {
+    for (uint32_t i = 1; i < content_sme->size; i++) {
       result = sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
       if (result->my_type == SM_RETURN_TYPE)
         return ((sm_return *)result)->address;
-      i++;
     }
     return result;
   } else
@@ -223,12 +223,11 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       }
     }
     case SM_DATE_EXPR: {
-      time_t     rawtime;
-      struct tm *timeinfo;
+      time_t rawtime;
       time(&rawtime);
-      timeinfo             = localtime(&rawtime);
-      uint32_t *time_tuple = (uint32_t *)timeinfo;
-      check_gc(sizeof(sm_space) + sizeof(sm_array) + 9 * sizeof(f64));
+      struct tm *timeinfo   = localtime(&rawtime);
+      uint32_t  *time_tuple = (uint32_t *)timeinfo;
+      check_gc();
       sm_space *space  = sm_new_space(sizeof(f64) * 9);
       sm_array *result = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
       for (uint32_t i = 0; i < 9; i++)
@@ -516,7 +515,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       gettimeofday(&t, NULL);
       sm_space *space  = NULL;
       sm_array *result = NULL;
-      check_gc(sizeof(sm_space) + sizeof(sm_array) + 2 * sizeof(f64) + 1024 + 512);
+      check_gc();
       space  = sm_new_space(sizeof(f64) * 2);
       result = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
       sm_f64_array_set(result, 0, t.tv_sec);
@@ -617,10 +616,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         return ((sm_object *)str1);
       uint32_t s0 = str0->size;
       uint32_t s1 = str1->size;
-      check_gc(sizeof(sm_string) + sm_round_size64(s0 + s1));
+      if (check_gc()) {
+        str0 = (sm_string *)sm_engine_eval((sm_object *)str0, NULL, NULL);
+        str1 = (sm_string *)sm_engine_eval((sm_object *)str1, NULL, NULL);
+      }
       sm_string *new_str = sm_new_string_manual(str0->size + str1->size);
       char      *content = &(new_str->content);
-      sm_strncpy(content, &(str0->content), str0->size);
+      sm_strncpy_unsafe(content, &(str0->content), str0->size);
       sm_strncpy(content + str0->size, &(str1->content), str1->size);
       return ((sm_object *)new_str);
       break;
@@ -1994,15 +1996,13 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       return (result);
     }
     case SM_INDEX_EXPR: {
-      // obj could be sm_expr or sm_array
-      sm_expr *obj =
-        (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
-      if (obj->my_type == SM_ERR_TYPE)
-        return ((sm_object *)obj);
       sm_f64 *index_f64 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
       if (index_f64->my_type != SM_F64_TYPE)
         return ((sm_object *)index_f64);
       uint32_t index = (uint32_t)index_f64->value;
+      // obj could be sm_expr or sm_array
+      sm_expr *obj =
+        (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE, current_cx, sf);
       switch (obj->my_type) {
       case SM_EXPR_TYPE: {
         sm_expr *arr = (sm_expr *)obj;
@@ -2024,6 +2024,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
         }
         return (sm_array_get(arr, index));
       }
+      default:
+        return ((sm_object *)obj);
       }
     }
     case SM_DOT_EXPR: {
@@ -2076,7 +2078,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     case SM_BLOCK_EXPR: {
       uint32_t   i      = 1;
       sm_object *result = (sm_object *)sms_true;
-      check_gc(sizeof(sm_cx));
+      check_gc();
       sm_cx *new_cx = sm_new_cx(current_cx);
       while (i < sme->size) {
         result = sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);

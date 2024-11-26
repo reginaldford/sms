@@ -8,7 +8,7 @@ CC_PROF         := clang
 CC_UNIFIED      := zig cc
 CFLAGS_UNIFIED  := -Oz -static
 #CFLAGS_UNIFIED := -Oz --target=x86_64-linux -static -I$(MUSL_PREFIX)/include 
-CFLAGS          := -O3 -ffast-math
+CFLAGS          := -O3 -ffast-math -fno-stack-protector
 #CFLAGS         := -O3 -ffast-math -static
 CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping

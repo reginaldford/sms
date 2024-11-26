@@ -4,6 +4,10 @@
 typedef struct sm_heap {
   /// The capacity of this heap in bytes. Copying GC using 2 heaps
   uint32_t capacity;
+  /// The capacity of this heaap in bytes, minus a safety_zone
+  uint32_t safe_capacity;
+  /// The size of the safety zone. We gc if the allocation ptr reaches this area.
+  uint32_t safezone_size;
   /// Number of bytes used in this heap
   uint32_t used;
   /// Pointer to the beginning of the memory heap content

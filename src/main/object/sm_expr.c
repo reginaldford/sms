@@ -94,13 +94,13 @@ sm_expr *sm_expr_set_arg(sm_expr *expr, uint32_t index, sm_object *value) {
 }
 
 // Get an argument of an expression
-sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index) {
+inline sm_object *sm_expr_get_arg(sm_expr *expr, uint32_t index) {
   sm_object **ptr_tuple = (sm_object **)&(expr[1]);
   return ptr_tuple[index];
 }
 
 // Can this op take 2 arguments AND have infix representation?
-bool sm_is_infix(enum SM_EXPR_TYPE op) {
+inline bool sm_is_infix(enum SM_EXPR_TYPE op) {
   switch (op) {
   case SM_ASSIGN_EXPR:
   case SM_PLUS_EXPR:
