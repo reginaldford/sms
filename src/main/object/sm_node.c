@@ -67,6 +67,9 @@ bool sm_node_insert(struct sm_node *root, struct sm_node *new_node, int where) {
 }
 
 // Define popcountll whether or not we have the built-in instruction.
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
 #if __has_builtin(__builtin_popcountll)
 inline static int popcountll(uint64_t num) { return __builtin_popcountll(num); }
 #else
