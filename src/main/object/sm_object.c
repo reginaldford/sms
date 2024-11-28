@@ -89,10 +89,6 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 // Return the size of the object in bytes
 
 uint32_t sm_sizeof(sm_object *obj1) {
-  if ((intptr_t)obj1 & 7) {
-    fprintf(stderr, "! misaligned object File: %s Line: %u\n", __FILE__, __LINE__);
-    exit(1);
-  }
   switch (obj1->my_type) {
   case SM_F64_TYPE:
     return sizeof(sm_f64);

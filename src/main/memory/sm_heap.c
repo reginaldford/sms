@@ -137,10 +137,6 @@ bool sm_heap_has_object(sm_heap *heap, void *guess) {
 
 // Designed to be fast
 void sm_heap_register_object(sm_heap *heap, void *obj) {
-  if (((intptr_t)obj) & 7) {
-    fprintf(stderr, "Misaligned object registration.  %s:%u\n", __FILE__, __LINE__);
-    exit(1);
-  }
   // Calculate the position in the bitmap
   uint32_t map_pos =
     ((intptr_t *)obj - (intptr_t *)heap->storage) >> 3; // Offset in the heap divided by 8 bytes

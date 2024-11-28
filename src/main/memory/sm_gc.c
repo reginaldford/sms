@@ -192,7 +192,7 @@ inline void sm_garbage_collect() {
     void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
     void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
     higherPtr += (intptr_t)__builtin_frame_address(0) - (intptr_t)memory_marker2;
-    for (void **ptr = (void **)(((uintptr_t)lowerPtr) & ~7); ptr < higherPtr; ptr++)
+    for (void **ptr = (void **)(((uintptr_t)lowerPtr)); ptr < higherPtr; ptr++)
       if (sm_heap_has_object(sms_heap, *ptr))
         *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
   }
