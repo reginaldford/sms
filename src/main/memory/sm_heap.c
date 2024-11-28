@@ -41,8 +41,8 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
       exit(1);
     }
   }
-  static const uint32_t safe_value = 4096;
-  new_heap->safe_capacity          = capacity < safe_value ? 0 : capacity - safe_value;
+  static const uint32_t safe_value = 256;
+  new_heap->safe_capacity          = capacity < safe_value ? capacity : capacity - safe_value;
   sm_heap_clear(new_heap);
   return new_heap;
 }
