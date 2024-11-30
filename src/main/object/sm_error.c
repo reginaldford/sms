@@ -2,6 +2,8 @@
 
 #include "../sms.h"
 
+extern sm_object *return_obj;
+
 /// Error object
 sm_error *sm_new_error_blank() {
   sm_error *new_error = sm_malloc(sizeof(sm_error));
@@ -51,7 +53,8 @@ sm_error *sm_new_error_from_expr(sm_symbol *title, sm_string *message, sm_expr *
   sm_error  *e      = sm_new_error_from_strings(title, message, source, (int)line->value, notes);
   // Call _errHandler through engine eval.
   // This process does not refer to current_cx or stackframe, so those parameters can be NULL
-  return (sm_error *)sm_engine_eval((sm_object *)e, NULL, NULL);
+  sm_engine_eval((sm_object *)e, NULL, NULL);
+  return (sm_error *)return_obj;
 }
 
 /// If !fake, print the error type to a string buffer. Return the length regardlessly.
