@@ -187,6 +187,10 @@ inline void sm_garbage_collect() {
       sm_meet_object(sms_heap, sms_other_heap, sm_global_parser_output(NULL)));
   else
     sm_global_parser_output((sm_object *)sms_false);
+
+  // Handle the global return_obj ptr as a root
+  return_obj = sm_meet_object(sms_heap, sms_other_heap, return_obj);
+
   // Handle the C Callstack as a root
   if (evaluating) {
     memory_marker2   = lowestPointer(0);
@@ -197,8 +201,7 @@ inline void sm_garbage_collect() {
       if (sm_heap_has_object(sms_heap, *ptr))
         *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
   }
-  // Handle the global return_obj ptr as a root
-  return_obj = sm_meet_object(sms_heap, sms_other_heap, return_obj);
+
 
   // Inflate
   sm_inflate_heap(sms_heap, sms_other_heap);

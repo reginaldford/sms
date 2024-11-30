@@ -5,7 +5,6 @@
 
 extern int        yylineno;
 extern void      *memory_marker1;
-extern void      *memory_marker2;
 extern bool       evaluating;
 extern sm_object *return_obj;
 

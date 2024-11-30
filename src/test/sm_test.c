@@ -7,6 +7,7 @@
 
 extern int yylineno;
 #define DISPLAY_WIDTH 65
+extern sm_object *return_obj;
 
 // Global for the test outline structure
 test_outline *global_test_outline(test_outline *replacement) {
@@ -131,7 +132,8 @@ int perform_specific_test(sm_cx *test_env, sm_expr *test_list, int chapter, int 
   char    *test_description = &(((sm_string *)sm_expr_get_arg(test_triplet, 2))->content);
   test_intro(chapter, subchapter, test, test_description);
 
-  sm_object *outcome      = sm_engine_eval(sm_expr_get_arg(test_triplet, 0), test_env, NULL);
+  sm_engine_eval(sm_expr_get_arg(test_triplet, 0), test_env, NULL);
+  sm_object *outcome      = return_obj;
   sm_string *outcome_str  = sm_object_to_string(outcome);
   sm_object *expected     = sm_expr_get_arg(test_triplet, 1);
   sm_string *expected_str = sm_object_to_string(expected);
