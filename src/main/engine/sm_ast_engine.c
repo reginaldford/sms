@@ -2233,7 +2233,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_BLOCK_EXPR: {
       uint32_t   i      = 1;
       sm_object *result = (sm_object *)sms_true;
-      sm_cx     *new_cx = sm_new_cx(current_cx);
+      check_gc();
+      sm_cx *new_cx = sm_new_cx(current_cx);
       while (i < sme->size) {
         sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);
         result = return_obj;
@@ -3166,6 +3167,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ(((sm_object *)new_arr));
     }
     case SM_PARAM_LIST_EXPR: {
+      if (sms_heap->capacity - sms_heap->used <= sizeof(sm_expr) + sizeof(size_t) * sme->size)
+        sm_garbage_collect();
       sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size, NULL);
       for (uint32_t i = 0; i < sme->size; i++) {
         sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
