@@ -75,7 +75,9 @@ enum sm_object_type {
   SM_ARRAY_TYPE,
   /// 20: f64 precision floating point (sm_f64.h)
   SM_F64_TYPE,
-  /// 21: Unrecognized
+  /// 21: objstack (sm_objstack.h)
+  SM_OBJSTACK_TYPE,
+  /// 22: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -90,6 +92,7 @@ enum sm_object_type {
 #include "memory/sm_heap.h"
 #include "sm_env.h"
 #include "sm_signal.h"
+#include "sm_objstack.h"
 #include "sm_init.h"
 #include "object/sm_type.h"
 #include "object/sm_string.h"

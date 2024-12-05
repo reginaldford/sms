@@ -3,8 +3,6 @@
 #include "sms.h"
 
 // Global object pointers
-void      **memory_marker1;
-void      **memory_marker2;
 sm_heap_set sms_all_heaps;
 sm_heap    *sms_heap;
 sm_heap    *sms_other_heap;
@@ -17,7 +15,6 @@ sm_heap   *sms_symbol_name_heap;
 uint32_t   sms_num_symbols;
 bool       evaluating;
 sm_object *return_obj;
-
 
 /* GLOBALS as functions
  The following globals use functions f(x):
