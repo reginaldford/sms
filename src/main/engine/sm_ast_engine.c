@@ -1895,12 +1895,17 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 0);
       sm_object *expression = sm_expr_get_arg(sme, 1);
       sm_engine_eval((sm_object *)condition, current_cx, sf);
-      while (!IS_FALSE(return_obj)) {
+      sm_object *condition_result = return_obj;
+      sm_object *eval_result;
+      while (!IS_FALSE(condition_result)) {
         sm_engine_eval(expression, current_cx, sf);
-        if (return_obj->my_type == SM_RETURN_TYPE)
-          return;
+        eval_result = return_obj;
+        sm_engine_eval((sm_object *)condition, current_cx, sf);
+        condition_result = return_obj;
+        if (eval_result->my_type == SM_RETURN_TYPE)
+          RETURN_OBJ(eval_result);
       }
-      return;
+      RETURN_OBJ(eval_result);
       break;
     }
     case SM_FOR_EXPR: {
