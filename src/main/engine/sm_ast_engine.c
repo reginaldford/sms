@@ -1923,15 +1923,19 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_expr_set_arg((sm_expr *)expression, 0, (sm_object *)inner_cx);
       }
       sm_engine_eval((sm_object *)condition, inner_cx, sf);
-      while (!IS_FALSE(return_obj)) {
+      sm_object *condition_result = return_obj;
+      sm_object *eval_result;
+      while (!IS_FALSE(condition_result)) {
         sm_engine_eval(expression, inner_cx, sf);
+        eval_result = return_obj;
         if (return_obj->my_type == SM_RETURN_TYPE || return_obj->my_type == SM_ERR_TYPE)
           return;
         // Run increment after each loop
         sm_engine_eval((sm_object *)increment, inner_cx, sf);
         sm_engine_eval((sm_object *)condition, inner_cx, sf);
+        condition_result = return_obj;
       }
-      RETURN_OBJ((result));
+      RETURN_OBJ(eval_result);
       break;
     }
     case SM_FOR_IN_EXPR: {
