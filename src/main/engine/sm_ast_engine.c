@@ -2083,32 +2083,35 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     }
     case SM_MAP_EXPR: {
       // expecting a unary func
-      sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *obj0 = return_obj;
-      sm_fun    *fun;
-      if (!expect_type(obj0, SM_FUN_TYPE))
-        RETURN_OBJ(((sm_object *)sms_false));
-      fun             = (sm_fun *)obj0;
-      sm_object *obj1 = return_obj;
-      sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
-      sm_expr *arr;
-      if (!expect_type(obj1, SM_EXPR_TYPE))
-        RETURN_OBJ(((sm_object *)sms_false));
-      arr             = (sm_expr *)obj1;
+      eager_type_check(sme, 0, SM_FUN_TYPE, current_cx, sf);
+      if (return_obj->my_type != SM_FUN_TYPE) {
+        RETURN_OBJ(return_obj); // Return the function object if type check fails
+      }
+      sm_fun *fun = (sm_fun *)return_obj;
+
+      eager_type_check(sme, 1, SM_EXPR_TYPE, current_cx, sf);
+      if (return_obj->my_type != SM_EXPR_TYPE) {
+        RETURN_OBJ(return_obj);
+      }
+      sm_expr *arr = (sm_expr *)return_obj;
+      // Create a new output expression with the same operation type and size
       sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size, NULL);
+      // Iterate over the elements of the array expression (arr)
       for (uint32_t i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj, NULL);
-
+        // Call the function with the new expression
         sm_engine_eval(fun->content, fun->parent, new_sf);
         sm_object *map_result = return_obj;
-
-        if (map_result->my_type == SM_RETURN_TYPE)
+        // If the result is a return type, dereference it
+        if (map_result->my_type == SM_RETURN_TYPE) {
           map_result = ((sm_return *)map_result)->address;
-
+        }
+        // Set the result of the current element into the output expression
         sm_expr_set_arg(output, i, map_result);
       }
-      RETURN_OBJ(((sm_object *)output));
+      // Return the output expression with the mapped results
+      RETURN_OBJ((sm_object *)output);
     }
     case SM_REDUCE_EXPR: {
       // expecting a binary function
