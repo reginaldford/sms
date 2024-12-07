@@ -2,6 +2,8 @@
 
 #include "../sms.h"
 
+extern void     **memory_marker1;
+extern void     **memory_marker2;
 extern bool       evaluating;
 extern sm_object *return_obj;
 
@@ -162,6 +164,8 @@ inline void sm_inflate_heap(sm_heap *from, sm_heap *to) {
   }
 }
 
+void **lowestPointer(intptr_t x) { return x + __builtin_frame_address(0); }
+
 // Copying GC
 inline void sm_garbage_collect() {
   if (!sms_heap->used)
@@ -187,8 +191,15 @@ inline void sm_garbage_collect() {
   // Handle the global return_obj ptr as a root
   return_obj = sm_meet_object(sms_heap, sms_other_heap, return_obj);
 
-  // Runtime roots
+  // Handle the C Callstack as a root
   if (evaluating) {
+    memory_marker2   = lowestPointer(0);
+    void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
+    void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
+    higherPtr += (intptr_t)__builtin_frame_address(0) - (intptr_t)memory_marker2;
+    for (void **ptr = (void **)(((uintptr_t)lowerPtr)); ptr < higherPtr; ptr++)
+      if (sm_heap_has_object(sms_heap, *ptr))
+        *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
   }
 
 

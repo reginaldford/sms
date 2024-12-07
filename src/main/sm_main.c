@@ -4,6 +4,7 @@
 #include "../bison_flex/y.tab.h"
 
 extern int        yylineno;
+extern void      *memory_marker1;
 extern bool       evaluating;
 extern sm_object *return_obj;
 
@@ -42,6 +43,7 @@ void start_repl(sm_env *env) {
     sm_parse_result pr = sm_terminal_prompt(env->plain_mode);
     if (!pr.return_val && pr.parsed_object) {
       // Before we eval, let's save a ptr to stack frame.
+      memory_marker1 = __builtin_frame_address(0);
       // Evaluate
       evaluating = true;
       sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
@@ -75,7 +77,8 @@ void run_file(char *file_path, sm_env *env) {
   }
   if (pr.parsed_object != NULL) {
     // Before we eval, let's save a ptr to stack frame.
-    evaluating = true;
+    memory_marker1 = __builtin_frame_address(0);
+    evaluating     = true;
     sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
     evaluating = false;
   }
@@ -169,7 +172,8 @@ int main(int num_args, char *argv[]) {
         printf("Parser returned nothing.\n");
         clean_exit(&env, 1);
       }
-      evaluating = true;
+      memory_marker1 = __builtin_frame_address(0);
+      evaluating     = true;
       sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
       sm_object *evaluated = return_obj;
       evaluating           = false;
