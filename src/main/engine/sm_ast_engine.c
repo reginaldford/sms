@@ -11,6 +11,10 @@ extern sm_heap     *sms_symbol_name_heap;
 extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
 extern sm_object   *return_obj;
+// 3 virtual machine  stacks
+extern sm_object_stack *sms_stack;
+extern sm_object_stack *sms_cx_stack;
+extern sm_object_stack *sms_sf_stack;
 
 #define RETURN_OBJ(x)                                                                              \
   {                                                                                                \
