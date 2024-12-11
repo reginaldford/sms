@@ -76,7 +76,7 @@ enum sm_object_type {
   /// 20: f64 precision floating point (sm_f64.h)
   SM_F64_TYPE,
   /// 21: object-only stack in malloc space
-  SM_OBJECT_STACK_TYPE,
+  SM_STACK2_TYPE,
   /// 22: Unrecognized
   SM_UNKNOWN_TYPE
 };
@@ -92,11 +92,11 @@ enum sm_object_type {
 #include "memory/sm_heap.h"
 #include "sm_env.h"
 #include "sm_signal.h"
-#include "sm_object_stack.h"
+#include "object/sm_object.h"
+#include "sm_stack2.h"
 #include "sm_init.h"
 #include "object/sm_type.h"
 #include "object/sm_string.h"
-#include "object/sm_object.h"
 #include "object/sm_expr.h"
 #include "sm_stack.h"
 #include "object/sm_stack_obj.h"

@@ -11,25 +11,15 @@ extern sm_heap     *sms_symbol_name_heap;
 extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
 extern sm_object   *return_obj;
-// 3 virtual machine  stacks
-extern sm_object_stack *sms_stack;
-extern sm_object_stack *sms_cx_stack;
-extern sm_object_stack *sms_sf_stack;
+// 2 virtual machine  stacks
+extern sm_stack2 *sms_stack;
+extern sm_stack2 *sms_cx_stack;
 
 #define RETURN_OBJ(x)                                                                              \
   {                                                                                                \
     return_obj = x;                                                                                \
     return;                                                                                        \
   }
-
-// GC if necessary
-static inline bool check_gc() {
-  if (sms_heap->safe_capacity <= sms_heap->used) {
-    sm_garbage_collect();
-    return true;
-  }
-  return false;
-}
 
 // Execute a function
 inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
@@ -242,9 +232,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       time(&rawtime);
       struct tm *timeinfo   = localtime(&rawtime);
       uint32_t  *time_tuple = (uint32_t *)timeinfo;
-      check_gc();
-      sm_space *space  = sm_new_space(sizeof(f64) * 9);
-      sm_array *result = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
+      sm_space  *space      = sm_new_space(sizeof(f64) * 9);
+      sm_array  *result     = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
       for (uint32_t i = 0; i < 9; i++)
         sm_f64_array_set(result, i, time_tuple[i]);
       RETURN_OBJ(((sm_object *)result));
@@ -541,9 +530,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       gettimeofday(&t, NULL);
       sm_space *space  = NULL;
       sm_array *result = NULL;
-      check_gc();
-      space  = sm_new_space(sizeof(f64) * 2);
-      result = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
+      space            = sm_new_space(sizeof(f64) * 2);
+      result           = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
       sm_f64_array_set(result, 0, t.tv_sec);
       sm_f64_array_set(result, 1, t.tv_usec);
       RETURN_OBJ(((sm_object *)result));
@@ -652,14 +640,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_string *str1 = (sm_string *)return_obj;
       if (str1->my_type != SM_STRING_TYPE)
         RETURN_OBJ(((sm_object *)str1));
-      uint32_t s0 = str0->size;
-      uint32_t s1 = str1->size;
-      if (check_gc()) {
-        sm_engine_eval((sm_object *)str0, NULL, NULL);
-        str0 = (sm_string *)return_obj;
-        sm_engine_eval((sm_object *)str1, NULL, NULL);
-        str1 = (sm_string *)return_obj;
-      }
+      uint32_t   s0      = str0->size;
+      uint32_t   s1      = str1->size;
       sm_string *new_str = sm_new_string_manual(str0->size + str1->size);
       char      *content = &(new_str->content);
       sm_strncpy_unsafe(content, &(str0->content), str0->size);
@@ -2249,8 +2231,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_BLOCK_EXPR: {
       uint32_t   i      = 1;
       sm_object *result = (sm_object *)sms_true;
-      check_gc();
-      sm_cx *new_cx = sm_new_cx(current_cx);
+      sm_cx     *new_cx = sm_new_cx(current_cx);
       while (i < sme->size) {
         sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);
         result = return_obj;
@@ -2846,60 +2827,19 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       RETURN_OBJ(result);
     }
-    case SM_PLUS_EXPR: {
-      sm_f64 *answer = sm_new_f64(0);
-      sm_f64 *obj0   = answer;
-      sm_f64 *obj1   = answer;
-      eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
-      obj0 = (sm_f64 *)return_obj;
-      if (obj0->my_type != SM_F64_TYPE)
-        RETURN_OBJ(((sm_object *)obj0));
-      eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      obj1 = (sm_f64 *)return_obj;
-      if (obj1->my_type != SM_F64_TYPE)
-        RETURN_OBJ(((sm_object *)obj1));
-      answer->value = obj0->value + obj1->value;
-      RETURN_OBJ((sm_object *)answer);
+    case SM_PLUS_EXPR:
+      sm_push((sm_object *)sm_new_f64(((sm_f64 *)sm_pop())->value + ((sm_f64 *)sm_pop())->value));
       break;
-    }
     case SM_MINUS_EXPR: {
-      sm_f64 *answer = sm_new_f64(0);
-      sm_f64 *obj0   = answer;
-      sm_f64 *obj1   = answer;
-      eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
-      obj0 = (sm_f64 *)return_obj;
-      if (obj0->my_type != SM_F64_TYPE)
-        RETURN_OBJ(((sm_object *)obj0));
-      eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      obj1 = (sm_f64 *)return_obj;
-      if (obj1->my_type != SM_F64_TYPE)
-        RETURN_OBJ(((sm_object *)obj1));
-      answer->value = obj0->value - obj1->value;
-      RETURN_OBJ((sm_object *)answer);
+      sm_push((sm_object *)sm_new_f64(((sm_f64 *)sm_pop())->value - ((sm_f64 *)sm_pop())->value));
       break;
     }
     case SM_TIMES_EXPR: {
-      eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
-      sm_f64 *obj0 = (sm_f64 *)return_obj;
-      if (obj0->my_type == SM_ERR_TYPE)
-        RETURN_OBJ(((sm_object *)obj0));
-      eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      sm_f64 *obj1 = (sm_f64 *)return_obj;
-      if (obj1->my_type == SM_ERR_TYPE)
-        RETURN_OBJ(((sm_object *)obj1));
-      RETURN_OBJ(((sm_object *)sm_new_f64(obj0->value * obj1->value)));
+      sm_push((sm_object *)sm_new_f64(((sm_f64 *)sm_pop())->value * ((sm_f64 *)sm_pop())->value));
       break;
     }
     case SM_DIVIDE_EXPR: {
-      eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
-      sm_f64 *obj0 = (sm_f64 *)return_obj;
-      if (obj0->my_type == SM_ERR_TYPE)
-        RETURN_OBJ(((sm_object *)obj0));
-      eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      sm_f64 *obj1 = (sm_f64 *)return_obj;
-      if (obj1->my_type == SM_ERR_TYPE)
-        RETURN_OBJ(((sm_object *)obj1));
-      RETURN_OBJ(((sm_object *)sm_new_f64(obj0->value / obj1->value)));
+      sm_push((sm_object *)sm_new_f64(((sm_f64 *)sm_pop())->value / ((sm_f64 *)sm_pop())->value));
       break;
     }
     case SM_POW_EXPR: {
@@ -3463,19 +3403,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ((input));
     }
   }
-  case SM_POINTER_TYPE: {
-    // Since registers are hard to access in C,
-    // We miss the registers as a root
-    // This causes the next object evalutation to aim at a pointer
-    // Following the pointer seems to solve this
-    sm_heap    *pointeeH = sm_is_within_heap(input, sms_heap) ? sms_other_heap : sms_heap;
-    sm_pointer *p        = (sm_pointer *)input;
-    sm_object  *pointee  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
-    sm_engine_eval(pointee, current_cx, sf);
-    return;
-  }
   default:
-    RETURN_OBJ((input));
+    sm_push(input);
     break;
   }
 }
