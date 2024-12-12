@@ -13,7 +13,6 @@ extern const int           sms_version_len;
 extern bool                evaluating;
 extern sm_stack2          *sms_stack;
 extern sm_stack2          *sms_cx_stack;
-extern sm_stack2          *sms_sf_stack;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Set version number. Major.Minor.Patch
@@ -58,7 +57,6 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   // Virual machine stacks
   sms_stack    = sm_new_stack2(128);
   sms_cx_stack = sm_new_stack2(128);
-  sms_sf_stack = sm_new_stack2(128);
 
   // Initialize the lexical stack
   sm_global_lex_stack(sm_new_stack(128));

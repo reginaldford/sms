@@ -163,8 +163,30 @@ static inline void eager_type_check3(sm_expr *sme, uint32_t operand, uint32_t pa
 #define IS_TRUE(x) ((void *)x == (void *)sms_true)
 #define IS_FALSE(x) ((void *)x == (void *)sms_false)
 
-// Recursive engine
+// Old Recursive engine
 inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
+  printf("This eval func is depricated\n");
+}
+
+struct sm_vmi {
+  size_t instruction;
+};
+
+struct sm_compiled {
+  size_t         length;
+  struct sm_vmi *content;
+};
+
+struct sm_compiled *sm_compile(sm_object *ast) {
+  // return stuff
+  return (struct sm_compiled *)NULL;
+}
+
+void sm_eval_compiled(struct sm_compiled *cmds) {
+  sm_object *input;
+  sm_cx     *current_cx;
+  sm_expr   *sf;
+
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;
