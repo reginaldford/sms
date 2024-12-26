@@ -17,10 +17,9 @@ sm_heap   *sms_symbol_name_heap;
 uint32_t   sms_num_symbols;
 bool       evaluating;
 sm_object *return_obj;
-// 3 virtual machine  stacks
-sm_object_stack *sms_stack;
-sm_object_stack *sms_cx_stack;
-sm_object_stack *sms_sf_stack;
+// 2 virtual machine  stacks
+sm_stack2 *sms_stack;
+sm_stack2 *sms_cx_stack;
 
 /* GLOBALS as functions
  The following globals use functions f(x):

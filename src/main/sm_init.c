@@ -11,6 +11,8 @@ extern sm_stack           *sms_callstack;
 extern const char         *sms_version;
 extern const int           sms_version_len;
 extern bool                evaluating;
+extern sm_stack2          *sms_stack;
+extern sm_stack2          *sms_cx_stack;
 
 void sm_init(sm_env *env, int num_args, char **argv) {
   // Set version number. Major.Minor.Patch
@@ -51,6 +53,10 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   // Initialize the current memory heap
   // During first gc, a second heap of the same size will be allocated.
   sms_heap = sm_new_heap(mem_bytes / 2, true);
+
+  // Virual machine stacks
+  sms_stack    = sm_new_stack2(128);
+  sms_cx_stack = sm_new_stack2(128);
 
   // Initialize the lexical stack
   sm_global_lex_stack(sm_new_stack(128));
