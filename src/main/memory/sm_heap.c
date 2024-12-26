@@ -41,7 +41,7 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
       exit(1);
     }
   }
-  static const uint32_t safe_value = 256;
+  static const uint32_t safe_value = (2 << 16) + sizeof(size_t) - 1;
   new_heap->safe_capacity          = capacity < safe_value ? capacity : capacity - safe_value;
   sm_heap_clear(new_heap);
   return new_heap;
@@ -51,7 +51,7 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
   uint32_t bytes_used      = h->used;
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
-  if (next_bytes_used >= h->capacity - 1024) {
+  if ((h == sms_heap && next_bytes_used >= h->safe_capacity) || h->used >= h->capacity) {
     // Only GC sms_heap
     if (h == sms_heap) {
       // Try gc
@@ -234,9 +234,16 @@ bool sm_heap_scan(sm_heap *h) {
     // Register in heap map if it has valid object size
     uint32_t sizeOfObj = sm_sizeof(obj);
     // SM_POINTER objects are ONLY created during inflation, after this stage
-    if (!sizeOfObj || obj->my_type == SM_POINTER_TYPE) {
+    if (obj->my_type == SM_POINTER_TYPE) {
       fprintf(stderr, "! Corrupt object.  %s:%u\n", __FILE__, __LINE__);
-      exit(1);
+      printf("misplaced ptr\n");
+      sm_pointer *ptr = (sm_pointer *)obj;
+      sm_heap_register_object(sms_heap,
+                              (void *)((intptr_t)sms_heap->storage + (intptr_t)ptr->address));
+      continue;
+    }
+    if (!sizeOfObj) {
+      obj = (sm_object *)((char *)obj + sizeof(size_t));
     }
     sm_heap_register_object(sms_heap, obj);
     // Move to the next object

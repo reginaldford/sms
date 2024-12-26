@@ -1852,15 +1852,11 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_engine_eval(evaluated, current_cx, sf);
     }
     case SM_CX_EVAL_EXPR: {
-      sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *evaluated = return_obj;
       sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
       sm_object *obj1 = return_obj;
-      sm_cx     *where_to_eval;
-      if (!expect_type(evaluated, SM_CX_TYPE))
-        RETURN_OBJ(((sm_object *)sms_true));
-      where_to_eval = (sm_cx *)evaluated;
-      sm_engine_eval(obj1, where_to_eval, sf);
+      eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
+      sm_object *evaluated = return_obj;
+      sm_engine_eval(obj1, (sm_cx *)evaluated, sf);
     }
     case SM_PUT_EXPR: {
       sm_string *str;
@@ -3179,8 +3175,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ(((sm_object *)new_arr));
     }
     case SM_PARAM_LIST_EXPR: {
-      if (sms_heap->capacity - sms_heap->used <= sizeof(sm_expr) + sizeof(size_t) * sme->size)
-        sm_garbage_collect();
+      check_gc();
       sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size, NULL);
       for (uint32_t i = 0; i < sme->size; i++) {
         sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
