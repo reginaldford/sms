@@ -1850,6 +1850,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *evaluated = return_obj;
       sm_engine_eval(evaluated, current_cx, sf);
+      break;
     }
     case SM_CX_EVAL_EXPR: {
       sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
@@ -1857,6 +1858,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
       sm_object *evaluated = return_obj;
       sm_engine_eval(obj1, (sm_cx *)evaluated, sf);
+      break;
     }
     case SM_PUT_EXPR: {
       sm_string *str;
@@ -1986,6 +1988,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       }
+      break;
     }
     case SM_FOR_IN_WHERE_EXPR: {
       sm_symbol *handle             = (sm_symbol *)sm_expr_get_arg(sme, 0);
@@ -2049,6 +2052,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       }
+      break;
     }
     case SM_DO_WHILE_EXPR: {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
@@ -2231,10 +2235,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr *new_args = (sm_expr *)return_obj;
       sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *obj0 = return_obj;
-      if (obj0->my_type == SM_FUN_TYPE) {
-        sm_fun *fun = (sm_fun *)obj0;
-        execute_fun(fun, current_cx, new_args);
-      }
+      sm_fun    *fun  = (sm_fun *)obj0;
+      execute_fun(fun, current_cx, new_args);
       return;
       break;
     }
