@@ -41,7 +41,7 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
       exit(1);
     }
   }
-  static const uint32_t safe_value = 256;
+  static const uint32_t safe_value = 1024 + 512 + 256 + 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1;
   new_heap->safe_capacity          = capacity < safe_value ? capacity : capacity - safe_value;
   sm_heap_clear(new_heap);
   return new_heap;
@@ -51,7 +51,7 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
   uint32_t bytes_used      = h->used;
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
-  if (next_bytes_used >= h->capacity - 1024) {
+  if (next_bytes_used >= h->capacity) {
     // Only GC sms_heap
     if (h == sms_heap) {
       // Try gc
@@ -117,22 +117,15 @@ void sm_heap_print_map(sm_heap *h) {
 // Return whether this pointer aims at the beginning of a registered heap object
 bool sm_heap_has_object(sm_heap *heap, void *guess) {
   // First check if it's aligned and in bounds
-  if (((intptr_t)guess & 7) || !sm_is_within_heap(guess, heap)) {
+  if (((intptr_t)guess & 7) || !sm_is_within_heap(guess, heap) || !sm_sizeof(guess)) {
     return false;
   }
   // Calculate the position in the bitmap
   uint32_t map_pos =
     ((intptr_t *)guess - (intptr_t *)heap->storage) >> 3; // Offset in the heap divided by 8 bytes
-  uint32_t byte_pos  = map_pos >> 3;                      // Find the byte in the bitmap
-  uint8_t  bit_pos   = map_pos & 7;                       // Find the specific bit in the byte
-  bool     is_in_map = heap->map[byte_pos] & (1 << bit_pos);
-  if (is_in_map)
-    if (!sm_sizeof(guess)) {
-      // fprintf(stderr, "Registered object has improper header.  %s:%u\n", __FILE__, __LINE__);
-      // exit(1);
-      return false;
-    }
-  return is_in_map;
+  uint32_t byte_pos = map_pos >> 3;                       // Find the byte in the bitmap
+  uint8_t  bit_pos  = map_pos & 7;                        // Find the specific bit in the byte
+  return heap->map[byte_pos] & (1 << bit_pos);
 }
 
 // Designed to be fast
@@ -141,7 +134,7 @@ void sm_heap_register_object(sm_heap *heap, void *obj) {
   uint32_t map_pos =
     ((intptr_t *)obj - (intptr_t *)heap->storage) >> 3; // Offset in the heap divided by 8 bytes
   uint32_t byte_pos = map_pos >> 3;                     // Find the byte in the bitmap
-  uint32_t bit_pos  = map_pos & 7;                      // Find the specific bit in the byte
+  uint8_t  bit_pos  = map_pos & 7;                      // Find the specific bit in the byte
   heap->map[byte_pos] |= (1 << bit_pos);
 }
 

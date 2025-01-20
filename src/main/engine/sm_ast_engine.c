@@ -162,6 +162,7 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
 
 // Recursive engine
 inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
+  check_gc();
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
     sm_expr *sme = (sm_expr *)input;
@@ -227,9 +228,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       time(&rawtime);
       struct tm *timeinfo   = localtime(&rawtime);
       uint32_t  *time_tuple = (uint32_t *)timeinfo;
-      check_gc();
-      sm_space *space  = sm_new_space(sizeof(f64) * 9);
-      sm_array *result = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
+      sm_space  *space      = sm_new_space(sizeof(f64) * 9);
+      sm_array  *result     = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
       for (uint32_t i = 0; i < 9; i++)
         sm_f64_array_set(result, i, time_tuple[i]);
       return ((sm_object *)result);
@@ -515,9 +515,8 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       gettimeofday(&t, NULL);
       sm_space *space  = NULL;
       sm_array *result = NULL;
-      check_gc();
-      space  = sm_new_space(sizeof(f64) * 2);
-      result = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
+      space            = sm_new_space(sizeof(f64) * 2);
+      result           = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
       sm_f64_array_set(result, 0, t.tv_sec);
       sm_f64_array_set(result, 1, t.tv_usec);
       return ((sm_object *)result);
@@ -614,16 +613,12 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
       sm_string *str1 = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
       if (str1->my_type != SM_STRING_TYPE)
         return ((sm_object *)str1);
-      uint32_t s0 = str0->size;
-      uint32_t s1 = str1->size;
-      if (check_gc()) {
-        str0 = (sm_string *)sm_engine_eval((sm_object *)str0, NULL, NULL);
-        str1 = (sm_string *)sm_engine_eval((sm_object *)str1, NULL, NULL);
-      }
-      sm_string *new_str = sm_new_string_manual(str0->size + str1->size);
+      uint32_t   s0      = str0->size;
+      uint32_t   s1      = str1->size;
+      sm_string *new_str = sm_new_string_manual(s0 + s1);
       char      *content = &(new_str->content);
       sm_strncpy_unsafe(content, &(str0->content), str0->size);
-      sm_strncpy(content + str0->size, &(str1->content), str1->size);
+      sm_strncpy(content + s0, &(str1->content), s1);
       return ((sm_object *)new_str);
       break;
     }
@@ -2078,8 +2073,7 @@ inline sm_object *sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *s
     case SM_BLOCK_EXPR: {
       uint32_t   i      = 1;
       sm_object *result = (sm_object *)sms_true;
-      check_gc();
-      sm_cx *new_cx = sm_new_cx(current_cx);
+      sm_cx     *new_cx = sm_new_cx(current_cx);
       while (i < sme->size) {
         result = sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);
         if (result->my_type == SM_RETURN_TYPE)
