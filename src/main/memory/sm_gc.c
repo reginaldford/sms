@@ -202,7 +202,6 @@ inline void sm_garbage_collect() {
         *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
   }
 
-
   // Inflate
   sm_inflate_heap(sms_heap, sms_other_heap);
   // For tracking purposes

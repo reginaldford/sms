@@ -127,11 +127,13 @@ bool sm_heap_has_object(sm_heap *heap, void *guess) {
   uint8_t  bit_pos   = map_pos & 7;                       // Find the specific bit in the byte
   bool     is_in_map = heap->map[byte_pos] & (1 << bit_pos);
   if (is_in_map)
-    if (!sm_sizeof(guess)) {
-      // fprintf(stderr, "Registered object has improper header.  %s:%u\n", __FILE__, __LINE__);
-      // exit(1);
-      return false;
-    }
+    if (sm_sizeof(guess) > 1e3)
+      printf("suspicious. %i\n", __LINE__);
+  if (!sm_sizeof(guess)) {
+    // fprintf(stderr, "Registered object has improper header.  %s:%u\n", __FILE__, __LINE__);
+    // exit(1);
+    return false;
+  }
   return is_in_map;
 }
 
@@ -235,14 +237,15 @@ bool sm_heap_scan(sm_heap *h) {
     uint32_t sizeOfObj = sm_sizeof(obj);
     // SM_POINTER objects are ONLY created during inflation, after this stage
     if (obj->my_type == SM_POINTER_TYPE) {
-      fprintf(stderr, "! Corrupt object.  %s:%u\n", __FILE__, __LINE__);
-      printf("misplaced ptr\n");
+      fprintf(stderr, "! Corrupt object (sm_pointer in heap).  %s:%u\n", __FILE__, __LINE__);
       sm_pointer *ptr = (sm_pointer *)obj;
       sm_heap_register_object(sms_heap,
                               (void *)((intptr_t)sms_heap->storage + (intptr_t)ptr->address));
       continue;
     }
     if (!sizeOfObj) {
+      fprintf(stderr, "! Corrupt object (no sizeof result).  %s:%u\n", __FILE__, __LINE__);
+      printf("misplaced ptr\n");
       obj = (sm_object *)((char *)obj + sizeof(size_t));
     }
     sm_heap_register_object(sms_heap, obj);

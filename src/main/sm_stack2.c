@@ -9,7 +9,7 @@ extern sm_stack2 *sms_stack;
 
 // New stack (is an object) with size 0
 sm_stack2 *sm_new_stack2(uint32_t capacity) {
-  sm_stack2 *new_stack2 = sm_malloc(sizeof(sm_stack2) + sizeof(sm_object *) * capacity);
+  sm_stack2 *new_stack2 = malloc(sizeof(sm_stack2) + sizeof(sm_object *) * capacity);
   new_stack2->my_type   = SM_STACK2_TYPE;
   new_stack2->capacity  = capacity;
   new_stack2->size      = 0;
