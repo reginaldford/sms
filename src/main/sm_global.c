@@ -13,9 +13,13 @@ sm_symbol  *sms_false;
 // Symbols including the 2 above live in a symbol heap
 sm_heap *sms_symbol_heap;
 // Symbol names are in alpabetical order, correlating with the symbol
-sm_heap *sms_symbol_name_heap;
-uint32_t sms_num_symbols;
-bool     evaluating;
+sm_heap   *sms_symbol_name_heap;
+uint32_t   sms_num_symbols;
+bool       evaluating;
+sm_object *return_obj;
+// 2 virtual machine  stacks
+sm_stack2 *sms_stack;
+sm_stack2 *sms_cx_stack;
 
 /* GLOBALS as functions
  The following globals use functions f(x):

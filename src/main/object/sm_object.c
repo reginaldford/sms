@@ -17,7 +17,6 @@ uint32_t sm_object_is_int(sm_object *obj1) {
   }
 }
 
-
 // Return a new sm_string describing the object
 sm_string *sm_object_to_string(sm_object *obj1) {
   sm_string *new_str       = sm_new_string_manual(sm_object_sprint(obj1, NULL, true));

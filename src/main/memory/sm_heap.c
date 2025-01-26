@@ -227,9 +227,17 @@ bool sm_heap_scan(sm_heap *h) {
     // Register in heap map if it has valid object size
     uint32_t sizeOfObj = sm_sizeof(obj);
     // SM_POINTER objects are ONLY created during inflation, after this stage
-    if (!sizeOfObj || obj->my_type == SM_POINTER_TYPE) {
-      fprintf(stderr, "! Corrupt object.  %s:%u\n", __FILE__, __LINE__);
-      exit(1);
+    if (obj->my_type == SM_POINTER_TYPE) {
+      fprintf(stderr, "! Corrupt object (sm_pointer in heap).  %s:%u\n", __FILE__, __LINE__);
+      sm_pointer *ptr = (sm_pointer *)obj;
+      sm_heap_register_object(sms_heap,
+                              (void *)((intptr_t)sms_heap->storage + (intptr_t)ptr->address));
+      continue;
+    }
+    if (!sizeOfObj) {
+      fprintf(stderr, "! Corrupt object (no sizeof result).  %s:%u\n", __FILE__, __LINE__);
+      printf("misplaced ptr\n");
+      obj = (sm_object *)((char *)obj + sizeof(size_t));
     }
     sm_heap_register_object(sms_heap, obj);
     // Move to the next object

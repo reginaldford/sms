@@ -28,7 +28,7 @@
 
 // Set version number. Major.Minor.Patch
 #define SMS_VERSION "0.22.9"
-#define SMS_VERSION_LEN 7
+#define SMS_VERSION_LEN 6
 
 /// These are the major object types of SMS
 /// @note Must remain syncronized with function sm_type_name
@@ -75,7 +75,9 @@ enum sm_object_type {
   SM_ARRAY_TYPE,
   /// 20: f64 precision floating point (sm_f64.h)
   SM_F64_TYPE,
-  /// 21: Unrecognized
+  /// 21: object-only stack in malloc space
+  SM_STACK2_TYPE,
+  /// 22: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -90,10 +92,11 @@ enum sm_object_type {
 #include "memory/sm_heap.h"
 #include "sm_env.h"
 #include "sm_signal.h"
+#include "object/sm_object.h"
+#include "sm_stack2.h"
 #include "sm_init.h"
 #include "object/sm_type.h"
 #include "object/sm_string.h"
-#include "object/sm_object.h"
 #include "object/sm_expr.h"
 #include "sm_stack.h"
 #include "object/sm_stack_obj.h"

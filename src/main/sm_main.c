@@ -3,10 +3,10 @@
 #include "sms.h"
 #include "../bison_flex/y.tab.h"
 
-extern int   yylineno;
-extern void *memory_marker1;
-extern void *memory_marker2;
-extern bool  evaluating;
+extern int        yylineno;
+extern void      *memory_marker1;
+extern bool       evaluating;
+extern sm_object *return_obj;
 
 // Prints intro
 void print_intro() {
@@ -45,8 +45,9 @@ void start_repl(sm_env *env) {
       // Before we eval, let's save a ptr to stack frame.
       memory_marker1 = __builtin_frame_address(0);
       // Evaluate
-      evaluating        = true;
-      sm_object *result = sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      evaluating = true;
+      sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      sm_object *result = return_obj;
       evaluating        = false;
       // Print
       sm_string *result_str = sm_object_to_string(result);
@@ -173,10 +174,10 @@ int main(int num_args, char *argv[]) {
       }
       memory_marker1 = __builtin_frame_address(0);
       evaluating     = true;
-      sm_object *evaluated =
-        sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-      evaluating          = false;
-      sm_string *response = sm_object_to_string(evaluated);
+      sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
+      sm_object *evaluated = return_obj;
+      evaluating           = false;
+      sm_string *response  = sm_object_to_string(evaluated);
       printf("%s\n", &(response->content));
       fflush(stdout);
       clean_exit(&env, 0);
