@@ -199,3 +199,5 @@ bool sm_string_is_equal(sm_string *str1, sm_string *str2) {
       return false;
   return true;
 }
+
+char *sm_string_content(sm_string *s) { return (char *)(s + 1); }

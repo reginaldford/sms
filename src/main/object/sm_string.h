@@ -6,7 +6,11 @@
 typedef struct sm_string {
   uint32_t my_type;
   uint32_t size;
-  char     content; // stores NULL if nothing else
+  uint32_t filler;
+  char     content1; // stores NULL if nothing else
+  char     content2; // stores NULL if nothing else
+  char     content3; // stores NULL if nothing else
+  char     content;  // stores NULL if nothing else
 } sm_string;
 
 /// Copy a string of known length, add NULL terminator
@@ -33,3 +37,5 @@ sm_string *sm_new_string_manual(uint32_t size);
 sm_string *sm_string_escape(sm_string *input);
 /// Returns whether two strings match
 bool sm_string_is_equal(sm_string *str1, sm_string *str2);
+/// Return the string content directly after the header
+char *sm_string_content(sm_string *s);
