@@ -410,8 +410,12 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
+| INC SYM { $$ = sm_new_expr(SM_PREINC_EXPR,(sm_object*)$2,_note()); }
+| DEC SYM { $$ = sm_new_expr(SM_PREDEC_EXPR,(sm_object*)$2,_note()); }
 | SYM IINC { $$ = sm_new_expr(SM_IINC_EXPR,(sm_object*)$1,_note()); }
 | SYM IDEC { $$ = sm_new_expr(SM_IDEC_EXPR,(sm_object*)$1,_note()); }
+| IINC SYM { $$ = sm_new_expr(SM_PREIINC_EXPR,(sm_object*)$2,_note()); }
+| IDEC SYM { $$ = sm_new_expr(SM_PREIDEC_EXPR,(sm_object*)$2,_note()); }
 | MINUS EXPR {
   switch (((sm_object *)$2)->my_type) {
     case SM_F64_TYPE:

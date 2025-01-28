@@ -3079,10 +3079,46 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         RETURN_OBJ(((sm_object *)num));
       sm_f64 *output = sm_new_f64(num->value + 1);
       sm_cx_set(current_cx, sym, (sm_object *)output);
-      RETURN_OBJ(((sm_object *)output));
+      RETURN_OBJ(((sm_object *)num));
       break;
     }
     case SM_DEC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply -- to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        RETURN_OBJ(((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
+      sm_f64 *num = (sm_f64 *)return_obj;
+      if (num->my_type != SM_F64_TYPE)
+        RETURN_OBJ(((sm_object *)num));
+      sm_f64 *output = sm_new_f64(num->value - 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      RETURN_OBJ(((sm_object *)num));
+      break;
+    }
+    case SM_PREINC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply ++ to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        RETURN_OBJ(((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
+      sm_f64 *num = (sm_f64 *)return_obj;
+      if (num->my_type != SM_F64_TYPE)
+        RETURN_OBJ(((sm_object *)num));
+      sm_f64 *output = sm_new_f64(num->value + 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      RETURN_OBJ(((sm_object *)output));
+      break;
+    }
+    case SM_PREDEC_EXPR: {
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (sym->my_type != SM_SYMBOL_TYPE) {
         sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
@@ -3115,7 +3151,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         RETURN_OBJ(((sm_object *)num));
       sm_ui8 *output = sm_new_ui8(num->value + 1);
       sm_cx_set(current_cx, sym, (sm_object *)output);
-      RETURN_OBJ(((sm_object *)output));
+      RETURN_OBJ((sm_object *)num);
       break;
     }
     case SM_IDEC_EXPR: {
@@ -3133,7 +3169,43 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         RETURN_OBJ(((sm_object *)num));
       sm_ui8 *output = sm_new_ui8(num->value - 1);
       sm_cx_set(current_cx, sym, (sm_object *)output);
-      RETURN_OBJ(((sm_object *)output));
+      RETURN_OBJ((sm_object *)output);
+      break;
+    }
+    case SM_PREIINC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply ++ to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        RETURN_OBJ(((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      sm_ui8 *num = (sm_ui8 *)return_obj;
+      if (num->my_type != SM_UI8_TYPE)
+        RETURN_OBJ(((sm_object *)num));
+      sm_ui8 *output = sm_new_ui8(num->value + 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      RETURN_OBJ(((sm_object *)num));
+      break;
+    }
+    case SM_PREIDEC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply -- to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        RETURN_OBJ(((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      eager_type_check(sme, 0, SM_UI8_TYPE, current_cx, sf);
+      sm_ui8 *num = (sm_ui8 *)return_obj;
+      if (num->my_type != SM_UI8_TYPE)
+        RETURN_OBJ(((sm_object *)num));
+      sm_ui8 *output = sm_new_ui8(num->value - 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      RETURN_OBJ(((sm_object *)num));
       break;
     }
     case SM_IF_EXPR: {
