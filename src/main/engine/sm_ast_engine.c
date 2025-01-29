@@ -1842,7 +1842,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
       sm_object *evaluated = return_obj;
       sm_engine_eval(evaluated, current_cx, sf);
-      break;
+      return;
     }
     case SM_CX_EVAL_EXPR: {
       sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
