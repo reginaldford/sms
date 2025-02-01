@@ -2,16 +2,19 @@
 #Draws a fire-like image.
 #Must be run in the directory with colorPrint.sms
 {
+  # Collect terminal width and height with tput command
+  let tWidth = parse(osExecToStr("tput cols")[1]);
+  let tHeight = parse(osExecToStr("tput lines")[1])-2;
+  # Import the colorPrint library for terminal colors
   let c   = import "colorPrint.sms";
+  # Define max
   let max = (x,y) => if (x > y) x else y;
-  let draw = () => {
-    osExec("clear");
-    seed(time()[1]);
-    for (let i = 128; i >= 0; i--)
-      for (let j = 0; j < 200; j++)
-        c.print(max(0, random() * 1500 / max(1, i **2 - j)), " ");
-  };
-  draw();
-  #Return this context as a library
-  self;
+  # Clear the terminal
+  osExec("clear");
+  # Seed the RNG
+  seed(time()[1]);
+  # Artistic engine
+  for (let i = tHeight; i >= 0; i--)
+    for (let j = 0; j < tWidth; j++)
+      c.print(max(0, random() * tWidth / max(1, i**2 - j)), " ");
 };

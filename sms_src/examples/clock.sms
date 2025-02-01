@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -qm128k
+#!/usr/local/bin/sms -qm.5
 # Simply puts the time every second
 {
   let theString = false;
@@ -33,5 +33,6 @@
     #time()[1] gives microseconds (1e-6), we want hundredths of a second
     put(two_digits(floor(time()[1]/1e4)));
     putLn(" " str+ am_pm_str(d[2]));
+    sleep(10);
   };
 };
