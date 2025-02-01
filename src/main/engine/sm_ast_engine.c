@@ -1850,7 +1850,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       eager_type_check(sme, 0, SM_CX_TYPE, current_cx, sf);
       sm_object *evaluated = return_obj;
       sm_engine_eval(obj1, (sm_cx *)evaluated, sf);
-      break;
+      return;
     }
     case SM_PUT_EXPR: {
       sm_string *str;
