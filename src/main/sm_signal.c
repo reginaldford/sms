@@ -1,6 +1,9 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
+extern bool evaluating;
+
+void start_repl(sm_env *env);
 
 void sm_signal_handler(int signal_number) {
   char    *signal_name = "";
@@ -23,12 +26,24 @@ void sm_signal_handler(int signal_number) {
     exit_code   = 128 + SIGILL;
     break;
   case SIGINT:
-    signal_name = "SIGINT";
-    exit_code   = 128 + SIGINT;
+    if (evaluating) {
+      evaluating = false;
+      sm_global_parser_output((sm_object *)sms_false);
+      sm_garbage_collect();
+      sigset_t set;
+      sigemptyset(&set);
+      sigaddset(&set, SIGINT);
+      sigprocmask(SIG_UNBLOCK, &set, NULL);
+      start_repl(sm_global_environment(NULL));
+      return;
+    } else {
+      signal_name = "SIGINT";
+      exit_code   = 128 + 0;
+    }
     break;
   case SIGTERM:
     signal_name = "SIGTERM";
-    exit_code   = 128 + SIGTERM;
+    exit_code   = 128 + 0;
     break;
   case SIGFPE:
     signal_name = "SIGFPE";

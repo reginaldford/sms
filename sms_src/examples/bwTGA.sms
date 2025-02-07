@@ -1,5 +1,6 @@
 #!/usr/local/bin/sms
-# Usage: sms -i bwTGA.sms, then call bwTGA.write(filename, width, height, grayscaleArray)
+# Usage: import "bwTGA.sms" then call bwTGA.write(filename, width, height, grayscaleArray)
+# The size of grayscaleArray must be width * height in bytes
 {
   # Function to convert grayscale array to TGA format (black and white)
   let write = (filename, width, height, grayscaleArray) => {

@@ -3,10 +3,15 @@
 # I came up with a faster fib that doesn't memoize
 
 {
-  let t1 =[];
-  let t2 =[];
-  let time_elapsed =0;
-  let a =0;
+  if (isErr(parse(_args[size(_args) - 1]) + 0)) {
+    putLn("Provide an integer as command line argument");
+    exit(1);
+  };
+
+  let t1 = [];
+  let t2 = [];
+  let time_elapsed = 0;
+  let a = 0;
   let benchmark = (e) => {
     putLn("Benchmarking: " str+ str(e));
 
@@ -20,11 +25,11 @@
   };
 
   let first5 = [1,1,2,3,5];
-  let f = (n) => {
-    if(n<5)
+  let f = ( n ) => {
+    if(n < 5)
         return first5[n];
-    return 2  *f(n-3) + f(n-4) + f(n-2) ;
+    return f(n-2) + 2 * f(n-3) + f(n-4) ;
   };
 
-  benchmark(:f(40));
+  benchmark(:f(parse(_args[size(_args) - 1])));
 };

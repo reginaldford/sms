@@ -8,6 +8,9 @@ extern void      *memory_marker1;
 extern bool       evaluating;
 extern sm_object *return_obj;
 
+
+void start_repl(sm_env *e);
+
 // Prints intro
 void print_intro() {
   printf("%s%sSymbolic Math System\n", sm_terminal_bg_color(SM_TERM_BLACK),
@@ -31,39 +34,6 @@ void clean_exit(sm_env *env, int code) {
   if (env->initialized == true)
     sm_signal_exit(code);
   exit(code);
-}
-
-// Run user command line
-void start_repl(sm_env *env) {
-  // Reset the line counter
-  yylineno = 1;
-  // Read, Evaluate, Print Loop
-  while (true) {
-    // Read
-    sm_parse_result pr = sm_terminal_prompt(env->plain_mode);
-    if (!pr.return_val && pr.parsed_object) {
-      // Before we eval, let's save a ptr to stack frame.
-      memory_marker1 = __builtin_frame_address(0);
-      // Evaluate
-      evaluating = true;
-      sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-      sm_object *result = return_obj;
-      evaluating        = false;
-      // Print
-      sm_string *result_str = sm_object_to_string(result);
-      printf("%s", sm_terminal_fg_color(SM_TERM_B_WHITE));
-      sm_safe_print_string(result_str);
-      printf("%s", sm_terminal_reset());
-      // Cleanup
-      sm_garbage_collect();
-      // Count this as a line
-      yylineno++;
-    } else {
-      printf("Error: Parser returned %i\n", pr.return_val);
-      if (!pr.parsed_object)
-        printf("Nothing was parsed.");
-    }
-  }
 }
 
 // Run the file
