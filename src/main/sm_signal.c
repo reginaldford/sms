@@ -38,7 +38,7 @@ void sm_signal_handler(int signal_number) {
       return;
     } else {
       signal_name = "SIGINT";
-      exit_code   = 128 + 0;
+      exit_code   =  0;
     }
     break;
   case SIGTERM:

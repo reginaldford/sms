@@ -101,25 +101,19 @@ uint64_t sm_bytelength_parse(char *str, int length) {
   return atof(buffer);
 }
 
+// Print to buffer the byte length, in human readable form
 int sm_sprint_fancy_bytelength(char *buffer, uint64_t bytelength) {
-  const uint64_t KB = 1024;
-  if (bytelength < KB) {
-    return snprintf(buffer, 64, "%.4gB", (double)bytelength);
-  } else if (bytelength < KB * KB) {
-    return snprintf(buffer, 64, "%.4gKB", (double)bytelength / KB);
-  } else if (bytelength < (KB * KB * KB)) {
-    return snprintf(buffer, 64, "%.4gMB", (double)bytelength / (KB * KB));
-  } else if (bytelength < (KB * KB * KB * KB)) {
-    return snprintf(buffer, 64, "%.4gGB", (double)bytelength / (KB * KB * KB));
-  } else if (bytelength < (KB * KB * KB * KB * KB)) {
-    return snprintf(buffer, 64, "%.4gTB", (double)bytelength / (KB * KB * KB * KB));
-  } else if (bytelength < (KB * KB * KB * KB * KB * KB)) {
-    return snprintf(buffer, 64, "%.4gEB", (double)bytelength / (KB * KB * KB * KB * KB));
-  } else if (bytelength < (KB * KB * KB * KB * KB * KB * KB)) {
-    return snprintf(buffer, 64, "%.4gPB", (double)bytelength / (KB * KB * KB * KB * KB * KB));
-  } else {
-    return snprintf(buffer, 64, "lots");
-  }
+    const uint64_t KB = 1024;
+    const char* units[] = {"B", "KB", "MB", "GB", "TB", "EB", "PB"};
+    if (bytelength == 0) {
+        return snprintf(buffer, 2, "0B");
+    }
+    int unit = (int)(log(bytelength) * (1.0/log(KB))); // Calculate the appropriate unit
+    unit = MIN(unit, sizeof(units) - 1); // Ensure we don't exceed array bounds
+    if(unit>=(sizeof(units)-1))
+      return snprintf(buffer,4,"Lots");
+    double scaled = (double)bytelength / pow(KB, unit);
+    return sprintf(buffer, "%.4g%s", scaled, units[unit]);
 }
 
 // Reads a file into a string. If there is any issue, returns sms_false
