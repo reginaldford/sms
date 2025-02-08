@@ -1903,26 +1903,20 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
       sm_expr   *increment  = (sm_expr *)sm_expr_get_arg(sme, 2);
       sm_object *expression = sm_expr_get_arg(sme, 3);
-      sm_cx     *inner_cx   = sm_new_cx(current_cx);
       // Run init 1 time
-      sm_engine_eval((sm_object *)init, inner_cx, sf);
+      sm_engine_eval((sm_object *)init, current_cx, sf);
       sm_object *result = (sm_object *)sms_false;
-      // If it's a block, copy the block to set the inner_cx as scope
-      if (expression->my_type == SM_EXPR_TYPE && ((sm_expr *)expression)->op == SM_BLOCK_EXPR) {
-        expression = sm_copy(expression);
-        sm_expr_set_arg((sm_expr *)expression, 0, (sm_object *)inner_cx);
-      }
-      sm_engine_eval((sm_object *)condition, inner_cx, sf);
+      sm_engine_eval((sm_object *)condition, current_cx, sf);
       sm_object *condition_result = return_obj;
       sm_object *eval_result;
       while (!IS_FALSE(condition_result)) {
-        sm_engine_eval(expression, inner_cx, sf);
+        sm_engine_eval(expression, current_cx, sf);
         eval_result = return_obj;
         if (return_obj->my_type == SM_RETURN_TYPE || return_obj->my_type == SM_ERR_TYPE)
           return;
         // Run increment after each loop
-        sm_engine_eval((sm_object *)increment, inner_cx, sf);
-        sm_engine_eval((sm_object *)condition, inner_cx, sf);
+        sm_engine_eval((sm_object *)increment, current_cx, sf);
+        sm_engine_eval((sm_object *)condition, current_cx, sf);
         condition_result = return_obj;
       }
       RETURN_OBJ(eval_result);
@@ -3544,10 +3538,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_POINTER_TYPE: {
-    // Since registers are hard to access in C,
-    // We miss the registers as a root
-    // This causes the next object evalutation to aim at a pointer
-    // Following the pointer seems to solve this
     sm_heap    *pointeeH = sm_is_within_heap(input, sms_heap) ? sms_other_heap : sms_heap;
     sm_pointer *p        = (sm_pointer *)input;
     sm_object  *pointee  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
