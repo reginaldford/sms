@@ -3529,6 +3529,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
     sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
     sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, sm_copy(input), NULL);
+    // _errHandler(e) , where e is the object of type SM_ERR_TYPE 
     if (fun) {
       execute_fun(fun, current_cx, sf);
       return;

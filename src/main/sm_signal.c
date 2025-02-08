@@ -2,10 +2,11 @@
 
 #include "sms.h"
 extern bool evaluating;
+extern void      *memory_marker1;
 
 void start_repl(sm_env *env);
 
-void sm_signal_handler(int signal_number) {
+void sm_default_signal_handler(int signal_number) {
   char    *signal_name = "";
   uint16_t exit_code;
   switch (signal_number) {
@@ -34,6 +35,8 @@ void sm_signal_handler(int signal_number) {
       sigemptyset(&set);
       sigaddset(&set, SIGINT);
       sigprocmask(SIG_UNBLOCK, &set, NULL);
+      // Let's set the top of the callstack here (growing downward)
+    memory_marker1 = __builtin_frame_address(0);
       start_repl(sm_global_environment(NULL));
       return;
     } else {
@@ -74,6 +77,22 @@ void sm_signal_handler(int signal_number) {
   fflush(stdout);
   exit(exit_code);
 }
+
+void sm_signal_handler(int signal_number) {
+  // TODO: change to sms_scratch global
+    sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
+    sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_sigHandler", 11));
+    sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR,(sm_object*) sm_new_ui8((ui8)signal_number), NULL);
+    // _sigHandler(s) , where s is an f64 with the signal number 
+    if (fun) {
+      execute_fun(fun, scratch, sf);
+      return;
+    } else {
+      sm_default_signal_handler(signal_number);
+    }
+    
+}
+
 
 void sm_register_signals() {
   // Abort

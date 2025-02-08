@@ -7,7 +7,6 @@ extern struct sm_heap     *sms_heap;
 extern struct sm_heap     *sms_symbol_heap;
 extern struct sm_heap     *sms_symbol_name_heap;
 extern uint32_t            sms_num_symbols;
-extern sm_stack           *sms_callstack;
 extern const char         *sms_version;
 extern const int           sms_version_len;
 extern bool                evaluating;
