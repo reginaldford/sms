@@ -1,8 +1,8 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "sms.h"
-extern bool evaluating;
-extern void      *memory_marker1;
+extern bool  evaluating;
+extern void *memory_marker1;
 
 void start_repl(sm_env *env);
 
@@ -30,18 +30,17 @@ void sm_default_signal_handler(int signal_number) {
     if (evaluating) {
       evaluating = false;
       sm_global_parser_output((sm_object *)sms_false);
-      sm_garbage_collect();
       sigset_t set;
       sigemptyset(&set);
       sigaddset(&set, SIGINT);
       sigprocmask(SIG_UNBLOCK, &set, NULL);
       // Let's set the top of the callstack here (growing downward)
-    memory_marker1 = __builtin_frame_address(0);
+      memory_marker1 = __builtin_frame_address(0);
       start_repl(sm_global_environment(NULL));
       return;
     } else {
       signal_name = "SIGINT";
-      exit_code   =  0;
+      exit_code   = 0;
     }
     break;
   case SIGTERM:
@@ -80,17 +79,16 @@ void sm_default_signal_handler(int signal_number) {
 
 void sm_signal_handler(int signal_number) {
   // TODO: change to sms_scratch global
-    sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
-    sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_sigHandler", 11));
-    sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR,(sm_object*) sm_new_ui8((ui8)signal_number), NULL);
-    // _sigHandler(s) , where s is an f64 with the signal number 
-    if (fun) {
-      execute_fun(fun, scratch, sf);
-      return;
-    } else {
-      sm_default_signal_handler(signal_number);
-    }
-    
+  sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
+  sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_sigHandler", 11));
+  sm_expr *sf = sm_new_expr(SM_PARAM_LIST_EXPR, (sm_object *)sm_new_ui8((ui8)signal_number), NULL);
+  // _sigHandler(s) , where s is an f64 with the signal number
+  if (fun) {
+    execute_fun(fun, scratch, sf);
+    return;
+  } else {
+    sm_default_signal_handler(signal_number);
+  }
 }
 
 

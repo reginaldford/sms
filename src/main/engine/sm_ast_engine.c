@@ -887,29 +887,42 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       uint32_t size1     = list1->size;
       uint32_t new_size  = size0 + size1;
       sm_expr *new_tuple = sm_new_expr_n(SM_TUPLE_EXPR, new_size, new_size, NULL);
-      for (int i = 0; i < size0; i++) {
+      for (size_t i = 0; i < size0; i++) {
         sm_object *element = sm_expr_get_arg(list0, i);
         sm_expr_set_arg(new_tuple, i, element);
       }
-      for (int i = 0; i < size1; i++) {
+      for (size_t i = 0; i < size1; i++) {
         sm_object *element = sm_expr_get_arg(list1, i);
         sm_expr_set_arg(new_tuple, size0 + i, element);
       }
       RETURN_OBJ(((sm_object *)new_tuple));
       break;
     }
+
+
     case SM_EXIT_EXPR: {
       uint32_t exit_code = 0;
       if (sme->size != 0) {
-        eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
+        eager_type_check2(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, current_cx, sf);
         sm_f64 *num0 = (sm_f64 *)return_obj;
-        if (num0->my_type == SM_ERR_TYPE)
+        if (num0->my_type == SM_ERR_TYPE) {
           RETURN_OBJ(((sm_object *)num0));
-        exit_code = num0->value;
+        }
+        // We have already verified the type class
+        switch (num0->my_type) {
+        case SM_UI8_TYPE: {
+          sm_ui8 *byte_num = (sm_ui8 *)num0;
+          exit_code        = (uint32_t)(byte_num->value);
+        } break;
+        case SM_F64_TYPE: {
+          exit_code = (uint32_t)num0->value;
+        } break;
+        }
       }
-      sm_signal_exit(exit_code);
+      sm_signal_exit((uint32_t)exit_code);
       break;
     }
+
     case SM_LET_EXPR: {
       // Trust the parser for now regarding element 0 being a symbol
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
@@ -3529,7 +3542,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
     sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
     sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, sm_copy(input), NULL);
-    // _errHandler(e) , where e is the object of type SM_ERR_TYPE 
+    // _errHandler(e) , where e is the object of type SM_ERR_TYPE
     if (fun) {
       execute_fun(fun, current_cx, sf);
       return;
