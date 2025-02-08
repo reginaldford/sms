@@ -27,8 +27,8 @@
 #endif
 
 // Set version number. Major.Minor.Patch
-#define SMS_VERSION "0.22.9"
-#define SMS_VERSION_LEN 6
+#define SMS_VERSION "0.22.10"
+#define SMS_VERSION_LEN 7
 
 /// These are the major object types of SMS
 /// @note Must remain syncronized with function sm_type_name
