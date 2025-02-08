@@ -78,6 +78,7 @@ void sm_default_signal_handler(int signal_number) {
 }
 
 void sm_signal_handler(int signal_number) {
+  sm_garbage_collect();
   // TODO: change to sms_scratch global
   sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
   sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_sigHandler", 11));
