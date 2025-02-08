@@ -2,11 +2,11 @@
 #Draws a fire-like image.
 #Must be run in the directory with colorPrint.sms
 {
+  # Import the colorPrint library for terminal colors
+  let c   = import "colorPrint.sms";
   # Collect terminal width and height with tput command
   let tWidth = parse(osExecToStr("tput cols")[1]);
   let tHeight = parse(osExecToStr("tput lines")[1])-2;
-  # Import the colorPrint library for terminal colors
-  let c   = import "colorPrint.sms";
   # Define max
   let max = (x,y) => if (x > y) x else y;
   # Clear the terminal

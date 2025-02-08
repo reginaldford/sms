@@ -10,7 +10,7 @@
   # Change the parent from self to env
   f = fnSetParent(f,env);
   # Run f 10 times
-  for(let i = 0; i < 10 ; i = i ++)
+  for(let i = 0; i < 10 ; i ++)
     putLn(str(f()));
   # Show the env cx
   putLn(str(env));
