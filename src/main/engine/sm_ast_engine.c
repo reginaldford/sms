@@ -29,6 +29,8 @@ static inline bool check_gc() {
 
 // Execute a function
 inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
+  if(fun->my_type != SM_FUN_TYPE)
+    RETURN_OBJ((sm_object*)fun);
   sm_object *content = fun->content;
   sm_object *result;
   sm_cx     *new_cx = sm_new_cx(fun->parent);
