@@ -1724,15 +1724,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         RETURN_OBJ(((sm_object *)sm_new_string(0, "")));
       }
       FILE *fptr = fopen(fname_cstr, "r");
-      // Get length of file
-      fseek(fptr, 0, SEEK_END);
-      long file_length = ftell(fptr);
-
-      if (file_length < length->value) {
-        fclose(fptr);
-        printf("filePart failed because part length is out of range: %i\n",
-               (uint32_t)length->value);
-      }
       fseek(fptr, start_pos->value, SEEK_SET);
       sm_string *output = sm_new_string_manual((uint32_t)length->value);
       fread(&(output->content), 1, (uint32_t)length->value, fptr);
