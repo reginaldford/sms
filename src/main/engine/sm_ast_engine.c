@@ -2233,8 +2233,9 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_engine_eval((sm_object *)args, current_cx, sf);
       sm_expr *new_args = (sm_expr *)return_obj;
       sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *obj0 = return_obj;
-      sm_fun    *fun  = (sm_fun *)obj0;
+      if (return_obj->my_type == SM_ERR_TYPE)
+        RETURN_OBJ((sm_object *)return_obj);
+      sm_fun *fun = (sm_fun *)return_obj;
       execute_fun(fun, current_cx, new_args);
       return;
       break;
