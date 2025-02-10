@@ -6,7 +6,7 @@
 typedef struct sm_string {
   uint32_t my_type;
   uint32_t size;
-  char     content;  // stores NULL if nothing else
+  char     content; // stores NULL if nothing else
   char     filler1; // stores NULL if nothing else
   char     filler2; // stores NULL if nothing else
   char     filler3; // stores NULL if nothing else

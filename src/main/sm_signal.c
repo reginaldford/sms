@@ -36,6 +36,7 @@ void sm_default_signal_handler(int signal_number) {
       sigprocmask(SIG_UNBLOCK, &set, NULL);
       // Let's set the top of the callstack here (growing downward)
       memory_marker1 = __builtin_frame_address(0);
+      printf("\n");
       start_repl(sm_global_environment(NULL));
       return;
     } else {
@@ -78,7 +79,6 @@ void sm_default_signal_handler(int signal_number) {
 }
 
 void sm_signal_handler(int signal_number) {
-  sm_garbage_collect();
   // TODO: change to sms_scratch global
   sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
   sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_sigHandler", 11));
