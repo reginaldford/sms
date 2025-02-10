@@ -6,10 +6,11 @@
 typedef struct sm_string {
   uint32_t my_type;
   uint32_t size;
-  char     content; // stores NULL if nothing else
-  char     filler1; // stores NULL if nothing else
-  char     filler2; // stores NULL if nothing else
-  char     filler3; // stores NULL if nothing else
+  uint32_t filler;
+  char     content1; // stores NULL if nothing else
+  char     content2; // stores NULL if nothing else
+  char     content3; // stores NULL if nothing else
+  char     content;  // stores NULL if nothing else
 } sm_string;
 
 /// Copy a string of known length, add NULL terminator
