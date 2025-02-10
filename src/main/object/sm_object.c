@@ -96,7 +96,7 @@ uint32_t sm_sizeof(sm_object *obj1) {
   case SM_PRIMITIVE_TYPE:
     return sizeof(sm_expr);
   case SM_STRING_TYPE:
-    return sm_round_size64(sizeof(sm_string) - 3 + ((sm_string *)obj1)->size);
+    return sizeof(sm_string) + sm_round_size64(((sm_string *)obj1)->size);
   case SM_SYMBOL_TYPE:
     return sizeof(sm_symbol);
   case SM_CX_TYPE:
