@@ -1,5 +1,5 @@
 { # Basic data structure parsing without calculations.
-  tests->[
+  tests:[
     [ { }    , {}      ,  "parsing an empty context"],
     [ @1     , (1)     ,  "effectless parens"],
     [ @2     , ((2))   ,  "effectless parens 2"],
@@ -26,9 +26,9 @@
     [ -0 , -(0),   "negative 0"],
     [ @ if(n<2) 1 else fib + fib , if(n < 2) 1 else fib + fib,   "fake fib meta condition"],
     [ @ if(@true) 1 ,if(@true) 1 , "meta condition"],
-    [ { a->1; } , {a->1} ,   "single entry context"],
-    [ { x->"hi"; a->1 } , {a->1; x->"hi";} ,   "double entry context"],
-    [ { x->"hi"; a->1; k->{} } , {a->1; k->{}; x->"hi"; } ,   "triple entry context"],
-    [ { b->4.556; x->"hi"; a->1; k->{} } , {a->1; k->{}; x->"hi"; b->4.556; } ,   "quad entry context"],
+    [ { a:1; } , {a:1} ,   "single entry context"],
+    [ { x:"hi"; a:1 } , {a:1; x:"hi";} ,   "double entry context"],
+    [ { x:"hi"; a:1; k:{} } , {a:1; k:{}; x:"hi"; } ,   "triple entry context"],
+    [ { b:4.556; x:"hi"; a:1; k:{} } , {a:1; k:{}; x:"hi"; b:4.556; } ,   "quad entry context"],
   ];
 };

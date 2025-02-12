@@ -1,29 +1,29 @@
 { # This file is parsed by sms_tests for a test plan
   # Compare this to the output of ls -R at this directory
-  chapters -> [
+  chapters : [
     {
-      name-> "parser";
-      num_subchapters -> 2;
+      name: "parser";
+      num_subchapters : 2;
     },
     {
-      name-> "control";
-      num_subchapters -> 5;
+      name: "control";
+      num_subchapters : 5;
     },
     {
-      name-> "math";
-      num_subchapters -> 2;
+      name: "math";
+      num_subchapters : 2;
     },
     {
-      name-> "file";
-      num_subchapters -> 1;
+      name: "file";
+      num_subchapters : 1;
     },
     {
-      name-> "string";
-      num_subchapters -> 1;
+      name: "string";
+      num_subchapters : 1;
     },
     {
-      name-> "cx";
-      num_subchapters -> 1;
+      name: "cx";
+      num_subchapters : 1;
     }
   ];
 };

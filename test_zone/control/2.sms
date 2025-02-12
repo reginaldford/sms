@@ -1,6 +1,6 @@
 { #while statements
-  x->0;
-  tests->[
+  x:0;
+  tests:[
     [while(x<10)x=x+1, 10, "basic while"],
     [while(x>0)x=x-1, 0, "rewinding while"],
     [while(x<5){x=x+1;put("\nRepeating this message...  ...  ...");true;},true , "repeating message"],

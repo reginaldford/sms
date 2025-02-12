@@ -1,5 +1,5 @@
 { #if statements
-  tests->[
+  tests:[
     [if(2<5) "hello" else "goodbye","hello","2<5?"],
     [if(2>5)"hello" else "goodbye","goodbye","2>5?"],
     [if(2==5) "hello" else "goodbye","goodbye","2==5?"],

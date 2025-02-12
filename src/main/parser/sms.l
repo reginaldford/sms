@@ -126,7 +126,7 @@ parse        {return PARSE;}
 str          {return NEW_STR;}
 toStrFmt     {return TO_STRFMT;}
 
-"->"         {return ASSOCIATE;}
+":"         {return ASSOCIATE;}
 ==           {return EQEQ;}
 "<="         {return LT_EQ;}
 ">="         {return GT_EQ;}
@@ -210,7 +210,7 @@ floor       {return FLOOR;}
 ceil        {return CEIL;}
 mod         {return MOD;}
 
-=>          {return ARROW;}
+"=>"        {return ARROW;}
 fnXp        {return FN_XP;}
 fnSetXp     {return FN_SETXP;}
 fnParams    {return FN_PARAMS;}

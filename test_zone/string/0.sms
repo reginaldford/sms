@@ -1,7 +1,7 @@
 { # string manipulations
-  a->"this";
-  b->"That";
-  tests->[
+  a:"this";
+  b:"That";
+  tests:[
     [  str+(a,b)   , "thisThat"       ,  "str+ 1"],
     [  str+(b,a)   , "Thatthis"       ,  "str+ 2"],
     [  str+(str+(b,a),a)   , "Thatthisthis" ,  "str+ 3"],

@@ -1,5 +1,5 @@
 { # file operations
-  tests->[
+  tests:[
     [ fileWriteStr("test_file_0.txt","str1"),true,  "Writing a file"],
     [ fileReadStr("test_file_0.txt"),"str1","Reading the file that was written"],
     [ fileExists("test_file_0.txt"),true,"Checking the the file exists"],
