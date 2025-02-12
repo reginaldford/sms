@@ -23,5 +23,5 @@
   };
 
   let f = (n) => if (n <= 1) 1 else f(n - 1) + f(n - 2);
-  benchmark(:f(parse(_args[size(_args)-1])));
+  benchmark(@f(parse(_args[size(_args)-1])));
 };

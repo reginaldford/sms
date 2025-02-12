@@ -31,5 +31,5 @@
     return f(n-2) + 2 * f(n-3) + f(n-4) ;
   };
 
-  benchmark(:f(parse(_args[size(_args) - 1])));
+  benchmark(@f(parse(_args[size(_args) - 1])));
 };
