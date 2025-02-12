@@ -826,8 +826,28 @@ CONTEXT : CONTEXT_LIST '}' {
 | '{' ASSOCIATION '}' {
   sm_cx *parent_cx         = *(sm_global_lex_stack(NULL)->top);
   sm_cx *new_cx            = sm_new_cx(parent_cx);
-  sm_object  *value        = ((sm_object *)sm_expr_get_arg($2, 1));
-  sm_cx_let(new_cx,(sm_symbol *)sm_expr_get_arg($2, 0),value);
+  sm_object  *value        = (sm_object *)sm_expr_get_arg($2, 1);
+  sm_object *leftSide  = (sm_object *)sm_expr_get_arg($2, 0);
+  sm_symbol *lhs_sym   = NULL;
+  switch (leftSide->my_type) {
+  case SM_SYMBOL_TYPE:
+    lhs_sym = (sm_symbol *)leftSide;
+    break;
+  case SM_STRING_TYPE:
+  {
+    sm_string *s = (sm_string *)leftSide;
+    lhs_sym      = sm_new_symbol( &(s->content),s->size);
+    }
+    break;
+  default:
+    lhs_sym=NULL; 
+  }
+  if(lhs_sym)
+    sm_cx_let(new_cx, lhs_sym, value);
+  else
+    yyerror("Left side of an association must be a string or valid symbol name");
+
+  sm_cx_let(new_cx,lhs_sym,value);
   $$ = new_cx;
 }
 | '{' '}' {
