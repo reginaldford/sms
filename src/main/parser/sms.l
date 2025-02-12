@@ -291,7 +291,7 @@ _imgSave       {return HEAPSAVE;}
 
 [\<\>\=] { return yytext[0]; }
 
-[-+*/=\^\;\[\]\(\)\{\},\:\<\>] { return yytext[0];}
+[-+*/=\^\;\[\]\(\)\{\},\@\<\>] { return yytext[0];}
 
 ({alpha}?+{digit}?+_?+\'?+)?+ {
     yylval.sym = sm_new_symbol(yytext,yyleng);

@@ -1,6 +1,6 @@
 { # cx commands
   cx1 -> { ex1 = "info"; ex2 = "info2" };
   tests -> [
-    [cxRm(parent(self),:false),true, "cxRm False"]
+    [cxRm(parent(self),@false),true, "cxRm False"]
   ];
 };

@@ -23,7 +23,7 @@ sm_string *sm_meta_to_string(sm_meta *meta) {
 // Print to c string buffer a description of this meta
 uint32_t sm_meta_sprint(sm_meta *meta, char *buffer, bool fake) {
   if (!fake)
-    buffer[0] = ':';
+    buffer[0] = '@';
   if (meta->address->my_type == SM_EXPR_TYPE) {
     if (sm_is_infix(((sm_expr *)meta->address)->op)) {
       if (((sm_expr *)meta->address)->size < 3) {

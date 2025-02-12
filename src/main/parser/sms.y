@@ -341,7 +341,7 @@ int parsing_fpath_len;
 
 %nonassoc SYM
 %nonassoc '<' '>' LT_EQ GT_EQ EQEQ IS ISNAN ISINF
-%left ':'
+%left '@'
 %left  '='
 %nonassoc ','
 %left IF WHILE FOR FOR_IN DOWHILE
@@ -798,7 +798,7 @@ FUN_CALL_OPEN : EXPR '(' EXPR {
   $$=sm_expr_set_arg($1,1,(sm_object*)args);
 }
 
-META_EXPR : ':' EXPR { $$ = sm_new_meta((sm_object *)$2, *(sm_global_lex_stack(NULL))->top); }
+META_EXPR : '@' EXPR { $$ = sm_new_meta((sm_object *)$2, *(sm_global_lex_stack(NULL))->top); }
 
 TUPLE : TUPLE_LIST ']' {};
 | TUPLE_LIST ',' ']' {};
