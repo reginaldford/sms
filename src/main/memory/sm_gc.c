@@ -40,7 +40,7 @@ sm_object *sm_meet_object(sm_heap *source, sm_heap *dest, sm_object *obj) {
   if (sm_is_within_heap(obj, source)) {
     uint32_t obj_type = obj->my_type;
     if (obj_type == SM_POINTER_TYPE)
-      return (sm_object *)(((uint64_t)dest) + (uint64_t)((sm_pointer *)obj)->address);
+      return sm_pointer_deref((sm_pointer *)obj, dest);
     else
       return sm_move_to_new_heap(dest, obj);
   }
@@ -190,6 +190,8 @@ inline void sm_garbage_collect() {
 
   // Handle the global return_obj ptr as a root
   return_obj = sm_meet_object(sms_heap, sms_other_heap, return_obj);
+  if (return_obj->my_type == SM_POINTER_TYPE)
+    return_obj = sm_pointer_deref((sm_pointer *)return_obj, sms_other_heap);
 
   // Handle the C Callstack as a root
   if (evaluating) {

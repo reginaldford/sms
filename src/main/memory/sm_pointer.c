@@ -9,3 +9,7 @@ sm_pointer *sm_new_pointer(sm_heap *origin, sm_object *old_object, sm_object *ne
   ptr->address    = (uint32_t)((uint64_t)new_address - (uint64_t)origin);
   return ptr;
 }
+
+sm_object *sm_pointer_deref(sm_pointer *p, sm_heap *h) {
+  return (sm_object *)((uint64_t)h + (uint64_t)(p->address));
+}

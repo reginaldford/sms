@@ -9,3 +9,5 @@ typedef struct sm_pointer {
 
 /// Create a new sm_pointer object
 sm_pointer *sm_new_pointer(sm_heap *origin, sm_object *old_object, sm_object *address);
+/// Get the object pointed to by the sm_pointer
+sm_object *sm_pointer_deref(sm_pointer *p, sm_heap *h);
