@@ -182,16 +182,16 @@ inline void sm_garbage_collect() {
   *sm_global_lex_stack(NULL)->top =
     sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*sm_global_lex_stack(NULL)->top);
   // Treat parser output as root or set parser output to false
-  if (evaluating)
+  if (evaluating) {
     sm_global_parser_output(
       sm_meet_object(sms_heap, sms_other_heap, sm_global_parser_output(NULL)));
-  else
+    // Handle the global return_obj ptr as a root
+    return_obj = sm_meet_object(sms_heap, sms_other_heap, return_obj);
+    if (return_obj->my_type == SM_POINTER_TYPE)
+      return_obj = sm_pointer_deref((sm_pointer *)return_obj, sms_other_heap);
+  } else
     sm_global_parser_output((sm_object *)sms_false);
 
-  // Handle the global return_obj ptr as a root
-  return_obj = sm_meet_object(sms_heap, sms_other_heap, return_obj);
-  if (return_obj->my_type == SM_POINTER_TYPE)
-    return_obj = sm_pointer_deref((sm_pointer *)return_obj, sms_other_heap);
 
   // Handle the C Callstack as a root
   if (evaluating) {
