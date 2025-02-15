@@ -77,7 +77,9 @@ enum sm_object_type {
   SM_F64_TYPE,
   /// 21: object-only stack in malloc space
   SM_STACK2_TYPE,
-  /// 22: Unrecognized
+  /// 22: Shared object pointer
+  SM_SO_TYPE,
+  /// 23: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -94,6 +96,7 @@ enum sm_object_type {
 #include "sm_signal.h"
 #include "object/sm_object.h"
 #include "sm_stack2.h"
+#include "object/sm_so.h"
 #include "sm_init.h"
 #include "object/sm_type.h"
 #include "object/sm_string.h"

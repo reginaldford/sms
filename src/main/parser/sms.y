@@ -16,6 +16,7 @@ int parsing_fpath_len;
 
 %}
 
+// All of the possible literals
 %union {
   uint32_t         integer;
   f64              num;
