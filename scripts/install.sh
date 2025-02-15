@@ -1,5 +1,8 @@
 #!/usr/bin/bash
 make -C ../ &&
 sudo cp ../bin/sms /usr/local/bin/sms &&
-export SMS_PATH=`realpath ../sms_src/lib`
+sudo mkdir -p /usr/lib/sms &&
+sudo cp -fr ../sms_src/lib/* /usr/lib/sms &&
+sudo chmod -R 445 /usr/lib/sms
+export SMS_PATH=/usr/lib/sms
 
