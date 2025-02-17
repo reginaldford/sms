@@ -591,8 +591,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | ERR_LINE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRLINE_EXPR,(sm_object*)$3,_note());}
 | ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERRNOTES_EXPR,(sm_object*)$3,_note());}
 | IMPORT STRING  { $$ = sm_new_expr(SM_IMPORT_EXPR,(sm_object*)$2,_note());}
-| SO_LOAD '(' EXPR ')' { $$ = sm_new_expr(SM_SOLOAD_EXPR, (sm_object*)$3,_note());}
-| SO_FUN '(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_SOLOAD_EXPR, (sm_object*)$3,(sm_object*)$5,(sm_object*)$7,_note());}
+| SO_LOAD '(' EXPR ')' { $$ = sm_new_expr(SM_SO_LOAD_EXPR, (sm_object*)$3,_note());}
+| SO_FUN '(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_SO_FUN_EXPR, (sm_object*)$3,(sm_object*)$5,(sm_object*)$7,_note());}
 
 ERROR : '<' '>' { $$ = sm_new_error(0,NULL,0 ,NULL,parsing_fpath_len,parsing_fpath,yylineno);}
 | '<' SYM '>' {

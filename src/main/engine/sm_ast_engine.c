@@ -3525,12 +3525,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     RETURN_OBJ(((sm_object *)f));
     break;
   }
-  case SM_CX_TYPE: {
-    sm_cx *cx = (sm_cx *)input;
-    cx        = (sm_cx *)sm_copy((sm_object *)cx);
-    RETURN_OBJ(((sm_object *)cx));
-    break;
-  }
   case SM_ERR_TYPE: {
     // Run the error handler if it exists
     sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
