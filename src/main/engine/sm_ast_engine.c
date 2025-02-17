@@ -924,7 +924,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_signal_exit((uint32_t)exit_code);
       break;
     }
-
     case SM_LET_EXPR: {
       // Trust the parser for now regarding element 0 being a symbol
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
@@ -3470,9 +3469,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
       sm_string *path = (sm_string *)return_obj;
       if (path->my_type != SM_STRING_TYPE) {
-        sm_symbol *title   = sm_new_symbol("soPathIsNotString", 17);
-        sm_string *message = sm_new_fstring_at(sms_heap, "The input to soLoad is not a string.");
-        RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+        RETURN_OBJ((sm_object *)path);
       }
       void *handle = dlopen(&path->content, RTLD_LAZY);
       if (!handle) {

@@ -73,6 +73,9 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_UI8_TYPE:
     len += sm_ui8_sprint((sm_ui8 *)obj1, buffer, fake);
     break;
+  case SM_SO_TYPE:
+    len += sm_so_sprint((sm_so*)obj1,buffer,fake);
+    break;
   default: {
     if (!fake)
       len += sprintf(buffer, "?(%i)", obj1->my_type);
