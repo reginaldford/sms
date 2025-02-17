@@ -17,6 +17,7 @@
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 #define f64 double
 #define ui8 uint8_t

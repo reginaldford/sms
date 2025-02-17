@@ -3464,6 +3464,25 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       }
+      break;
+    }
+    case SM_SO_LOAD_EXPR: {
+      eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      sm_string *path = (sm_string *)return_obj;
+      if (path->my_type != SM_STRING_TYPE) {
+        sm_symbol *title   = sm_new_symbol("soPathIsNotString", 17);
+        sm_string *message = sm_new_fstring_at(sms_heap, "The input to soLoad is not a string.");
+        RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      void *handle = dlopen(&path->content, RTLD_LAZY);
+      if (!handle) {
+        sm_symbol *title = sm_new_symbol("soLoadFailed", 12);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, ".so file failed to load: %s", &path->content);
+        RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      RETURN_OBJ((sm_object *)sm_new_so(handle));
+      break;
     }
     default: // unrecognized expr gets returned without evaluation
       RETURN_OBJ((input));
