@@ -80,7 +80,9 @@ enum sm_object_type {
   SM_STACK2_TYPE,
   /// 22: Shared object pointer
   SM_SO_TYPE,
-  /// 23: Unrecognized
+  /// 23: Shared object function pointer
+  SM_SO_FUN_TYPE,
+  /// 24: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -98,6 +100,7 @@ enum sm_object_type {
 #include "object/sm_object.h"
 #include "sm_stack2.h"
 #include "object/sm_so.h"
+#include "object/sm_so_fun.h"
 #include "sm_init.h"
 #include "object/sm_type.h"
 #include "object/sm_string.h"

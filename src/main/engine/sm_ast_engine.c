@@ -3481,6 +3481,30 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ((sm_object *)sm_new_so(handle));
       break;
     }
+    case SM_SO_FUN_EXPR: {
+      // soFun(so,nameStr,numInputs)
+      eager_type_check(sme, 0, SM_SO_TYPE, current_cx, sf);
+      sm_so *so = (sm_so *)return_obj;
+      if (so->my_type != SM_SO_TYPE) {
+        RETURN_OBJ((sm_object *)so);
+      }
+      void *handle = so->handle;
+      // function name is a string
+      eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
+      sm_string *funcName = (sm_string *)return_obj;
+      if (funcName->my_type != SM_STRING_TYPE) {
+        RETURN_OBJ((sm_object *)funcName);
+      }
+      void *fnPtr = dlsym(handle, &funcName->content);
+      // number of inputs is provided as an f64
+      eager_type_check(sme, 2, SM_STRING_TYPE, current_cx, sf);
+      sm_f64 *numInputs = (sm_f64 *)return_obj;
+      if (numInputs->my_type != SM_F64_TYPE) {
+        RETURN_OBJ((sm_object *)numInputs);
+      }
+      RETURN_OBJ((sm_object *)sm_new_so_fun(fnPtr, (uint32_t)numInputs->value));
+      break;
+    }
     default: // unrecognized expr gets returned without evaluation
       RETURN_OBJ((input));
     } // End of expr case
