@@ -5,8 +5,8 @@
 extern sm_symbol      *sms_false; // Assuming sms_false is declared elsewhere.
 extern struct sm_heap *sms_heap;  // Global heap
 
-/** @brief Finds a file named `needle` in the current directory or in the directories listed in
- * SMS_PATH.
+/** @brief Finds a file specified by 'needle' string, in the current directory or in the directories
+ * listed in SMS_PATH.
  *  @param needle The name of the file to search for.
  *  @return Pointer to `sm_object` containing the path if found, otherwise returns `sms_false`.
  */
@@ -34,7 +34,7 @@ sm_object *sm_path_find(sm_string *needle) {
   // Get the SMS_PATH environment variable.
   char *sms_path = getenv("SMS_PATH");
   if (sms_path == NULL) {
-    return (sm_object *)sms_false; // SMS_PATH not set
+    sms_path = "/usr/lib/sms";
   }
 
   // Handle escaped colons in the SMS_PATH variable.
