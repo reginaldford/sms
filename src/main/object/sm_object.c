@@ -76,6 +76,9 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_SO_TYPE:
     len += sm_so_sprint((sm_so *)obj1, buffer, fake);
     break;
+  case SM_SO_FUN_TYPE:
+    len += sm_so_fun_sprint((sm_so_fun *)obj1, buffer, fake);
+    break;
   default: {
     if (!fake)
       len += sprintf(buffer, "?(%i)", obj1->my_type);
@@ -131,6 +134,10 @@ uint32_t sm_sizeof(sm_object *obj1) {
     return sizeof(sm_array);
   case SM_UI8_TYPE:
     return sizeof(sm_ui8);
+  case SM_SO_TYPE:
+    return sizeof(sm_so);
+  case SM_SO_FUN_TYPE:
+    return sizeof(sm_so_fun);
   default:
     return 0;
   }
@@ -201,6 +208,10 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
     }
     return true;
   }
+  case SM_SO_TYPE:
+    return ((sm_so *)self)->handle == ((sm_so *)other)->handle;
+  case SM_SO_FUN_TYPE:
+    return ((sm_so_fun *)self)->function == ((sm_so_fun *)other)->function;
   default:
     return self == other;
   }
