@@ -29,12 +29,24 @@ static inline bool check_gc() {
 
 // Execute a function
 inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
-  if (fun->my_type != SM_FUN_TYPE)
+  switch (fun->my_type) {
+  case SM_FUN_TYPE: {
+    sm_object *content = fun->content;
+    sm_object *result;
+    sm_cx     *new_cx = sm_new_cx(fun->parent);
+    sm_engine_eval(content, new_cx, sf);
+    break;
+  }
+  case SM_SO_FUN_TYPE: {
+    sm_so_fun *f = (sm_so_fun *)f;
+    // We can just pass the sm_expr ptr (sf)
+    // and now we have one interface for everything
+    // YOU ARE HERE
+    break;
+  }
+  default:
     RETURN_OBJ((sm_object *)fun);
-  sm_object *content = fun->content;
-  sm_object *result;
-  sm_cx     *new_cx = sm_new_cx(fun->parent);
-  sm_engine_eval(content, new_cx, sf);
+  }
 }
 
 // Basic type checking

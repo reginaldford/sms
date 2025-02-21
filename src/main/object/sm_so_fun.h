@@ -4,7 +4,7 @@
 typedef struct sm_so_fun {
   uint32_t my_type;
   uint32_t num_inputs;
-  // TODO: optionally type
+  // TODO: optionally typed, and defaults
   // sm_xpr* types; // null if not specified.
   void *function;
 } sm_so_fun;
