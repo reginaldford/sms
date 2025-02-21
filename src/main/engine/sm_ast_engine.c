@@ -34,17 +34,7 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   sm_object *content = fun->content;
   sm_object *result;
   sm_cx     *new_cx = sm_new_cx(fun->parent);
-  if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
-    sm_expr *content_sme = (sm_expr *)fun->content;
-    for (uint32_t i = 1; i < content_sme->size; i++) {
-      sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
-      result = return_obj;
-      if (result->my_type == SM_RETURN_TYPE)
-        RETURN_OBJ(((sm_return *)result)->address);
-    }
-    RETURN_OBJ(result);
-  } else
-    sm_engine_eval(content, new_cx, sf);
+  sm_engine_eval(content, new_cx, sf);
 }
 
 // Basic type checking
