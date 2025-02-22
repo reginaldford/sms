@@ -35,10 +35,11 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     sm_object *result;
     sm_cx     *new_cx = sm_new_cx(fun->parent);
     sm_engine_eval(content, new_cx, sf);
+    return;
     break;
   }
   case SM_SO_FUN_TYPE: {
-    sm_so_fun *f                        = (sm_so_fun *)f;
+    sm_so_fun *f                        = (sm_so_fun *)fun;
     sm_object *(*ff)(sm_object * input) = f->function;
     sm_object *output                   = ff((sm_object *)sf);
     RETURN_OBJ(output);
@@ -47,6 +48,7 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   default:
     RETURN_OBJ((sm_object *)fun);
   }
+  RETURN_OBJ((sm_object *)fun);
 }
 
 // Basic type checking
