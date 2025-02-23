@@ -10,8 +10,10 @@
   let t2           = [];
   let time_elapsed = 0;
   let a            = 0;
+  let f_output = 0;
   let so = soLoad(pwd() str+ "/../../build/clib/fib.so");
-  let f = soFun(so,"fib");
+  let rawFunction = soFun(so,"fib");
+  fib = (x) => { rawFunction(x,f_output); f_output };
   let benchmark = (e) => {
     putLn("Benchmarking: " str+ str(e));
 
