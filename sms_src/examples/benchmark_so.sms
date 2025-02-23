@@ -11,9 +11,13 @@
   let time_elapsed = 0;
   let a            = 0;
   let f_output = 0;
+
   let so = soLoad(pwd() str+ "/../../build/clib/fib.so");
-  let rawFunction = soFun(so,"fib");
-  fib = (x) => { rawFunction(x,f_output); f_output };
+  if(isErr(so)){ putLn(so) ; exit(1); };
+
+  let f = soFun(so,"fib");
+  if(isErr(f)){ putLn(f) ; exit(1); };
+
   let benchmark = (e) => {
     putLn("Benchmarking: " str+ str(e));
 
@@ -25,6 +29,6 @@
     time_elapsed = 1000 * (t2[0] - t1[0]) + 0.001 * (t2[1] - t1[1]);
     putLn(str(time_elapsed) str+ " milliseconds");
   };
-
-  benchmark(@(f(parse(_args[size(_args)-1]))[0]));
+  # Here, we call f(input_number, output_number) and the 0 is mutated by the shared object code
+  benchmark(@(f(parse(_args[size(_args)-1]),0)));
 };
