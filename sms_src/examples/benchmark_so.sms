@@ -11,7 +11,7 @@
   let time_elapsed = 0;
   let a            = 0;
   let so = soLoad(pwd() str+ "/../../clib/fib.so");
-  let f = soFun(so,"fib",4);
+  let f = soFun(so,"fib");
   let benchmark = (e) => {
     putLn("Benchmarking: " str+ str(e));
 

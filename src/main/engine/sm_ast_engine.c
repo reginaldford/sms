@@ -3512,12 +3512,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       void *fnPtr = dlsym(handle, &funcName->content);
       // number of inputs is provided as an f64
-      eager_type_check(sme, 2, SM_F64_TYPE, current_cx, sf);
-      sm_f64 *numInputs = (sm_f64 *)return_obj;
-      if (numInputs->my_type != SM_F64_TYPE) {
-        RETURN_OBJ((sm_object *)numInputs);
-      }
-      RETURN_OBJ((sm_object *)sm_new_so_fun(fnPtr, (uint32_t)numInputs->value));
+      RETURN_OBJ((sm_object *)sm_new_so_fun(fnPtr));
       break;
     }
     default: // unrecognized expr gets returned without evaluation

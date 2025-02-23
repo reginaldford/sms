@@ -3,11 +3,10 @@
 #include "../sms.h"
 
 /// Construct a new shared object function
-sm_so_fun *sm_new_so_fun(void *fn, uint32_t num_inputs) {
+sm_so_fun *sm_new_so_fun(void *fn) {
   struct sm_so_fun *new_fun = sm_malloc(sizeof(sm_so_fun));
   new_fun->my_type          = SM_SO_FUN_TYPE;
   new_fun->function         = fn;
-  new_fun->num_inputs       = num_inputs;
   return new_fun;
 }
 
