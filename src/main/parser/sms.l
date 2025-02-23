@@ -269,10 +269,12 @@ errSource     {return ERR_SOURCE;}
 errLine       {return ERR_LINE;}
 errNotes      {return ERR_NOTES;}
 
-import { return IMPORT; }
+import        { return IMPORT; }
 
 _thisProcess   {return THISPROCESS;}
 _gc            {return GC;}
+soLoad         {return SO_LOAD;}
+soFun          {return SO_FUN;}
 _heapSave      {return HEAPSAVE;}
 _imgSave       {return HEAPSAVE;}
 

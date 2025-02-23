@@ -1,0 +1,28 @@
+#!/usr/local/bin/sms -m1.5g
+#Use this to benchmark something
+{
+  if (isErr(parse(_args[size(_args) - 1]) + 0)) {
+    putLn("Provide an integer as command line argument");
+    exit(1);
+  };
+
+  let t1           = [];
+  let t2           = [];
+  let time_elapsed = 0;
+  let a            = 0;
+  let so = soLoad(pwd() str+ "/../../clib/fib.so");
+  let f = soFun(so,"fib",4);
+  let benchmark = (e) => {
+    putLn("Benchmarking: " str+ str(e));
+
+    t1 = time();
+    putLn(str(eval(e)));
+    t2 = time();
+
+    putLn("Total time:");
+    time_elapsed = 1000 * (t2[0] - t1[0]) + 0.001 * (t2[1] - t1[1]);
+    putLn(str(time_elapsed) str+ " milliseconds");
+  };
+
+  benchmark(@(f(parse(_args[size(_args)-1]))[0]));
+};

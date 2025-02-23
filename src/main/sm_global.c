@@ -295,6 +295,8 @@ char *sm_global_fn_name(uint32_t which) {
     "errLine",       // SM_ERRLINE_EXPR
     "errNotes",      // SM_ERRNOTES_EXPR
     "import",        // SM_IMPORT_EXPR
+    "soLoad",        // SM_SOLOAD_EXPR
+    "soFun",         // SM_SOFUN_EXPR
     "?",             // SM_UNKNOWN_EXP
   };
   if (which >= num_functions)
@@ -313,7 +315,7 @@ uint32_t sm_global_fn_name_len(uint32_t which) {
     5,  5, 8,  8, 12, 5, 4, 7,  6, 8, 6, 8, 5, 9, 11, 8,  7, 8, 10, 8, 6, 6,  6,  12, 12,
     10, 5, 4,  4, 3,  6, 6, 4,  5, 5, 4, 3, 1, 2, 2,  2,  2, 3, 3,  3, 4, 7,  8,  11, 8,
     11, 4, 7,  7, 7,  6, 6, 6,  6, 7, 8, 4, 8, 7, 9,  11, 8, 6, 9,  3, 6, 12, 13, 8,  9,
-    7,  4, 4,  5, 6,  6, 6, 11, 8, 8, 9, 8, 3, 5, 8,  10, 9, 7, 8,  6, 1};
+    7,  4, 4,  5, 6,  6, 6, 11, 8, 8, 9, 8, 3, 5, 8,  10, 9, 7, 8,  6, 6, 5,  1};
 
   if (which >= sm_global_num_fns())
     return 1; // "?"
@@ -321,7 +323,7 @@ uint32_t sm_global_fn_name_len(uint32_t which) {
 }
 
 uint32_t sm_global_num_fns() {
-  static const uint32_t num_fns = 217;
+  static const uint32_t num_fns = 223;
   return num_fns;
 }
 

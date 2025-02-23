@@ -29,10 +29,11 @@ static inline bool check_gc() {
 
 // Execute a function
 inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
-  if (fun->my_type != SM_FUN_TYPE)
-    RETURN_OBJ((sm_object *)fun);
-  sm_object *content = fun->content;
-  sm_object *result;
+  switch (fun->my_type) {
+  case SM_FUN_TYPE: {
+    sm_object *content = fun->content;
+    sm_object *result;
+
   sm_cx     *new_cx = sm_new_cx(fun->parent);
   if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
     sm_expr *content_sme = (sm_expr *)fun->content;
@@ -45,6 +46,20 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     RETURN_OBJ(result);
   } else
     sm_engine_eval(content, new_cx, sf);
+    return;
+    break;
+  }
+  case SM_SO_FUN_TYPE: {
+    sm_so_fun *f                        = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object * input) = f->function;
+    sm_object *output                   = ff((sm_object *)sf);
+    RETURN_OBJ(output);
+    break;
+  }
+  default:
+    RETURN_OBJ((sm_object *)fun);
+  }
+  RETURN_OBJ((sm_object *)fun);
 }
 
 // Basic type checking
@@ -924,7 +939,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_signal_exit((uint32_t)exit_code);
       break;
     }
-
     case SM_LET_EXPR: {
       // Trust the parser for now regarding element 0 being a symbol
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
@@ -3464,6 +3478,47 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
       }
       }
+      break;
+    }
+    case SM_SO_LOAD_EXPR: {
+      eager_type_check(sme, 0, SM_STRING_TYPE, current_cx, sf);
+      sm_string *path = (sm_string *)return_obj;
+      if (path->my_type != SM_STRING_TYPE) {
+        RETURN_OBJ((sm_object *)path);
+      }
+      void *handle = dlopen(&path->content, RTLD_LAZY);
+      if (!handle) {
+        sm_symbol *title = sm_new_symbol("soLoadFailed", 12);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, ".so file failed to load: %s", &path->content);
+        RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      RETURN_OBJ((sm_object *)sm_new_so(handle));
+      break;
+    }
+    case SM_SO_FUN_EXPR: {
+      // soFun(so,nameStr,numInputs)
+      eager_type_check(sme, 0, SM_SO_TYPE, current_cx, sf);
+      sm_so *so = (sm_so *)return_obj;
+      if (so->my_type != SM_SO_TYPE) {
+        RETURN_OBJ((sm_object *)so);
+      }
+      void *handle = so->handle;
+      // function name is a string
+      eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
+      sm_string *funcName = (sm_string *)return_obj;
+      if (funcName->my_type != SM_STRING_TYPE) {
+        RETURN_OBJ((sm_object *)funcName);
+      }
+      void *fnPtr = dlsym(handle, &funcName->content);
+      // number of inputs is provided as an f64
+      eager_type_check(sme, 2, SM_F64_TYPE, current_cx, sf);
+      sm_f64 *numInputs = (sm_f64 *)return_obj;
+      if (numInputs->my_type != SM_F64_TYPE) {
+        RETURN_OBJ((sm_object *)numInputs);
+      }
+      RETURN_OBJ((sm_object *)sm_new_so_fun(fnPtr, (uint32_t)numInputs->value));
+      break;
     }
     default: // unrecognized expr gets returned without evaluation
       RETURN_OBJ((input));
@@ -3523,12 +3578,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     f         = (sm_fun *)sm_copy((sm_object *)f);
     f->parent = current_cx;
     RETURN_OBJ(((sm_object *)f));
-    break;
-  }
-  case SM_CX_TYPE: {
-    sm_cx *cx = (sm_cx *)input;
-    cx        = (sm_cx *)sm_copy((sm_object *)cx);
-    RETURN_OBJ(((sm_object *)cx));
     break;
   }
   case SM_ERR_TYPE: {

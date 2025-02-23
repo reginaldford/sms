@@ -16,6 +16,7 @@ int parsing_fpath_len;
 
 %}
 
+// All of the possible literals
 %union {
   uint32_t         integer;
   f64              num;
@@ -333,7 +334,10 @@ int parsing_fpath_len;
 %token <expr> HEAPSAVE
 %token <expr> IMAGESAVE
 %token <expr> GC
-%token <expr> GC_WHILE
+%token <expr> SO_LOAD
+%token <expr> SO_FUN
+%token <expr> SO_FUNCALL
+%token <expr> SO_UNLOAD
 %token <expr> THISPROCESS
 
 %token DONE
@@ -589,6 +593,10 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | ERR_LINE '(' EXPR ')' { $$ = sm_new_expr(SM_ERRLINE_EXPR,(sm_object*)$3,_note());}
 | ERR_NOTES '(' EXPR ')' { $$ = sm_new_expr(SM_ERRNOTES_EXPR,(sm_object*)$3,_note());}
 | IMPORT STRING  { $$ = sm_new_expr(SM_IMPORT_EXPR,(sm_object*)$2,_note());}
+| SO_LOAD '(' EXPR ')' { $$ = sm_new_expr(SM_SO_LOAD_EXPR, (sm_object*)$3,_note());}
+| SO_FUN '(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_SO_FUN_EXPR, (sm_object*)$3,(sm_object*)$5,(sm_object*)$7,_note());}
+//| SO_FUNCALL '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_FUN_CALL_EXPR, (sm_object*)$3,(sm_object*)$5,_note());}
+| SO_UNLOAD '(' EXPR ')' { $$ = sm_new_expr(SM_SO_UNLOAD_EXPR, (sm_object*)$3,_note());}
 
 ERROR : '<' '>' { $$ = sm_new_error(0,NULL,0 ,NULL,parsing_fpath_len,parsing_fpath,yylineno);}
 | '<' SYM '>' {

@@ -17,6 +17,7 @@
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 #define f64 double
 #define ui8 uint8_t
@@ -27,7 +28,7 @@
 #endif
 
 // Set version number. Major.Minor.Patch
-#define SMS_VERSION "0.22.11"
+#define SMS_VERSION "0.22.12"
 #define SMS_VERSION_LEN 7
 
 /// These are the major object types of SMS
@@ -77,7 +78,11 @@ enum sm_object_type {
   SM_F64_TYPE,
   /// 21: object-only stack in malloc space
   SM_STACK2_TYPE,
-  /// 22: Unrecognized
+  /// 22: Shared object pointer
+  SM_SO_TYPE,
+  /// 23: Shared object function pointer
+  SM_SO_FUN_TYPE,
+  /// 24: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -94,6 +99,8 @@ enum sm_object_type {
 #include "sm_signal.h"
 #include "object/sm_object.h"
 #include "sm_stack2.h"
+#include "object/sm_so.h"
+#include "object/sm_so_fun.h"
 #include "sm_init.h"
 #include "object/sm_type.h"
 #include "object/sm_string.h"
