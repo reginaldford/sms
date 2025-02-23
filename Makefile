@@ -55,6 +55,20 @@ main:
 $(MAKE) $(SRC_MAIN)/linenoise/linenoise.c:
 	git submodule update --recursive --init
 
+# Additional libraries in C
+
+
+# Rule to build the shared library
+build/clib/fib.so:
+	$(CC) -shared clib/fib.c -I ./ -o $@ $^
+
+# Rule to compile each source file to an object file
+$(OBJDIR)/%.so: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clibs: build/clib/fib.so
+
+
 
 
 # Not files
@@ -66,6 +80,7 @@ all:
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_TEST)
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_KT)
 	$(MAKE) -j$(THREADS) bin/$(BIN_NAME_DBG)
+	$(MAKE) -j$(THREADS) build/clib/fib.so
 
 # sms executable
 bin/$(BIN_NAME):  $(OBJS_PARSER) $(OBJS_BASE) $(BUILD_DIR)/$(SRC_MAIN)/sm_main.c.o
@@ -120,6 +135,8 @@ clean:
 		$(BUILD_DIR)/$(SRC_MEM)/*.o\
 		$(BUILD_DIR)/$(SRC_TERMINAL)/*.o\
 		$(BUILD_DIR)/$(SRC_MAIN)/linenoise/*.o\
+		$(BUILD_DIR)/$(SRC_MAIN)/linenoise/*.o\
+		$(BUILD_DIR)/clib/*.so\
 		bin/sms*\
 		docs/html
 
