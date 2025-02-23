@@ -3596,8 +3596,13 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
   }
   case SM_POINTER_TYPE: {
     sm_heap    *pointeeH = sm_is_within_heap(input, sms_heap) ? sms_other_heap : sms_heap;
+    sm_heap    *oppositeHeap = pointeeH == sms_heap ? sms_other_heap : sms_heap;
     sm_pointer *p        = (sm_pointer *)input;
-    sm_object  *pointee  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+    sm_object  *pointee  = sm_pointer_deref(p,pointeeH); 
+    // copy + inflate = deep copy
+    sm_copy(pointee);
+    sm_inflate_heap(oppositeHeap,pointeeH); 
+    // Now, we do the evaluation that was initially intended
     sm_engine_eval(pointee, current_cx, sf);
     return;
   }
