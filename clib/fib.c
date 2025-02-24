@@ -33,6 +33,6 @@ sm_object * fib(sm_object * input){
     return (sm_object*)input;
   }
   output_number->value = fib_recursive(input_number->value);
-  return (sm_object*)input;
+  return (sm_object*)output_number;
 }
 
