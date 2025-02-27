@@ -21,7 +21,7 @@ double fib_recursive(int n) {
  */
 sm_object * fib(sm_object * input){
   sm_expr* array = (sm_expr*)input;
-  if(array->size > 2){
+  if(array->size != 2){
     printf("There should be 2 inputs: the fib sequence index, and a place for the output_number (a number).\n");
     return input;
   }
