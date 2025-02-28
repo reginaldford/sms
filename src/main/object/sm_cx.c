@@ -188,36 +188,3 @@ void sm_cx_import(sm_cx *cxFrom, sm_cx *cxTo) {
     sm_cx_let(cxTo, keySym, sm_expr_get_arg(values, i));
   }
 }
-
-// If the object has a parent/parent_cx ptr, change it to the provided cx
-// Recurses through expressions
-void sm_cx_contextualize(sm_object *input, sm_cx *cx) {
-  switch (input->my_type) {
-  case SM_CX_TYPE: {
-    sm_cx *input_cx  = (sm_cx *)input;
-    input_cx->parent = cx;
-    break;
-  }
-  case SM_META_TYPE: {
-    sm_meta *input_meta = (sm_meta *)input;
-    input_meta->scope   = cx;
-    break;
-  }
-  case SM_FUN_TYPE: {
-    sm_fun *input_fun = (sm_fun *)input;
-    input_fun->parent = cx;
-    break;
-  }
-  case SM_EXPR_TYPE: {
-    sm_expr *input_expr = (sm_expr *)input;
-    if (input_expr->op == SM_BLOCK_EXPR) {
-      sm_cx *block_cx  = (sm_cx *)sm_expr_get_arg(input_expr, 0);
-      block_cx->parent = cx;
-      for (uint32_t i = 1; i < input_expr->size; i++)
-        sm_cx_contextualize(sm_expr_get_arg(input_expr, i), cx);
-    } else
-      for (uint32_t i = 0; i < input_expr->size; i++)
-        sm_cx_contextualize(sm_expr_get_arg(input_expr, i), cx);
-  }
-  }
-}
