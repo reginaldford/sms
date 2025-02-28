@@ -734,12 +734,10 @@ BLOCK : OPEN_BLOCK '}' {
 
 OPEN_BLOCK : '{' EXPR {
   sm_cx * new_cx = sm_new_cx((sm_cx*)*sm_global_lex_stack(NULL)->top);
-  sm_cx_contextualize((sm_object*)$2,new_cx);
   sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL), new_cx));
   $$ = sm_new_expr_2(SM_BLOCK_EXPR,(sm_object*)new_cx, (sm_object *)$2, _note()); 
 }
 | OPEN_BLOCK ';' EXPR {
-  sm_cx_contextualize((sm_object*)$3,*sm_global_lex_stack(NULL)->top);
   $$ = sm_expr_append((sm_expr *)$1, (sm_object *)$3);
 }
 
@@ -848,8 +846,6 @@ CONTEXT_LIST : '{' ASSOCIATION ';' ASSOCIATION {
   sm_cx *new_cx    = sm_new_cx(parent_cx);
   sm_object        *value  = (sm_object *)sm_expr_get_arg($2, 1);
   sm_object        *value2 = (sm_object *)sm_expr_get_arg($4, 1);
-  sm_cx_contextualize(value,new_cx);
-  sm_cx_contextualize(value2,new_cx);
   sm_cx_let(new_cx,(sm_symbol*)sm_expr_get_arg($2,0),value);
   sm_cx_let(new_cx,(sm_symbol*)sm_expr_get_arg($4,0),value2);
   sm_global_lex_stack(sm_stack_push(sm_global_lex_stack(NULL), new_cx));
