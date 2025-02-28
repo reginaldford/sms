@@ -1,0 +1,4 @@
+{
+  let f = (x) => {let x = x; put(str( x ));};
+  f(3);
+};
