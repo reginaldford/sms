@@ -139,7 +139,7 @@ is           {return IS;}
 "~"          {return NOT;}
 "||"         {return OR;}
 "^^"         {return XOR;}
-"&& "        {return AND;}
+"&&"        {return AND;}
 
 "~="         {return NOT_EQ;}
 "||="        {return OR_EQ;}
