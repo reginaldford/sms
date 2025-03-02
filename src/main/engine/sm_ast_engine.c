@@ -3260,7 +3260,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       check_gc();
       sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size, NULL);
       for (uint32_t i = 0; i < sme->size; i++) {
-        sm_engine_eval(sm_expr_get_arg(sme, i), current_cx, sf);
+        return_obj = sm_expr_get_arg(sme, i);
+        sm_engine_eval(return_obj, current_cx, sf);
         sm_object *new_val = return_obj;
         sm_expr_set_arg(new_arr, i, new_val);
       }
