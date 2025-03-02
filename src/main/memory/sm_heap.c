@@ -41,7 +41,8 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
       exit(1);
     }
   }
-  static const uint32_t safe_value = 1024 + 512 + 256 + 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1;
+  // somewhat arbitrary, but necessarily nonzero
+  static const uint32_t safe_value = 256 * sizeof(size_t);
   new_heap->safe_capacity          = capacity < safe_value ? capacity : capacity - safe_value;
   sm_heap_clear(new_heap);
   return new_heap;
@@ -51,7 +52,7 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
   uint32_t bytes_used      = h->used;
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
-  if (next_bytes_used >= h->capacity) {
+  if (next_bytes_used >= h->safe_capacity) {
     // Only GC sms_heap
     if (h == sms_heap) {
       // Try gc
@@ -89,7 +90,7 @@ void *sm_malloc_plain_at(sm_heap *h, uint32_t size) {
   uint32_t bytes_used      = h->used;
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
-  if (next_bytes_used >= h->capacity) {
+  if (next_bytes_used >= h->safe_capacity) {
     fprintf(
       stderr,
       "Ran out of heap memory in auxilliary heap. Try with more memory (sms -h for help) (%s:%u)\n",
