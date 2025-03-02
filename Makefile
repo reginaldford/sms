@@ -9,7 +9,7 @@ CC_UNIFIED      := zig cc
 CFLAGS_UNIFIED  := -Oz
 #CFLAGS_UNIFIED := -Oz --target=x86_64-linux -static -I$(MUSL_PREFIX)/include 
 CFLAGS          := -O3 -ffast-math
-CFLAGS_DEBUG    := -g
+CFLAGS_DEBUG    := -g -fsanitize=address
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm -flto
 #LDFLAGS        := -lm -flto -static
