@@ -32,18 +32,16 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   switch (fun->my_type) {
   case SM_FUN_TYPE: {
     sm_object *content = fun->content;
-    sm_object *result;
-
-    sm_cx *new_cx = sm_new_cx(fun->parent);
+    sm_cx     *new_cx  = sm_new_cx(fun->parent);
     if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
       sm_expr *content_sme = (sm_expr *)fun->content;
       for (uint32_t i = 1; i < content_sme->size; i++) {
-        sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
-        result = return_obj;
-        if (result->my_type == SM_RETURN_TYPE)
-          RETURN_OBJ(((sm_return *)result)->address);
+        return_obj = sm_expr_get_arg(content_sme, i);
+        sm_engine_eval(return_obj, new_cx, sf);
+        if (return_obj->my_type == SM_RETURN_TYPE)
+          RETURN_OBJ(((sm_return *)return_obj)->address);
       }
-      RETURN_OBJ(result);
+      return;
     } else
       sm_engine_eval(content, new_cx, sf);
     return;
@@ -98,7 +96,8 @@ static inline void type_check(sm_expr *sme, uint32_t operand, uint32_t param_typ
 // Evaluate the argument, then run type check
 static inline void eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type,
                                     sm_cx *current_cx, sm_expr *sf) {
-  sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
+  return_obj = sm_expr_get_arg(sme, operand);
+  sm_engine_eval(return_obj, current_cx, sf);
   sm_object *obj = return_obj;
   if (param_type != obj->my_type) {
     if (obj->my_type == SM_POINTER_TYPE) {
@@ -127,7 +126,8 @@ static inline void eager_type_check(sm_expr *sme, uint32_t operand, uint32_t par
 // Evaluate the argument, then run type check. 2 possibilities allowed
 static inline void eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type1,
                                      uint32_t param_type2, sm_cx *current_cx, sm_expr *sf) {
-  sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
+  return_obj = sm_expr_get_arg(sme, operand);
+  sm_engine_eval(return_obj, current_cx, sf);
   sm_object *obj = return_obj;
   if (param_type1 != obj->my_type && param_type2 != obj->my_type) {
     if (obj->my_type == SM_POINTER_TYPE) {
@@ -155,7 +155,8 @@ static inline void eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t pa
 static inline void eager_type_check3(sm_expr *sme, uint32_t operand, uint32_t param_type1,
                                      uint32_t param_type2, uint32_t param_type3, sm_cx *current_cx,
                                      sm_expr *sf) {
-  sm_engine_eval(sm_expr_get_arg(sme, operand), current_cx, sf);
+  return_obj = sm_expr_get_arg(sme, operand);
+  sm_engine_eval(return_obj, current_cx, sf);
   sm_object *obj = return_obj;
   if (param_type1 != obj->my_type && param_type2 != obj->my_type && param_type3 != obj->my_type) {
     if (obj->my_type == SM_POINTER_TYPE) {
@@ -942,7 +943,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_LET_EXPR: {
       // Trust the parser for now regarding element 0 being a symbol
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-      sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      return_obj     = sm_expr_get_arg(sme, 1);
+      sm_engine_eval(return_obj, current_cx, sf);
       sm_object *value = (sm_object *)return_obj;
       // If an error occurred, it is stored in the mapping
       sm_cx_let(current_cx, sym, value);
@@ -970,7 +972,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol *sym = (sm_symbol *)return_obj;
       if (sym->my_type == SM_ERR_TYPE)
         RETURN_OBJ(((sm_object *)sym));
-      sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      return_obj = sm_expr_get_arg(sme, 2);
+      sm_engine_eval(return_obj, current_cx, sf);
       sm_object *value = (sm_object *)return_obj;
       sm_cx_let(cx, sym, value);
       RETURN_OBJ((value));
@@ -1043,7 +1046,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol *sym = (sm_symbol *)return_obj;
       if (sym->my_type == SM_ERR_TYPE)
         RETURN_OBJ(((sm_object *)sym));
-      sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      return_obj = sm_expr_get_arg(sme, 2);
+      sm_engine_eval(return_obj, current_cx, sf);
       sm_object *value = (sm_object *)return_obj;
       if (sm_cx_set(cx, sym, value))
         RETURN_OBJ(((sm_object *)sms_true));
@@ -1126,7 +1130,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ(((sm_object *)sms_false));
     }
     case SM_CX_VALUES_EXPR: {
-      sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return_obj = sm_expr_get_arg(sme, 0);
+      sm_engine_eval(return_obj, current_cx, sf);
       sm_cx *cx = (sm_cx *)return_obj;
       if (cx->my_type != SM_CX_TYPE) {
         sm_symbol *title   = sm_new_symbol("typeMismatch", 12);
@@ -1150,8 +1155,9 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_fun *fun = (sm_fun *)return_obj;
       if (fun->my_type != SM_FUN_TYPE)
         RETURN_OBJ(((sm_object *)fun));
-      fun = (sm_fun *)sm_copy((sm_object *)fun); // functional
-      sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      fun        = (sm_fun *)sm_copy((sm_object *)fun); // functional
+      return_obj = sm_expr_get_arg(sme, 1);
+      sm_engine_eval(return_obj, current_cx, sf);
       fun->content = sm_localize(return_obj, fun);
       RETURN_OBJ(((sm_object *)fun));
     }
@@ -2100,13 +2106,13 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       // expecting a unary func
       eager_type_check(sme, 0, SM_FUN_TYPE, current_cx, sf);
       if (return_obj->my_type != SM_FUN_TYPE) {
-        RETURN_OBJ(return_obj); // Return the function object if type check fails
+        return; // Return the function object if type check fails
       }
       sm_fun *fun = (sm_fun *)return_obj;
 
       eager_type_check(sme, 1, SM_EXPR_TYPE, current_cx, sf);
       if (return_obj->my_type != SM_EXPR_TYPE) {
-        RETURN_OBJ(return_obj);
+        return;
       }
       sm_expr *arr = (sm_expr *)return_obj;
       // Create a new output expression with the same operation type and size
@@ -2236,29 +2242,28 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ((sm_simplify(evaluated0)));
     }
     case SM_FUN_CALL_EXPR: {
-      struct sm_expr *args = (struct sm_expr *)sm_expr_get_arg(sme, 1);
-      sm_engine_eval((sm_object *)args, current_cx, sf);
+      return_obj = (sm_object *)sm_expr_get_arg(sme, 1);
+      sm_engine_eval(return_obj, current_cx, sf);
       sm_expr *new_args = (sm_expr *)return_obj;
-      sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
+      return_obj        = sm_expr_get_arg(sme, 0);
+      sm_engine_eval(return_obj, current_cx, sf);
       if (return_obj->my_type == SM_ERR_TYPE)
-        RETURN_OBJ((sm_object *)return_obj);
-      sm_fun *fun = (sm_fun *)return_obj;
-      execute_fun(fun, current_cx, new_args);
+        return; // return the return_obj
+      execute_fun((sm_fun *)return_obj, current_cx, new_args);
       return;
       break;
     }
     case SM_BLOCK_EXPR: {
-      uint32_t   i      = 1;
-      sm_object *result = (sm_object *)sms_true;
-      sm_cx     *new_cx = sm_new_cx(current_cx);
+      uint32_t i    = 1;
+      return_obj    = (sm_object *)sms_true;
+      sm_cx *new_cx = sm_new_cx(current_cx);
       while (i < sme->size) {
         sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);
-        result = return_obj;
-        if (result->my_type == SM_RETURN_TYPE)
-          RETURN_OBJ((result));
+        if (return_obj->my_type == SM_RETURN_TYPE)
+          return;
         i++;
       }
-      RETURN_OBJ((result));
+      return;
       break;
     }
     case SM_ASSIGN_EXPR: {
@@ -2847,35 +2852,29 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ(result);
     }
     case SM_PLUS_EXPR: {
-      sm_f64 *answer = sm_new_f64(0);
-      sm_f64 *obj0   = answer;
-      sm_f64 *obj1   = answer;
       eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
-      obj0 = (sm_f64 *)return_obj;
-      if (obj0->my_type != SM_F64_TYPE)
-        RETURN_OBJ(((sm_object *)obj0));
+      if (return_obj->my_type != SM_F64_TYPE)
+        return;
+      sm_f64 *p1 = (sm_f64 *)return_obj;
       eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      obj1 = (sm_f64 *)return_obj;
-      if (obj1->my_type != SM_F64_TYPE)
-        RETURN_OBJ(((sm_object *)obj1));
-      answer->value = obj0->value + obj1->value;
-      RETURN_OBJ((sm_object *)answer);
+      if (return_obj->my_type != SM_F64_TYPE)
+        return;
+      sm_f64 *p2 = (sm_f64 *)return_obj;
+      return_obj = (sm_object *)sm_new_f64(p1->value + p2->value);
+      return;
       break;
     }
     case SM_MINUS_EXPR: {
-      sm_f64 *answer = sm_new_f64(0);
-      sm_f64 *obj0   = answer;
-      sm_f64 *obj1   = answer;
       eager_type_check(sme, 0, SM_F64_TYPE, current_cx, sf);
-      obj0 = (sm_f64 *)return_obj;
-      if (obj0->my_type != SM_F64_TYPE)
-        RETURN_OBJ(((sm_object *)obj0));
+      if (return_obj->my_type != SM_F64_TYPE)
+        return;
+      sm_f64 *p1 = (sm_f64 *)return_obj;
       eager_type_check(sme, 1, SM_F64_TYPE, current_cx, sf);
-      obj1 = (sm_f64 *)return_obj;
-      if (obj1->my_type != SM_F64_TYPE)
-        RETURN_OBJ(((sm_object *)obj1));
-      answer->value = obj0->value - obj1->value;
-      RETURN_OBJ((sm_object *)answer);
+      if (return_obj->my_type != SM_F64_TYPE)
+        return;
+      sm_f64 *p2 = (sm_f64 *)return_obj;
+      return_obj = (sm_object *)sm_new_f64(p1->value - p2->value);
+      return;
       break;
     }
     case SM_TIMES_EXPR: {
@@ -3224,26 +3223,26 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_IF_EXPR: {
-      sm_object *a0 = sm_expr_get_arg(sme, 0);
-      sm_engine_eval(a0, current_cx, sf);
-      a0 = return_obj;
-      if (!IS_FALSE(a0)) {
-        a0 = sm_expr_get_arg(sme, 1);
-        sm_engine_eval(a0, current_cx, sf);
-        a0 = return_obj;
+      return_obj = sm_expr_get_arg(sme, 0);
+      sm_engine_eval(return_obj, current_cx, sf);
+      if (!IS_FALSE(return_obj)) {
+        return_obj = sm_expr_get_arg(sme, 1);
+        sm_engine_eval(return_obj, current_cx, sf);
         return;
       }
       RETURN_OBJ(((sm_object *)sms_false));
       break;
     }
     case SM_IF_ELSE_EXPR: {
-      sm_engine_eval(sm_expr_get_arg(sme, 0), current_cx, sf);
-      sm_object *condition_result = return_obj;
-      if (!IS_FALSE(condition_result)) {
-        sm_engine_eval(sm_expr_get_arg(sme, 1), current_cx, sf);
+      return_obj = sm_expr_get_arg(sme, 0);
+      sm_engine_eval(return_obj, current_cx, sf);
+      if (!IS_FALSE(return_obj)) {
+        return_obj = sm_expr_get_arg(sme, 1);
+        sm_engine_eval(return_obj, current_cx, sf);
         return;
       }
-      sm_engine_eval(sm_expr_get_arg(sme, 2), current_cx, sf);
+      return_obj = sm_expr_get_arg(sme, 2);
+      sm_engine_eval(return_obj, current_cx, sf);
       return;
     }
     case SM_TUPLE_EXPR: {
@@ -3257,7 +3256,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_PARAM_LIST_EXPR: {
-      check_gc();
       sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size, NULL);
       for (uint32_t i = 0; i < sme->size; i++) {
         return_obj = sm_expr_get_arg(sme, i);
