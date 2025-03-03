@@ -43,7 +43,7 @@ sm_heap *sm_new_heap(uint32_t capacity, bool map) {
   } else
     new_heap->map = NULL;
   // somewhat arbitrary, but necessarily nonzero
-  static const uint32_t safe_value = 256 * sizeof(size_t);
+  static const uint32_t safe_value = (256 + 128) * sizeof(size_t);
   new_heap->safe_capacity          = capacity < safe_value ? capacity : capacity - safe_value;
   sm_heap_clear(new_heap);
   return new_heap;
@@ -54,7 +54,6 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
   uint32_t next_bytes_used = h->used + size;
   // Check for sufficient capacity
   if (next_bytes_used >= h->safe_capacity) {
-    // Only GC sms_heap
     if (h == sms_heap) {
       // Try gc
       sm_garbage_collect();
@@ -62,16 +61,14 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
       h               = sms_heap;
       bytes_used      = h->used;
       next_bytes_used = bytes_used + size;
-      if (next_bytes_used >= h->capacity) {
+      if (next_bytes_used >= h->safe_capacity) {
         fprintf(stderr, "Ran out of heap memory (%s:%u). Try with more memory (sms -h for help)\n",
                 __FILE__, __LINE__);
         sm_dump_and_count();
         exit(1);
       }
     } else {
-      fprintf(stderr,
-              "Ran out of heap memory in auxilliary heap (%s:%u). Try with more memory (sms -h for "
-              "help)\n",
+      fprintf(stderr, "Ran out of heap memory (%s:%u). Try with more memory (sms -h for help)\n",
               __FILE__, __LINE__);
       sm_dump_and_count();
       exit(1);
@@ -87,23 +84,7 @@ void *sm_malloc_at(sm_heap *h, uint32_t size) {
 void *sm_malloc(uint32_t size) { return sm_malloc_at(sms_heap, size); }
 
 // malloc_at with no gc
-void *sm_malloc_plain_at(sm_heap *h, uint32_t size) {
-  uint32_t bytes_used      = h->used;
-  uint32_t next_bytes_used = h->used + size;
-  // Check for sufficient capacity
-  if (next_bytes_used >= h->safe_capacity) {
-    fprintf(
-      stderr,
-      "Ran out of heap memory in auxilliary heap. Try with more memory (sms -h for help) (%s:%u)\n",
-      __FILE__, __LINE__);
-    sm_mem_dump(h, "auxilliary.mem");
-    exit(1);
-  }
-  // Update the used bytes
-  h->used = next_bytes_used;
-  // Get the pointer to the newly allocated space
-  return (void *)(((char *)h->storage) + bytes_used);
-}
+void *sm_malloc_plain_at(sm_heap *h, uint32_t size) { return sm_malloc_at(sms_heap, size); }
 
 // Internal 'malloc'
 void *sm_malloc_plain(uint32_t size) { return sm_malloc_plain_at(sms_heap, size); }
@@ -234,6 +215,8 @@ bool sm_heap_scan(sm_heap *h) {
       sm_pointer *ptr = (sm_pointer *)obj;
       sm_heap_register_object(sms_heap,
                               (void *)((intptr_t)sms_heap->storage + (intptr_t)ptr->address));
+
+      obj = (sm_object *)((char *)obj + sizeof(size_t));
       continue;
     }
     if (!sizeOfObj) {
