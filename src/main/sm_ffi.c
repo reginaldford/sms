@@ -9,29 +9,19 @@ unsigned char foo(unsigned int x, float y) {
   return result;
 }
 
-// sms object to wrap the cif
-typedef struct sm_ff_signature {
-  uint32_t my_type;
-  ffi_cif  cif;
-} sm_ff_signature;
 
-sm_ff_signature *sm_new_ffsignature(sm_expr *input_types, sm_symbol output_type) {
-  struct sm_ff_signature *ffs = (sm_ff_signature *)sm_malloc(sizeof(sm_ff_signature));
-  int                     SM_FF_SIGNATURE_TYPE = 122;
+sm_ff_sig *sm_new_ffsignature(sm_expr *input_types, sm_symbol output_type) {
+  struct sm_ff_sig *ffs = (sm_ff_sig *)sm_malloc(sizeof(sm_ff_sig));
   // Make space for the arg types
   ffi_type  *arg_types[(int)input_types->size];
   ffi_status status;
-
-  ffs->my_type = SM_FF_SIGNATURE_TYPE;
-
+  ffs->my_type = SM_FF_SIG_TYPE;
   if ((status = ffi_prep_cif(&ffs->cif, FFI_DEFAULT_ABI, 2, &ffi_type_uint8, arg_types)) !=
       FFI_OK) {
     return NULL;
   }
-
   return ffs;
 }
-
 
 sm_object *sm_ffi_call() {
   ffi_cif    cif;
