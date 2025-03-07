@@ -18,6 +18,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <ffi.h>
 
 #define f64 double
 #define ui8 uint8_t
@@ -82,7 +83,11 @@ enum sm_object_type {
   SM_SO_TYPE,
   /// 23: Shared object function pointer
   SM_SO_FUN_TYPE,
-  /// 24: Unrecognized
+  /// 24: Foreign function signature
+  SM_FF_SIG_TYPE,
+  /// 25: Foreign Function
+  SM_FF_FUN_TYPE,
+  /// 26: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -101,6 +106,7 @@ enum sm_object_type {
 #include "sm_stack2.h"
 #include "object/sm_so.h"
 #include "object/sm_so_fun.h"
+#include "sm_ffi.h"
 #include "sm_init.h"
 #include "object/sm_type.h"
 #include "object/sm_string.h"

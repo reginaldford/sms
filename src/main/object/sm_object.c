@@ -79,6 +79,12 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_SO_FUN_TYPE:
     len += sm_so_fun_sprint((sm_so_fun *)obj1, buffer, fake);
     break;
+  case SM_FF_SIG_TYPE:
+    len += sm_ff_sig_sprint((sm_ff_sig *)obj1, buffer, fake);
+    break;
+  case SM_FF_FUN_TYPE:
+    len += sm_ff_fun_sprint((sm_ff_fun *)obj1, buffer, fake);
+    break;
   default: {
     if (!fake)
       len += sprintf(buffer, "?(%i)", obj1->my_type);
