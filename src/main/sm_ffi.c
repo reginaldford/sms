@@ -13,7 +13,7 @@ unsigned char foo(unsigned int x, float y) {
 sm_ff_sig *sm_new_ffsignature(sm_expr *input_types, sm_symbol output_type) {
   struct sm_ff_sig *ffs = (sm_ff_sig *)sm_malloc(sizeof(sm_ff_sig));
   // Make space for the arg types
-  ffi_type  *arg_types[(int)input_types->size];
+  ffi_type  *arg_types[input_types->size];
   ffi_status status;
   ffs->my_type = SM_FF_SIG_TYPE;
   if ((status = ffi_prep_cif(&ffs->cif, FFI_DEFAULT_ABI, 2, &ffi_type_uint8, arg_types)) !=
@@ -23,7 +23,7 @@ sm_ff_sig *sm_new_ffsignature(sm_expr *input_types, sm_symbol output_type) {
   return ffs;
 }
 
-sm_object *sm_ffi_call() {
+sm_object *sm_ffi_call(sm_ff_fun *fun, sm_object *input) {
   ffi_cif    cif;
   ffi_type  *arg_types[2];
   void      *arg_values[2];
@@ -70,3 +70,33 @@ uint32_t sm_ff_sig_sprint(sm_ff_sig *self, char *to_str, bool fake) {
     return sprintf(tempBuffer, "(ff_sig@%p)", &self->cif);
   }
 }
+
+// Create a new shard object
+sm_ff_fun *sm_new_ff_fun(void *handle) {
+  struct sm_ff_fun *new_ff_fun = sm_malloc(sizeof(sm_ff_fun));
+  new_ff_fun->my_type          = SM_FF_FUN_TYPE;
+  new_ff_fun->fun              = handle;
+  return new_ff_fun;
+}
+
+// If fake is false,
+// Prints to to_str a string describing the ff_fun
+// Returns the length regardless
+uint32_t sm_ff_fun_sprint(sm_ff_fun *self, char *to_str, bool fake) {
+  if (!fake)
+    return sprintf(to_str, "(ff_fun@%p)", self->fun);
+  else {
+    char tempBuffer[32];
+    return sprintf(tempBuffer, "(ff_fun@%p)", self->fun);
+  }
+}
+
+// Returns whether two ff_funs match handle ptr
+bool sm_ff_fun_is_equal(sm_ff_fun *ff_fun1, sm_ff_fun *ff_fun2) {
+  return ff_fun1->fun == ff_fun2->fun;
+}
+
+
+// Returns whether two ff_sigs match handle ptr
+// bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) { return ((void*)ff_sig1->cif) ==
+// ((void*)ff_sig2->cif); }
