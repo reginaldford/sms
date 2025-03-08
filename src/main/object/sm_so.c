@@ -56,26 +56,6 @@ bool sm_ff_fun_is_equal(sm_ff_fun *ff_fun1, sm_ff_fun *ff_fun2) {
 }
 
 
-// Create a new shard object
-struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif) {
-  struct sm_ff_sig *new_ff_sig = sm_malloc(sizeof(struct sm_ff_sig));
-  new_ff_sig->my_type          = SM_FF_SIG_TYPE;
-  new_ff_sig->cif              = cif;
-  return new_ff_sig;
-}
-
-// If fake is false,
-// Prints to to_str a string describing the ff_sig
-// Returns the length regardless
-uint32_t sm_ff_sig_sprint(sm_ff_sig *self, char *to_str, bool fake) {
-  if (!fake)
-    return sprintf(to_str, "(ff_sig@%p)", &self->cif);
-  else {
-    char tempBuffer[32];
-    return sprintf(tempBuffer, "(ff_sig@%p)", &self->cif);
-  }
-}
-
 // Returns whether two ff_sigs match handle ptr
 // bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) { return ((void*)ff_sig1->cif) ==
 // ((void*)ff_sig2->cif); }
