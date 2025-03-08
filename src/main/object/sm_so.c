@@ -26,36 +26,3 @@ uint32_t sm_so_sprint(sm_so *self, char *to_str, bool fake) {
 
 // Returns whether two SOs match handle ptr
 bool sm_so_is_equal(sm_so *so1, sm_so *so2) { return so1->handle == so2->handle; }
-
-
-///
-///
-// Create a new shard object
-sm_ff_fun *sm_new_ff_fun(void *handle) {
-  struct sm_ff_fun *new_ff_fun = sm_malloc(sizeof(sm_ff_fun));
-  new_ff_fun->my_type          = SM_FF_FUN_TYPE;
-  new_ff_fun->fun              = handle;
-  return new_ff_fun;
-}
-
-// If fake is false,
-// Prints to to_str a string describing the ff_fun
-// Returns the length regardless
-uint32_t sm_ff_fun_sprint(sm_ff_fun *self, char *to_str, bool fake) {
-  if (!fake)
-    return sprintf(to_str, "(ff_fun@%p)", self->fun);
-  else {
-    char tempBuffer[32];
-    return sprintf(tempBuffer, "(ff_fun@%p)", self->fun);
-  }
-}
-
-// Returns whether two ff_funs match handle ptr
-bool sm_ff_fun_is_equal(sm_ff_fun *ff_fun1, sm_ff_fun *ff_fun2) {
-  return ff_fun1->fun == ff_fun2->fun;
-}
-
-
-// Returns whether two ff_sigs match handle ptr
-// bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) { return ((void*)ff_sig1->cif) ==
-// ((void*)ff_sig2->cif); }
