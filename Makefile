@@ -1,5 +1,7 @@
 # This makefile is designed for GNU Make
 
+# Requires: libffi-devel, bison, flex
+
 # Seems to work with zig cc, clang, gcc, egcc (OpenBSD), tcc
 INSTALL_DIR     := /usr/local/bin
 CC              := clang

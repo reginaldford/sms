@@ -50,3 +50,23 @@ sm_object *sm_ffi_call() {
   printf("result is %hhu", (unsigned char)result);
   return 0;
 }
+
+// Create a new ffi signature object
+struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif) {
+  struct sm_ff_sig *new_ff_sig = sm_malloc(sizeof(struct sm_ff_sig));
+  new_ff_sig->my_type          = SM_FF_SIG_TYPE;
+  new_ff_sig->cif              = cif;
+  return new_ff_sig;
+}
+
+// If fake is false,
+// Prints to to_str a string describing the ff_sig
+// Returns the length regardless
+uint32_t sm_ff_sig_sprint(sm_ff_sig *self, char *to_str, bool fake) {
+  if (!fake)
+    return sprintf(to_str, "(ff_sig@%p)", &self->cif);
+  else {
+    char tempBuffer[32];
+    return sprintf(tempBuffer, "(ff_sig@%p)", &self->cif);
+  }
+}
