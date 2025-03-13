@@ -275,6 +275,9 @@ _thisProcess   {return THISPROCESS;}
 _gc            {return GC;}
 soLoad         {return SO_LOAD;}
 soFun          {return SO_FUN;}
+soUnload       {return SO_UNLOAD;}
+ffSig          {return FF_SIG;}
+ff             {return FF;}
 _heapSave      {return HEAPSAVE;}
 _imgSave       {return HEAPSAVE;}
 
