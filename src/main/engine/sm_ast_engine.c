@@ -3516,6 +3516,13 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ((sm_object *)sm_new_so_fun(fnPtr));
       break;
     }
+    case SM_FF_EXPR: {
+      break;
+    }
+    case SM_FF_SIG_EXPR: {
+      break;
+    }
+
     default: // unrecognized expr gets returned without evaluation
       RETURN_OBJ((input));
     } // End of expr case
