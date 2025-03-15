@@ -3537,6 +3537,25 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           sm_new_error_from_previous(title, message, sme, (sm_error *)return_obj);
         RETURN_OBJ((sm_object *)this_err);
       }
+      if (return_obj->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title    = sm_new_symbol("ffSigFailed", 11);
+        sm_string *message  = sm_new_string(43, "First argument to ffSig should be a symbol.");
+        sm_error  *this_err = sm_new_error_from_expr(title, message, sme, NULL);
+        RETURN_OBJ((sm_object *)this_err);
+      }
+      sm_symbol      *input_type_sym = (sm_symbol *)return_obj;
+      const ffi_type *input_ffi_type = sm_ffi_type_from_symbol(input_type_sym);
+      if (!input_ffi_type) {
+        sm_symbol *title = sm_new_symbol("ffSigFailed", 11);
+        sm_string *message =
+          sm_new_string(56, "First argument to ffSig does not represent a valid type.");
+        sm_error *this_err = sm_new_error_from_expr(title, message, sme, NULL);
+        RETURN_OBJ((sm_object *)this_err);
+      }
+      // So far, we have validated the input type. Now for the other types
+      // YOU ARE HERE
+
+
       break;
     }
     case SM_FF_EXPR: {
