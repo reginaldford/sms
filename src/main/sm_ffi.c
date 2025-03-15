@@ -17,6 +17,7 @@ struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif) {
   return new_ff_sig;
 }
 
+
 const ffi_type *get_ffi_type(const char *type) {
   const char *valid_type_strings[] = {
     "void",           /* ffi_type_void */
@@ -52,6 +53,10 @@ const ffi_type *get_ffi_type(const char *type) {
     }
   }
   return NULL; // Type not found
+}
+
+const ffi_type *sm_ffi_type_from_symbol(sm_symbol *sym) {
+  return get_ffi_type(&(sym->name->content));
 }
 
 
