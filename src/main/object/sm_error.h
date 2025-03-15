@@ -13,8 +13,11 @@ typedef struct sm_error {
 
 sm_error *sm_new_error(int title_len, char *title_str, int message_len, char *message_str,
                        int sourceLen, char *source, uint32_t line);
+sm_cx    *sm_error_note(sm_error *previous);
 int       sm_err_sprint(sm_error *self, char *buffer, bool fake);
 sm_error *sm_new_error_blank();
 sm_error *sm_new_error_from_expr(sm_symbol *title, sm_string *message, sm_expr *sme, sm_cx *notes);
+sm_error *sm_new_error_from_previous(sm_symbol *title, sm_string *message, sm_expr *sme,
+                                     sm_error *previous);
 sm_error *sm_new_error_from_strings(sm_symbol *title, sm_string *message, sm_string *source,
                                     uint32_t line, sm_cx *notes);

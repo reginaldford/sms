@@ -50,9 +50,9 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_SO_FUN_TYPE: {
-    sm_so_fun *f                       = (sm_so_fun *)fun;
-    sm_object *(*ff)(sm_object *input) = f->function;
-    sm_object *output                  = ff((sm_object *)sf);
+    sm_so_fun *f                        = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object * input) = f->function;
+    sm_object *output                   = ff((sm_object *)sf);
     RETURN_OBJ(output);
     break;
   }
@@ -3516,10 +3516,30 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ((sm_object *)sm_new_so_fun(fnPtr));
       break;
     }
-    case SM_FF_EXPR: {
+    case SM_FF_SIG_EXPR: {
+      // First arg should be a symbol for the input type.
+      // Second arg is Expected to be an array with the output type symbols:
+      // void, pointer, uint8/16/32/64, complet_float/double
+      if (sme->size != 2) {
+        sm_symbol *title = sm_new_symbol("ffSigFailed", 11);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "ffSig requires two inputs, but %i was provided.", sme->size);
+        RETURN_OBJ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      eager_type_check(sme, 0, SM_SYMBOL_TYPE, current_cx, sf);
+      if (return_obj->my_type == SM_ERR_TYPE) {
+        // we have an error in this block caused by error in another block
+        // we should make a new error and chain it
+        sm_symbol *title = sm_new_symbol("ffSigFailed", 11);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Error from evaluating first argument of ffSig.", sme->size);
+        sm_error *this_err =
+          sm_new_error_from_previous(title, message, sme, (sm_error *)return_obj);
+        RETURN_OBJ((sm_object *)this_err);
+      }
       break;
     }
-    case SM_FF_SIG_EXPR: {
+    case SM_FF_EXPR: {
       break;
     }
 
