@@ -46,16 +46,33 @@ sm_error *sm_new_error_from_strings(sm_symbol *title, sm_string *message, sm_str
   new_error->notes    = notes;
   return new_error;
 }
+
+/// Chains the causing error to this error with th notes ptr
+sm_cx *sm_error_note(sm_error *previous) {
+  sm_cx     *new_cx        = sm_new_cx(NULL);
+  sm_symbol *caused_by_sym = sm_new_symbol("causedBy", 8);
+  sm_cx_let(new_cx, caused_by_sym, (sm_object *)previous);
+  return new_cx;
+}
+
 /// Creates an error with line and source from the expression
 sm_error *sm_new_error_from_expr(sm_symbol *title, sm_string *message, sm_expr *sme, sm_cx *notes) {
   sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
   sm_f64    *line   = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
   sm_error  *e      = sm_new_error_from_strings(title, message, source, (int)line->value, notes);
-  // Call _errHandler through engine eval.
-  // This process does not refer to current_cx or stackframe, so those parameters can be NULL
-  sm_engine_eval((sm_object *)e, NULL, NULL);
+  return (sm_error *)e;
+}
+
+/// Creates an error with line and source from the expression
+sm_error *sm_new_error_from_previous(sm_symbol *title, sm_string *message, sm_expr *sme,
+                                     sm_error *previous) {
+  sm_string *source = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+  sm_f64    *line   = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+  sm_cx     *notes  = sm_error_note(previous);
+  sm_error  *e      = sm_new_error_from_strings(title, message, source, (int)line->value, notes);
   return (sm_error *)return_obj;
 }
+
 
 /// If !fake, print the error type to a string buffer. Return the length regardlessly.
 /// Error type is a symbol involving things like "...Invalid" and "...Blocked"

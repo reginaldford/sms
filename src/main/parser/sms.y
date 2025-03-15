@@ -597,8 +597,8 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | SO_LOAD '(' EXPR ')' { $$ = sm_new_expr(SM_SO_LOAD_EXPR, (sm_object*)$3,_note());}
 | SO_FUN '(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_SO_FUN_EXPR, (sm_object*)$3,(sm_object*)$5,_note());}
 | SO_UNLOAD '(' EXPR ')' { $$ = sm_new_expr(SM_SO_UNLOAD_EXPR, (sm_object*)$3,_note());}
-| FF'(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_FF_EXPR, (sm_object*)$3,(sm_object*)$5,(sm_object*)$7,_note());}
 | FF_SIG'(' EXPR ',' EXPR ')' { $$ = sm_new_expr_2(SM_FF_SIG_EXPR, (sm_object*)$3,(sm_object*)$5,_note());}
+| FF'(' EXPR ',' EXPR ',' EXPR ')' { $$ = sm_new_expr_3(SM_FF_EXPR, (sm_object*)$3,(sm_object*)$5,(sm_object*)$7,_note());}
 
 ERROR : '<' '>' { $$ = sm_new_error(0,NULL,0 ,NULL,parsing_fpath_len,parsing_fpath,yylineno);}
 | '<' SYM '>' {
