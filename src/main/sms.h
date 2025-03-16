@@ -86,7 +86,7 @@ enum sm_object_type {
   /// 24: Foreign function signature
   SM_FF_SIG_TYPE,
   /// 25: Foreign Function
-  SM_FF_FUN_TYPE,
+  SM_FF_TYPE,
   /// 26: Unrecognized
   SM_UNKNOWN_TYPE
 };
