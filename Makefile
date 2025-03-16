@@ -1,5 +1,6 @@
 # This makefile is designed for GNU Make
 
+
 # Seems to work with zig cc, clang, gcc, egcc (OpenBSD), tcc
 INSTALL_DIR     := /usr/local/bin
 CC              := clang
@@ -9,7 +10,7 @@ CC_UNIFIED      := zig cc
 CFLAGS_UNIFIED  := -Oz
 #CFLAGS_UNIFIED := -Oz --target=x86_64-linux -static -I$(MUSL_PREFIX)/include 
 CFLAGS          := -O3 -ffast-math
-CFLAGS_DEBUG    := -g #-fsanitize=address
+CFLAGS_DEBUG    := -g
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm -flto
 #LDFLAGS        := -lm -flto -static
@@ -60,7 +61,7 @@ $(MAKE) $(SRC_MAIN)/linenoise/linenoise.c:
 
 # Rule to build the shared library
 build/clib/fib.so:
-	$(CC) -shared clib/fib.c -I ./ -o $@ $^
+	$(CC) -shared  -I ./src/main/ clib/fib.c -o $@ $^
 
 # Rule to compile each source file to an object file
 $(OBJDIR)/%.so: $(SRCDIR)/%.c
