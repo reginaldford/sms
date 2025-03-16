@@ -1,4 +1,5 @@
 # Removes empty lines and counts the lines of code in all .c, .h, .l, and .y files under src
+echo "You may want to run make clean"
 cd ..
 echo "C only:"
 cat src/**/*.c src/**/*.h src/**/**/*.c src/**/**/*.h | grep -E -v '^[[:space:]]*$'  | wc -l
