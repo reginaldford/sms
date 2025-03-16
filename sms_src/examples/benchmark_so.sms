@@ -1,4 +1,4 @@
-#!/usr/local/bin/sms -m1.5g
+#!/usr/local/bin/sms -m1
 #Use this to benchmark something
 {
   if (isErr(parse(_args[size(_args) - 1]) + 0)) {
