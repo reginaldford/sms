@@ -26,6 +26,8 @@ ffi_type *get_ffi_type(const char *type) {
     "uint16",         /* ffi_type_uint16 */
     "uint32",         /* ffi_type_uint32 */
     "uint64",         /* ffi_type_uint64 */
+    "float",          /* ffi_type_float */
+    "double",         /* ffi_type_double */
     "complex_float",  /* ffi_type_complex_float */
     "complex_double", /* ffi_type_complex_double */
   };
@@ -43,6 +45,8 @@ ffi_type *get_ffi_type(const char *type) {
     &ffi_type_uint16,         /* uint16 (unsigned 16-bit integer) */
     &ffi_type_uint32,         /* uint32 (unsigned 32-bit integer) */
     &ffi_type_uint64,         /* uint64 (unsigned 64-bit integer) */
+    &ffi_type_float,          /* float */
+    &ffi_type_double,         /* double */
     &ffi_type_complex_float,  /* complex float (complex single-precision floating-point number) */
     &ffi_type_complex_double, /* complex double (complex double-precision floating-point number) */
   };
@@ -55,9 +59,7 @@ ffi_type *get_ffi_type(const char *type) {
   return NULL; // Type not found
 }
 
-ffi_type *sm_ffi_type_from_symbol(sm_symbol *sym) {
-  return get_ffi_type(&(sym->name->content));
-}
+ffi_type *sm_ffi_type_from_symbol(sm_symbol *sym) { return get_ffi_type(&(sym->name->content)); }
 
 
 sm_object *sm_ffi_call(sm_ff_fun *fun, sm_object *input) {
@@ -130,5 +132,3 @@ bool sm_ff_fun_is_equal(sm_ff_fun *ff_fun1, sm_ff_fun *ff_fun2) {
 // Returns whether two ff_sigs match handle ptr
 // bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) { return ((void*)ff_sig1->cif) ==
 // ((void*)ff_sig2->cif); }
-
-
