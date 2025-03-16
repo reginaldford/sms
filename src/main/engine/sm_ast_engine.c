@@ -3541,8 +3541,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_error  *this_err = sm_new_error_from_expr(title, message, sme, NULL);
         RETURN_OBJ((sm_object *)this_err);
       }
-      sm_symbol      *input_type_sym = (sm_symbol *)return_obj;
-      const ffi_type *input_ffi_type = sm_ffi_type_from_symbol(input_type_sym);
+      sm_symbol *input_type_sym = (sm_symbol *)return_obj;
+      ffi_type  *input_ffi_type = sm_ffi_type_from_symbol(input_type_sym);
       if (!input_ffi_type) {
         sm_symbol *title   = sm_new_symbol("ffSigFailed", 11);
         sm_string *message = sm_new_fstring_at(
@@ -3567,7 +3567,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         sm_error  *this_err = sm_new_error_from_expr(title, message, sme, NULL);
         RETURN_OBJ((sm_object *)this_err);
       }
-      sm_expr *arg_types = (sm_expr *)return_obj;
+      sm_expr  *arg_types = (sm_expr *)return_obj;
+      ffi_type *ffi_arg_types[arg_types->size];
       for (size_t i = 0; i < arg_types->size; i++) {
         sm_object *current_arg = sm_expr_get_arg(arg_types, i);
         if (current_arg->my_type == SM_ERR_TYPE) {
@@ -3584,19 +3585,27 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
           sm_error  *this_err = sm_new_error_from_expr(title, message, sme, NULL);
           RETURN_OBJ((sm_object *)this_err);
         }
-        sm_symbol      *input_type_sym = (sm_symbol *)current_arg;
-        const ffi_type *input_ffi_type = sm_ffi_type_from_symbol(input_type_sym);
-        if (!input_ffi_type) {
+        sm_symbol *arg_type_sym = (sm_symbol *)current_arg;
+        ffi_type  *arg_ffi_type = sm_ffi_type_from_symbol(arg_type_sym);
+        if (!arg_ffi_type) {
           sm_symbol *title   = sm_new_symbol("ffSigFailed", 11);
           sm_string *message = sm_new_fstring_at(
             sms_heap, "First argument to ffSig: %s does not represent a valid type.",
-            &(input_type_sym->name->content));
+            &(arg_type_sym->name->content));
           sm_error *this_err = sm_new_error_from_expr(title, message, sme, NULL);
           RETURN_OBJ((sm_object *)this_err);
         }
-        // YOU ARE HERE
-        // now we store the type in an array
+        ffi_arg_types[i] = arg_ffi_type;
       }
+      // We populated ffi_arg_types, now to convert to ffi_cif
+      ffi_status status;
+      ffi_cif    cif;
+      if ((status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, 2, input_ffi_type, ffi_arg_types)) !=
+          FFI_OK) {
+        // Handle the ffi_status error.
+      }
+      sm_ff_sig *new_sig = sm_new_ff_sig(cif);
+      RETURN_OBJ((sm_object *)new_sig);
 
       break;
     }

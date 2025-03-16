@@ -18,7 +18,7 @@ struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif) {
 }
 
 
-const ffi_type *get_ffi_type(const char *type) {
+ffi_type *get_ffi_type(const char *type) {
   const char *valid_type_strings[] = {
     "void",           /* ffi_type_void */
     "pointer",        /* ffi_type_pointer */
@@ -36,7 +36,7 @@ const ffi_type *get_ffi_type(const char *type) {
   // Define your array of ffi_type pointers
 
   /* Array of FFI type pointers */
-  const ffi_type *valid_types[] = {
+  ffi_type *valid_types[] = {
     &ffi_type_void,           /* void */
     &ffi_type_pointer,        /* pointer */
     &ffi_type_uint8,          /* uint8 (unsigned 8-bit integer) */
@@ -55,7 +55,7 @@ const ffi_type *get_ffi_type(const char *type) {
   return NULL; // Type not found
 }
 
-const ffi_type *sm_ffi_type_from_symbol(sm_symbol *sym) {
+ffi_type *sm_ffi_type_from_symbol(sm_symbol *sym) {
   return get_ffi_type(&(sym->name->content));
 }
 
