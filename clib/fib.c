@@ -1,4 +1,4 @@
-#include "../src/main/sms.h"
+#include "src/main/sms.h"
 #include "stdio.h"
 // Shared object example
 // Example of the unwrapping necessary to access a raw value, like a double (f64)
