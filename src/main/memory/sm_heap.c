@@ -166,9 +166,9 @@ void sm_dump_and_count() {
   char       fname[20];
   static int index     = 1;
   int        index_len = log(index) / log(10);
-  snprintf(fname, 12 + index_len, "current_%i.mem", index);
+  snprintf(fname, 13 + index_len, "current_%i.mem", index);
   sm_mem_dump(sms_heap, fname);
-  snprintf(fname, 10 + index_len, "other_%i.mem", index);
+  snprintf(fname, 11 + index_len, "other_%i.mem", index);
   if (sms_other_heap)
     sm_mem_dump(sms_other_heap, fname);
   index++;
