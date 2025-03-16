@@ -50,9 +50,9 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_SO_FUN_TYPE: {
-    sm_so_fun *f                        = (sm_so_fun *)fun;
-    sm_object *(*ff)(sm_object * input) = f->function;
-    sm_object *output                   = ff((sm_object *)sf);
+    sm_so_fun *f                       = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object *input) = f->function;
+    sm_object *output                  = ff((sm_object *)sf);
     RETURN_OBJ(output);
     break;
   }
@@ -3528,8 +3528,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       eager_type_check(sme, 0, SM_SYMBOL_TYPE, current_cx, sf);
       if (return_obj->my_type == SM_ERR_TYPE) {
-        // we have an error in this block caused by error in another block
-        // we should make a new error and chain it
         sm_symbol *title = sm_new_symbol("ffSigFailed", 11);
         sm_string *message =
           sm_new_fstring_at(sms_heap, "Error from evaluating first argument of ffSig.", sme->size);
@@ -3546,15 +3544,59 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       sm_symbol      *input_type_sym = (sm_symbol *)return_obj;
       const ffi_type *input_ffi_type = sm_ffi_type_from_symbol(input_type_sym);
       if (!input_ffi_type) {
-        sm_symbol *title = sm_new_symbol("ffSigFailed", 11);
-        sm_string *message =
-          sm_new_string(56, "First argument to ffSig does not represent a valid type.");
+        sm_symbol *title   = sm_new_symbol("ffSigFailed", 11);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "First argument to ffSig: %s does not represent a valid type.",
+          &(input_type_sym->name->content));
         sm_error *this_err = sm_new_error_from_expr(title, message, sme, NULL);
         RETURN_OBJ((sm_object *)this_err);
       }
       // So far, we have validated the input type. Now for the other types
-      // YOU ARE HERE
-
+      eager_type_check(sme, 1, SM_EXPR_TYPE, current_cx, sf);
+      if (return_obj->my_type == SM_ERR_TYPE) {
+        sm_symbol *title = sm_new_symbol("ffSigFailed", 11);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Error from evaluating second argument of ffSig.", sme->size);
+        sm_error *this_err =
+          sm_new_error_from_previous(title, message, sme, (sm_error *)return_obj);
+        RETURN_OBJ((sm_object *)this_err);
+      }
+      if (return_obj->my_type != SM_EXPR_TYPE) {
+        sm_symbol *title    = sm_new_symbol("ffSigFailed", 11);
+        sm_string *message  = sm_new_string(43, "First argument to ffSig should be an expression.");
+        sm_error  *this_err = sm_new_error_from_expr(title, message, sme, NULL);
+        RETURN_OBJ((sm_object *)this_err);
+      }
+      sm_expr *arg_types = (sm_expr *)return_obj;
+      for (size_t i = 0; i < arg_types->size; i++) {
+        sm_object *current_arg = sm_expr_get_arg(arg_types, i);
+        if (current_arg->my_type == SM_ERR_TYPE) {
+          sm_symbol *title   = sm_new_symbol("ffSigFailed", 11);
+          sm_string *message = sm_new_fstring_at(
+            sms_heap, "Error from evaluating second argument of ffSig.", sme->size);
+          sm_error *this_err =
+            sm_new_error_from_previous(title, message, sme, (sm_error *)current_arg);
+          RETURN_OBJ((sm_object *)this_err);
+        }
+        if (current_arg->my_type != SM_SYMBOL_TYPE) {
+          sm_symbol *title    = sm_new_symbol("ffSigFailed", 11);
+          sm_string *message  = sm_new_string(43, "First argument to ffSig should be a symbol.");
+          sm_error  *this_err = sm_new_error_from_expr(title, message, sme, NULL);
+          RETURN_OBJ((sm_object *)this_err);
+        }
+        sm_symbol      *input_type_sym = (sm_symbol *)current_arg;
+        const ffi_type *input_ffi_type = sm_ffi_type_from_symbol(input_type_sym);
+        if (!input_ffi_type) {
+          sm_symbol *title   = sm_new_symbol("ffSigFailed", 11);
+          sm_string *message = sm_new_fstring_at(
+            sms_heap, "First argument to ffSig: %s does not represent a valid type.",
+            &(input_type_sym->name->content));
+          sm_error *this_err = sm_new_error_from_expr(title, message, sme, NULL);
+          RETURN_OBJ((sm_object *)this_err);
+        }
+        // YOU ARE HERE
+        // now we store the type in an array
+      }
 
       break;
     }
