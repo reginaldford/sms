@@ -10,45 +10,28 @@ unsigned char foo(unsigned int x, float y) {
 }
 
 // Create a new ffi signature object
-struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif) {
-  struct sm_ff_sig *new_ff_sig = sm_malloc(sizeof(struct sm_ff_sig));
-  new_ff_sig->my_type          = SM_FF_SIG_TYPE;
-  new_ff_sig->cif              = cif;
+struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif, uint32_t num_args) {
+  struct sm_ff_sig *new_ff_sig =
+    sm_malloc(sizeof(struct sm_ff_sig) + sizeof(ffi_type *) * num_args);
+  new_ff_sig->my_type = SM_FF_SIG_TYPE;
+  new_ff_sig->cif     = cif;
   return new_ff_sig;
 }
 
-
+// Array of FFI type names
 ffi_type *get_ffi_type(const char *type) {
   const char *valid_type_strings[] = {
-    "void",           /* ffi_type_void */
-    "pointer",        /* ffi_type_pointer */
-    "uint8",          /* ffi_type_uint8 */
-    "uint16",         /* ffi_type_uint16 */
-    "uint32",         /* ffi_type_uint32 */
-    "uint64",         /* ffi_type_uint64 */
-    "float",          /* ffi_type_float */
-    "double",         /* ffi_type_double */
-    "complex_float",  /* ffi_type_complex_float */
-    "complex_double", /* ffi_type_complex_double */
+    "void",   "pointer", "uint8",  "uint16",        "uint32",
+    "uint64", "float",   "double", "complex_float", "complex_double",
   };
-
 
   size_t num_types = sizeof(valid_type_strings) / sizeof(valid_type_strings[0]);
 
-  // Define your array of ffi_type pointers
-
-  /* Array of FFI type pointers */
+  // Array of FFI type pointers, associated with the names defined above
   ffi_type *valid_types[] = {
-    &ffi_type_void,           /* void */
-    &ffi_type_pointer,        /* pointer */
-    &ffi_type_uint8,          /* uint8 (unsigned 8-bit integer) */
-    &ffi_type_uint16,         /* uint16 (unsigned 16-bit integer) */
-    &ffi_type_uint32,         /* uint32 (unsigned 32-bit integer) */
-    &ffi_type_uint64,         /* uint64 (unsigned 64-bit integer) */
-    &ffi_type_float,          /* float */
-    &ffi_type_double,         /* double */
-    &ffi_type_complex_float,  /* complex float (complex single-precision floating-point number) */
-    &ffi_type_complex_double, /* complex double (complex double-precision floating-point number) */
+    &ffi_type_void,          &ffi_type_pointer,        &ffi_type_uint8, &ffi_type_uint16,
+    &ffi_type_uint32,        &ffi_type_uint64,         &ffi_type_float, &ffi_type_double,
+    &ffi_type_complex_float, &ffi_type_complex_double,
   };
   // We search through teh string list, return the correlating ffi_type
   for (size_t i = 0; i < num_types; ++i) {
@@ -60,7 +43,6 @@ ffi_type *get_ffi_type(const char *type) {
 }
 
 ffi_type *sm_ffi_type_from_symbol(sm_symbol *sym) { return get_ffi_type(&(sym->name->content)); }
-
 
 sm_object *sm_ffi_call(sm_ff_fun *fun, sm_object *input) {
   ffi_cif    cif;
@@ -90,7 +72,6 @@ sm_object *sm_ffi_call(sm_ff_fun *fun, sm_object *input) {
   return 0;
 }
 
-
 // If fake is false,
 // Prints to to_str a string describing the ff_sig
 // Returns the length regardless
@@ -99,14 +80,14 @@ uint32_t sm_ff_sig_sprint(sm_ff_sig *self, char *to_str, bool fake) {
     return sprintf(to_str, "(ff_sig@%p)", &self->cif);
   else {
     char tempBuffer[32];
-    return sprintf(tempBuffer, "(ff_sig@%p)", &self->cif);
+    return snprintf(tempBuffer, 32, "(ff_sig@%p)", &self->cif);
   }
 }
 
 // Create a new shard object
 sm_ff_fun *sm_new_ff_fun(void *handle) {
   struct sm_ff_fun *new_ff_fun = sm_malloc(sizeof(sm_ff_fun));
-  new_ff_fun->my_type          = SM_FF_FUN_TYPE;
+  new_ff_fun->my_type          = SM_FF_TYPE;
   new_ff_fun->fun              = handle;
   return new_ff_fun;
 }
@@ -119,7 +100,7 @@ uint32_t sm_ff_fun_sprint(sm_ff_fun *self, char *to_str, bool fake) {
     return sprintf(to_str, "(ff_fun@%p)", self->fun);
   else {
     char tempBuffer[32];
-    return sprintf(tempBuffer, "(ff_fun@%p)", self->fun);
+    return snprintf(tempBuffer, 32, "(ff_fun@%p)", self->fun);
   }
 }
 
@@ -128,7 +109,6 @@ bool sm_ff_fun_is_equal(sm_ff_fun *ff_fun1, sm_ff_fun *ff_fun2) {
   return ff_fun1->fun == ff_fun2->fun;
 }
 
-
 // Returns whether two ff_sigs match handle ptr
-// bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) { return ((void*)ff_sig1->cif) ==
-// ((void*)ff_sig2->cif); }
+// bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) { return
+// ((void*)ff_sig1->cif)((void*)ff_sig2->cif); }
