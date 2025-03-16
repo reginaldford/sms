@@ -176,7 +176,7 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
     else
       len = 7 + strlen(test_zone_path) + strlen(chapter_name(chapter)) + 1;
 
-    snprintf(buf, len, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
+    snprintf(buf, len + 1, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
     // If test_zone_path is empty string, then we need to remove the leading "/" from buf
     if (test_zone_path[0] == '\0') {
       for (int i = 0; buf[i] != '\0' && i <= 62; i++) {

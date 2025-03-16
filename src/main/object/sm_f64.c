@@ -31,13 +31,13 @@ sm_string *sm_f64_to_string(sm_f64 *self) {
 uint32_t sm_f64_sprint(sm_f64 *self, char *buffer, bool fake) {
   char internal_buf[25];
   if (!fake)
-    snprintf(buffer, 24, "%.16g", self->value);
+    snprintf(buffer, 25, "%.16g", self->value);
   else {
-    snprintf(internal_buf, 24, "%.16g", self->value);
+    snprintf(internal_buf, 25, "%.16g", self->value);
     buffer = internal_buf;
   }
   uint16_t count = 0;
-  while (count < 24 && buffer[count] != '\0')
+  while (count < 25 && buffer[count] != '\0')
     count++;
   return count;
 }
