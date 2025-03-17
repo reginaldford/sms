@@ -21,8 +21,8 @@ struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif, uint32_t num_args) {
 // Array of FFI type names
 ffi_type *get_ffi_type(const char *type) {
   const char *valid_type_strings[] = {
-    "void",   "pointer", "uint8",  "uint16",        "uint32",
-    "uint64", "float",   "double", "complex_float", "complex_double",
+    "void",   "pointer", "uint8",  "uint16", "uint32", "uint64",        "sint8",
+    "uint16", "uint32",  "sint64", "float",  "double", "complex_float", "complex_double",
   };
 
   size_t num_types = sizeof(valid_type_strings) / sizeof(valid_type_strings[0]);
@@ -30,7 +30,8 @@ ffi_type *get_ffi_type(const char *type) {
   // Array of FFI type pointers, associated with the names defined above
   ffi_type *valid_types[] = {
     &ffi_type_void,          &ffi_type_pointer,        &ffi_type_uint8, &ffi_type_uint16,
-    &ffi_type_uint32,        &ffi_type_uint64,         &ffi_type_float, &ffi_type_double,
+    &ffi_type_uint32,        &ffi_type_uint64,         &ffi_type_sint8, &ffi_type_sint16,
+    &ffi_type_sint32,        &ffi_type_sint64,         &ffi_type_float, &ffi_type_double,
     &ffi_type_complex_float, &ffi_type_complex_double,
   };
   // We search through teh string list, return the correlating ffi_type
