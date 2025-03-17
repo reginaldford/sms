@@ -3519,7 +3519,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FF_SIG_EXPR: {
       // First arg should be a symbol for the input type.
       // Second arg is Expected to be an array with the output type symbols:
-      // void, pointer, uint8/16/32/64, complet_float/double
+      // void, pointer, uint8/16/32/64, sint8/16/32/64, complet_float/double
       if (sme->size != 2) {
         sm_symbol *title   = sm_new_symbol("ffSigFailed", 11);
         sm_string *message = sm_new_fstring_at(
