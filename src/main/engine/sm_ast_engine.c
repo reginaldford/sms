@@ -57,9 +57,13 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_FF_TYPE: {
-    // cif, FFI_FN(f), &ouput, arg_values
-    // ffi_call(&cif, FFI_FN(foo), &result, arg_values);
-    // RETURN_OBJ(output);
+    sm_ff *ff = (sm_ff *)fun;
+    // based on the output type, I have to make the right space (for c usage)
+    sm_f64 *space = sm_new_f64(0);
+    void   *arg_values;
+    ffi_call(&ff->cif, FFI_FN(ff->fptr), &space, arg_values);
+    // Now I have to convert the c-space to a real sms object based on the signature
+    RETURN_OBJ((sm_object *)sms_false);
     break;
   }
   default:
@@ -3635,7 +3639,8 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (sig->my_type == SM_ERR_TYPE) {
         RETURN_OBJ(((sm_object *)sig));
       }
-      sm_ff *ff = sm_new_ff(fname, sig);
+      void  *fptr = dlsym(so->handle, &fname->content);
+      sm_ff *ff   = sm_new_ff(fptr, fname, sig);
       RETURN_OBJ((sm_object *)ff);
       break;
     }
