@@ -22,7 +22,7 @@ struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif, uint32_t num_args) {
 ffi_type *get_ffi_type(const char *type) {
   const char *valid_type_strings[] = {
     "void",   "pointer", "uint8",  "uint16", "uint32", "uint64",        "sint8",
-    "uint16", "uint32",  "sint64", "float",  "double", "complex_float", "complex_double",
+    "sint16", "sint32",  "sint64", "float",  "double", "complex_float", "complex_double",
   };
 
   size_t num_types = sizeof(valid_type_strings) / sizeof(valid_type_strings[0]);
