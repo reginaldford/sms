@@ -56,6 +56,12 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     RETURN_OBJ(output);
     break;
   }
+  case SM_FF_TYPE: {
+    // cif, FFI_FN(f), &ouput, arg_values
+    // ffi_call(&cif, FFI_FN(foo), &result, arg_values);
+    // RETURN_OBJ(output);
+    break;
+  }
   default:
     RETURN_OBJ((sm_object *)fun);
   }
@@ -3624,17 +3630,13 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (fname->my_type == SM_ERR_TYPE) {
         RETURN_OBJ(((sm_object *)fname));
       }
-      eager_type_check(sme, 2, SM_STRING_TYPE, current_cx, sf);
+      eager_type_check(sme, 2, SM_FF_SIG_TYPE, current_cx, sf);
       sm_ff_sig *sig = (sm_ff_sig *)return_obj;
       if (sig->my_type == SM_ERR_TYPE) {
         RETURN_OBJ(((sm_object *)sig));
       }
-      sm_ff *ff    = sm_malloc(sizeof(ff) + sizeof(void *) * sig->num_args);
-      ff->my_type  = SM_FF_TYPE;
-      ff->num_args = sig->num_args;
-      ff->cif      = sig->cif;
-      ff->name     = fname;
-      memcpy((void *)((&ff) + 1), (void *)((&sig) + 1), sig->num_args * sizeof(void *));
+      sm_ff *ff = sm_new_ff(fname, sig);
+      RETURN_OBJ((sm_object *)ff);
       break;
     }
 
