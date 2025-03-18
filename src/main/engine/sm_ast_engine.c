@@ -3613,6 +3613,28 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_FF_EXPR: {
+      // Expecting So, name, signature
+      eager_type_check(sme, 0, SM_SO_TYPE, current_cx, sf);
+      sm_so *so = (sm_so *)return_obj;
+      if (so->my_type == SM_ERR_TYPE) {
+        RETURN_OBJ(((sm_object *)so));
+      }
+      eager_type_check(sme, 1, SM_STRING_TYPE, current_cx, sf);
+      sm_string *fname = (sm_string *)return_obj;
+      if (fname->my_type == SM_ERR_TYPE) {
+        RETURN_OBJ(((sm_object *)fname));
+      }
+      eager_type_check(sme, 2, SM_STRING_TYPE, current_cx, sf);
+      sm_ff_sig *sig = (sm_ff_sig *)return_obj;
+      if (sig->my_type == SM_ERR_TYPE) {
+        RETURN_OBJ(((sm_object *)sig));
+      }
+      sm_ff *ff    = sm_malloc(sizeof(ff) + sizeof(void *) * sig->num_args);
+      ff->my_type  = SM_FF_TYPE;
+      ff->num_args = sig->num_args;
+      ff->cif      = sig->cif;
+      ff->name     = fname;
+      memcpy((void *)((&ff) + 1), (void *)((&sig) + 1), sig->num_args * sizeof(void *));
       break;
     }
 
