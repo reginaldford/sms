@@ -50,9 +50,9 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_SO_FUN_TYPE: {
-    sm_so_fun *f                       = (sm_so_fun *)fun;
-    sm_object *(*ff)(sm_object *input) = f->function;
-    sm_object *output                  = ff((sm_object *)sf);
+    sm_so_fun *f                        = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object * input) = f->function;
+    sm_object *output                   = ff((sm_object *)sf);
     RETURN_OBJ(output);
     break;
   }
