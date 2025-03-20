@@ -36,5 +36,3 @@ uint32_t sm_cx_size(sm_cx *self);
 void sm_cx_clear(sm_cx *self);
 /// Import all key-value pairs from cxFrom to cxTo
 void sm_cx_import(sm_cx *cxFrom, sm_cx *cxTo);
-/// Set the parent context to cx, if the object has a 'parent cx' ptr
-void sm_cx_contextualize(sm_object *input, sm_cx *cx);

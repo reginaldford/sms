@@ -34,18 +34,18 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     sm_object *content = fun->content;
     sm_object *result;
 
-  sm_cx     *new_cx = sm_new_cx(fun->parent);
-  if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
-    sm_expr *content_sme = (sm_expr *)fun->content;
-    for (uint32_t i = 1; i < content_sme->size; i++) {
-      sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
-      result = return_obj;
-      if (result->my_type == SM_RETURN_TYPE)
-        RETURN_OBJ(((sm_return *)result)->address);
-    }
-    RETURN_OBJ(result);
-  } else
-    sm_engine_eval(content, new_cx, sf);
+    sm_cx *new_cx = sm_new_cx(fun->parent);
+    if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
+      sm_expr *content_sme = (sm_expr *)fun->content;
+      for (uint32_t i = 1; i < content_sme->size; i++) {
+        sm_engine_eval(sm_expr_get_arg(content_sme, i), new_cx, sf);
+        result = return_obj;
+        if (result->my_type == SM_RETURN_TYPE)
+          RETURN_OBJ(((sm_return *)result)->address);
+      }
+      RETURN_OBJ(result);
+    } else
+      sm_engine_eval(content, new_cx, sf);
     return;
     break;
   }
@@ -3590,13 +3590,13 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_POINTER_TYPE: {
-    sm_heap    *pointeeH = sm_is_within_heap(input, sms_heap) ? sms_other_heap : sms_heap;
+    sm_heap    *pointeeH     = sm_is_within_heap(input, sms_heap) ? sms_other_heap : sms_heap;
     sm_heap    *oppositeHeap = pointeeH == sms_heap ? sms_other_heap : sms_heap;
-    sm_pointer *p        = (sm_pointer *)input;
-    sm_object  *pointee  = sm_pointer_deref(p,pointeeH); 
+    sm_pointer *p            = (sm_pointer *)input;
+    sm_object  *pointee      = sm_pointer_deref(p, pointeeH);
     // copy + inflate = deep copy
     sm_copy(pointee);
-    sm_inflate_heap(oppositeHeap,pointeeH); 
+    sm_inflate_heap(oppositeHeap, pointeeH);
     // Now, we do the evaluation that was initially intended
     sm_engine_eval(pointee, current_cx, sf);
     return;
