@@ -1,4 +1,10 @@
+#!./bin/sms
 {
-  let f = (x) => {let x = x; put(str( x ));};
-  f(3);
+  let so=soLoad("./clib/blah.o");
+  putLn(str(so));
+  let sig = ffSig(@sint32,[@double]);
+  putLn(str(sig));
+  let f=ff(so,"fib",sig);
+  putLn(str(f));
+  putLn(str(f(10)));
 };
