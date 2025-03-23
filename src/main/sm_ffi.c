@@ -4,11 +4,10 @@
 #include "sms.h"
 
 // Create a new ffi signature object
-struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif, uint32_t num_args) {
-  struct sm_ff_sig *new_ff_sig =
-    sm_malloc(sizeof(struct sm_ff_sig) + sizeof(ffi_type *) * num_args);
-  new_ff_sig->my_type = SM_FF_SIG_TYPE;
-  new_ff_sig->cif     = cif;
+struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif) {
+  struct sm_ff_sig *new_ff_sig = sm_malloc(sizeof(struct sm_ff_sig));
+  new_ff_sig->my_type          = SM_FF_SIG_TYPE;
+  new_ff_sig->cif              = cif;
   return new_ff_sig;
 }
 
@@ -19,7 +18,7 @@ struct sm_ff *sm_new_ff(void *fptr, sm_string *fname, sm_ff_sig *sig) {
   ff->name     = fname;
   ff->num_args = sig->num_args;
   ff->cif      = sig->cif;
-  memcpy((void *)(ff + 1), (void *)(sig + 1), sig->num_args * sizeof(void *));
+  memcpy((void *)(ff + 1), (void *)(sig + 1), (sig->num_args) * sizeof(void *));
   return ff;
 }
 
