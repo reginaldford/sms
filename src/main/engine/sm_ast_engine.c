@@ -34,6 +34,34 @@ double fib_recursive(int n) {
   return fib_recursive(n - 1) + fib_recursive(n - 2);
 }
 
+void print_cif(const ffi_cif *cif) {
+  printf("CIF contents:\n");
+  printf("  abi: %d\n", cif->abi);
+  printf("  nargs: %u\n", cif->nargs);
+
+  printf("  arg_types:");
+  if (cif->arg_types == NULL) {
+    printf(" NULL\n");
+  } else {
+    printf(" [");
+    for (unsigned i = 0; i < cif->nargs; ++i) {
+      printf("%p", cif->arg_types[i]);
+      if (i < cif->nargs - 1) {
+        printf(", ");
+      }
+    }
+    printf("]\n");
+  }
+
+  printf("  rtype: %p\n", cif->rtype);
+  printf("  bytes: %u\n", cif->bytes);
+  printf("  flags: %u\n", cif->flags);
+#ifdef FFI_EXTRA_CIF_FIELDS
+  printf("  Extra fields defined.\n");
+#endif
+}
+
+
 // Execute a function
 inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   switch (fun->my_type) {
@@ -69,17 +97,20 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     int       tmp_arg = (int)(((sm_f64 *)sm_expr_get_arg(sf, 0))->value);
     void     *args[1] = {&tmp_arg};
     ffi_type *arg_types[1];
-    arg_types[0]      = &ffi_type_sint32;
-    ff->cif.arg_types = arg_types;
+    arg_types[0] = &ffi_type_sint32;
 
-    double return_val = 0;
-    // ff->cif.rtype        = &ffi_type_double;
-    if (ffi_prep_cif(&ff->cif, FFI_DEFAULT_ABI, 1, &ffi_type_double, arg_types) != FFI_OK) {
+    double  return_val = 0;
+    ffi_cif c;
+    if (ffi_prep_cif(&c, FFI_DEFAULT_ABI, 1, &ffi_type_double, arg_types) != FFI_OK) {
       printf("prep cif failed.\n");
     }
 
-    // ffi_call(&ff->cif, FFI_FN(ff->fptr), &return_val, args);
-    ffi_call(&ff->cif, &fib_recursive, &return_val, args);
+    printf("c:\n");
+    print_cif(&c);
+    printf("ff->cif:\n");
+    print_cif(&ff->cif);
+    //ffi_call(&c, FFI_FN(ff->fptr), &return_val, args); // doesnt work
+    ffi_call(&c, FFI_FN(&fib_recursive), &return_val, args); //does work
 
     // Now I have to convert the c-space to a real sms object based on the signature
     RETURN_OBJ((sm_object *)sm_new_f64(return_val));
@@ -3635,6 +3666,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       ffi_cif    cif;
       if ((status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, arg_types->size, input_ffi_type,
                                  ffi_arg_types)) != FFI_OK) {
+        printf("line %i : prep cif failed\n", __LINE__);
         // TODO: Handle the ffi_status error.
       }
       sm_ff_sig *new_sig = sm_new_ff_sig(cif);
