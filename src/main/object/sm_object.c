@@ -147,7 +147,7 @@ uint32_t sm_sizeof(sm_object *obj1) {
   case SM_FF_TYPE:
     return sizeof(sm_ff) + sizeof(ffi_type *) * ((sm_ff *)obj1)->num_args;
   case SM_FF_SIG_TYPE:
-    return sizeof(sm_ff_sig) + sizeof(ffi_type *) * ((sm_ff_sig *)obj1)->num_args;
+    return sizeof(sm_ff_sig);
     ;
   default:
     return 0;

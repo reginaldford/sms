@@ -2,9 +2,9 @@
 {
   let so=soLoad("./clib/blah.o");
   putLn(str(so));
-  let sig = ffSig(@sint32,[@double]);
+  let sig = ffSig(@double,[@sint32]);
   putLn(str(sig));
-  let f=ff(so,"fib",sig);
+  let f=ff(so,"fib_recursive",sig);
   putLn(str(f));
   putLn(str(f(10)));
 };

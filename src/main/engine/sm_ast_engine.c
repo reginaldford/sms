@@ -27,6 +27,13 @@ static inline bool check_gc() {
   return false;
 }
 
+
+double fib_recursive(int n) {
+  if (n < 2)
+    return 1;
+  return fib_recursive(n - 1) + fib_recursive(n - 2);
+}
+
 // Execute a function
 inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   switch (fun->my_type) {
@@ -59,19 +66,20 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   case SM_FF_TYPE: {
     sm_ff *ff = (sm_ff *)fun;
 
-    int   tmp_arg     = (int)(((sm_f64 *)sm_expr_get_arg(sf, 0))->value);
-    int  *tmp_arg_ptr = &tmp_arg;
-    void *args        = (void *)tmp_arg_ptr;
-
+    int       tmp_arg = (int)(((sm_f64 *)sm_expr_get_arg(sf, 0))->value);
+    void     *args[1] = {&tmp_arg};
     ffi_type *arg_types[1];
-    arg_types[0]      = &ffi_type_sint;
+    arg_types[0]      = &ffi_type_sint32;
     ff->cif.arg_types = arg_types;
 
-    double    return_val = 0;
-    ffi_type *rtype      = &ffi_type_double;
-    ff->cif.rtype        = rtype;
+    double return_val = 0;
+    // ff->cif.rtype        = &ffi_type_double;
+    if (ffi_prep_cif(&ff->cif, FFI_DEFAULT_ABI, 1, &ffi_type_double, arg_types) != FFI_OK) {
+      printf("prep cif failed.\n");
+    }
 
-    ffi_call(&ff->cif, ff->fptr, &return_val, args);
+    // ffi_call(&ff->cif, FFI_FN(ff->fptr), &return_val, args);
+    ffi_call(&ff->cif, &fib_recursive, &return_val, args);
 
     // Now I have to convert the c-space to a real sms object based on the signature
     RETURN_OBJ((sm_object *)sm_new_f64(return_val));
@@ -3627,9 +3635,9 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       ffi_cif    cif;
       if ((status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, arg_types->size, input_ffi_type,
                                  ffi_arg_types)) != FFI_OK) {
-        // Handle the ffi_status error.
+        // TODO: Handle the ffi_status error.
       }
-      sm_ff_sig *new_sig = sm_new_ff_sig(cif, arg_types->size);
+      sm_ff_sig *new_sig = sm_new_ff_sig(cif);
       RETURN_OBJ((sm_object *)new_sig);
       break;
     }
@@ -3650,8 +3658,14 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       if (sig->my_type == SM_ERR_TYPE) {
         RETURN_OBJ(((sm_object *)sig));
       }
-      void  *fptr = dlsym(so->handle, &fname->content);
-      sm_ff *ff   = sm_new_ff(fptr, fname, sig);
+      void *fptr = dlsym(so->handle, &fname->content);
+      if (!fptr) {
+        // TODO: handle correctly
+        printf("obtaining fptr failed!");
+        exit(1);
+      }
+
+      sm_ff *ff = sm_new_ff(fptr, fname, sig);
       RETURN_OBJ((sm_object *)ff);
       break;
     }
