@@ -109,8 +109,8 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     print_cif(&c);
     printf("ff->cif:\n");
     print_cif(&ff->cif);
-    //ffi_call(&c, FFI_FN(ff->fptr), &return_val, args); // doesnt work
-    ffi_call(&c, FFI_FN(&fib_recursive), &return_val, args); //does work
+    // ffi_call(&c, FFI_FN(ff->fptr), &return_val, args); // doesnt work
+    ffi_call(&c, FFI_FN(&fib_recursive), &return_val, args); // does work
 
     // Now I have to convert the c-space to a real sms object based on the signature
     RETURN_OBJ((sm_object *)sm_new_f64(return_val));
@@ -3669,7 +3669,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         printf("line %i : prep cif failed\n", __LINE__);
         // TODO: Handle the ffi_status error.
       }
-      sm_ff_sig *new_sig = sm_new_ff_sig(cif);
+      sm_ff_sig *new_sig = sm_new_ff_sig(cif, arg_types->size);
       RETURN_OBJ((sm_object *)new_sig);
       break;
     }
