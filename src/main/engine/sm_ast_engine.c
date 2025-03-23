@@ -27,41 +27,6 @@ static inline bool check_gc() {
   return false;
 }
 
-
-double fib_recursive(int n) {
-  if (n < 2)
-    return 1;
-  return fib_recursive(n - 1) + fib_recursive(n - 2);
-}
-
-void print_cif(const ffi_cif *cif) {
-  printf("CIF contents:\n");
-  printf("  abi: %d\n", cif->abi);
-  printf("  nargs: %u\n", cif->nargs);
-
-  printf("  arg_types:");
-  if (cif->arg_types == NULL) {
-    printf(" NULL\n");
-  } else {
-    printf(" [");
-    for (unsigned i = 0; i < cif->nargs; ++i) {
-      printf("%p", cif->arg_types[i]);
-      if (i < cif->nargs - 1) {
-        printf(", ");
-      }
-    }
-    printf("]\n");
-  }
-
-  printf("  rtype: %p\n", cif->rtype);
-  printf("  bytes: %u\n", cif->bytes);
-  printf("  flags: %u\n", cif->flags);
-#ifdef FFI_EXTRA_CIF_FIELDS
-  printf("  Extra fields defined.\n");
-#endif
-}
-
-
 // Execute a function
 inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   switch (fun->my_type) {
@@ -99,20 +64,14 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     ffi_type *arg_types[1];
     arg_types[0] = &ffi_type_sint32;
 
-    double  return_val = 0;
-    ffi_cif c;
-    if (ffi_prep_cif(&c, FFI_DEFAULT_ABI, 1, &ffi_type_double, arg_types) != FFI_OK) {
-      printf("prep cif failed.\n");
-    }
+    double return_val = 0;
 
-    printf("c:\n");
-    print_cif(&c);
-    printf("ff->cif:\n");
-    print_cif(&ff->cif);
-    // ffi_call(&c, FFI_FN(ff->fptr), &return_val, args); // doesnt work
-    ffi_call(&c, FFI_FN(&fib_recursive), &return_val, args); // does work
+    ffi_type **ptr_after_ff = (ffi_type **)(ff + 1);
+    // fix cif arg types on ff TODO move to gc
+    ff->cif.arg_types = ptr_after_ff;
+    ff->cif.rtype     = &ffi_type_double;
+    ffi_call(&ff->cif, FFI_FN(ff->fptr), &return_val, args);
 
-    // Now I have to convert the c-space to a real sms object based on the signature
     RETURN_OBJ((sm_object *)sm_new_f64(return_val));
     break;
   }
@@ -2306,9 +2265,9 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
     case SM_FUN_CALL_EXPR: {
       return_obj = (sm_object *)sm_expr_get_arg(sme, 1);
       sm_engine_eval(return_obj, current_cx, sf);
-      sm_expr *new_args = (sm_expr *)return_obj;
-      return_obj        = sm_expr_get_arg(sme, 0);
-      sm_engine_eval(return_obj, current_cx, sf);
+      sm_expr   *new_args         = (sm_expr *)return_obj;
+      sm_object *function_to_call = sm_expr_get_arg(sme, 0);
+      sm_engine_eval(function_to_call, current_cx, sf);
       if (return_obj->my_type == SM_ERR_TYPE)
         return; // return the return_obj
       execute_fun((sm_fun *)return_obj, current_cx, new_args);
@@ -2316,15 +2275,10 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       break;
     }
     case SM_BLOCK_EXPR: {
-      uint32_t i    = 1;
       return_obj    = (sm_object *)sms_true;
       sm_cx *new_cx = sm_new_cx(current_cx);
-      while (i < sme->size) {
+      for (uint32_t i = 1; i < sme->size && return_obj->my_type != SM_RETURN_TYPE; i++)
         sm_engine_eval(sm_expr_get_arg(sme, i), new_cx, sf);
-        if (return_obj->my_type == SM_RETURN_TYPE)
-          return;
-        i++;
-      }
       return;
       break;
     }
@@ -3696,7 +3650,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         printf("obtaining fptr failed!");
         exit(1);
       }
-
       sm_ff *ff = sm_new_ff(fptr, fname, sig);
       RETURN_OBJ((sm_object *)ff);
       break;
