@@ -7,4 +7,5 @@
   let f=ff(so,"fib_recursive",sig);
   putLn(str(f));
   putLn(str(f(11)));
+  putLn(str(f("11")));
 };
