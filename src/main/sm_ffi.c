@@ -4,25 +4,25 @@
 #include "sms.h"
 
 // Create a new ffi signature object
-struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif, uint32_t num_args) {
+struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif) {
   struct sm_ff_sig *new_ff_sig =
-    sm_malloc(sizeof(struct sm_ff_sig) + sizeof(ffi_type *) * num_args);
-  new_ff_sig->my_type  = SM_FF_SIG_TYPE;
-  new_ff_sig->cif      = cif;
-  new_ff_sig->num_args = num_args;
-  memcpy(new_ff_sig + 1, cif.arg_types, num_args * sizeof(void *));
+    sm_malloc(sizeof(struct sm_ff_sig) + sizeof(ffi_type *) * cif.nargs);
+  new_ff_sig->my_type = SM_FF_SIG_TYPE;
+  new_ff_sig->cif     = cif;
+  memcpy(new_ff_sig + 1, cif.arg_types, cif.nargs * sizeof(ffi_type *));
   return new_ff_sig;
 }
 
 struct sm_ff *sm_new_ff(void *fptr, sm_string *fname, sm_ff_sig *sig) {
-  sm_ff *ff    = sm_malloc(sizeof(sm_ff) + sizeof(void *) * sig->num_args);
-  ff->my_type  = SM_FF_TYPE;
-  ff->fptr     = fptr;
-  ff->name     = fname;
-  ff->num_args = sig->num_args;
-  ff->cif      = sig->cif;
+  sm_ff *ff   = sm_malloc(sizeof(struct sm_ff) + sizeof(ffi_type *) * sig->cif.nargs);
+  ff->my_type = SM_FF_TYPE;
+  ff->fptr    = fptr;
+  ff->name    = fname;
+  ff->cif     = sig->cif;
   // Copy the arg_types pointers after the struct
-  memcpy(ff + 1, sig + 1, sig->num_args * sizeof(void *));
+  memcpy(ff + 1, sig + 1, sig->cif.nargs * sizeof(ffi_type *));
+  // Update the arg_types ptr on the cif
+  ff->cif.arg_types = (ffi_type **)(ff + 1);
   return ff;
 }
 
