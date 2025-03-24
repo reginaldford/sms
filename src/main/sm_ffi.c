@@ -65,30 +65,20 @@ uint32_t sm_ff_sig_sprint(sm_ff_sig *self, char *to_str, bool fake) {
   }
 }
 
-// Create a new shard object
-sm_ff_fun *sm_new_ff_fun(void *handle) {
-  struct sm_ff_fun *new_ff_fun = sm_malloc(sizeof(sm_ff_fun));
-  new_ff_fun->my_type          = SM_FF_TYPE;
-  new_ff_fun->fun              = handle;
-  return new_ff_fun;
-}
-
 // If fake is false,
-// Prints to to_str a string describing the ff_fun
+// Prints to to_str a string describing the ff
 // Returns the length regardless
-uint32_t sm_ff_fun_sprint(sm_ff_fun *self, char *to_str, bool fake) {
+uint32_t sm_ff_sprint(sm_ff *self, char *to_str, bool fake) {
   if (!fake)
-    return sprintf(to_str, "(ff_fun@%p)", self->fun);
+    return sprintf(to_str, "(ff@%p)", self->fptr);
   else {
     char tempBuffer[32];
-    return snprintf(tempBuffer, 32, "(ff_fun@%p)", self->fun);
+    return snprintf(tempBuffer, 32, "(ff@%p)", self->fptr);
   }
 }
 
-// Returns whether two ff_funs match handle ptr
-bool sm_ff_fun_is_equal(sm_ff_fun *ff_fun1, sm_ff_fun *ff_fun2) {
-  return ff_fun1->fun == ff_fun2->fun;
-}
+// Returns whether two ff match handle ptr
+bool sm_ff_is_equal(sm_ff *ff1, sm_ff *ff2) { return ff1->fptr == ff2->fptr; }
 
 // Returns whether two ff_sigs match handle ptr
 // bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) { return

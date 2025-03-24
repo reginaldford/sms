@@ -83,7 +83,7 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
     len += sm_ff_sig_sprint((sm_ff_sig *)obj1, buffer, fake);
     break;
   case SM_FF_TYPE:
-    len += sm_ff_fun_sprint((sm_ff_fun *)obj1, buffer, fake);
+    len += sm_ff_sprint((sm_ff *)obj1, buffer, fake);
     break;
   default: {
     if (!fake)
