@@ -57,11 +57,18 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_FF_TYPE: {
-    sm_ff    *ff      = (sm_ff *)fun;
-    int       tmp_arg = (int)(((sm_f64 *)sm_expr_get_arg(sf, 0))->value);
-    void     *args[1] = {&tmp_arg};
-    ffi_type *arg_types[1];
-    arg_types[0]      = &ffi_type_sint32;
+    sm_ff *ff = (sm_ff *)fun;
+    if (sf->size < ff->cif.nargs) {
+      printf("!not enough args\n");
+      RETURN_OBJ((sm_object *)sms_false);
+    }
+    void *args[ff->cif.nargs];
+
+    // fill in the arg ptrs
+    for (size_t i = 0; i < ff->cif.nargs; i++) {
+      args[i] = &((sm_f64 *)sm_expr_get_arg(sf, i))->value;
+    }
+
     double return_val = 0;
     ffi_call(&ff->cif, FFI_FN(ff->fptr), &return_val, args);
     RETURN_OBJ((sm_object *)sm_new_f64(return_val));
