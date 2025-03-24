@@ -57,21 +57,13 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_FF_TYPE: {
-    sm_ff *ff = (sm_ff *)fun;
-
+    sm_ff    *ff      = (sm_ff *)fun;
     int       tmp_arg = (int)(((sm_f64 *)sm_expr_get_arg(sf, 0))->value);
     void     *args[1] = {&tmp_arg};
     ffi_type *arg_types[1];
-    arg_types[0] = &ffi_type_sint32;
-
+    arg_types[0]      = &ffi_type_sint32;
     double return_val = 0;
-
-    ffi_type **ptr_after_ff = (ffi_type **)(ff + 1);
-    // fix cif arg types on ff TODO move to gc
-    ff->cif.arg_types = ptr_after_ff;
-    ff->cif.rtype     = &ffi_type_double;
     ffi_call(&ff->cif, FFI_FN(ff->fptr), &return_val, args);
-
     RETURN_OBJ((sm_object *)sm_new_f64(return_val));
     break;
   }
@@ -3623,7 +3615,7 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         printf("line %i : prep cif failed\n", __LINE__);
         // TODO: Handle the ffi_status error.
       }
-      sm_ff_sig *new_sig = sm_new_ff_sig(cif, arg_types->size);
+      sm_ff_sig *new_sig = sm_new_ff_sig(cif);
       RETURN_OBJ((sm_object *)new_sig);
       break;
     }
