@@ -18,13 +18,36 @@ extern sm_object   *return_obj;
     return;                                                                                        \
   }
 
-// GC if necessary
-static inline bool check_gc() {
-  if (sms_heap->safe_capacity <= sms_heap->used) {
-    sm_garbage_collect();
-    return true;
+static inline bool expect_type(sm_object *obj, uint32_t arg_type) {
+  if (obj->my_type == SM_POINTER_TYPE) {
+    sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
+    sm_pointer *p        = (sm_pointer *)obj;
+    obj                  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
   }
-  return false;
+  return obj->my_type == arg_type;
+}
+
+// Returns the object if it's ok, returns an error if it's not
+static inline void type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
+  sm_object *obj = sm_expr_get_arg(sme, operand);
+  if (param_type != obj->my_type) {
+    if (obj->my_type == SM_POINTER_TYPE) {
+      sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
+      sm_pointer *p        = (sm_pointer *)obj;
+      obj                  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
+      if (param_type == obj->my_type)
+        RETURN_OBJ(obj);
+    }
+    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message = sm_new_fstring_at(
+      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s (%s:%u)",
+      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type),
+      __FILE__, __LINE__);
+    RETURN_OBJ((sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
+                                         source->size, &source->content, (uint32_t)line->value));
+  }
+  RETURN_OBJ(obj);
 }
 
 // Execute a function
@@ -59,14 +82,26 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
   case SM_FF_TYPE: {
     sm_ff *ff = (sm_ff *)fun;
     if (sf->size < ff->cif.nargs) {
-      printf("!not enough args\n");
+      printf("!not enough arguments for ffi call.\n");
       RETURN_OBJ((sm_object *)sms_false);
     }
     void *args[ff->cif.nargs];
 
     // fill in the arg ptrs
     for (size_t i = 0; i < ff->cif.nargs; i++) {
-      args[i] = &((sm_f64 *)sm_expr_get_arg(sf, i))->value;
+      ffi_type *current_type = ff->cif.arg_types[i];
+      // We cannot use a switch statement here.
+      // so we use a series of conditions
+      if (current_type == &ffi_type_double) {
+        type_check(sf, i, SM_F64_TYPE);
+        if(return_obj->my_type == SM_ERR_TYPE){
+              printf("wrong type for ffi call\n");
+        }
+        sm_f64 *num = (sm_f64 *)sm_expr_get_arg(sf, i);
+        args[i]     = &num->value;
+      } else {
+        printf("unsupported ffi type\n");
+      }
     }
 
     double return_val = 0;
@@ -81,37 +116,6 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
 }
 
 // Basic type checking
-static inline bool expect_type(sm_object *obj, uint32_t arg_type) {
-  if (obj->my_type == SM_POINTER_TYPE) {
-    sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
-    sm_pointer *p        = (sm_pointer *)obj;
-    obj                  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
-  }
-  return obj->my_type == arg_type;
-}
-
-// Returns the object if it's ok, returns an error if it's not
-static inline void type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
-  sm_object *obj = sm_expr_get_arg(sme, operand);
-  if (param_type != obj->my_type) {
-    if (obj->my_type == SM_POINTER_TYPE) {
-      sm_heap    *pointeeH = sm_is_within_heap(obj, sms_heap) ? sms_other_heap : sms_heap;
-      sm_pointer *p        = (sm_pointer *)obj;
-      obj                  = (sm_object *)(((uint64_t)pointeeH) + (uint64_t)(p->address));
-      if (param_type == obj->my_type)
-        RETURN_OBJ(obj);
-    }
-    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    sm_string *message = sm_new_fstring_at(
-      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s (%s:%u)",
-      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type),
-      __FILE__, __LINE__);
-    RETURN_OBJ((sm_object *)sm_new_error(12, "typeMismatch", message->size, &message->content,
-                                         source->size, &source->content, (uint32_t)line->value));
-  }
-  RETURN_OBJ(obj);
-}
 
 // Evaluate the argument, then run type check
 static inline void eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type,
