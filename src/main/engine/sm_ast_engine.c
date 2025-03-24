@@ -94,8 +94,8 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
       // so we use a series of conditions
       if (current_type == &ffi_type_double) {
         type_check(sf, i, SM_F64_TYPE);
-        if(return_obj->my_type == SM_ERR_TYPE){
-              printf("wrong type for ffi call\n");
+        if (return_obj->my_type == SM_ERR_TYPE) {
+          printf("wrong type for ffi call\n");
         }
         sm_f64 *num = (sm_f64 *)sm_expr_get_arg(sf, i);
         args[i]     = &num->value;
