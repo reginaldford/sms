@@ -86,21 +86,26 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ((sm_object *)sms_false);
     }
     void *args[ff->cif.nargs];
-
     // fill in the arg ptrs
     for (size_t i = 0; i < ff->cif.nargs; i++) {
       ffi_type *current_type = ff->cif.arg_types[i];
       // We cannot use a switch statement here.
       // so we use a series of conditions
       if (current_type == &ffi_type_double) {
-        type_check(sf, i, SM_F64_TYPE);
-        if (return_obj->my_type == SM_ERR_TYPE) {
-          printf("wrong type for ffi call\n");
+        printf("doing typecheck\n");
+        // something doesnt work with this typecheck:
+        // type_check(sf, i, SM_F64_TYPE);
+        sm_object *current_arg = sm_expr_get_arg(sf, i);
+        if (current_arg->my_type != SM_F64_TYPE) {
+          printf("wrong type for arg %lu\n", i);
+          return;
         }
+        printf("typecheck done\n");
         sm_f64 *num = (sm_f64 *)sm_expr_get_arg(sf, i);
         args[i]     = &num->value;
       } else {
         printf("unsupported ffi type\n");
+        RETURN_OBJ((sm_object *)sms_false);
       }
     }
 
