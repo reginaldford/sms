@@ -7,5 +7,13 @@
   let f=ff(so,"fib_recursive",sig);
   putLn(str(f));
   putLn(str(f(11)));
-  putLn(str(f("11")));
+  putLn(str(f("11"))); # wrong type
+  # Primitive function ptrs in a global table
+  # These functions are obj -> obj, so no signature necessary
+  # let internal = InternalFun("fname");
+  # Eventually we want the engine switch case replaced with :
+  # obj eval(obj o){ engine_cases[ o->type ]( o ) }; 
+  # and mutable switch block cases from inside sms:
+  # setEvaluationCase(case#,function)
+  # where function can be shared object, internal , or expression
 };
