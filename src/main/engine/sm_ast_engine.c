@@ -73,9 +73,9 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
     break;
   }
   case SM_SO_FUN_TYPE: {
-    sm_so_fun *f                        = (sm_so_fun *)fun;
-    sm_object *(*ff)(sm_object * input) = f->function;
-    sm_object *output                   = ff((sm_object *)sf);
+    sm_so_fun *f                       = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object *input) = f->function;
+    sm_object *output                  = ff((sm_object *)sf);
     RETURN_OBJ(output);
     break;
   }
@@ -92,7 +92,6 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
       // We cannot use a switch statement here.
       // so we use a series of conditions
       if (current_type == &ffi_type_double) {
-        printf("doing typecheck\n");
         // something doesnt work with this typecheck:
         // type_check(sf, i, SM_F64_TYPE);
         sm_object *current_arg = sm_expr_get_arg(sf, i);
@@ -100,7 +99,6 @@ inline void execute_fun(sm_fun *fun, sm_cx *current_cx, sm_expr *sf) {
           printf("wrong type for arg %lu\n", i);
           return;
         }
-        printf("typecheck done\n");
         sm_f64 *num = (sm_f64 *)sm_expr_get_arg(sf, i);
         args[i]     = &num->value;
       } else {
