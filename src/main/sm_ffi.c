@@ -80,7 +80,16 @@ uint32_t sm_ff_sprint(sm_ff *self, char *to_str, bool fake) {
 // Returns whether two ff match handle ptr
 bool sm_ff_is_equal(sm_ff *ff1, sm_ff *ff2) { return ff1->fptr == ff2->fptr; }
 
-// Returns whether two ff_sigs match handle ptr
+// Returns whether two ff_sigs match return value and arg types
 bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) {
-  return ((void *)&ff_sig1->cif) == (((void *)&ff_sig2->cif));
+  ffi_cif *cif1 = ((void *)&ff_sig1->cif);
+  ffi_cif *cif2 = ((void *)&ff_sig2->cif);
+  if (cif1->rtype != cif2->rtype)
+    return false;
+  if (cif1->nargs != cif2->nargs)
+    return false;
+  for (uint32_t i = 0; i < cif1->nargs; i++)
+    if (cif1->arg_types[i] != cif2->arg_types[i])
+      return false;
+  return true;
 }
