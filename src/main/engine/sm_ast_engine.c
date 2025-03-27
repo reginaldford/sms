@@ -943,8 +943,6 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       RETURN_OBJ(((sm_object *)new_tuple));
       break;
     }
-
-
     case SM_EXIT_EXPR: {
       uint32_t exit_code = 0;
       if (sme->size != 0) {
@@ -3622,12 +3620,14 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
         ffi_arg_types[i] = arg_ffi_type;
       }
       // We populated ffi_arg_types, now to convert to ffi_cif
-      ffi_status status;
       ffi_cif    cif;
-      if ((status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, arg_types->size, input_ffi_type,
-                                 ffi_arg_types)) != FFI_OK) {
-        printf("line %i : prep cif failed\n", __LINE__);
-        // TODO: Handle the ffi_status error.
+      ffi_status status =
+        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, arg_types->size, input_ffi_type, ffi_arg_types);
+      if (status != FFI_OK) {
+        sm_symbol *title   = sm_new_symbol("ffSigFailed", 11);
+        sm_string *message = sm_new_fstring_at(sms_heap, "ffi_prep_cif returned status %i", status);
+        sm_error  *this_err = sm_new_error_from_expr(title, message, sme, NULL);
+        RETURN_OBJ((sm_object *)this_err);
       }
       sm_ff_sig *new_sig = sm_new_ff_sig(cif);
       RETURN_OBJ((sm_object *)new_sig);
@@ -3652,9 +3652,11 @@ inline void sm_engine_eval(sm_object *input, sm_cx *current_cx, sm_expr *sf) {
       }
       void *fptr = dlsym(so->handle, &fname->content);
       if (!fptr) {
-        // TODO: handle correctly
-        printf("obtaining fptr failed!");
-        exit(1);
+        sm_symbol *title   = sm_new_symbol("FFNotFound", 10);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "FF: Function: %s was not found in the Shared Object", &fname->content);
+        sm_error *this_err = sm_new_error_from_expr(title, message, sme, NULL);
+        RETURN_OBJ((sm_object *)this_err);
       }
       sm_ff *ff = sm_new_ff(fptr, fname, sig);
       RETURN_OBJ((sm_object *)ff);
