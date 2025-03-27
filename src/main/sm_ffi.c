@@ -81,5 +81,6 @@ uint32_t sm_ff_sprint(sm_ff *self, char *to_str, bool fake) {
 bool sm_ff_is_equal(sm_ff *ff1, sm_ff *ff2) { return ff1->fptr == ff2->fptr; }
 
 // Returns whether two ff_sigs match handle ptr
-// bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) { return
-// ((void*)ff_sig1->cif)((void*)ff_sig2->cif); }
+bool sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2) {
+  return ((void *)&ff_sig1->cif) == (((void *)&ff_sig2->cif));
+}
