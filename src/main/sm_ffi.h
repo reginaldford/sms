@@ -23,3 +23,5 @@ uint32_t          sm_ff_sig_sprint(sm_ff_sig *self, char *to_str, bool fake);
 struct sm_ff_sig *sm_new_ff_sig(ffi_cif cif);
 struct sm_ff     *sm_new_ff(void *fptr, sm_string *fname, sm_ff_sig *sig);
 uint32_t          sm_ff_sprint(sm_ff *self, char *to_str, bool fake);
+bool              sm_ff_is_equal(sm_ff *ff1, sm_ff *ff2);
+bool              sm_ff_sig_is_equal(sm_ff_sig *ff_sig1, sm_ff_sig *ff_sig2);

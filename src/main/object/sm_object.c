@@ -222,8 +222,10 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
     return ((sm_so *)self)->handle == ((sm_so *)other)->handle;
   case SM_SO_FUN_TYPE:
     return ((sm_so_fun *)self)->function == ((sm_so_fun *)other)->function;
+  case SM_FF_SIG_TYPE:
+    return sm_ff_sig_is_equal((sm_ff_sig *)self, (sm_ff_sig *)other);
   case SM_FF_TYPE:
-    return ((sm_ff *)self)->fptr == ((sm_ff *)other)->fptr;
+    return sm_ff_is_equal((sm_ff *)self, (sm_ff *)other);
   default:
     return self == other;
   }
