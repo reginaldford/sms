@@ -16,4 +16,7 @@
   # and mutable switch block cases from inside sms:
   # setEvaluationCase(case#,function)
   # where function can be shared object, internal , or expression
+  let g=(x)=>if(x<2)1 else g(x-1)+g(x-2);
+  cxImport(self,_scratch);
+  eval(parse(fileReadStr("./sms_src/examples/repl.sms")));
 };
