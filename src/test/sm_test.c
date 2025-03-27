@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 extern int yylineno;
-#define DISPLAY_WIDTH 65
+#define DISPLAY_WIDTH 85
 extern sm_object *return_obj;
 
 // Global for the test outline structure

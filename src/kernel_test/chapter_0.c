@@ -39,5 +39,9 @@ int chapter_0(int test) {
   TEST(printf("sizeof %s is %zu\n", "sm_string", sizeof(sm_string)));
   TEST(printf("sizeof %s is %zu\n", "sm_symbol", sizeof(sm_symbol)));
   TEST(printf("sizeof %s is %zu\n", "sm_ui8", sizeof(sm_ui8)));
+  TEST(printf("sizeof %s is %zu\n", "sm_so", sizeof(sm_so)));
+  TEST(printf("sizeof %s is %zu\n", "sm_so_fun", sizeof(sm_so_fun)));
+  TEST(printf("sizeof %s is %zu\n", "sm_ff_sig", sizeof(sm_ff_sig)));
+  TEST(printf("sizeof %s is %zu\n", "sm_ff", sizeof(sm_ff)));
   return 0;
 }
