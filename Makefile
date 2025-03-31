@@ -10,10 +10,10 @@ CC_PROF         := clang
 CC_UNIFIED      := zig cc
 CFLAGS_UNIFIED  := -Oz
 #CFLAGS_UNIFIED := -Oz --target=x86_64-linux -static -I$(MUSL_PREFIX)/include 
-CFLAGS          := -O3
-CFLAGS_DEBUG    := -g
+CFLAGS          := -O3 -I /usr/local/include
+CFLAGS_DEBUG    := -g -I /usr/local/include
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
-LDFLAGS         := -lm -flto -lffi
+LDFLAGS         := -lm -flto -lffi -L/usr/local/lib/
 #LDFLAGS        := -lm -flto -static
 BUILD_DIR       := build
 SRC_BISON_FLEX  := src/bison_flex
@@ -62,7 +62,7 @@ $(MAKE) $(SRC_MAIN)/linenoise/linenoise.c:
 
 # Rule to build the shared library
 build/clib/fib.so:
-	$(CC) -shared  -I ./src/main/ clib/fib.c -o $@ $^
+	$(CC) $(CFLAGS) -shared  -I ./src/main/ clib/fib.c -o $@ $^
 
 # Rule to compile each source file to an object file
 $(OBJDIR)/%.so: $(SRCDIR)/%.c
