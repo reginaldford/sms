@@ -168,7 +168,7 @@ inline void sm_inflate_heap(sm_heap *from, sm_heap *to) {
       sm_ff     *ff           = (sm_ff *)current_obj;
       ffi_type **ptr_after_ff = (ffi_type **)(ff + 1);
       ff->cif.arg_types       = ptr_after_ff;
-      ff->name = (sm_string*)sm_meet_object(from,to,(sm_object*)ff->name);
+      ff->name                = (sm_string *)sm_meet_object(from, to, (sm_object *)ff->name);
       break;
     }
     default:

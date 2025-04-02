@@ -3,12 +3,13 @@
 // Store an error
 // source is NULL or "file : line : col" or similar
 typedef struct sm_error {
-  int32_t    my_type;
-  sm_symbol *title;
-  sm_string *message;
-  sm_string *source;
-  int32_t    line;
-  sm_cx     *notes;
+  int32_t          my_type;
+  sm_symbol       *title;
+  sm_string       *message;
+  sm_string       *source;
+  int32_t          line;
+  sm_cx           *notes;
+  struct sm_error *origin;
 } sm_error;
 
 sm_error *sm_new_error(int title_len, char *title_str, int message_len, char *message_str,
