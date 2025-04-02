@@ -42,7 +42,7 @@ ffi_type *get_ffi_type(const char *type) {
     &ffi_type_sint32,        &ffi_type_sint64,         &ffi_type_float, &ffi_type_double,
     &ffi_type_complex_float, &ffi_type_complex_double,
   };
-  // We search through teh string list, return the correlating ffi_type
+  // We search through the string list, return the correlating ffi_type
   for (size_t i = 0; i < num_types; ++i) {
     if (strcmp(type, valid_type_strings[i]) == 0) {
       return valid_types[i];

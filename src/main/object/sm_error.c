@@ -8,6 +8,7 @@ extern sm_object *return_obj;
 sm_error *sm_new_error_blank() {
   sm_error *new_error = sm_malloc(sizeof(sm_error));
   new_error->my_type  = SM_ERR_TYPE;
+  new_error->origin   = NULL;
   return new_error;
 }
 
