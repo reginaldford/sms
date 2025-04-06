@@ -41,17 +41,20 @@ void run_file(char *file_path, sm_env *env) {
   sm_parse_result pr;
   yylineno = 1; // resetting the line count
   pr       = sm_parse_file(file_path);
+
   if (pr.return_val != 0) {
-    printf("Error parsing the file. Parser returned %i\n", pr.return_val);
+    printf("Error: Parser failed and returned %i\n", pr.return_val);
     clean_exit(env, 1);
   }
-  if (pr.parsed_object != NULL) {
-    // Before we eval, let's save a ptr to stack frame.
-    memory_marker1 = __builtin_frame_address(0);
-    evaluating     = true;
-    sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-    evaluating = false;
+  if (pr.parsed_object == NULL) {
+    printf("Parser returned nothing.\n");
+    clean_exit(env, 1);
   }
+  sm_object *evaluated = sm_eval(pr.parsed_object);
+  sm_string *response  = sm_object_to_string(evaluated);
+  printf("%s\n", &(response->content));
+  fflush(stdout);
+  clean_exit(env, 0);
 }
 
 // Main function uses getopt from unistd.h
@@ -142,11 +145,7 @@ int main(int num_args, char *argv[]) {
         printf("Parser returned nothing.\n");
         clean_exit(&env, 1);
       }
-      memory_marker1 = __builtin_frame_address(0);
-      evaluating     = true;
-      sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-      sm_object *evaluated = return_obj;
-      evaluating           = false;
+      sm_object *evaluated = sm_eval(pr.parsed_object);
       sm_string *response  = sm_object_to_string(evaluated);
       printf("%s\n", &(response->content));
       fflush(stdout);

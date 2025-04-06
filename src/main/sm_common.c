@@ -15,13 +15,8 @@ void start_repl(sm_env *env) {
     // Read
     sm_parse_result pr = sm_terminal_prompt(env->plain_mode);
     if (!pr.return_val && pr.parsed_object) {
-      // Before we eval, let's save a ptr to stack frame.
-      memory_marker1 = __builtin_frame_address(0);
       // Evaluate
-      evaluating = true;
-      sm_engine_eval(pr.parsed_object, *(sm_global_lex_stack(NULL)->top), NULL);
-      sm_object *result = return_obj;
-      evaluating        = false;
+      sm_object *result = sm_eval(pr.parsed_object);
       // Print
       sm_string *result_str = sm_object_to_string(result);
       printf("%s", sm_terminal_fg_color(SM_TERM_B_WHITE));
