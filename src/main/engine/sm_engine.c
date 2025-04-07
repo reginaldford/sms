@@ -39,9 +39,8 @@ static inline sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32
 // Evaluate the argument, then run type check. 2 possibilities allowed
 static inline sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type1,
                                            uint32_t param_type2) {
-  return_obj = sm_expr_get_arg(sme, operand);
-  sm_eval(return_obj);
-  sm_object *obj = return_obj;
+  return_obj     = sm_expr_get_arg(sme, operand);
+  sm_object *obj = sm_eval(return_obj);
   if (param_type1 != obj->my_type && param_type2 != obj->my_type) {
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
@@ -62,9 +61,8 @@ static inline sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint3
 // Evaluate the argument, then run type check. 3 possibilities allowed
 static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint32_t param_type1,
                                            uint32_t param_type2, uint32_t param_type3) {
-  return_obj = sm_expr_get_arg(sme, operand);
-  sm_eval(return_obj);
-  sm_object *obj = return_obj;
+  return_obj     = sm_expr_get_arg(sme, operand);
+  sm_object *obj = sm_eval(return_obj);
   if (param_type1 != obj->my_type && param_type2 != obj->my_type && param_type3 != obj->my_type) {
     sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
     sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
@@ -98,8 +96,6 @@ sm_object *sm_eval(sm_object *input) {
     case SM_NEW_F64_EXPR: {
       // TODO stack push to sms_stack every such var:
       sm_object *fromObj = eager_type_check3(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, SM_STRING_TYPE);
-      if (fromObj->my_type == SM_ERR_TYPE)
-        return fromObj;
       switch (fromObj->my_type) {
       case SM_F64_TYPE:
         return (((sm_object *)sm_new_f64(((sm_f64 *)fromObj)->value)));
@@ -122,7 +118,10 @@ sm_object *sm_eval(sm_object *input) {
         sm_symbol *title   = sm_new_symbol("cannotConvertToF64", 18);
         sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to f64.",
                                                sm_type_name(fromObj->my_type));
-        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+        sm_error  *err     = sm_new_error_from_expr(title, message, sme, NULL);
+        if (fromObj->my_type == SM_ERR_TYPE)
+          err->origin = (sm_error *)fromObj;
+        return (sm_object *)err;
       }
       }
     }
@@ -137,8 +136,20 @@ sm_object *sm_eval(sm_object *input) {
         return (((sm_object *)sm_new_ui8(((sm_f64 *)fromObj)->value)));
       case SM_UI8_TYPE:
         return (((sm_object *)sm_new_ui8(((sm_ui8 *)fromObj)->value)));
-      case SM_STRING_TYPE:
-        return (((sm_object *)sm_new_ui8(((sm_string *)fromObj)->content)));
+      case SM_STRING_TYPE: {
+        char       *endptr;
+        const char *str_content = &((sm_string *)fromObj)->content;
+        double      value       = strtod(str_content, &endptr);
+
+        // Check for conversion errors
+        if (endptr == str_content) {
+          sm_symbol *title = sm_new_symbol("cannotConvertToUi8", 18);
+          sm_string *message =
+            sm_new_fstring_at(sms_heap, "Cannot convert string to ui8: %s", str_content);
+          return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+        }
+        return (((sm_object *)sm_new_ui8((char)value)));
+      }
       default: {
         sm_symbol *title   = sm_new_symbol("cannotConvertToUI8", 18);
         sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to ui8.",
@@ -156,7 +167,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_array  *result     = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
       for (uint32_t i = 0; i < 9; i++)
         sm_f64_array_set(result, i, time_tuple[i]);
-      return (((sm_object *)result));
+      return (sm_object *)result;
       break;
     }
     case SM_HEAPSAVE_EXPR: {
