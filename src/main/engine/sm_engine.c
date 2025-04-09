@@ -140,7 +140,6 @@ sm_object *sm_eval(sm_object *input) {
         char       *endptr;
         const char *str_content = &((sm_string *)fromObj)->content;
         double      value       = strtod(str_content, &endptr);
-
         // Check for conversion errors
         if (endptr == str_content) {
           sm_symbol *title = sm_new_symbol("cannotConvertToUi8", 18);
@@ -654,6 +653,12 @@ sm_object *sm_eval(sm_object *input) {
       }
       return (((sm_object *)new_list));
       break;
+    }
+
+
+    case SM_PLUS_EXPR: {
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      // sm_push(sm_to_type(sm_peek()->my_type,sm_expr_get_arg(sme,1)));
     }
     }
   }
