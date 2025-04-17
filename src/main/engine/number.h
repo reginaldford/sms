@@ -1,0 +1,18 @@
+// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
+
+sm_object *sm_add_uint8_and_uint8();
+sm_object *sm_add_uint8_and_int64();
+sm_object *sm_add_uint8_and_int64();
+sm_object *sm_add_uint8_and_f64();
+sm_object *sm_add_int64_and_uint8();
+sm_object *sm_add_int64_and_int64();
+sm_object *sm_add_int64_and_int64();
+sm_object *sm_add_int64_and_f64();
+sm_object *sm_add_int64_and_uint8();
+sm_object *sm_add_int64_and_int64();
+sm_object *sm_add_int64_and_int64();
+sm_object *sm_add_int64_and_f64();
+sm_object *sm_add_f64_and_uint8();
+sm_object *sm_add_f64_and_int64();
+sm_object *sm_add_f64_and_int64();
+sm_object *sm_add_f64_and_f64();
