@@ -617,11 +617,15 @@ sm_object *sm_eval(sm_object *input) {
       return (((sm_object *)new_list));
       break;
     }
-
-
     case SM_PLUS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-      // sm_push(sm_to_type(sm_peek()->my_type,sm_expr_get_arg(sme,1)));
+      sm_object *o0    = sm_eval(sm_expr_get_arg(sme, 0));
+      uint64_t   type0 = o0->my_type;
+      sm_push(o0);
+      sm_object *o1    = sm_eval(sm_expr_get_arg(sme, 1));
+      uint64_t   type1 = o1->my_type;
+      sm_push(o1);
+      sm_object *(**number_fns)[16];
+      // return  number_table[type0 * 4 + type1]();
     }
     }
   }
