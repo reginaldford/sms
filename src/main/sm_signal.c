@@ -85,7 +85,7 @@ void sm_signal_handler(int signal_number) {
   sm_expr *sf = sm_new_expr(SM_PARAM_LIST_EXPR, (sm_object *)sm_new_ui8((ui8)signal_number), NULL);
   // _sigHandler(s) , where s is an f64 with the signal number
   if (fun) {
-    execute_fun(fun, scratch, sf);
+    execute_fun(fun);
     return;
   } else {
     sm_default_signal_handler(signal_number);

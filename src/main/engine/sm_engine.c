@@ -12,6 +12,7 @@ extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
 extern sm_stack2   *sms_stack;
 extern sm_stack2   *sms_cx_stack;
+extern sm_object *(*number_funs[])();
 
 // Basic type checking
 
@@ -77,6 +78,73 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
     return ((sm_object *)err);
   }
   return (obj);
+}
+// Execute a function
+sm_object *execute_fun(sm_fun *fun) {
+  sm_expr *sf; // TODO: this would come from the stack
+  sm_cx   *current_cx;
+  switch (fun->my_type) {
+  case SM_FUN_TYPE: {
+    sm_object *content = fun->content;
+    sm_object *result;
+    // TODO: cx gets pushed to cx stack
+    // sm_cx *new_cx = sm_new_cx(fun->parent);
+    if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
+      sm_expr *content_sme = (sm_expr *)fun->content;
+      for (uint32_t i = 1; i < content_sme->size; i++) {
+        result = sm_eval(sm_expr_get_arg(content_sme, i));
+        if (result->my_type == SM_RETURN_TYPE)
+          return (((sm_return *)result)->address);
+      }
+      return (result);
+    } else
+      return sm_eval(content);
+    break;
+  }
+  case SM_SO_FUN_TYPE: {
+    sm_so_fun *f                        = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object * input) = f->function;
+    sm_object *output                   = ff((sm_object *)sf);
+    return (output);
+    break;
+  }
+  case SM_FF_TYPE: {
+    sm_ff *ff = (sm_ff *)fun;
+    if (sf->size < ff->cif.nargs) {
+      printf("!not enough arguments for ffi call.\n");
+      return ((sm_object *)sms_false);
+    }
+    void *args[ff->cif.nargs];
+    // fill in the arg ptrs
+    for (size_t i = 0; i < ff->cif.nargs; i++) {
+      ffi_type *current_type = ff->cif.arg_types[i];
+      // We cannot use a switch statement here.
+      // so we use a series of conditions
+      if (current_type == &ffi_type_double) {
+        // something doesnt work with this typecheck:
+        // type_check(sf, i, SM_F64_TYPE);
+        sm_object *current_arg = sm_expr_get_arg(sf, i);
+        if (current_arg->my_type != SM_F64_TYPE) {
+          printf("wrong type for arg %lu\n", i);
+          return (sm_object *)sms_false;
+        }
+        sm_f64 *num = (sm_f64 *)sm_expr_get_arg(sf, i);
+        args[i]     = &num->value;
+      } else {
+        printf("unsupported ffi type\n");
+        return ((sm_object *)sms_false);
+      }
+    }
+
+    double return_val = 0;
+    ffi_call(&ff->cif, FFI_FN(ff->fptr), &return_val, args);
+    return ((sm_object *)sm_new_f64(return_val));
+    break;
+  }
+  default:
+    return ((sm_object *)fun);
+  }
+  return ((sm_object *)fun);
 }
 
 
@@ -624,8 +692,8 @@ sm_object *sm_eval(sm_object *input) {
       sm_object *o1    = sm_eval(sm_expr_get_arg(sme, 1));
       uint64_t   type1 = o1->my_type;
       sm_push(o1);
-      sm_object *(**number_fns)[16];
-      // return  number_table[type0 * 4 + type1]();
+      return sm_add_f64_and_f64();
+      // return number_funs[type0 * 2 + type1]();
     }
     }
   }
