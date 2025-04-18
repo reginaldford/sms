@@ -10,7 +10,7 @@ CC_PROF         := clang
 CC_UNIFIED      := zig cc
 CFLAGS_UNIFIED  := -Oz
 #CFLAGS_UNIFIED := -Oz --target=x86_64-linux -static -I$(MUSL_PREFIX)/include 
-CFLAGS          := -O0 -I /usr/local/include
+CFLAGS          := -O3 -I /usr/local/include
 CFLAGS_DEBUG    := -g -I /usr/local/include
 CFLAGS_PROF     := -fprofile-instr-generate -fcoverage-mapping
 LDFLAGS         := -lm -flto -lffi -L/usr/local/lib/
