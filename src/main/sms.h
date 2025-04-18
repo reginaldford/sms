@@ -35,48 +35,48 @@
 /// These are the major object types of SMS
 /// @note Must remain syncronized with function sm_type_name
 enum sm_object_type {
-  /// 0: unsigned byte int (sm_ui8.h)
-  SM_UI8_TYPE,
-  /// 1: Expression (sm_expr.h)
-  SM_EXPR_TYPE,
-  /// 2: Primitive is not used yet
-  SM_PRIMITIVE_TYPE,
-  /// 3: Strings (sm_string.h)
-  SM_STRING_TYPE,
-  /// 4: Symbols (sm_symbol.h)
-  SM_SYMBOL_TYPE,
-  /// 5: Contexts (sm_cx.h)
-  SM_CX_TYPE,
-  /// 6: Nodes (sm_node.h)
-  SM_NODE_TYPE,
-  /// 7: Pointers (for gc) (sm_pointer.h)
-  SM_POINTER_TYPE,
-  /// 8: Meta objects (sm_meta.h)
-  SM_META_TYPE,
-  /// 9: Space objects (sm_space.h)
-  SM_SPACE_TYPE,
-  /// 10: Functions (sm_fun.h)
-  SM_FUN_TYPE,
-  /// 11: Function parameters (sm_fun.h)
-  SM_FUN_PARAM_TYPE,
-  /// 12: Local variable reference (sm_local.h)
-  SM_LOCAL_TYPE,
-  /// 13: Linked list objects (not used yet) (sm_link.h)
-  SM_LINK_TYPE,
-  /// 14: Error objects
-  SM_ERR_TYPE,
-  /// 15: Reference to current scope. (sm_self.h)
-  SM_SELF_TYPE,
-  /// 16: Acts as return statement. (sm_return.h)
-  SM_RETURN_TYPE,
-  /// 17: Bytecode block. (note used yet) (sm_return.h)
-  SM_BC_BLOCK_TYPE,
-  /// 18: Stack (sm_stack_obj.h)
-  SM_STACK_OBJ_TYPE,
-  /// 19: Array (sm_array.h)
-  SM_ARRAY_TYPE,
-  /// 20: f64 precision floating point (sm_f64.h)
+  /// 0: f64 precision floating point (sm_f64.h)
   SM_F64_TYPE,
+  /// 1: unsigned byte int (sm_ui8.h)
+  SM_UI8_TYPE,
+  /// 2: Expression (sm_expr.h)
+  SM_EXPR_TYPE,
+  /// 3: Primitive is not used yet
+  SM_PRIMITIVE_TYPE,
+  /// 4: Strings (sm_string.h)
+  SM_STRING_TYPE,
+  /// 5: Symbols (sm_symbol.h)
+  SM_SYMBOL_TYPE,
+  /// 6: Contexts (sm_cx.h)
+  SM_CX_TYPE,
+  /// 7: Nodes (sm_node.h)
+  SM_NODE_TYPE,
+  /// 8: Pointers (for gc) (sm_pointer.h)
+  SM_POINTER_TYPE,
+  /// 9: Meta objects (sm_meta.h)
+  SM_META_TYPE,
+  /// 10: Space objects (sm_space.h)
+  SM_SPACE_TYPE,
+  /// 11: Functions (sm_fun.h)
+  SM_FUN_TYPE,
+  /// 12: Function parameters (sm_fun.h)
+  SM_FUN_PARAM_TYPE,
+  /// 13: Local variable reference (sm_local.h)
+  SM_LOCAL_TYPE,
+  /// 14: Linked list objects (not used yet) (sm_link.h)
+  SM_LINK_TYPE,
+  /// 15: Error objects
+  SM_ERR_TYPE,
+  /// 16: Reference to current scope. (sm_self.h)
+  SM_SELF_TYPE,
+  /// 17: Acts as return statement. (sm_return.h)
+  SM_RETURN_TYPE,
+  /// 18: Bytecode block. (note used yet) (sm_return.h)
+  SM_BC_BLOCK_TYPE,
+  /// 19: Stack (sm_stack_obj.h)
+  SM_STACK_OBJ_TYPE,
+  /// 20: Array (sm_array.h)
+  SM_ARRAY_TYPE,
   /// 21: object-only stack in malloc space
   SM_STACK2_TYPE,
   /// 22: Shared object pointer
