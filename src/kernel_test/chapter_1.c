@@ -16,8 +16,6 @@ int chapter_1(int test) {
   sm_string      *s  = sm_new_string(0, "");
   sm_parse_result pr = sm_parse_cstr(&(s->content), 0);
   printf("Evaluating empty string.\n");
-  // We do not ask engine_eval to handle NULL because it expects obj->my_type to exist
-  // sm_object * obj = sm_engine_eval(pr.parsed_object,NULL,NULL);
   if (pr.return_val == 0 && pr.parsed_object == NULL)
     printf("Parsed empty string, and got {0,NULL} as expected.\n");
   else {
