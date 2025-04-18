@@ -2423,6 +2423,11 @@ sm_object *sm_eval(sm_object *input) {
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
       return sm_times();
     }
+    case SM_DIVIDE_EXPR: {
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      return sm_divide();
+    }
     }
   }
   }
