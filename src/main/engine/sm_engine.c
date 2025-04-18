@@ -686,15 +686,9 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_PLUS_EXPR: {
-      sm_object *o0    = sm_eval(sm_expr_get_arg(sme, 0));
-      uint64_t   type0 = o0->my_type;
-      sm_push(o0);
-      sm_object *o1    = sm_eval(sm_expr_get_arg(sme, 1));
-      uint64_t   type1 = o1->my_type;
-      sm_push(o1);
-      return sm_add_f64_and_f64(); // static dispatch
-      // return number_funs[type0 * 2 + type1](); // dual dispatch
-      // return (o0->type_ptr)[SM_PLUS_EXPR][type1](); // single dispatch
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      return sm_add();
     }
     }
   }
