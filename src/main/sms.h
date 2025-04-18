@@ -21,6 +21,8 @@
 #include <ffi.h>
 
 #define f64 double
+#define i64 int64_t
+#define ui64 uint64_t
 #define ui8 uint8_t
 
 // We use __builtin_popcount_ll in sm_node.c
@@ -37,57 +39,61 @@
 enum sm_object_type {
   /// 0: f64 precision floating point (sm_f64.h)
   SM_F64_TYPE,
-  /// 1: unsigned byte int (sm_ui8.h)
+  /// 1: i64 signed integer (sm_i64.h)
+  SM_I64_TYPE,
+  /// 2: ui64 unsigned integer (sm_ui64.h)
+  SM_UI64_TYPE,
+  /// 3: unsigned byte int (sm_ui8.h)
   SM_UI8_TYPE,
-  /// 2: Expression (sm_expr.h)
+  /// 4: Expression (sm_expr.h)
   SM_EXPR_TYPE,
-  /// 3: Primitive is not used yet
+  /// 5: Primitive is not used yet
   SM_PRIMITIVE_TYPE,
-  /// 4: Strings (sm_string.h)
+  /// 6: Strings (sm_string.h)
   SM_STRING_TYPE,
-  /// 5: Symbols (sm_symbol.h)
+  /// 7: Symbols (sm_symbol.h)
   SM_SYMBOL_TYPE,
-  /// 6: Contexts (sm_cx.h)
+  /// 8: Contexts (sm_cx.h)
   SM_CX_TYPE,
-  /// 7: Nodes (sm_node.h)
+  /// 9: Nodes (sm_node.h)
   SM_NODE_TYPE,
-  /// 8: Pointers (for gc) (sm_pointer.h)
+  /// 10: Pointers (for gc) (sm_pointer.h)
   SM_POINTER_TYPE,
-  /// 9: Meta objects (sm_meta.h)
+  /// 11: Meta objects (sm_meta.h)
   SM_META_TYPE,
-  /// 10: Space objects (sm_space.h)
+  /// 12: Space objects (sm_space.h)
   SM_SPACE_TYPE,
-  /// 11: Functions (sm_fun.h)
+  /// 13: Functions (sm_fun.h)
   SM_FUN_TYPE,
-  /// 12: Function parameters (sm_fun.h)
+  /// 14: Function parameters (sm_fun.h)
   SM_FUN_PARAM_TYPE,
-  /// 13: Local variable reference (sm_local.h)
+  /// 15: Local variable reference (sm_local.h)
   SM_LOCAL_TYPE,
-  /// 14: Linked list objects (not used yet) (sm_link.h)
+  /// 16: Linked list objects (not used yet) (sm_link.h)
   SM_LINK_TYPE,
-  /// 15: Error objects
+  /// 17: Error objects
   SM_ERR_TYPE,
-  /// 16: Reference to current scope. (sm_self.h)
+  /// 18: Reference to current scope. (sm_self.h)
   SM_SELF_TYPE,
-  /// 17: Acts as return statement. (sm_return.h)
+  /// 19: Acts as return statement. (sm_return.h)
   SM_RETURN_TYPE,
-  /// 18: Bytecode block. (note used yet) (sm_return.h)
+  /// 20: Bytecode block. (note used yet) (sm_return.h)
   SM_BC_BLOCK_TYPE,
-  /// 19: Stack (sm_stack_obj.h)
+  /// 21: Stack (sm_stack_obj.h)
   SM_STACK_OBJ_TYPE,
-  /// 20: Array (sm_array.h)
+  /// 22: Array (sm_array.h)
   SM_ARRAY_TYPE,
-  /// 21: object-only stack in malloc space
+  /// 23: object-only stack in malloc space
   SM_STACK2_TYPE,
-  /// 22: Shared object pointer
+  /// 24: Shared object pointer
   SM_SO_TYPE,
-  /// 23: Shared object function pointer
+  /// 25: Shared object function pointer
   SM_SO_FUN_TYPE,
-  /// 24: Foreign function signature
+  /// 26: Foreign function signature
   SM_FF_SIG_TYPE,
-  /// 25: Foreign Function
+  /// 27: Foreign Function
   SM_FF_TYPE,
-  /// 26: Unrecognized
+  /// 28: Unrecognized
   SM_UNKNOWN_TYPE
 };
 
@@ -117,6 +123,8 @@ enum sm_object_type {
 #include "object/sm_cx.h"
 #include "parser/sm_parse_result.h"
 #include "object/sm_f64.h"
+#include "object/sm_i64.h"
+#include "object/sm_ui64.h"
 #include "object/sm_ui8.h"
 #include "object/sm_fun.h"
 #include "object/sm_local.h"

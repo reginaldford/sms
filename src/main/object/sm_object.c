@@ -37,6 +37,12 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_F64_TYPE:
     len += sm_f64_sprint((sm_f64 *)obj1, buffer, fake);
     break;
+  case SM_I64_TYPE:
+    len += sm_i64_sprint((sm_i64 *)obj1, buffer, fake);
+    break;
+  case SM_UI64_TYPE:
+    len += sm_ui64_sprint((sm_ui64 *)obj1, buffer, fake);
+    break;
   case SM_STRING_TYPE:
     len += sm_string_sprint((sm_string *)obj1, buffer, fake);
     break;

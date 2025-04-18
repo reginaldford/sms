@@ -20,8 +20,8 @@ exit         {return EXIT;}
 help         {return HELP;}
 
 f64 {return NEW_F64;}
-f64Repeat {return F64_REPEAT;}
-
+i64 {return NEW_I64;}
+ui64 {return NEW_UI64;}
 ui8 { return NEW_UI8; }
 ui8\((-?{digit}+)\) {
     char *num_str = yytext + 4;  // Skip "ui8("
@@ -40,6 +40,11 @@ ui8\((-?{digit}+)\) {
     yylval.ui8 = number;
     return UI8;
 }
+
+
+f64Repeat {return F64_REPEAT;}
+i64Repeat {return I64_REPEAT;}
+ui64Repeat {return UI64_REPEAT;}
 ui8Repeat { return UI8_REPEAT ; }
 
 "&" {return IAND;}
@@ -159,6 +164,8 @@ parent       {return PARENT;}
 rm           {return RM;}
 
 "f64["       {return F64_ARRAY_OPEN;}
+"i64["       {return I64_ARRAY_OPEN;}
+"ui64["       {return UI64_ARRAY_OPEN;}
 "ui8["       {return UI8_ARRAY_OPEN;}
 
 newCx        {return NEW_CX;}
