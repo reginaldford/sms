@@ -102,9 +102,9 @@ sm_object *execute_fun(sm_fun *fun) {
     break;
   }
   case SM_SO_FUN_TYPE: {
-    sm_so_fun *f                        = (sm_so_fun *)fun;
-    sm_object *(*ff)(sm_object * input) = f->function;
-    sm_object *output                   = ff((sm_object *)sf);
+    sm_so_fun *f                       = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object *input) = f->function;
+    sm_object *output                  = ff((sm_object *)sf);
     return (output);
     break;
   }
@@ -2409,23 +2409,23 @@ sm_object *sm_eval(sm_object *input) {
       */
 
     case SM_PLUS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_add();
     }
     case SM_MINUS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_minus();
     }
     case SM_TIMES_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_times();
     }
     case SM_DIVIDE_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_divide();
     }
     }
