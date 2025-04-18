@@ -1,12 +1,12 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include "../sms.h"
-extern sm_object *(*number_funs[])(sm_object *o0, sm_object *o1);
+extern sm_object *(*sm_add_functions[])(sm_object *o0, sm_object *o1);
 
 sm_object *sm_add() {
   sm_object *o0 = sm_pop();
   sm_object *o1 = sm_pop();
-  return number_funs[o0->my_type * 2 + o1->my_type](o0, o1);
+  return sm_add_functions[o0->my_type * 2 + o1->my_type](o0, o1);
 }
 
 sm_object *sm_add_uint8_and_uint8(sm_object *o0, sm_object *o1) {
