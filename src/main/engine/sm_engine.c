@@ -12,7 +12,7 @@ extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
 extern sm_stack2   *sms_stack;
 extern sm_stack2   *sms_cx_stack;
-extern sm_object *(*number_funs[])();
+extern sm_object *(*sm_add_functions[])();
 
 // Basic type checking
 
