@@ -201,7 +201,7 @@ sm_object *sm_eval(sm_object *input) {
       case SM_STRING_TYPE: {
         char       *endptr;
         const char *str_content = &((sm_string *)fromObj)->content;
-        double      value       = strtod(str_content, &endptr);
+        int64_t     value       = strtoll(str_content, &endptr, 10);
         // Check for conversion errors
         if (endptr == str_content) {
           sm_symbol *title = sm_new_symbol("cannotConvertToI64", 18);
@@ -233,7 +233,7 @@ sm_object *sm_eval(sm_object *input) {
       case SM_STRING_TYPE: {
         char       *endptr;
         const char *str_content = &((sm_string *)fromObj)->content;
-        double      value       = strtod(str_content, &endptr);
+        uint64_t    value       = strtoull(str_content, &endptr, 10);
         // Check for conversion errors
         if (endptr == str_content) {
           sm_symbol *title = sm_new_symbol("cannotConvertToI64", 18);
@@ -266,7 +266,7 @@ sm_object *sm_eval(sm_object *input) {
       case SM_STRING_TYPE: {
         char       *endptr;
         const char *str_content = &((sm_string *)fromObj)->content;
-        double      value       = strtod(str_content, &endptr);
+        uint64_t    value       = strtoull(str_content, &endptr, 10);
         // Check for conversion errors
         if (endptr == str_content) {
           sm_symbol *title = sm_new_symbol("cannotConvertToUi8", 18);
