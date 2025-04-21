@@ -37,14 +37,14 @@
 /// These are the major object types of SMS
 /// @note Must remain syncronized with function sm_type_name
 enum sm_object_type {
-  /// 0: f64 precision floating point (sm_f64.h)
-  SM_F64_TYPE,
-  /// 1: i64 signed integer (sm_i64.h)
-  SM_I64_TYPE,
-  /// 2: ui64 unsigned integer (sm_ui64.h)
-  SM_UI64_TYPE,
-  /// 3: unsigned byte int (sm_ui8.h)
+  /// 0: unsigned byte int (sm_ui8.h)
   SM_UI8_TYPE,
+  /// 1: ui64 unsigned integer (sm_ui64.h)
+  SM_UI64_TYPE,
+  /// 2: i64 signed integer (sm_i64.h)
+  SM_I64_TYPE,
+  /// 3: f64 precision floating point (sm_f64.h)
+  SM_F64_TYPE,
   /// 4: Expression (sm_expr.h)
   SM_EXPR_TYPE,
   /// 5: Primitive is not used yet

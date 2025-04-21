@@ -1,22 +1,28 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 sm_object *sm_add();
-sm_object *sm_add_uint8_and_uint8(sm_object *o0, sm_object *o1);
-sm_object *sm_add_uint8_and_int64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_uint8_and_int64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_uint8_and_f64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_int64_and_uint8(sm_object *o0, sm_object *o1);
-sm_object *sm_add_int64_and_int64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_int64_and_int64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_int64_and_f64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_int64_and_uint8(sm_object *o0, sm_object *o1);
-sm_object *sm_add_int64_and_int64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_int64_and_int64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_int64_and_f64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_f64_and_uint8(sm_object *o0, sm_object *o1);
-sm_object *sm_add_f64_and_int64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_f64_and_int64(sm_object *o0, sm_object *o1);
-sm_object *sm_add_f64_and_f64(sm_object *o0, sm_object *o1);
+
+sm_object *sm_add_ui8_and_ui8(sm_object *ui8_o0, sm_object *ui8_o1);
+sm_object *sm_add_ui8_and_ui64(sm_object *ui8_o0, sm_object *ui64_o1);
+sm_object *sm_add_ui8_and_i64(sm_object *ui8_o0, sm_object *i64_o1);
+sm_object *sm_add_ui8_and_f64(sm_object *ui8_o0, sm_object *f64_o1);
+
+sm_object *sm_add_ui64_and_ui8(sm_object *ui64_o0, sm_object *ui8_o1);
+sm_object *sm_add_ui64_and_ui64(sm_object *ui64_o0, sm_object *ui64_o1);
+sm_object *sm_add_ui64_and_i64(sm_object *ui64_o0, sm_object *i64_o1);
+sm_object *sm_add_ui64_and_f64(sm_object *ui64_o0, sm_object *f64_o1);
+
+sm_object *sm_add_i64_and_ui8(sm_object *i64_o0, sm_object *ui8_o1);
+sm_object *sm_add_i64_and_ui64(sm_object *i64_o0, sm_object *ui64_o1);
+sm_object *sm_add_i64_and_i64(sm_object *i64_o0, sm_object *i64_o1);
+sm_object *sm_add_i64_and_f64(sm_object *i64_o0, sm_object *f64_o1);
+
+sm_object *sm_add_f64_and_ui8(sm_object *f64_o0, sm_object *ui8_o1);
+sm_object *sm_add_f64_and_ui64(sm_object *f64_o0, sm_object *ui64_o1);
+sm_object *sm_add_f64_and_i64(sm_object *f64_o0, sm_object *i64_o1);
+sm_object *sm_add_f64_and_f64(sm_object *f64_o0, sm_object *f64_o1);
+
+
 sm_object *sm_minus();
 sm_object *sm_minus_uint8_and_uint8(sm_object *o0, sm_object *o1);
 sm_object *sm_minus_uint8_and_int64(sm_object *o0, sm_object *o1);
