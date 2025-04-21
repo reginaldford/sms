@@ -22,14 +22,17 @@ sm_stack2 *sms_stack;
 sm_stack2 *sms_cx_stack;
 // function pointers for numbers
 // f64, i64, ui64, ui8
-sm_object *(*sm_add_functions[])()    = {&sm_add_f64_and_f64, &sm_add_f64_and_uint8,
-                                         &sm_add_uint8_and_f64, &sm_add_uint8_and_uint8};
-sm_object *(*sm_minus_functions[])()  = {&sm_minus_f64_and_f64, &sm_minus_f64_and_uint8,
-                                         &sm_minus_uint8_and_f64, &sm_minus_uint8_and_uint8};
-sm_object *(*sm_times_functions[])()  = {&sm_times_f64_and_f64, &sm_times_f64_and_uint8,
-                                         &sm_times_uint8_and_f64, &sm_times_uint8_and_uint8};
-sm_object *(*sm_divide_functions[])() = {&sm_divide_f64_and_f64, &sm_divide_f64_and_uint8,
-                                         &sm_divide_uint8_and_f64, &sm_divide_uint8_and_uint8};
+sm_object *(*sm_add_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_add_f64_and_f64, &sm_add_f64_and_uint8, &sm_add_uint8_and_f64, &sm_add_uint8_and_uint8};
+sm_object *(*sm_minus_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_minus_f64_and_f64, &sm_minus_f64_and_uint8, &sm_minus_uint8_and_f64,
+  &sm_minus_uint8_and_uint8};
+sm_object *(*sm_times_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_times_f64_and_f64, &sm_times_f64_and_uint8, &sm_times_uint8_and_f64,
+  &sm_times_uint8_and_uint8};
+sm_object *(*sm_divide_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_divide_f64_and_f64, &sm_divide_f64_and_uint8, &sm_divide_uint8_and_f64,
+  &sm_divide_uint8_and_uint8};
 
 /* GLOBALS as functions
  The following globals use functions f(x):

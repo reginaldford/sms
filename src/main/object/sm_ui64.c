@@ -2,7 +2,7 @@
 
 #include "../sms.h"
 
-// Return new object encapsulating 64 bit floating point value
+// Return new object encapsulating 64 bit unsigned integer value
 sm_ui64 *sm_new_ui64(ui64 value) {
   struct sm_ui64 *newnum = (sm_ui64 *)sm_malloc(sizeof(sm_ui64));
   newnum->my_type        = SM_UI64_TYPE;
@@ -10,7 +10,7 @@ sm_ui64 *sm_new_ui64(ui64 value) {
   return newnum;
 }
 
-// Return new object encapsulating 64 bit floating point value
+// Return new object encapsulating 64 bit unsigned integer value
 sm_ui64 *sm_new_ui64_at(sm_heap *h, ui64 value) {
   struct sm_ui64 *newnum = (sm_ui64 *)sm_malloc_at(h, sizeof(sm_ui64));
   newnum->my_type        = SM_UI64_TYPE;
