@@ -30,11 +30,25 @@ sm_object *(*sm_add_functions[])(sm_object *o1, sm_object *o2) = {
   &sm_add_i64_and_ui8,  &sm_add_i64_and_ui64,  &sm_add_i64_and_i64,  &sm_add_i64_and_f64,
   &sm_add_f64_and_ui8,  &sm_add_f64_and_ui64,  &sm_add_f64_and_i64,  &sm_add_f64_and_f64};
 
+sm_object *(*sm_minus_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_minus_ui8_and_ui8,  &sm_minus_ui8_and_ui64,  &sm_minus_ui8_and_i64,  &sm_minus_ui8_and_f64,
+  &sm_minus_ui64_and_ui8, &sm_minus_ui64_and_ui64, &sm_minus_ui64_and_i64, &sm_minus_ui64_and_f64,
+  &sm_minus_i64_and_ui8,  &sm_minus_i64_and_ui64,  &sm_minus_i64_and_i64,  &sm_minus_i64_and_f64,
+  &sm_minus_f64_and_ui8,  &sm_minus_f64_and_ui64,  &sm_minus_f64_and_i64,  &sm_minus_f64_and_f64};
 
-sm_object *(*sm_minus_functions[])(sm_object *o1, sm_object *o2)  = {};
-sm_object *(*sm_times_functions[])(sm_object *o1, sm_object *o2)  = {};
-sm_object *(*sm_divide_functions[])(sm_object *o1, sm_object *o2) = {};
+sm_object *(*sm_times_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_times_ui8_and_ui8,  &sm_times_ui8_and_ui64,  &sm_times_ui8_and_i64,  &sm_times_ui8_and_f64,
+  &sm_times_ui64_and_ui8, &sm_times_ui64_and_ui64, &sm_times_ui64_and_i64, &sm_times_ui64_and_f64,
+  &sm_times_i64_and_ui8,  &sm_times_i64_and_ui64,  &sm_times_i64_and_i64,  &sm_times_i64_and_f64,
+  &sm_times_f64_and_ui8,  &sm_times_f64_and_ui64,  &sm_times_f64_and_i64,  &sm_times_f64_and_f64};
 
+sm_object *(*sm_divide_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_divide_ui8_and_ui8,  &sm_divide_ui8_and_ui64, &sm_divide_ui8_and_i64,
+  &sm_divide_ui8_and_f64,  &sm_divide_ui64_and_ui8, &sm_divide_ui64_and_ui64,
+  &sm_divide_ui64_and_i64, &sm_divide_ui64_and_f64, &sm_divide_i64_and_ui8,
+  &sm_divide_i64_and_ui64, &sm_divide_i64_and_i64,  &sm_divide_i64_and_f64,
+  &sm_divide_f64_and_ui8,  &sm_divide_f64_and_ui64, &sm_divide_f64_and_i64,
+  &sm_divide_f64_and_f64};
 /* GLOBALS as functions
  The following globals use functions f(x):
   - If x is NULL, the static field is returned.
