@@ -88,8 +88,8 @@ sm_object *sm_add_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_add_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  double   a = ((sm_ui64 *)o0)->value;
-  uint64_t b = ((sm_f64 *)o1)->value;
+  uint64_t a = ((sm_f64 *)o0)->value;
+  double   b = ((sm_ui64 *)o1)->value;
   return (sm_object *)sm_new_f64(a + b);
 }
 
@@ -200,8 +200,8 @@ sm_object *sm_minus_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_minus_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  double   a = ((sm_ui64 *)o0)->value;
-  uint64_t b = ((sm_f64 *)o1)->value;
+  uint64_t a = ((sm_f64 *)o0)->value;
+  double   b = ((sm_ui64 *)o1)->value;
   return (sm_object *)sm_new_f64(a - b);
 }
 
@@ -312,8 +312,8 @@ sm_object *sm_times_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_times_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  double   a = ((sm_ui64 *)o0)->value;
-  uint64_t b = ((sm_f64 *)o1)->value;
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  double   b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a * b);
 }
 
@@ -423,8 +423,8 @@ sm_object *sm_divide_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_divide_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  double   a = ((sm_ui64 *)o0)->value;
-  uint64_t b = ((sm_f64 *)o1)->value;
+  uint64_t a = ((sm_f64 *)o0)->value;
+  double   b = ((sm_ui64 *)o1)->value;
   return (sm_object *)sm_new_f64(a / b);
 }
 
