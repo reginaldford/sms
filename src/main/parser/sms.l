@@ -19,11 +19,45 @@ _version     {return VERSION;}
 exit         {return EXIT;}
 help         {return HELP;}
 
-f64 {return NEW_F64;}
-i64 {return NEW_I64;}
-ui64 {return NEW_UI64;}
-ui8 { return NEW_UI8; }
-ui8\((-?{digit}+)\) {
+f64  { return NEW_F64;  }
+i64  { return NEW_I64;  }
+i64\(\ +(-?{digit}+)\ +\) {
+    char *num_str = yytext + 4;  // Skip "i64("
+    // Find the position of the closing parenthesis
+    char *end_paren = strchr(num_str, ')');
+    if (!end_paren) {
+        fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
+        return 0;
+    }   
+    // Temporarily terminate the string at the closing parenthesis
+    *end_paren = '\0';
+    // Trim spaces from the start and end of num_str
+    char *end = num_str + strlen(num_str) - 1;
+    end[1] = '\0';  // Null-terminate the trimmed string
+    int64_t number = strtoll(num_str,NULL,10);  // Convert the trimmed number string to an integer
+    yylval.i64 = number;
+    return I64;
+}
+ui64 { return NEW_UI64; }
+ui64\(\ +(-?{digit}+)\ +\) {
+    char *num_str = yytext + 5;  // Skip "ui64("
+    // Find the position of the closing parenthesis
+    char *end_paren = strchr(num_str, ')');
+    if (!end_paren) {
+        fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
+        return 0;
+    }   
+    // Temporarily terminate the string at the closing parenthesis
+    *end_paren = '\0';
+    // Trim spaces from the start and end of num_str
+    char *end = num_str + strlen(num_str) - 1;
+    end[1] = '\0';  // Null-terminate the trimmed string
+    uint64_t number = strtoull(num_str,NULL,10);  // Convert the trimmed number string to an integer
+    yylval.ui64 = number;
+    return UI64;
+}
+ui8  { return NEW_UI8;  }
+ui8\(\ +(-?{digit}+)\ +\) {
     char *num_str = yytext + 4;  // Skip "ui8("
     // Find the position of the closing parenthesis
     char *end_paren = strchr(num_str, ')');
@@ -42,10 +76,10 @@ ui8\((-?{digit}+)\) {
 }
 
 
-f64Repeat {return F64_REPEAT;}
-i64Repeat {return I64_REPEAT;}
-ui64Repeat {return UI64_REPEAT;}
-ui8Repeat { return UI8_REPEAT ; }
+f64Repeat  { return F64_REPEAT;  }
+i64Repeat  { return I64_REPEAT;  }
+ui64Repeat { return UI64_REPEAT; }
+ui8Repeat  { return UI8_REPEAT ; }
 
 "&" {return IAND;}
 "|" {return IOR;}
@@ -292,11 +326,11 @@ _imgSave       {return HEAPSAVE;}
 '\0'        {return DONE;}
 
 ({digit}+) {
- yylval.integer = atoi(yytext);
+ yylval.integer = strtoull(yytext,NULL,10);
  return INTEGER;
 }
 
-\.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
+\.?{digit}+(\.{digit}+)([eE]-?{digit}+)?  {
    yylval.num = atof(yytext);
    return F64;
   }

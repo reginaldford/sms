@@ -18,7 +18,7 @@ int parsing_fpath_len;
 
 // All of the possible literals
 %union {
-  uint32_t         integer;
+  uint64_t         integer;
   double           num;
   uint64_t         ui64;
   int64_t          i64;
@@ -98,10 +98,10 @@ int parsing_fpath_len;
 %token <num> F64
 %token <expr> NEW_I64
 %token <expr> I64_REPEAT
-%token <num> I64
+%token <i64> I64
 %token <expr> NEW_UI64
 %token <expr> UI64_REPEAT
-%token <num> UI64
+%token <ui64> UI64
 %token <ui8> UI8
 %token <ui8> NEW_UI8
 %token <expr> UI8_REPEAT

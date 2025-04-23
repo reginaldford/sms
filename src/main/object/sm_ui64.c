@@ -31,9 +31,9 @@ sm_string *sm_ui64_to_string(sm_ui64 *self) {
 uint32_t sm_ui64_sprint(sm_ui64 *self, char *buffer, bool fake) {
   char internal_buf[30];
   if (!fake)
-    snprintf(buffer, 30, "ui64(%lu)", self->value);
+    snprintf(buffer, 30, "ui64(%llu)", self->value);
   else {
-    snprintf(internal_buf, 30, "ui64(%lu)", self->value);
+    snprintf(internal_buf, 30, "ui64(%llu)", self->value);
     buffer = internal_buf;
   }
   uint16_t count = 0;

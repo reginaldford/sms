@@ -231,21 +231,21 @@ sm_object *sm_eval(sm_object *input) {
       case SM_UI8_TYPE:
         return (((sm_object *)sm_new_ui64(((sm_ui8 *)fromObj)->value)));
       case SM_STRING_TYPE: {
-        char       *endptr;
+        char       *endptr = NULL;
         const char *str_content = &((sm_string *)fromObj)->content;
         uint64_t    value       = strtoull(str_content, &endptr, 10);
         // Check for conversion errors
         if (endptr == str_content) {
           sm_symbol *title = sm_new_symbol("cannotConvertToI64", 18);
           sm_string *message =
-            sm_new_fstring_at(sms_heap, "Cannot convert string to i64: %s", str_content);
+            sm_new_fstring_at(sms_heap, "Cannot convert string to ui64: %s", str_content);
           return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
         }
         return (((sm_object *)sm_new_ui64(value)));
       }
       default: {
         sm_symbol *title   = sm_new_symbol("cannotConvertToI64", 18);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to i64.",
+        sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to ui64.",
                                                sm_type_name(fromObj->my_type));
         sm_error  *err     = sm_new_error_from_expr(title, message, sme, NULL);
         if (fromObj->my_type == SM_ERR_TYPE)
