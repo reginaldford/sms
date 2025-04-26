@@ -103,7 +103,7 @@ sm_object *sm_add_i64_and_i64(sm_object *o0, sm_object *o1) {
 
 sm_object *sm_add_i64_and_f64(sm_object *o0, sm_object *o1) {
   int64_t a = ((sm_i64 *)o0)->value;
-  double   b = ((sm_f64 *)o1)->value;
+  double  b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a + b);
 }
 
@@ -215,7 +215,7 @@ sm_object *sm_minus_i64_and_i64(sm_object *o0, sm_object *o1) {
 
 sm_object *sm_minus_i64_and_f64(sm_object *o0, sm_object *o1) {
   int64_t a = ((sm_i64 *)o0)->value;
-  double   b = ((sm_f64 *)o1)->value;
+  double  b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a - b);
 }
 
@@ -327,7 +327,7 @@ sm_object *sm_times_i64_and_i64(sm_object *o0, sm_object *o1) {
 
 sm_object *sm_times_i64_and_f64(sm_object *o0, sm_object *o1) {
   int64_t a = ((sm_i64 *)o0)->value;
-  double   b = ((sm_f64 *)o1)->value;
+  double  b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a * b);
 }
 
@@ -438,7 +438,7 @@ sm_object *sm_divide_i64_and_i64(sm_object *o0, sm_object *o1) {
 
 sm_object *sm_divide_i64_and_f64(sm_object *o0, sm_object *o1) {
   int64_t a = ((sm_i64 *)o0)->value;
-  double   b = ((sm_f64 *)o1)->value;
+  double  b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a / b);
 }
 
@@ -458,8 +458,8 @@ sm_object *sm_divide_f64_and_f64(sm_object *o0, sm_object *o1) {
 
 // cx
 sm_object *sm_add_cx_and_number(sm_object *cx, sm_object *number) {
-  sm_cx *cx_number = (sm_cx*)cx;
-  sm_object * add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_",5));
+  sm_cx     *cx_number    = (sm_cx *)cx;
+  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_", 5));
   // TODO: you have to push the stack frame and cx ,and then execute_fun
   return cx;
 }
