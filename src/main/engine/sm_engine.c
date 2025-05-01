@@ -1645,14 +1645,11 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)output;
     }
     case SM_FILE_EXISTS_EXPR: {
-      sm_object *evaluated = eager_type_check(sme, 0, SM_STRING_TYPE);
-      sm_string *fname_str;
-      if (!expect_type(evaluated, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      fname_str        = (sm_string *)evaluated;
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
+      if (fname_str->my_type != SM_STRING_TYPE)
+        return (sm_object *)fname_str;
       char *fname_cstr = &(fname_str->content);
-
-      FILE *file = fopen(fname_cstr, "r");
+      FILE *file       = fopen(fname_cstr, "r");
       if (file == NULL) {
         return (sm_object *)sms_false;
       }
@@ -1660,25 +1657,20 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sms_true;
     }
     case SM_FILE_RM_EXPR: {
-      sm_object *evaluated = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_string *fname_str;
-      if (!expect_type(evaluated, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      fname_str           = (sm_string *)evaluated;
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
+      if (fname_str->my_type != SM_STRING_TYPE)
+        return (sm_object *)fname_str;
       char    *fname_cstr = &(fname_str->content);
       uint32_t result     = remove(fname_cstr);
       if (result != 0) {
-        printf("fileRm failed: Could not rm file: %s\n", fname_cstr);
         return (sm_object *)sms_false;
       }
       return (sm_object *)sms_true;
     }
     case SM_FILE_STAT_EXPR: {
-      sm_object *evaluated = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_string *fname_str;
-      if (!expect_type(evaluated, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      fname_str              = (sm_string *)evaluated;
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
+      if (fname_str->my_type != SM_STRING_TYPE)
+        return (sm_object *)fname_str;
       char       *fname_cstr = &(fname_str->content);
       struct stat filestat;
       sm_expr    *output;
@@ -1715,13 +1707,11 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)output;
     }
     case SM_FILE_PARSE_EXPR: {
-      sm_object *evaluated = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_string *str;
-      if (!expect_type(evaluated, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      str                  = (sm_string *)evaluated;
-      char           *cstr = &(str->content);
-      sm_parse_result pr   = sm_parse_file(cstr);
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
+      if (fname_str->my_type != SM_STRING_TYPE)
+        return (sm_object *)fname_str;
+      char           *fname_cstr = &(fname_str->content);
+      sm_parse_result pr         = sm_parse_file(fname_cstr);
       if (pr.return_val != 0) {
         printf("Error: Parser failed and returned %i.\n", pr.return_val);
         return (sm_object *)sms_false;
@@ -1730,11 +1720,9 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_PARSE_EXPR: {
-      sm_object *evaluated = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_string *str;
-      if (!expect_type(evaluated, SM_STRING_TYPE))
-        return (sm_object *)sms_false;
-      str                = (sm_string *)evaluated;
+      sm_string *str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
+      if (str->my_type != SM_STRING_TYPE)
+        return (sm_object *)str;
       char *cstr         = &(str->content);
       cstr[str->size]    = ';'; // Temporarily replacing the NULL char
       sm_parse_result pr = sm_parse_cstr(cstr, str->size + 1);
@@ -1747,18 +1735,17 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_NEW_STR_EXPR: {
       sm_object *evaluated = sm_eval(sm_expr_get_arg(sme, 0));
-      return (sm_object*) sm_object_to_string(evaluated;
+      return (sm_object *)sm_object_to_string(evaluated);
     }
     case SM_EVAL_EXPR: {
       sm_object *evaluated = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_eval(evaluated);
-      return;
+      return sm_eval(evaluated);
     }
     case SM_CX_EVAL_EXPR: {
       sm_object *obj1      = sm_eval(sm_expr_get_arg(sme, 1));
       sm_object *evaluated = eager_type_check(sme, 0, SM_CX_TYPE);
-      sm_eval(obj1, (sm_cx *)evaluated, sf);
-      return;
+      // TODO cx stack push
+      return sm_eval(obj1);
     }
     case SM_PUT_EXPR: {
       sm_string *str;
@@ -1828,17 +1815,20 @@ sm_object *sm_eval(sm_object *input) {
       sm_expr   *expression         = (sm_expr *)sm_expr_get_arg(sme, 2);
       sm_object *result             = (sm_object *)sms_false;
       sm_object *evalResult         = sm_eval(possibleCollection);
+      sm_object *output             = (sm_object *)sms_false;
       switch (evalResult->my_type) {
       case SM_ARRAY_TYPE: {
         sm_cx     *inner_cx = sm_new_cx(current_cx);
         sm_object *result   = (sm_object *)sms_false;
         sm_array  *arr      = (sm_array *)evalResult;
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
+        sm_object *output = (sm_object *)sms_false;
         for (uint32_t i = 0; i < arr->size; i++) {
           sm_cx_set(inner_cx, handle, sm_array_get(arr, i));
-          sm_eval((sm_object *)expression, inner_cx, sf);
+          // TODO: inner_cx, sf stack work
+          output = sm_eval((sm_object *)expression);
         }
-        return;
+        return output;
         break;
       }
       case SM_EXPR_TYPE: {
@@ -1847,21 +1837,24 @@ sm_object *sm_eval(sm_object *input) {
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < collectionExpr->size; i++) {
           sm_cx_set(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
-          sm_eval((sm_object *)expression, inner_cx, sf);
+          // TODO: cx stack push
+          output = sm_eval((sm_object *)expression);
         }
-        return;
+        return output;
         break;
       }
       case SM_STRING_TYPE: {
         sm_cx     *inner_cx = sm_new_cx(current_cx);
         sm_string *str      = (sm_string *)evalResult;
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
+        sm_object *output = (sm_object *)sms_false;
         for (uint32_t i = 0; i < str->size; i++) {
           sm_cx_set(inner_cx, handle,
                     (sm_object *)sm_new_fstring_at(sms_heap, "%c", (&str->content)[i]));
-          sm_eval((sm_object *)expression, inner_cx, sf);
+          // TODO: cx stack push
+          output = sm_eval((sm_object *)expression);
         }
-        return;
+        return output;
         break;
       }
       default: {
@@ -1870,7 +1863,7 @@ sm_object *sm_eval(sm_object *input) {
                                                "(expr, array, string). Instead, object type is: %s",
                                                sm_type_name(evalResult->my_type));
         sm_symbol *title   = sm_new_symbol("typeMismatchForIn", 17);
-        return (sm_object*)sm_new_error_from_expr(title, message, sme, NULL;
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       }
       break;
@@ -1882,6 +1875,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_expr   *whereCondition     = (sm_expr *)sm_expr_get_arg(sme, 2);
       sm_object *result             = (sm_object *)sms_false;
       sm_object *evalResult         = sm_eval(possibleCollection);
+      sm_object *output             = (sm_object *)sms_false;
       switch (evalResult->my_type) {
       case SM_ARRAY_TYPE: {
         sm_cx     *inner_cx = sm_new_cx(current_cx);
@@ -1890,11 +1884,12 @@ sm_object *sm_eval(sm_object *input) {
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < arr->size; i++) {
           sm_cx_set(inner_cx, handle, sm_array_get(arr, i));
-          sm_object *conditionResult = sm_eval((sm_object *)whereCondition, inner_cx, sf);
+          // TODO: stack work
+          sm_object *conditionResult = sm_eval((sm_object *)whereCondition);
           if ((sm_object *)sms_false != (conditionResult))
-            sm_eval((sm_object *)expression, inner_cx, sf);
+            output = sm_eval((sm_object *)expression);
         }
-        return;
+        return output;
         break;
       }
       case SM_EXPR_TYPE: {
@@ -1903,11 +1898,12 @@ sm_object *sm_eval(sm_object *input) {
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < collectionExpr->size; i++) {
           sm_cx_set(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
-          sm_object *conditionResult = sm_eval((sm_object *)whereCondition, inner_cx, sf);
+          // TODO: stack push
+          sm_object *conditionResult = sm_eval((sm_object *)whereCondition);
           if ((sm_object *)sms_false != (conditionResult))
-            sm_eval((sm_object *)expression, inner_cx, sf);
+            output = sm_eval((sm_object *)expression);
         }
-        return;
+        return output;
         break;
       }
       case SM_STRING_TYPE: {
@@ -1917,11 +1913,12 @@ sm_object *sm_eval(sm_object *input) {
         for (uint32_t i = 0; i < str->size; i++) {
           sm_cx_set(inner_cx, handle,
                     (sm_object *)sm_new_fstring_at(sms_heap, "%c", (&str->content)[i]));
-          sm_object *conditionResult = sm_eval((sm_object *)whereCondition, inner_cx, sf);
+          sm_object *conditionResult = sm_eval((sm_object *)whereCondition);
+          // TODO: ditto
           if ((sm_object *)sms_false != (conditionResult))
-            sm_eval((sm_object *)expression, inner_cx, sf);
+            output = sm_eval((sm_object *)expression);
         }
-        return;
+        return output;
         break;
       }
       default: {
@@ -1930,7 +1927,7 @@ sm_object *sm_eval(sm_object *input) {
                                                "(expr, array, string). Instead, object type is: %s",
                                                sm_type_name(evalResult->my_type));
         sm_symbol *title   = sm_new_symbol("typeMismatchForIn", 17);
-        return (sm_object*)sm_new_error_from_expr(title, message, sme, NULL;
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       }
       break;
@@ -1938,18 +1935,19 @@ sm_object *sm_eval(sm_object *input) {
     case SM_DO_WHILE_EXPR: {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
       sm_object *expression = sm_expr_get_arg(sme, 0);
-      sm_object *result     = (sm_object *)sms_true;
+      sm_object *evaluated;
+      // TODO: watch for return_obj refs
       do {
-        result = sm_eval(expression);
-        if (result->my_type == SM_RETURN_TYPE)
-          return result;
+        evaluated = sm_eval(expression);
+        if (evaluated->my_type == SM_RETURN_TYPE)
+          return evaluated;
         sm_object *evaluated = sm_eval((sm_object *)condition);
-      } while ((sm_object *)sms_false != (evaluated));
-      return;
+      } while ((sm_object *)sms_false != evaluated);
+      return (sm_object *)sms_true;
       break;
     }
     case SM_RETURN_EXPR: {
-      return (sm_object*)sm_new_return(sm_eval(sm_expr_get_arg(sme, 0);
+      return (sm_object *)sm_new_return(sm_eval(sm_expr_get_arg(sme, 0)));
     }
     case SM_SIZE_EXPR: {
       sm_object *base_obj = eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE);
@@ -1958,27 +1956,24 @@ sm_object *sm_eval(sm_object *input) {
       switch (base_obj->my_type) {
       case SM_EXPR_TYPE: {
         sm_expr *expr = (sm_expr *)base_obj;
-        return (sm_object*) sm_new_f64(expr->size;
+        return (sm_object *)sm_new_f64(expr->size);
       }
       case SM_ARRAY_TYPE: {
         sm_array *array = (sm_array *)base_obj;
-        return (sm_object*) sm_new_f64(array->size;
+        return (sm_object *)sm_new_f64(array->size);
       }
       default:
-        return (sm_object*) sm_new_f64(0;
+        return (sm_object *)sm_new_f64(0);
       }
     }
     case SM_MAP_EXPR: {
       // expecting a unary func
-      sm_object *fun = eager_type_check(sme, 0, SM_FUN_TYPE);
-      if (fun->my_type == SM_ERR_TYPE) {
-        return fun; // Return the function object if type check fails
-      }
-
-      sm_object *arr = eager_type_check(sme, 1, SM_EXPR_TYPE);
-      if (arr->my_type == SM_ERR_TYPE) {
-        return arr;
-      }
+      sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
+      if (fun->my_type == SM_ERR_TYPE)
+        return (sm_object *)fun; // Return the function object if type check fails
+      sm_expr *arr = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE);
+      if (arr->my_type == SM_ERR_TYPE)
+        return (sm_object *)arr;
       // Create a new output expression with the same operation type and size
       sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size, NULL);
       // Iterate over the elements of the array expression (arr)
@@ -1986,7 +1981,8 @@ sm_object *sm_eval(sm_object *input) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj, NULL);
         // Call the function with the new expression
-        sm_object *map_result = sm_eval(fun->content, fun->parent, new_sf);
+        // TODO: stack stuff
+        sm_object *map_result = sm_eval(fun->content);
         // If the result is a return type, dereference it
         if (map_result->my_type == SM_RETURN_TYPE) {
           map_result = ((sm_return *)map_result)->address;
@@ -1999,17 +1995,12 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_REDUCE_EXPR: {
       // expecting a binary function
-      sm_object *obj0 = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_fun    *fun;
-      if (!expect_type(obj0, SM_FUN_TYPE))
-        return (sm_object *)sms_false;
-      fun = (sm_fun *)obj0;
+      sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
+      if (fun->my_type == SM_ERR_TYPE)
+        return (sm_object *)fun;
       // evaluating the expression to reduce
       sm_object *obj1 = sm_eval(sm_expr_get_arg(sme, 1));
-      sm_expr   *arr;
-      if (!expect_type(obj1, SM_EXPR_TYPE))
-        return (sm_object *)sms_false;
-      arr = (sm_expr *)obj1;
+      sm_expr   *arr  = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE);
       // initial value for reduction
       sm_object *initial = sm_eval(sm_expr_get_arg(sme, 2));
       // reducing the expression
@@ -2019,7 +2010,8 @@ sm_object *sm_eval(sm_object *input) {
       for (uint32_t i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr_set_arg(reusable, 1, current_obj);
-        result = sm_eval(fun->content, fun->parent, reusable);
+        // TODO: stack
+        result = sm_eval(fun->content);
         sm_expr_set_arg(reusable, 0, result);
       }
       return result;
@@ -2039,7 +2031,7 @@ sm_object *sm_eval(sm_object *input) {
           sm_string *message = sm_new_fstring_at(
             sms_heap, "Index out of range: %i . Expr size is %i", index, arr->size);
           sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
         }
         return sm_expr_get_arg(arr, index);
       }
@@ -2049,7 +2041,7 @@ sm_object *sm_eval(sm_object *input) {
           sm_string *message = sm_new_fstring_at(
             sms_heap, "Index out of range: %i . Array size is %i", index, arr->size);
           sm_symbol *title = sm_new_symbol("indexOutOfBounds", 16);
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
         }
         return sm_array_get(arr, index);
       }
@@ -2069,7 +2061,7 @@ sm_object *sm_eval(sm_object *input) {
         sm_string *cx_str  = sm_object_to_string((sm_object *)current_cx);
         sm_string *message = sm_new_fstring_at(sms_heap, "variable: %s not found in cx: %s",
                                                &field_name->content, &cx_str->content);
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       return (sm_object *)sr;
     }
@@ -2080,312 +2072,300 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)base_cx->parent;
     }
     case SM_DIFF_EXPR: {
-      sm_object *evaluated0 = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_object *evaluated1 = sm_eval(sm_expr_get_arg(sme, 1));
-      sm_symbol *sym1;
-      if (!expect_type(evaluated1, SM_SYMBOL_TYPE))
-        return (sm_object *)sms_false;
-      sym1              = (sm_symbol *)evaluated1;
-      sm_object *result = sm_diff(evaluated0, sym1);
-      return sm_simplify(result);
+      sm_expr *expr = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE);
+      if (expr->my_type != SM_EXPR_TYPE)
+        return (sm_object *)expr;
+      sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
+      if (sym->my_type != SM_SYMBOL_TYPE)
+        return (sm_object *)sym;
+      return (sm_object *)sm_simplify(sm_diff(expr, sym));
     }
     case SM_SIMP_EXPR: {
       sm_object *evaluated0 = sm_eval(sm_expr_get_arg(sme, 0));
       return sm_simplify(evaluated0);
     }
     case SM_FUN_CALL_EXPR: {
-      sm_expr   *new_args         = (sm_expr *)sm_eval((sm_object *)sm_expr_get_arg(sme, 1));
-      sm_object *function_to_call = sm_expr_get_arg(sme, 0);
-      function_to_call            = sm_eval(function_to_call);
-      if (function_to_cal->my_type == SM_ERR_TYPE)
-        return function_to_call; // return the return_obj
-      execute_fun((sm_fun *)return_obj, current_cx, new_args);
-      return;
+      sm_fun  *function_to_call = (sm_fun *)sm_eval(sm_expr_get_arg(sme, 0));
+      sm_expr *args             = (sm_expr *)sm_eval(sm_expr_get_arg(sme, 1));
+      // if (function_to_cal->my_type == SM_ERR_TYPE)
+      // return (sm_object*)function_to_call; // return the return_obj
+      //  TODO: stack
+      return execute_fun(function_to_call);
       break;
     }
     case SM_BLOCK_EXPR: {
-      return_obj    = (sm_object *)sms_true;
-      sm_cx *new_cx = sm_new_cx(current_cx);
-      for (uint32_t i = 1; i < sme->size && return_obj->my_type != SM_RETURN_TYPE; i++)
-        sm_eval(sm_expr_get_arg(sme, i), new_cx, sf);
-      return;
+      sm_cx     *new_cx = sm_new_cx(current_cx);
+      sm_object *output = (sm_object *)sms_false;
+      // TODO: stack
+      for (uint32_t i = 1; i < sme->size && output->my_type != SM_RETURN_TYPE; i++)
+        output = sm_eval(sm_expr_get_arg(sme, i));
+      return output;
       break;
     }
     case SM_ASSIGN_EXPR: {
-      sm_symbol *sym;
-      sm_object *obj0 = sm_expr_get_arg(sme, 0);
-      sm_eval(sm_expr_get_arg(sme, 1));
-      sm_object *value = return_obj;
-      if (!expect_type(obj0, SM_SYMBOL_TYPE))
-        return (sm_object *)sms_false;
-      sym = (sm_symbol *)obj0;
+      sm_symbol *sym   = (sm_symbol *)eager_type_check(sme, 0, SM_SYMBOL_TYPE);
+      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
+      if (value->my_type == SM_ERR_TYPE)
+        return (sm_object *)value;
       if (!sm_cx_set(current_cx, sym, value))
         return (sm_object *)sms_false;
       return value;
     }
     case SM_ASSIGN_DOT_EXPR: {
-      sm_eval(sm_expr_get_arg(sme, 0));
-      sm_cx     *predot  = (sm_cx *)return_obj;
+      sm_cx     *predot  = (sm_cx *)sm_eval(sm_expr_get_arg(sme, 0));
       sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(sme, 1);
-      sm_eval(sm_expr_get_arg(sme, 2));
-      sm_object *value = return_obj;
-
+      sm_object *value   = sm_eval(sm_expr_get_arg(sme, 2));
       if (!sm_cx_let(predot, postdot, value))
         return (sm_object *)sms_false;
       return (sm_object *)sms_true;
     }
     case SM_ASSIGN_LOCAL_EXPR: {
-      sm_object *obj0 = sm_expr_get_arg(sme, 0);
-      sm_eval(sm_expr_get_arg(sme, 1));
-      sm_object *value = (sm_object *)return_obj;
-      if (obj0->my_type == SM_LOCAL_TYPE) {
-        sm_local *lcl = (sm_local *)obj0;
-        sm_expr_set_arg(sf, lcl->index, value);
-      } else
-        return (sm_object *)sms_false;
+      sm_object *lcl   = eager_type_check(sme, 0, SM_LOCAL_TYPE);
+      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
+      if (lcl->my_type != SM_LOCAL_TYPE)
+        return lcl;
+      // TODO: stack
+      // sm_expr_set_arg(sf, lcl->index, value);
+    }
       return value;
       break;
     }
-
-
-    case SM_ASSIGN_INDEX_EXPR: {
-      // Expecting a[4]=value => =index_expr(a,4,value);
-      sm_eval(sm_expr_get_arg(sme, 2));
-      sm_object *value = return_obj;
-      eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE);
-      sm_expr *arr_obj = (sm_expr *)return_obj;
-      eager_type_check(sme, 1, SM_F64_TYPE);
-      sm_f64 *index = (sm_f64 *)return_obj;
-      // This works on both tuples and arrays
-      switch (arr_obj->my_type) {
-      case SM_EXPR_TYPE: {
-        sm_expr *arr_expr = (sm_expr *)arr_obj;
-        if ((uint32_t)index->value >= arr_expr->size || (uint32_t)index->value < 0) {
-          sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
-          sm_string *message =
-            sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
-                              (uint32_t)index->value, (uint32_t)arr_expr->size);
+  case SM_ASSIGN_INDEX_EXPR: {
+    // Expecting a[4]=value => =index_expr(a,4,value);
+    sm_object *value   = sm_eval(sm_expr_get_arg(sme, 2));
+    sm_expr   *arr_obj = (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE);
+    sm_f64    *index   = eager_type_check(sme, 1, SM_F64_TYPE);
+    sm_f64    *index   = (sm_f64 *)return_obj;
+    // This works on both tuples and arrays
+    switch (arr_obj->my_type) {
+    case SM_EXPR_TYPE: {
+      sm_expr *arr_expr = (sm_expr *)arr_obj;
+      if ((uint32_t)index->value >= arr_expr->size || (uint32_t)index->value < 0) {
+        sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
+                            (uint32_t)index->value, (uint32_t)arr_expr->size);
           return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-        }
-        sm_expr_set_arg(arr_expr, (uint32_t)index->value, value);
+      }
+      sm_expr_set_arg(arr_expr, (uint32_t)index->value, value);
+      break;
+    }
+    case SM_ARRAY_TYPE: {
+      sm_array *arr = (sm_array *)arr_obj;
+      if ((uint32_t)index->value >= arr->size || (uint32_t)index->value < 0) {
+        sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
+                            (uint32_t)index->value, (uint32_t)arr->size);
+          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+      }
+      if (arr->inner_type != value->my_type) {
+        sm_symbol *title   = sm_new_symbol("arrayAssignmentTypeMismatch", 27);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Array contains objects of type %s, but assignment value has type %s",
+          sm_type_name(arr->inner_type), sm_type_name(value->my_type));
+          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+      }
+      switch (arr->inner_type) {
+      case SM_F64_TYPE: {
+        sm_f64_array_set(arr, index->value, ((sm_f64 *)value)->value);
         break;
       }
-      case SM_ARRAY_TYPE: {
-        sm_array *arr = (sm_array *)arr_obj;
-        if ((uint32_t)index->value >= arr->size || (uint32_t)index->value < 0) {
-          sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
-          sm_string *message =
-            sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
-                              (uint32_t)index->value, (uint32_t)arr->size);
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-        }
-        if (arr->inner_type != value->my_type) {
-          sm_symbol *title   = sm_new_symbol("arrayAssignmentTypeMismatch", 27);
-          sm_string *message = sm_new_fstring_at(
-            sms_heap, "Array contains objects of type %s, but assignment value has type %s",
-            sm_type_name(arr->inner_type), sm_type_name(value->my_type));
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-        }
-        switch (arr->inner_type) {
-        case SM_F64_TYPE: {
-          sm_f64_array_set(arr, index->value, ((sm_f64 *)value)->value);
-          break;
-        }
-        case SM_UI8_TYPE: {
-          sm_ui8_array_set(arr, index->value, ((sm_ui8 *)value)->value);
-          break;
-        }
-        default: {
-          sm_symbol *title   = sm_new_symbol("arrayTypeUnknownError", 19);
-          sm_string *message = sm_new_fstring_at(sms_heap, "Unsupported array inner type %i",
-                                                 (uint32_t)arr->inner_type);
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-        }
-        }
+      case SM_UI8_TYPE: {
+        sm_ui8_array_set(arr, index->value, ((sm_ui8 *)value)->value);
         break;
       }
       default: {
-        sm_symbol *title = sm_new_symbol("invalidExpressionType", 19);
+        sm_symbol *title = sm_new_symbol("arrayTypeUnknownError", 19);
         sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid expression type %i", (uint32_t)arr_obj->my_type);
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+          sm_new_fstring_at(sms_heap, "Unsupported array inner type %i", (uint32_t)arr->inner_type);
+          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
       }
       }
-      return value;
+      break;
     }
-    case SM_IXOR_EXPR: {
-      eager_type_check(sme, 0, SM_UI8_TYPE);
-      sm_ui8 *obj0 = (sm_ui8 *)return_obj;
-      if (obj0->my_type != SM_UI8_TYPE)
-        return (sm_object *)obj0;
-      eager_type_check(sme, 1, SM_UI8_TYPE);
-      sm_ui8 *obj1 = (sm_ui8 *)return_obj;
-      if (obj1->my_type != SM_UI8_TYPE)
-        return (sm_object *)obj1;
+    default: {
+      sm_symbol *title = sm_new_symbol("invalidExpressionType", 19);
+      sm_string *message =
+        sm_new_fstring_at(sms_heap, "Invalid expression type %i", (uint32_t)arr_obj->my_type);
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    }
+    return value;
+  }
+  case SM_IXOR_EXPR: {
+    eager_type_check(sme, 0, SM_UI8_TYPE);
+    sm_ui8 *obj0 = (sm_ui8 *)return_obj;
+    if (obj0->my_type != SM_UI8_TYPE)
+      return (sm_object *)obj0;
+    eager_type_check(sme, 1, SM_UI8_TYPE);
+    sm_ui8 *obj1 = (sm_ui8 *)return_obj;
+    if (obj1->my_type != SM_UI8_TYPE)
+      return (sm_object *)obj1;
       return (sm_object*) sm_new_ui8(obj0->value ^ obj1->value;
       break;
-    }
-    case SM_IAND_EXPR: {
-      eager_type_check(sme, 0, SM_UI8_TYPE);
-      sm_ui8 *obj0 = (sm_ui8 *)return_obj;
-      if (obj0->my_type != SM_UI8_TYPE)
-        return (sm_object *)obj0;
-      eager_type_check(sme, 1, SM_UI8_TYPE);
-      sm_ui8 *obj1 = (sm_ui8 *)return_obj;
-      if (obj1->my_type != SM_UI8_TYPE)
-        return (sm_object *)obj1;
+  }
+  case SM_IAND_EXPR: {
+    eager_type_check(sme, 0, SM_UI8_TYPE);
+    sm_ui8 *obj0 = (sm_ui8 *)return_obj;
+    if (obj0->my_type != SM_UI8_TYPE)
+      return (sm_object *)obj0;
+    eager_type_check(sme, 1, SM_UI8_TYPE);
+    sm_ui8 *obj1 = (sm_ui8 *)return_obj;
+    if (obj1->my_type != SM_UI8_TYPE)
+      return (sm_object *)obj1;
       return (sm_object*) sm_new_ui8(obj0->value & obj1->value;
       break;
-    }
-    case SM_IOR_EXPR: {
-      eager_type_check(sme, 0, SM_UI8_TYPE);
-      sm_ui8 *obj0 = (sm_ui8 *)return_obj;
-      if (obj0->my_type != SM_UI8_TYPE)
-        return (sm_object *)obj0;
-      eager_type_check(sme, 1, SM_UI8_TYPE);
-      sm_ui8 *obj1 = (sm_ui8 *)return_obj;
-      if (obj1->my_type != SM_UI8_TYPE)
-        return (sm_object *)obj1;
+  }
+  case SM_IOR_EXPR: {
+    eager_type_check(sme, 0, SM_UI8_TYPE);
+    sm_ui8 *obj0 = (sm_ui8 *)return_obj;
+    if (obj0->my_type != SM_UI8_TYPE)
+      return (sm_object *)obj0;
+    eager_type_check(sme, 1, SM_UI8_TYPE);
+    sm_ui8 *obj1 = (sm_ui8 *)return_obj;
+    if (obj1->my_type != SM_UI8_TYPE)
+      return (sm_object *)obj1;
       return (sm_object*) sm_new_ui8(obj0->value | obj1->value;
       break;
+  }
+  case SM_IPLUSEQ_EXPR: {
+    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+    sm_eval(sm_expr_get_arg(sme, 1));
+    sm_object *value         = return_obj;
+    sm_object *current_value = sm_cx_get(current_cx, sym);
+    if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+      sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+      sm_string *message =
+        sm_new_fstring_at(sms_heap, "Invalid types for += operation. Expected numbers.");
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
     }
-    case SM_IPLUSEQ_EXPR: {
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-      sm_eval(sm_expr_get_arg(sme, 1));
-      sm_object *value         = return_obj;
-      sm_object *current_value = sm_cx_get(current_cx, sym);
-      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
-        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
-        sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid types for += operation. Expected numbers.");
+    sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+    sm_ui8 *value_ui8   = (sm_ui8 *)value;
+    if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
+      sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+      sm_string *message = sm_new_fstring_at(
+        sms_heap, "Operands must be of type %s for !+= operation.", sm_type_name(SM_UI8_TYPE));
         return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
-      sm_ui8 *value_ui8   = (sm_ui8 *)value;
-      if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
-        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Operands must be of type %s for !+= operation.", sm_type_name(SM_UI8_TYPE));
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value + value_ui8->value);
-      if (!sm_cx_set(current_cx, sym, result)) {
-        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      return result;
     }
-    case SM_IMINUSEQ_EXPR: {
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-      sm_eval(sm_expr_get_arg(sme, 1));
-      sm_object *value         = return_obj;
-      sm_object *current_value = sm_cx_get(current_cx, sym);
-      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
-        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
-        sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid types for !-= operation. Expected numbers.");
+    sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value + value_ui8->value);
+    if (!sm_cx_set(current_cx, sym, result)) {
+      sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
         return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
-      sm_ui8 *value_ui8   = (sm_ui8 *)value;
-      if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
-        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Operands must be of type %s for -= operation.", sm_type_name(SM_UI8_TYPE));
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value - value_ui8->value);
-      if (!sm_cx_set(current_cx, sym, result)) {
-        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      return result;
     }
-    case SM_ITIMESEQ_EXPR: {
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-      sm_eval(sm_expr_get_arg(sme, 1));
-      sm_object *value         = return_obj;
-      sm_object *current_value = sm_cx_get(current_cx, sym);
-      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
-        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
-        sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid types for *= operation. Expected numbers.");
+    return result;
+  }
+  case SM_IMINUSEQ_EXPR: {
+    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+    sm_eval(sm_expr_get_arg(sme, 1));
+    sm_object *value         = return_obj;
+    sm_object *current_value = sm_cx_get(current_cx, sym);
+    if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+      sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+      sm_string *message =
+        sm_new_fstring_at(sms_heap, "Invalid types for !-= operation. Expected numbers.");
         return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
-      sm_ui8 *value_ui8   = (sm_ui8 *)value;
-      if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
-        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Operands must be of type %s for *= operation.", sm_type_name(SM_UI8_TYPE));
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value * value_ui8->value);
-      if (!sm_cx_set(current_cx, sym, result)) {
-        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      return result;
     }
-    case SM_IDIVIDEEQ_EXPR: {
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-      sm_eval(sm_expr_get_arg(sme, 1));
-      sm_object *value         = return_obj;
-      sm_object *current_value = sm_cx_get(current_cx, sym);
-      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
-        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
-        sm_string *message =
-          sm_new_fstring_at(sms_heap, "Invalid types for /= operation. Expected numbers.");
+    sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+    sm_ui8 *value_ui8   = (sm_ui8 *)value;
+    if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
+      sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+      sm_string *message = sm_new_fstring_at(
+        sms_heap, "Operands must be of type %s for -= operation.", sm_type_name(SM_UI8_TYPE));
         return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
-      sm_ui8 *value_ui8   = (sm_ui8 *)value;
-      if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
-        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Operands must be of type %s for /= operation.", sm_type_name(SM_UI8_TYPE));
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      if (value_ui8->value == 0.0) {
-        sm_symbol *title   = sm_new_symbol("divisionByZero", 15);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Division by zero in /= operation.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value / value_ui8->value);
-      if (!sm_cx_set(current_cx, sym, result)) {
-        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
-        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      return result;
     }
+    sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value - value_ui8->value);
+    if (!sm_cx_set(current_cx, sym, result)) {
+      sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    return result;
+  }
+  case SM_ITIMESEQ_EXPR: {
+    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+    sm_eval(sm_expr_get_arg(sme, 1));
+    sm_object *value         = return_obj;
+    sm_object *current_value = sm_cx_get(current_cx, sym);
+    if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+      sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+      sm_string *message =
+        sm_new_fstring_at(sms_heap, "Invalid types for *= operation. Expected numbers.");
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+    sm_ui8 *value_ui8   = (sm_ui8 *)value;
+    if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
+      sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+      sm_string *message = sm_new_fstring_at(
+        sms_heap, "Operands must be of type %s for *= operation.", sm_type_name(SM_UI8_TYPE));
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value * value_ui8->value);
+    if (!sm_cx_set(current_cx, sym, result)) {
+      sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    return result;
+  }
+  case SM_IDIVIDEEQ_EXPR: {
+    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+    sm_eval(sm_expr_get_arg(sme, 1));
+    sm_object *value         = return_obj;
+    sm_object *current_value = sm_cx_get(current_cx, sym);
+    if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+      sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+      sm_string *message =
+        sm_new_fstring_at(sms_heap, "Invalid types for /= operation. Expected numbers.");
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
+    sm_ui8 *value_ui8   = (sm_ui8 *)value;
+    if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
+      sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+      sm_string *message = sm_new_fstring_at(
+        sms_heap, "Operands must be of type %s for /= operation.", sm_type_name(SM_UI8_TYPE));
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    if (value_ui8->value == 0.0) {
+      sm_symbol *title   = sm_new_symbol("divisionByZero", 15);
+      sm_string *message = sm_new_fstring_at(sms_heap, "Division by zero in /= operation.");
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value / value_ui8->value);
+    if (!sm_cx_set(current_cx, sym, result)) {
+      sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    }
+    return result;
+  }
 
-      // done
-    case SM_PLUS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-      return sm_add();
-    }
-    case SM_MINUS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-      return sm_minus();
-    }
-    case SM_TIMES_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-      return sm_times();
-    }
-    case SM_DIVIDE_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-      return sm_divide();
-    }
-    }
+    // done
+  case SM_PLUS_EXPR: {
+    sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+    sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+    return sm_add();
+  }
+  case SM_MINUS_EXPR: {
+    sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+    sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+    return sm_minus();
+  }
+  case SM_TIMES_EXPR: {
+    sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+    sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+    return sm_times();
+  }
+  case SM_DIVIDE_EXPR: {
+    sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+    sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+    return sm_divide();
   }
   }
-  return input;
+  }
+}
+return input;
 }
