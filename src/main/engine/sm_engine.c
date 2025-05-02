@@ -12,7 +12,6 @@ extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
 extern sm_stack2   *sms_stack;
 extern sm_stack2   *sms_cx_stack;
-extern sm_object *(*sm_add_functions[])();
 
 sm_object *sf;
 sm_cx     *current_cx;
@@ -38,6 +37,7 @@ static inline sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32
   }
   return (sm_object *)obj;
 }
+// extern sm_object *(*sm_add_functions[])();
 
 // Evaluate the argument, then run type check. 2 possibilities allowed
 static inline sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type1,
@@ -2087,7 +2087,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_fun  *function_to_call = (sm_fun *)sm_eval(sm_expr_get_arg(sme, 0));
       sm_expr *args             = (sm_expr *)sm_eval(sm_expr_get_arg(sme, 1));
       // if (function_to_cal->my_type == SM_ERR_TYPE)
-      // return (sm_object*)function_to_call; // return the return_obj
+      // return (sm_object*)function_to_call; // return the return
       //  TODO: stack
       return execute_fun(function_to_call);
       break;
@@ -2190,6 +2190,156 @@ sm_object *sm_eval(sm_object *input) {
       }
       return value;
     } break;
+
+
+    case SM_PLUSEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for += operation. Expected numbers.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      sm_f64 *current_f64 = (sm_f64 *)current_value;
+      sm_f64 *value_f64   = (sm_f64 *)value;
+      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for += operation.", sm_type_name(SM_F64_TYPE));
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      sm_object *result = (sm_object *)sm_new_f64(current_f64->value + value_f64->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      return ((result));
+    }
+    case SM_MINUSEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for -= operation. Expected numbers.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      sm_f64 *current_f64 = (sm_f64 *)current_value;
+      sm_f64 *value_f64   = (sm_f64 *)value;
+      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for -= operation.", sm_type_name(SM_F64_TYPE));
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      sm_object *result = (sm_object *)sm_new_f64(current_f64->value - value_f64->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      return ((result));
+    }
+
+
+    case SM_TIMESEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for *= operation. Expected numbers.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      sm_f64 *current_f64 = (sm_f64 *)current_value;
+      sm_f64 *value_f64   = (sm_f64 *)value;
+      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for *= operation.", sm_type_name(SM_F64_TYPE));
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      sm_object *result = (sm_object *)sm_new_f64(current_f64->value * value_f64->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      return ((result));
+    }
+    case SM_DIVIDEEQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+      if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for /= operation. Expected numbers.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      sm_f64 *current_f64 = (sm_f64 *)current_value;
+      sm_f64 *value_f64   = (sm_f64 *)value;
+      if (current_f64->my_type != SM_F64_TYPE || value_f64->my_type != SM_F64_TYPE) {
+        sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Operands must be of type %s for /= operation.", sm_type_name(SM_F64_TYPE));
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      if (value_f64->value == 0.0) {
+        sm_symbol *title   = sm_new_symbol("divisionByZero", 15);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Division by zero in /= operation.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      sm_object *result = (sm_object *)sm_new_f64(current_f64->value / value_f64->value);
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return (((sm_object *)sm_new_error_from_expr(title, message, sme, NULL)));
+      }
+      return ((result));
+    }
+    case SM_POWEREQ_EXPR: {
+      sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      sm_object *current_value = sm_cx_get(current_cx, sym);
+
+      if (!current_value) {
+        sm_symbol *title   = sm_new_symbol("valueNotFound", 13);
+        sm_string *message = sm_new_fstring_at(
+          sms_heap, "Symbol is not associated with a value in the current context.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+
+      // Ensure both operands are of type f64
+      if (current_value->my_type != SM_F64_TYPE || value->my_type != SM_F64_TYPE) {
+        sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Invalid types for ^= operation. Expected f64 numbers.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+
+      // Perform power operation
+      sm_f64    *current_f64  = (sm_f64 *)current_value;
+      sm_f64    *value_f64    = (sm_f64 *)value;
+      double     result_value = pow(current_f64->value, value_f64->value);
+      sm_object *result       = (sm_object *)sm_new_f64(result_value);
+
+      // Update the context with the new value
+      if (!sm_cx_set(current_cx, sym, result)) {
+        sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
+        sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+
+      return (result);
+    }
+
+
     case SM_PLUS_EXPR: {
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
       sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
@@ -2209,6 +2359,230 @@ sm_object *sm_eval(sm_object *input) {
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
       sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_divide();
+    }
+
+
+    case SM_POW_EXPR: {
+      sm_f64 *obj0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (obj0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)obj0);
+      sm_f64 *obj1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
+      if (obj1->my_type == SM_ERR_TYPE)
+        return ((sm_object *)obj1);
+      return ((sm_object *)sm_new_f64(pow(obj0->value, obj1->value)));
+      break;
+    }
+    case SM_SIN_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(sin(num0->value)));
+      break;
+    }
+    case SM_COS_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(cos(num0->value)));
+      break;
+    }
+    case SM_TAN_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(tan(num0->value)));
+      break;
+    }
+    case SM_ASIN_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(asin(num0->value)));
+      break;
+    }
+    case SM_ACOS_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(acos(num0->value)));
+      break;
+    }
+
+    case SM_ATAN_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(atan(num0->value)));
+      break;
+    }
+    case SM_SEC_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(1.0 / cos(num0->value)));
+      break;
+    }
+    case SM_CSC_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(1.0 / sin(num0->value)));
+      break;
+    }
+    case SM_COT_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(1.0 / tan(num0->value)));
+      break;
+    }
+    case SM_SINH_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(sinh(num0->value)));
+      break;
+    }
+    case SM_COSH_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(cosh(num0->value)));
+      break;
+    }
+    case SM_TANH_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(tanh(num0->value)));
+      break;
+    }
+    case SM_SECH_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(1.0 / cosh(num0->value)));
+      break;
+    }
+    case SM_CSCH_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(1.0 / sinh(num0->value)));
+      break;
+    }
+    case SM_COTH_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(1.0 / tanh(num0->value)));
+      break;
+    }
+    case SM_LN_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(log(num0->value)));
+      break;
+    }
+    case SM_LOG_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      sm_f64 *num1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
+      if (num1->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num1);
+      return ((sm_object *)sm_new_f64(log(num1->value) / log(num0->value)));
+      break;
+    }
+    case SM_EXP_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(exp(num0->value)));
+      break;
+    }
+    case SM_SQRT_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(sqrt(num0->value)));
+      break;
+    }
+    case SM_ABS_EXPR: {
+      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return ((sm_object *)num0);
+      return ((sm_object *)sm_new_f64(num0->value < 0 ? -1 * num0->value : num0->value));
+      break;
+    }
+    case SM_INC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply ++ to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_f64 *num = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num->my_type != SM_F64_TYPE)
+        return ((sm_object *)num);
+      sm_f64 *output = sm_new_f64(num->value + 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      return ((sm_object *)num);
+      break;
+    }
+    case SM_DEC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply -- to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_f64 *num = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num->my_type != SM_F64_TYPE)
+        return ((sm_object *)num);
+      sm_f64 *output = sm_new_f64(num->value - 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      return ((sm_object *)num);
+      break;
+    }
+    case SM_PREINC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply ++ to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_f64 *num = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num->my_type != SM_F64_TYPE)
+        return ((sm_object *)num);
+      sm_f64 *output = sm_new_f64(num->value + 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      return ((sm_object *)output);
+      break;
+    }
+    case SM_PREDEC_EXPR: {
+      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      if (sym->my_type != SM_SYMBOL_TYPE) {
+        sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Cannot apply -- to non-symbol. Object type is %s instead",
+                            sm_type_name(sym->my_type));
+        return ((sm_object *)sm_new_error_from_expr(title, message, sme, NULL));
+      }
+      sm_f64 *num = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num->my_type != SM_F64_TYPE)
+        return ((sm_object *)num);
+      sm_f64 *output = sm_new_f64(num->value - 1);
+      sm_cx_set(current_cx, sym, (sm_object *)output);
+      return ((sm_object *)output);
+      break;
     }
     }
   }
