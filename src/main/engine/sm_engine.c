@@ -1936,7 +1936,6 @@ sm_object *sm_eval(sm_object *input) {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
       sm_object *expression = sm_expr_get_arg(sme, 0);
       sm_object *evaluated;
-      // TODO: watch for return_obj refs
       do {
         evaluated = sm_eval(expression);
         if (evaluated->my_type == SM_RETURN_TYPE)
@@ -2078,7 +2077,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
       if (sym->my_type != SM_SYMBOL_TYPE)
         return (sm_object *)sym;
-      return (sm_object *)sm_simplify(sm_diff(expr, sym));
+      return (sm_object *)sm_simplify(sm_diff((sm_object *)expr, sym));
     }
     case SM_SIMP_EXPR: {
       sm_object *evaluated0 = sm_eval(sm_expr_get_arg(sme, 0));
@@ -2126,246 +2125,93 @@ sm_object *sm_eval(sm_object *input) {
         return lcl;
       // TODO: stack
       // sm_expr_set_arg(sf, lcl->index, value);
-    }
       return value;
       break;
     }
-  case SM_ASSIGN_INDEX_EXPR: {
-    // Expecting a[4]=value => =index_expr(a,4,value);
-    sm_object *value   = sm_eval(sm_expr_get_arg(sme, 2));
-    sm_expr   *arr_obj = (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE);
-    sm_f64    *index   = eager_type_check(sme, 1, SM_F64_TYPE);
-    sm_f64    *index   = (sm_f64 *)return_obj;
-    // This works on both tuples and arrays
-    switch (arr_obj->my_type) {
-    case SM_EXPR_TYPE: {
-      sm_expr *arr_expr = (sm_expr *)arr_obj;
-      if ((uint32_t)index->value >= arr_expr->size || (uint32_t)index->value < 0) {
-        sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
-        sm_string *message =
-          sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
-                            (uint32_t)index->value, (uint32_t)arr_expr->size);
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      sm_expr_set_arg(arr_expr, (uint32_t)index->value, value);
-      break;
-    }
-    case SM_ARRAY_TYPE: {
-      sm_array *arr = (sm_array *)arr_obj;
-      if ((uint32_t)index->value >= arr->size || (uint32_t)index->value < 0) {
-        sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
-        sm_string *message =
-          sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
-                            (uint32_t)index->value, (uint32_t)arr->size);
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      if (arr->inner_type != value->my_type) {
-        sm_symbol *title   = sm_new_symbol("arrayAssignmentTypeMismatch", 27);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Array contains objects of type %s, but assignment value has type %s",
-          sm_type_name(arr->inner_type), sm_type_name(value->my_type));
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-      }
-      switch (arr->inner_type) {
-      case SM_F64_TYPE: {
-        sm_f64_array_set(arr, index->value, ((sm_f64 *)value)->value);
+    case SM_ASSIGN_INDEX_EXPR: {
+      // Expecting a[4]=value => =index_expr(a,4,value);
+      sm_object *value   = sm_eval(sm_expr_get_arg(sme, 2));
+      sm_expr   *arr_obj = (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE);
+      sm_f64    *index   = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
+      // This works on both tuples and arrays
+      switch (arr_obj->my_type) {
+      case SM_EXPR_TYPE: {
+        sm_expr *arr_expr = (sm_expr *)arr_obj;
+        if ((uint32_t)index->value >= arr_expr->size || (uint32_t)index->value < 0) {
+          sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
+          sm_string *message =
+            sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
+                              (uint32_t)index->value, (uint32_t)arr_expr->size);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        sm_expr_set_arg(arr_expr, (uint32_t)index->value, value);
         break;
       }
-      case SM_UI8_TYPE: {
-        sm_ui8_array_set(arr, index->value, ((sm_ui8 *)value)->value);
+      case SM_ARRAY_TYPE: {
+        sm_array *arr = (sm_array *)arr_obj;
+        if ((uint32_t)index->value >= arr->size || (uint32_t)index->value < 0) {
+          sm_symbol *title = sm_new_symbol("arrayIndexOutOfBounds", 17);
+          sm_string *message =
+            sm_new_fstring_at(sms_heap, "Index %u is out of bounds of array of size %u",
+                              (uint32_t)index->value, (uint32_t)arr->size);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        if (arr->inner_type != value->my_type) {
+          sm_symbol *title   = sm_new_symbol("arrayAssignmentTypeMismatch", 27);
+          sm_string *message = sm_new_fstring_at(
+            sms_heap, "Array contains objects of type %s, but assignment value has type %s",
+            sm_type_name(arr->inner_type), sm_type_name(value->my_type));
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        switch (arr->inner_type) {
+        case SM_F64_TYPE: {
+          sm_f64_array_set(arr, index->value, ((sm_f64 *)value)->value);
+          break;
+        }
+        case SM_UI8_TYPE: {
+          sm_ui8_array_set(arr, index->value, ((sm_ui8 *)value)->value);
+          break;
+        }
+        default: {
+          sm_symbol *title   = sm_new_symbol("arrayTypeUnknownError", 19);
+          sm_string *message = sm_new_fstring_at(sms_heap, "Unsupported array inner type %i",
+                                                 (uint32_t)arr->inner_type);
+          return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        }
+        }
         break;
       }
       default: {
-        sm_symbol *title = sm_new_symbol("arrayTypeUnknownError", 19);
+        sm_symbol *title = sm_new_symbol("invalidExpressionType", 19);
         sm_string *message =
-          sm_new_fstring_at(sms_heap, "Unsupported array inner type %i", (uint32_t)arr->inner_type);
-          return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+          sm_new_fstring_at(sms_heap, "Invalid expression type %i", (uint32_t)arr_obj->my_type);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
       }
       }
-      break;
+      return value;
+    } break;
+    case SM_PLUS_EXPR: {
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      return sm_add();
     }
-    default: {
-      sm_symbol *title = sm_new_symbol("invalidExpressionType", 19);
-      sm_string *message =
-        sm_new_fstring_at(sms_heap, "Invalid expression type %i", (uint32_t)arr_obj->my_type);
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
+    case SM_MINUS_EXPR: {
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      return sm_minus();
+    }
+    case SM_TIMES_EXPR: {
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      return sm_times();
+    }
+    case SM_DIVIDE_EXPR: {
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      return sm_divide();
     }
     }
-    return value;
-  }
-  case SM_IXOR_EXPR: {
-    eager_type_check(sme, 0, SM_UI8_TYPE);
-    sm_ui8 *obj0 = (sm_ui8 *)return_obj;
-    if (obj0->my_type != SM_UI8_TYPE)
-      return (sm_object *)obj0;
-    eager_type_check(sme, 1, SM_UI8_TYPE);
-    sm_ui8 *obj1 = (sm_ui8 *)return_obj;
-    if (obj1->my_type != SM_UI8_TYPE)
-      return (sm_object *)obj1;
-      return (sm_object*) sm_new_ui8(obj0->value ^ obj1->value;
-      break;
-  }
-  case SM_IAND_EXPR: {
-    eager_type_check(sme, 0, SM_UI8_TYPE);
-    sm_ui8 *obj0 = (sm_ui8 *)return_obj;
-    if (obj0->my_type != SM_UI8_TYPE)
-      return (sm_object *)obj0;
-    eager_type_check(sme, 1, SM_UI8_TYPE);
-    sm_ui8 *obj1 = (sm_ui8 *)return_obj;
-    if (obj1->my_type != SM_UI8_TYPE)
-      return (sm_object *)obj1;
-      return (sm_object*) sm_new_ui8(obj0->value & obj1->value;
-      break;
-  }
-  case SM_IOR_EXPR: {
-    eager_type_check(sme, 0, SM_UI8_TYPE);
-    sm_ui8 *obj0 = (sm_ui8 *)return_obj;
-    if (obj0->my_type != SM_UI8_TYPE)
-      return (sm_object *)obj0;
-    eager_type_check(sme, 1, SM_UI8_TYPE);
-    sm_ui8 *obj1 = (sm_ui8 *)return_obj;
-    if (obj1->my_type != SM_UI8_TYPE)
-      return (sm_object *)obj1;
-      return (sm_object*) sm_new_ui8(obj0->value | obj1->value;
-      break;
-  }
-  case SM_IPLUSEQ_EXPR: {
-    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-    sm_eval(sm_expr_get_arg(sme, 1));
-    sm_object *value         = return_obj;
-    sm_object *current_value = sm_cx_get(current_cx, sym);
-    if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
-      sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
-      sm_string *message =
-        sm_new_fstring_at(sms_heap, "Invalid types for += operation. Expected numbers.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
-    sm_ui8 *value_ui8   = (sm_ui8 *)value;
-    if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
-      sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-      sm_string *message = sm_new_fstring_at(
-        sms_heap, "Operands must be of type %s for !+= operation.", sm_type_name(SM_UI8_TYPE));
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value + value_ui8->value);
-    if (!sm_cx_set(current_cx, sym, result)) {
-      sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
-      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    return result;
-  }
-  case SM_IMINUSEQ_EXPR: {
-    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-    sm_eval(sm_expr_get_arg(sme, 1));
-    sm_object *value         = return_obj;
-    sm_object *current_value = sm_cx_get(current_cx, sym);
-    if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
-      sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
-      sm_string *message =
-        sm_new_fstring_at(sms_heap, "Invalid types for !-= operation. Expected numbers.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
-    sm_ui8 *value_ui8   = (sm_ui8 *)value;
-    if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
-      sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-      sm_string *message = sm_new_fstring_at(
-        sms_heap, "Operands must be of type %s for -= operation.", sm_type_name(SM_UI8_TYPE));
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value - value_ui8->value);
-    if (!sm_cx_set(current_cx, sym, result)) {
-      sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
-      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    return result;
-  }
-  case SM_ITIMESEQ_EXPR: {
-    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-    sm_eval(sm_expr_get_arg(sme, 1));
-    sm_object *value         = return_obj;
-    sm_object *current_value = sm_cx_get(current_cx, sym);
-    if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
-      sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
-      sm_string *message =
-        sm_new_fstring_at(sms_heap, "Invalid types for *= operation. Expected numbers.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
-    sm_ui8 *value_ui8   = (sm_ui8 *)value;
-    if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
-      sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-      sm_string *message = sm_new_fstring_at(
-        sms_heap, "Operands must be of type %s for *= operation.", sm_type_name(SM_UI8_TYPE));
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value * value_ui8->value);
-    if (!sm_cx_set(current_cx, sym, result)) {
-      sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
-      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    return result;
-  }
-  case SM_IDIVIDEEQ_EXPR: {
-    sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
-    sm_eval(sm_expr_get_arg(sme, 1));
-    sm_object *value         = return_obj;
-    sm_object *current_value = sm_cx_get(current_cx, sym);
-    if (!current_value || !sm_object_is_int(current_value) || !sm_object_is_int(value)) {
-      sm_symbol *title = sm_new_symbol("invalidOperandTypes", 17);
-      sm_string *message =
-        sm_new_fstring_at(sms_heap, "Invalid types for /= operation. Expected numbers.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    sm_ui8 *current_ui8 = (sm_ui8 *)current_value;
-    sm_ui8 *value_ui8   = (sm_ui8 *)value;
-    if (current_ui8->my_type != SM_UI8_TYPE || value_ui8->my_type != SM_UI8_TYPE) {
-      sm_symbol *title   = sm_new_symbol("invalidNumberType", 16);
-      sm_string *message = sm_new_fstring_at(
-        sms_heap, "Operands must be of type %s for /= operation.", sm_type_name(SM_UI8_TYPE));
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    if (value_ui8->value == 0.0) {
-      sm_symbol *title   = sm_new_symbol("divisionByZero", 15);
-      sm_string *message = sm_new_fstring_at(sms_heap, "Division by zero in /= operation.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    sm_object *result = (sm_object *)sm_new_ui8(current_ui8->value / value_ui8->value);
-    if (!sm_cx_set(current_cx, sym, result)) {
-      sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
-      sm_string *message = sm_new_fstring_at(sms_heap, "Failed to update symbol in context.");
-        return (sm_object*) sm_new_error_from_expr(title, message, sme, NULL;
-    }
-    return result;
-  }
-
-    // done
-  case SM_PLUS_EXPR: {
-    sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-    sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-    return sm_add();
-  }
-  case SM_MINUS_EXPR: {
-    sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-    sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-    return sm_minus();
-  }
-  case SM_TIMES_EXPR: {
-    sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-    sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-    return sm_times();
-  }
-  case SM_DIVIDE_EXPR: {
-    sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-    sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-    return sm_divide();
   }
   }
-  }
-}
-return input;
+  return input;
 }
