@@ -57,6 +57,12 @@ sm_object *(*sm_gt_functions[])(sm_object *o1, sm_object *o2) = {
   &sm_gt_i64_and_ui8,  &sm_gt_i64_and_ui64,  &sm_gt_i64_and_i64,  &sm_gt_i64_and_f64,
   &sm_gt_f64_and_ui8,  &sm_gt_f64_and_ui64,  &sm_gt_f64_and_i64,  &sm_gt_f64_and_f64};
 
+sm_object *(*sm_lt_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_lt_ui8_and_ui8,  &sm_lt_ui8_and_ui64,  &sm_lt_ui8_and_i64,  &sm_lt_ui8_and_f64,
+  &sm_lt_ui64_and_ui8, &sm_lt_ui64_and_ui64, &sm_lt_ui64_and_i64, &sm_lt_ui64_and_f64,
+  &sm_lt_i64_and_ui8,  &sm_lt_i64_and_ui64,  &sm_lt_i64_and_i64,  &sm_lt_i64_and_f64,
+  &sm_lt_f64_and_ui8,  &sm_lt_f64_and_ui64,  &sm_lt_f64_and_i64,  &sm_lt_f64_and_f64};
+
 /* GLOBALS as functions
  The following globals use functions f(x):
   - If x is NULL, the static field is returned.
