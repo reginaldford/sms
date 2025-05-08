@@ -9,6 +9,7 @@ extern sm_object *(*sm_times_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_divide_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_gt_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_lt_functions[])(sm_object *o0, sm_object *o1);
+extern sm_object *(*sm_pow_functions[])(sm_object *o0, sm_object *o1);
 
 // Types: ui8 ui64 i64 f64 cx
 
@@ -775,6 +776,175 @@ sm_object *sm_lt_f64_and_f64(sm_object *o0, sm_object *o1) {
 sm_object *sm_lt_cx_and_number(sm_object *cx, sm_object *number) {
   sm_cx     *cx_number    = (sm_cx *)cx;
   sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_lt_", 5));
+  // TODO: you have to push the stack frame and cx ,and then execute_fun
+  return cx;
+}
+
+
+// POW operations
+
+sm_object *sm_pow() {
+  sm_object *o0 = sm_pop();
+  sm_object *o1 = sm_pop();
+  return sm_pow_functions[o0->my_type * 4 + o1->my_type](o0, o1);
+}
+
+// uint8
+
+sm_object *sm_pow_ui8_and_ui8(sm_object *o0, sm_object *o1) {
+  uint8_t  a      = ((sm_ui8 *)o0)->value;
+  uint8_t  b      = ((sm_ui8 *)o1)->value;
+  uint64_t output = a;
+  for (uint64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_ui64(output);
+}
+
+sm_object *sm_pow_ui8_and_ui64(sm_object *o0, sm_object *o1) {
+  uint8_t  a      = ((sm_ui8 *)o0)->value;
+  uint64_t b      = ((sm_ui64 *)o1)->value;
+  uint64_t output = a;
+  for (uint64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_ui64(output);
+}
+
+sm_object *sm_pow_ui64_and_ui8(sm_object *o0, sm_object *o1) {
+  uint64_t a      = ((sm_ui64 *)o0)->value;
+  uint8_t  b      = ((sm_ui8 *)o1)->value;
+  uint64_t output = a;
+  for (uint64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_ui64(output);
+}
+
+sm_object *sm_pow_ui8_and_i64(sm_object *o0, sm_object *o1) {
+  uint8_t a      = ((sm_ui8 *)o0)->value;
+  int64_t b      = ((sm_i64 *)o1)->value;
+  int64_t output = a;
+  for (uint64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_i64(output);
+}
+
+sm_object *sm_pow_i64_and_ui8(sm_object *o0, sm_object *o1) {
+  int64_t a      = ((sm_i64 *)o0)->value;
+  uint8_t b      = ((sm_ui8 *)o1)->value;
+  int64_t output = a;
+  for (uint64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_i64(output);
+}
+
+sm_object *sm_pow_f64_and_ui8(sm_object *o0, sm_object *o1) {
+  double  a      = ((sm_f64 *)o0)->value;
+  uint8_t b      = ((sm_ui8 *)o1)->value;
+  double  output = a;
+  for (double i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_f64(output);
+}
+
+sm_object *sm_pow_ui8_and_f64(sm_object *o0, sm_object *o1) {
+  uint8_t a      = ((sm_ui8 *)o0)->value;
+  double  b      = ((sm_f64 *)o1)->value;
+  double  output = a;
+  for (double i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_f64(output);
+}
+
+// ui64
+
+sm_object *sm_pow_ui64_and_ui64(sm_object *o0, sm_object *o1) {
+  uint64_t a      = ((sm_ui64 *)o0)->value;
+  uint64_t b      = ((sm_ui64 *)o1)->value;
+  uint64_t output = a;
+  for (uint64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_ui64(output);
+}
+
+sm_object *sm_pow_ui64_and_i64(sm_object *o0, sm_object *o1) {
+  uint64_t a      = ((sm_ui64 *)o0)->value;
+  int64_t  b      = ((sm_i64 *)o1)->value;
+  uint64_t output = a;
+  for (uint64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_ui64(output);
+}
+
+sm_object *sm_pow_i64_and_ui64(sm_object *o0, sm_object *o1) {
+  int64_t  a      = ((sm_i64 *)o0)->value;
+  uint64_t b      = ((sm_ui64 *)o1)->value;
+  uint64_t output = a;
+  for (int64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_i64(output);
+}
+
+sm_object *sm_pow_f64_and_ui64(sm_object *o0, sm_object *o1) {
+  double   a      = ((sm_f64 *)o0)->value;
+  uint64_t b      = ((sm_ui64 *)o1)->value;
+  double   output = a;
+  for (double i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_f64(output);
+}
+
+sm_object *sm_pow_ui64_and_f64(sm_object *o0, sm_object *o1) {
+  uint64_t a      = ((sm_f64 *)o0)->value;
+  double   b      = ((sm_ui64 *)o1)->value;
+  double   output = a;
+  for (double i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_f64(output);
+}
+
+// i64
+
+sm_object *sm_pow_i64_and_i64(sm_object *o0, sm_object *o1) {
+  int64_t a      = ((sm_i64 *)o0)->value;
+  int64_t b      = ((sm_i64 *)o1)->value;
+  int64_t output = a;
+  for (int64_t i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_i64(output);
+}
+
+sm_object *sm_pow_i64_and_f64(sm_object *o0, sm_object *o1) {
+  int64_t a      = ((sm_i64 *)o0)->value;
+  double  b      = ((sm_f64 *)o1)->value;
+  double  output = a;
+  for (double i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_f64(output);
+}
+
+sm_object *sm_pow_f64_and_i64(sm_object *o0, sm_object *o1) {
+  double  a      = ((sm_f64 *)o0)->value;
+  int64_t b      = ((sm_i64 *)o1)->value;
+  double  output = a;
+  for (double i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_f64(output);
+}
+
+// f64
+
+sm_object *sm_pow_f64_and_f64(sm_object *o0, sm_object *o1) {
+  double a      = ((sm_f64 *)o0)->value;
+  double b      = ((sm_f64 *)o1)->value;
+  double output = a;
+  for (double i = 1; i < b; i++)
+    output *= a;
+  return (sm_object *)sm_new_f64(output);
+}
+
+// cx
+sm_object *sm_pow_cx_and_number(sm_object *cx, sm_object *number) {
+  sm_cx     *cx_number    = (sm_cx *)cx;
+  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_pow_", 5));
   // TODO: you have to push the stack frame and cx ,and then execute_fun
   return cx;
 }

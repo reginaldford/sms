@@ -2362,14 +2362,9 @@ sm_object *sm_eval(sm_object *input) {
 
 
     case SM_POW_EXPR: {
-      sm_f64 *obj0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (obj0->my_type == SM_ERR_TYPE)
-        return ((sm_object *)obj0);
-      sm_f64 *obj1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (obj1->my_type == SM_ERR_TYPE)
-        return ((sm_object *)obj1);
-      return ((sm_object *)sm_new_f64(pow(obj0->value, obj1->value)));
-      break;
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      return sm_pow();
     }
     case SM_SIN_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
