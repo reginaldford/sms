@@ -28,7 +28,7 @@ i64\(\ +(-?{digit}+)\ +\) {
     if (!end_paren) {
         fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
         return 0;
-    }   
+    } 
     // Temporarily terminate the string at the closing parenthesis
     *end_paren = '\0';
     // Trim spaces from the start and end of num_str
@@ -307,12 +307,7 @@ _imgSave       {return HEAPSAVE;}
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}
 
-({digit}+) {
- yylval.ui64 = strtoull(yytext,NULL,10);
- return UI64;
-}
-
-\.?{digit}+(\.{digit}+)([eE]-?{digit}+)?  {
+\.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
    yylval.f64 = atof(yytext);
    return F64;
 }

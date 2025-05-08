@@ -672,7 +672,6 @@ I64_ARRAY_LIST : I64_ARRAY_OPEN I64 {
 };
 
 
-
 UI64_ARRAY : UI64_ARRAY_LIST ']' {};
 | UI64_ARRAY_LIST ',' ']' {};
 | UI64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_UI64_TYPE, 0,NULL,0) ;} 
