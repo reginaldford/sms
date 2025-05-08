@@ -108,18 +108,6 @@ int parsing_fpath_len;
 %token <integer> INTEGER
 
 
-%token <expr> IPLUS
-%token <expr> IMINUS
-%token <expr> ITIMES
-%token <expr> IDIVIDE
-%token <expr> IPOW
-
-%token <expr> IPLUSEQ
-%token <expr> IMINUSEQ
-%token <expr> ITIMESEQ
-%token <expr> IDIVIDEEQ
-%token <expr> IPOWEREQ
-
 %token <expr> PLUS
 %token <expr> MINUS
 %token <expr> TIMES
@@ -370,9 +358,6 @@ int parsing_fpath_len;
 %left DOT PLUS MINUS
 %left TIMES DIVIDE
 %left POW
-%left IPLUS IMINUS
-%left ITIMES IDIVIDE
-%left IPOW
 %left ';'
 
 %%
@@ -401,24 +386,6 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR TIMES EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR DIVIDE EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR POW EXPR { $$ = sm_new_expr_2(SM_POW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IPLUS EXPR { $$ = sm_new_expr_2(SM_IPLUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IMINUS EXPR { $$ = sm_new_expr_2(SM_IMINUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR ITIMES EXPR { $$ = sm_new_expr_2(SM_ITIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IDIVIDE EXPR { $$ = sm_new_expr_2(SM_IDIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IPOW EXPR { $$ = sm_new_expr_2(SM_IPOW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IXOR EXPR { $$ = sm_new_expr_2(SM_IXOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IXOR_EQ EXPR { $$ = sm_new_expr_2(SM_IXOREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IOR EXPR { $$ = sm_new_expr_2(SM_IOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IOR_EQ EXPR { $$ = sm_new_expr_2(SM_IOREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IAND_EQ EXPR { $$ = sm_new_expr_2(SM_IANDEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IAND EXPR { $$ = sm_new_expr_2(SM_IAND_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| INOT EXPR { $$ = sm_new_expr(SM_INOT_EXPR, (sm_object *)$2, _note()); }
-| EXPR INOT_EQ EXPR { $$ = sm_new_expr_2(SM_INOTEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM IPLUSEQ EXPR { $$ = sm_new_expr_2(SM_IPLUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM IMINUSEQ EXPR { $$ = sm_new_expr_2(SM_IMINUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM ITIMESEQ EXPR { $$ = sm_new_expr_2(SM_ITIMESEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM IDIVIDEEQ EXPR { $$ = sm_new_expr_2(SM_IDIVIDEEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM IPOWEREQ EXPR { $$ = sm_new_expr_2(SM_IPOWEREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM PLUSEQ EXPR { $$ = sm_new_expr_2(SM_PLUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM MINUSEQ EXPR { $$ = sm_new_expr_2(SM_MINUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM TIMESEQ EXPR { $$ = sm_new_expr_2(SM_TIMESEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }

@@ -85,23 +85,6 @@ ui8Repeat  { return UI8_REPEAT ; }
 "|" {return IOR;}
 "^" {return IXOR;}
 
-"&=" {return IAND_EQ;}
-"|=" {return IOR_EQ;}
-"^=" {return IXOR_EQ;}
-"_~=" {return INOT_EQ;}
-
-"!+"  {return IPLUS;}
-"!-"  {return IMINUS;}
-"!*"  {return ITIMES;}
-"!/"  {return IDIVIDE;}
-"!**" {return IPOW;}
-
-"!+="   {return IPLUSEQ;}
-"!-="   {return IMINUSEQ;}
-"!*="   {return ITIMESEQ;}
-"!/="   {return IDIVIDEEQ;}
-"!**="  {return IPOWEREQ;}
-
 "+"  {return PLUS;}
 "-"  {return MINUS;}
 "*"  {return TIMES;}

@@ -123,8 +123,17 @@ sm_object *sm_add_f64_and_f64(sm_object *o0, sm_object *o1) {
   return (sm_object *)sm_new_f64(a + b);
 }
 
+// cx
+sm_object *sm_add_cx_and_number(sm_object *cx, sm_object *number) {
+  sm_cx     *cx_number    = (sm_cx *)cx;
+  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_", 5));
+  // TODO: you have to push the stack frame and cx ,and then execute_fun
+  return cx;
+}
+
 
 // Minus operations
+
 sm_object *sm_minus() {
   sm_object *o0 = sm_pop();
   sm_object *o1 = sm_pop();
@@ -459,9 +468,9 @@ sm_object *sm_divide_f64_and_f64(sm_object *o0, sm_object *o1) {
 }
 
 // cx
-sm_object *sm_add_cx_and_number(sm_object *cx, sm_object *number) {
+sm_object *sm_divide_cx_and_number(sm_object *cx, sm_object *number) {
   sm_cx     *cx_number    = (sm_cx *)cx;
-  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_", 5));
+  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_divide_", 5));
   // TODO: you have to push the stack frame and cx ,and then execute_fun
   return cx;
 }
@@ -613,7 +622,7 @@ sm_object *sm_gt_f64_and_f64(sm_object *o0, sm_object *o1) {
 // cx
 sm_object *sm_gt_cx_and_number(sm_object *cx, sm_object *number) {
   sm_cx     *cx_number    = (sm_cx *)cx;
-  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_", 5));
+  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_gt_", 5));
   // TODO: you have to push the stack frame and cx ,and then execute_fun
   return cx;
 }
@@ -765,7 +774,7 @@ sm_object *sm_lt_f64_and_f64(sm_object *o0, sm_object *o1) {
 // cx
 sm_object *sm_lt_cx_and_number(sm_object *cx, sm_object *number) {
   sm_cx     *cx_number    = (sm_cx *)cx;
-  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_", 5));
+  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_lt_", 5));
   // TODO: you have to push the stack frame and cx ,and then execute_fun
   return cx;
 }
