@@ -10,6 +10,7 @@ extern sm_object *(*sm_divide_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_gt_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_lt_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_pow_functions[])(sm_object *o0, sm_object *o1);
+extern sm_object *(*sm_gteq_functions[])(sm_object *o0, sm_object *o1);
 
 // Types: ui8 ui64 i64 f64 cx
 
@@ -947,4 +948,148 @@ sm_object *sm_pow_cx_and_number(sm_object *cx, sm_object *number) {
   sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_pow_", 5));
   // TODO: you have to push the stack frame and cx ,and then execute_fun
   return cx;
+}
+
+
+// gteq operations
+sm_object *sm_gteq() {
+  sm_object *o0 = sm_pop();
+  sm_object *o1 = sm_pop();
+  return sm_gteq_functions[o0->my_type * 4 + o1->my_type](o0, o1);
+}
+
+// uint8
+
+sm_object *sm_gteq_ui8_and_ui8(sm_object *o0, sm_object *o1) {
+  uint8_t a = ((sm_ui8 *)o0)->value;
+  uint8_t b = ((sm_ui8 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_ui8_and_ui64(sm_object *o0, sm_object *o1) {
+  uint8_t  a = ((sm_ui8 *)o0)->value;
+  uint64_t b = ((sm_ui64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_ui64_and_ui8(sm_object *o0, sm_object *o1) {
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  uint8_t  b = ((sm_ui8 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_ui8_and_i64(sm_object *o0, sm_object *o1) {
+  uint8_t a = ((sm_ui8 *)o0)->value;
+  int64_t b = ((sm_i64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_i64_and_ui8(sm_object *o0, sm_object *o1) {
+  int64_t a = ((sm_i64 *)o0)->value;
+  uint8_t b = ((sm_ui8 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_f64_and_ui8(sm_object *o0, sm_object *o1) {
+  double  a = ((sm_f64 *)o0)->value;
+  uint8_t b = ((sm_ui8 *)o1)->value;
+  if (a >= (double)b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_ui8_and_f64(sm_object *o0, sm_object *o1) {
+  uint8_t a = ((sm_ui8 *)o0)->value;
+  double  b = ((sm_f64 *)o1)->value;
+  if ((double)a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+// ui64
+
+sm_object *sm_gteq_ui64_and_ui64(sm_object *o0, sm_object *o1) {
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  uint64_t b = ((sm_ui64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_ui64_and_i64(sm_object *o0, sm_object *o1) {
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  int64_t  b = ((sm_i64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_i64_and_ui64(sm_object *o0, sm_object *o1) {
+  int64_t  a = ((sm_i64 *)o0)->value;
+  uint64_t b = ((sm_ui64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_f64_and_ui64(sm_object *o0, sm_object *o1) {
+  double   a = ((sm_f64 *)o0)->value;
+  uint64_t b = ((sm_ui64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_ui64_and_f64(sm_object *o0, sm_object *o1) {
+  uint64_t a = ((sm_f64 *)o0)->value;
+  double   b = ((sm_ui64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+// i64
+
+sm_object *sm_gteq_i64_and_i64(sm_object *o0, sm_object *o1) {
+  int64_t a = ((sm_i64 *)o0)->value;
+  int64_t b = ((sm_i64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_i64_and_f64(sm_object *o0, sm_object *o1) {
+  int64_t a = ((sm_i64 *)o0)->value;
+  double  b = ((sm_f64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+sm_object *sm_gteq_f64_and_i64(sm_object *o0, sm_object *o1) {
+  double  a = ((sm_f64 *)o0)->value;
+  int64_t b = ((sm_i64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
+}
+
+// f64
+
+sm_object *sm_gteq_f64_and_f64(sm_object *o0, sm_object *o1) {
+  double a = ((sm_f64 *)o0)->value;
+  double b = ((sm_f64 *)o1)->value;
+  if (a >= b)
+    return (sm_object *)sms_true;
+  return (sm_object *)sms_false;
 }

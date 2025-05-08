@@ -2641,21 +2641,13 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sms_false;
       break;
     }
+    case SM_GT_EQ_EXPR: {
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      return sm_gteq();
+      break;
+    }
       /*
-case SM_GT_EQ_EXPR: {
-sm_f64 *obj0 = (sm_f64 *)eager_type_check(sme, 0);
-if (obj0->my_type == SM_ERR_TYPE)
-return (sm_object *)obj0;
-
-sm_f64 *obj1 = (sm_f64 *)eager_type_check(sme, 1);
-if (obj1->my_type == SM_ERR_TYPE)
-return (sm_object *)obj1;
-
-if (obj0->value >= obj1->value)
-return (sm_object *)sms_true;
-return (sm_object *)sms_false;
-break;
-}
 case SM_LT_EQ_EXPR: {
 sm_f64 *obj0 = NULL;
 sm_f64 *obj1 = NULL;

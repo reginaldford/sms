@@ -131,3 +131,23 @@ sm_object *sm_pow_f64_and_ui64(sm_object *o0, sm_object *o1);
 sm_object *sm_pow_f64_and_i64(sm_object *o0, sm_object *o1);
 sm_object *sm_pow_f64_and_i64(sm_object *o0, sm_object *o1);
 sm_object *sm_pow_f64_and_f64(sm_object *o0, sm_object *o1);
+
+
+sm_object *sm_gteq();
+sm_object *sm_gteq_ui8_and_ui8(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_ui8_and_ui64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_ui8_and_i64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_ui8_and_f64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_ui64_and_ui8(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_ui64_and_ui64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_ui64_and_i64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_ui64_and_f64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_i64_and_ui8(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_i64_and_ui64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_i64_and_i64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_i64_and_f64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_f64_and_ui8(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_f64_and_ui64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_f64_and_i64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_f64_and_i64(sm_object *o0, sm_object *o1);
+sm_object *sm_gteq_f64_and_f64(sm_object *o0, sm_object *o1);
