@@ -2615,18 +2615,9 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_LT_EXPR: {
-      //! virtul ptr table
-      sm_f64 *obj1 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (obj1->my_type == SM_ERR_TYPE)
-        return (sm_object *)obj1;
-      sm_f64 *obj2 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (obj2->my_type == SM_ERR_TYPE)
-        return (sm_object *)obj2;
-      if (obj1->value < obj2->value) {
-        return (sm_object *)sms_true;
-      } else {
-        return (sm_object *)sms_false;
-      }
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      return sm_lt();
       break;
     }
     case SM_GT_EXPR: {
@@ -2635,17 +2626,17 @@ sm_object *sm_eval(sm_object *input) {
       return sm_gt();
     }
     case SM_EQEQ_EXPR: {
-      sm_object *obj1 = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_object *obj2 = sm_eval(sm_expr_get_arg(sme, 1));
-      if (sm_object_eq(obj1, obj2))
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      if (sm_object_eq(sm_pop(), sm_pop()))
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
       break;
     }
     case SM_IS_EXPR: {
-      sm_object *obj1 = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_object *obj2 = sm_eval(sm_expr_get_arg(sme, 1));
-      if (obj1 == obj2)
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      if (sm_pop() == sm_pop())
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
       break;
@@ -2745,8 +2736,8 @@ return (sm_object *)sms_false;
 break;
 }
             */
-    }
-  }
-  }
+    } // end of switch on expression op value
+  }   // end of expression case
+  }   // end of switch on input type
   return input;
 }

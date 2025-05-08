@@ -681,7 +681,7 @@ sm_object *sm_lt_i64_and_ui8(sm_object *o0, sm_object *o1) {
 sm_object *sm_lt_f64_and_ui8(sm_object *o0, sm_object *o1) {
   double  a = ((sm_f64 *)o0)->value;
   uint8_t b = ((sm_ui8 *)o1)->value;
-  if (a < b)
+  if (a < (double)b)
     return (sm_object *)sms_true;
   return (sm_object *)sms_false;
 }
@@ -689,7 +689,7 @@ sm_object *sm_lt_f64_and_ui8(sm_object *o0, sm_object *o1) {
 sm_object *sm_lt_ui8_and_f64(sm_object *o0, sm_object *o1) {
   uint8_t a = ((sm_ui8 *)o0)->value;
   double  b = ((sm_f64 *)o1)->value;
-  if (a < b)
+  if ((double)a < b)
     return (sm_object *)sms_true;
   return (sm_object *)sms_false;
 }
