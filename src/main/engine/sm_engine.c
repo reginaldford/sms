@@ -291,7 +291,7 @@ sm_object *sm_eval(sm_object *input) {
       time(&rawtime);
       struct tm *timeinfo   = localtime(&rawtime);
       uint32_t  *time_tuple = (uint32_t *)timeinfo;
-      sm_space  *space      = sm_new_space(sizeof(f64) * 9);
+      sm_space  *space      = sm_new_space(sizeof(double) * 9);
       sm_array  *result     = sm_new_array(SM_F64_TYPE, 9, (sm_object *)space, 0);
       for (uint32_t i = 0; i < 9; i++)
         sm_f64_array_set(result, i, time_tuple[i]);
@@ -577,7 +577,7 @@ sm_object *sm_eval(sm_object *input) {
       gettimeofday(&t, NULL);
       sm_space *space  = NULL;
       sm_array *result = NULL;
-      space            = sm_new_space(sizeof(f64) * 2);
+      space            = sm_new_space(sizeof(double) * 2);
       result           = sm_new_array(SM_F64_TYPE, 2, (sm_object *)space, 0);
       sm_f64_array_set(result, 0, t.tv_sec);
       sm_f64_array_set(result, 1, t.tv_usec);
@@ -696,12 +696,12 @@ sm_object *sm_eval(sm_object *input) {
       sm_f64 *reps = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
       if (reps->my_type == SM_ERR_TYPE)
         return (sm_object *)reps;
-      f64        repetitions   = reps->value;
+      double     repetitions   = reps->value;
       uint32_t   original_size = str->size;
       uint32_t   new_size      = (uint32_t)(original_size * repetitions);
       sm_string *new_str       = sm_new_string_manual(new_size);
       char      *content       = &(new_str->content);
-      for (int i = 0; i < new_size; i += original_size) {
+      for (uint32_t i = 0; i < new_size; i += original_size) {
         sm_strncpy(content + i, &(str->content), original_size);
       }
       return (sm_object *)new_str;
@@ -763,26 +763,26 @@ sm_object *sm_eval(sm_object *input) {
         return (sm_object *)sm_new_array(SM_UI8_TYPE, 0, NULL, sizeof(sm_space));
       uint32_t  total_size = 0;
       sm_space *new_space  = NULL;
-      ui8      *dst_data   = NULL;
+      uint8_t  *dst_data   = NULL;
       switch (obj->my_type) {
       case SM_EXPR_TYPE: {
         sm_expr *arr = (sm_expr *)obj;
         total_size   = arr->size * repeat_count;
         new_space    = sm_new_space(total_size);
-        dst_data     = (ui8 *)(new_space + 1);
+        dst_data     = (uint8_t *)(new_space + 1);
         for (uint32_t i = 0; i < repeat_count; i++) {
           for (uint32_t j = 0; j < arr->size; j++) {
             sm_object *element = sm_expr_get_arg(arr, j);
             switch (element->my_type) {
             case SM_F64_TYPE:
-              dst_data[i * arr->size + j] = (ui8)((sm_f64 *)element)->value;
+              dst_data[i * arr->size + j] = (uint8_t)((sm_f64 *)element)->value;
               break;
             case SM_UI8_TYPE:
               dst_data[i * arr->size + j] = ((sm_ui8 *)element)->value;
               break;
             case SM_STRING_TYPE:
               dst_data[i * arr->size + j] =
-                (ui8)(((sm_string *)element)->content); // Convert first character
+                (uint8_t)(((sm_string *)element)->content); // Convert first character
               break;
             default: {
               sm_symbol *title   = sm_new_symbol("InvalidElementType", 17);
@@ -799,19 +799,19 @@ sm_object *sm_eval(sm_object *input) {
         sm_array *arr = (sm_array *)obj;
         total_size    = arr->size * repeat_count;
         new_space     = sm_new_space(total_size);
-        dst_data      = (ui8 *)(new_space + 1);
+        dst_data      = (uint8_t *)(new_space + 1);
         switch (arr->inner_type) {
         case SM_UI8_TYPE: {
-          ui8 *src_data = sm_ui8_array_get_start(arr);
+          uint8_t *src_data = sm_ui8_array_get_start(arr);
           for (uint32_t i = 0; i < repeat_count; i++)
             memcpy(dst_data + i * arr->size, src_data, arr->size);
           break;
         }
         case SM_F64_TYPE: {
-          f64 *src_data = sm_f64_array_get_start(arr);
+          double *src_data = sm_f64_array_get_start(arr);
           for (uint32_t i = 0; i < repeat_count; i++)
             for (uint32_t j = 0; j < arr->size; j++)
-              dst_data[i * arr->size + j] = (ui8)src_data[j];
+              dst_data[i * arr->size + j] = (uint8_t)src_data[j];
           break;
         }
         default:
@@ -843,36 +843,36 @@ sm_object *sm_eval(sm_object *input) {
 
       uint32_t  total_size = 0;
       sm_space *new_space  = NULL;
-      f64      *dst_data   = NULL;
+      double   *dst_data   = NULL;
 
       switch (obj->my_type) {
       case SM_EXPR_TYPE: {
         sm_expr *arr = (sm_expr *)obj;
         total_size   = arr->size * repeat_count;
-        new_space    = sm_new_space(total_size * sizeof(f64));
-        dst_data     = (f64 *)(new_space + 1);
+        new_space    = sm_new_space(total_size * sizeof(double));
+        dst_data     = (double *)(new_space + 1);
         for (uint32_t i = 0; i < repeat_count; i++)
           for (uint32_t j = 0; j < arr->size; j++)
-            dst_data[i * arr->size + j] = (f64)(uintptr_t)sm_expr_get_arg(arr, j);
+            dst_data[i * arr->size + j] = (double)(uintptr_t)sm_expr_get_arg(arr, j);
         break;
       }
       case SM_ARRAY_TYPE: {
         sm_array *arr = (sm_array *)obj;
         total_size    = arr->size * repeat_count;
-        new_space     = sm_new_space(total_size * sizeof(f64));
-        dst_data      = (f64 *)(new_space + 1);
+        new_space     = sm_new_space(total_size * sizeof(double));
+        dst_data      = (double *)(new_space + 1);
         switch (arr->inner_type) {
         case SM_UI8_TYPE: {
-          ui8 *src_data = sm_ui8_array_get_start(arr);
+          uint8_t *src_data = sm_ui8_array_get_start(arr);
           for (uint32_t i = 0; i < repeat_count; i++)
             for (uint32_t j = 0; j < arr->size; j++)
-              dst_data[i * arr->size + j] = (f64)src_data[j];
+              dst_data[i * arr->size + j] = (double)src_data[j];
           break;
         }
         case SM_F64_TYPE: {
-          f64 *src_data = sm_f64_array_get_start(arr);
+          double *src_data = sm_f64_array_get_start(arr);
           for (uint32_t i = 0; i < repeat_count; i++)
-            memcpy(dst_data + i * arr->size, src_data, arr->size * sizeof(f64));
+            memcpy(dst_data + i * arr->size, src_data, arr->size * sizeof(double));
           break;
         }
         default:
@@ -1344,14 +1344,14 @@ sm_object *sm_eval(sm_object *input) {
       sm_f64 *number = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
       if (number->my_type != SM_F64_TYPE)
         return (sm_object *)number;
-      f64 val = number->value;
+      double val = number->value;
       return (sm_object *)sm_new_f64(round(val));
     }
     case SM_FLOOR_EXPR: {
       sm_f64 *number = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
       if (number->my_type != SM_F64_TYPE)
         return (sm_object *)number;
-      f64 val = number->value;
+      double val = number->value;
       return (sm_object *)sm_new_f64(floor(val));
     }
     case SM_CEIL_EXPR: {
@@ -1370,13 +1370,13 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sm_new_f64(fmod(num0->value, num1->value));
     }
     case SM_RANDOM_EXPR: {
-      return (sm_object *)sm_new_f64(((f64)rand()) / ((f64)RAND_MAX));
+      return (sm_object *)sm_new_f64(((double)rand()) / ((double)RAND_MAX));
     }
     case SM_SEED_EXPR: {
       sm_f64 *number = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
       if (number->my_type != SM_F64_TYPE)
         return (sm_object *)number;
-      f64      val       = number->value;
+      double   val       = number->value;
       uint32_t floor_val = val > 0 ? val + 0.5 : val - 0.5;
       srand((int)floor_val);
       return (sm_object *)sms_true;
@@ -1446,7 +1446,7 @@ sm_object *sm_eval(sm_object *input) {
       case SM_F64_TYPE: {
         // Handle f64 arrays
         content_cstr = (char *)content_array->content + sizeof(sm_space);
-        content_size = content_array->size * sizeof(f64); // Size in bytes
+        content_size = content_array->size * sizeof(double); // Size in bytes
         break;
       }
       default: {

@@ -3,7 +3,7 @@
 #include "../sms.h"
 
 // Whether an expression contains a specific f64
-bool sm_expr_has_num(sm_expr *expr, f64 n) {
+bool sm_expr_has_num(sm_expr *expr, double n) {
   for (uint32_t i = 0; i < expr->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(expr, i);
     if (current_obj->my_type == SM_F64_TYPE) {
@@ -15,7 +15,7 @@ bool sm_expr_has_num(sm_expr *expr, f64 n) {
 }
 
 // Remove all cases of a certain f64 from this expression
-sm_expr *sm_expr_rm_num(sm_expr *expr, f64 to_rm) {
+sm_expr *sm_expr_rm_num(sm_expr *expr, double to_rm) {
   sm_expr *result = sm_new_expr_n(expr->op, 0, expr->size, NULL);
   for (uint32_t i = 0; i < expr->size; i++) {
     sm_object *current_obj = sm_expr_get_arg(expr, i);
@@ -315,8 +315,8 @@ sm_expr *apply_constants11(sm_expr *e) {
       if (obj0->my_type == SM_F64_TYPE && obj1->my_type == SM_F64_TYPE) {
         sm_f64 *d0 = (sm_f64 *)obj0;
         sm_f64 *d1 = (sm_f64 *)obj1;
-        f64     i0 = d0->value;
-        f64     i1 = d1->value;
+        double  i0 = d0->value;
+        double  i1 = d1->value;
 
         if (i1 != 0 && (int)i0 == i0 && (int)i1 == i1) { // Check if both values are integers
           int int0 = (int)i0;
@@ -445,7 +445,7 @@ sm_expr *apply_constants15(sm_expr *e) {
       // put numbers first, unified
       if (num_count > 0) {
         uint32_t num_index;
-        f64      calculation = 0;
+        double   calculation = 0;
         if (e->op == SM_TIMES_EXPR)
           calculation = 1;
         for (num_index = 0; num_index < num_count; num_index++) {
@@ -500,9 +500,9 @@ sm_expr *apply_constants17(sm_expr *e) {
     sm_expr *new_expr = sm_new_expr_n(e->op, 0, e->size, NULL);
 
     if (e->op == SM_TIMES_EXPR) {
-      int count_numbers = 0;
-      f64 total         = 1;
-      int non_one_terms = 0;
+      int    count_numbers = 0;
+      double total         = 1;
+      int    non_one_terms = 0;
 
       for (uint32_t i = 0; i < e->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(e, i);

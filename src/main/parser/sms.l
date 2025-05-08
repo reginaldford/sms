@@ -75,7 +75,6 @@ ui8\(\ +(-?{digit}+)\ +\) {
     return UI8;
 }
 
-
 f64Repeat  { return F64_REPEAT;  }
 i64Repeat  { return I64_REPEAT;  }
 ui64Repeat { return UI64_REPEAT; }
@@ -309,20 +308,20 @@ _imgSave       {return HEAPSAVE;}
 '\0'        {return DONE;}
 
 ({digit}+) {
- yylval.integer = strtoull(yytext,NULL,10);
- return INTEGER;
+ yylval.ui64 = strtoull(yytext,NULL,10);
+ return UI64;
 }
 
 \.?{digit}+(\.{digit}+)([eE]-?{digit}+)?  {
-   yylval.num = atof(yytext);
+   yylval.f64 = atof(yytext);
    return F64;
-  }
+}
 
 [\<\>\=] { return yytext[0]; }
 
 [-+*/=\^\;\[\]\(\)\{\},\@\<\>] { return yytext[0];}
 
-({alpha}?+{digit}?+_?+\'?+)?+ {
+({alpha}+{digit}?+_?+\'?+)?+ {
     yylval.sym = sm_new_symbol(yytext,yyleng);
     return SYM;
   }

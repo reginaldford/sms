@@ -167,16 +167,16 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
     return false;
   switch (self->my_type) {
   case SM_F64_TYPE: {
-    f64 value1 = ((sm_f64 *)self)->value;
-    f64 value2 = ((sm_f64 *)other)->value;
+    double value1 = ((sm_f64 *)self)->value;
+    double value2 = ((sm_f64 *)other)->value;
     if (value1 == value2)
       return true;
     else
       return false;
   }
   case SM_UI8_TYPE: {
-    ui8 value1 = ((sm_ui8 *)self)->value;
-    ui8 value2 = ((sm_ui8 *)other)->value;
+    uint8_t value1 = ((sm_ui8 *)self)->value;
+    uint8_t value2 = ((sm_ui8 *)other)->value;
     if (value1 == value2)
       return true;
     else

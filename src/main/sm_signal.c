@@ -82,7 +82,8 @@ void sm_signal_handler(int signal_number) {
   // TODO: change to sms_scratch global
   sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
   sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_sigHandler", 11));
-  sm_expr *sf = sm_new_expr(SM_PARAM_LIST_EXPR, (sm_object *)sm_new_ui8((ui8)signal_number), NULL);
+  sm_expr *sf =
+    sm_new_expr(SM_PARAM_LIST_EXPR, (sm_object *)sm_new_ui8((uint8_t)signal_number), NULL);
   // _sigHandler(s) , where s is an f64 with the signal number
   if (fun) {
     execute_fun(fun);

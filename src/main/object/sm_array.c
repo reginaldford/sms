@@ -12,13 +12,17 @@ sm_array *sm_new_array(uint32_t type, uint32_t size, sm_object *content, uint32_
   return output;
 }
 
-f64 *sm_f64_array_get_start(sm_array *a) { return (f64 *)(&((sm_space *)a->content)[1]); }
+double *sm_f64_array_get_start(sm_array *a) { return (double *)(&((sm_space *)a->content)[1]); }
 
-f64 sm_f64_array_get_bare(sm_array *a, uint32_t index) { return sm_f64_array_get_start(a)[index]; }
+double sm_f64_array_get_bare(sm_array *a, uint32_t index) {
+  return sm_f64_array_get_start(a)[index];
+}
 
-ui8 *sm_ui8_array_get_start(sm_array *a) { return (ui8 *)(&((sm_space *)a->content)[1]); }
+uint8_t *sm_ui8_array_get_start(sm_array *a) { return (uint8_t *)(&((sm_space *)a->content)[1]); }
 
-ui8 sm_ui8_array_get_bare(sm_array *a, uint32_t index) { return sm_ui8_array_get_start(a)[index]; }
+uint8_t sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
+  return sm_ui8_array_get_start(a)[index];
+}
 
 sm_object *sm_array_get(sm_array *a, uint32_t index) {
   switch (a->inner_type) {
@@ -32,12 +36,12 @@ sm_object *sm_array_get(sm_array *a, uint32_t index) {
   return (sm_object *)sms_false;
 }
 
-void sm_f64_array_set(sm_array *a, uint32_t index, f64 number) {
-  ((f64 *)sm_f64_array_get_start(a))[index] = number;
+void sm_f64_array_set(sm_array *a, uint32_t index, double number) {
+  ((double *)sm_f64_array_get_start(a))[index] = number;
 }
 
-void sm_ui8_array_set(sm_array *a, uint32_t index, ui8 number) {
-  ((ui8 *)sm_ui8_array_get_start(a))[index] = number;
+void sm_ui8_array_set(sm_array *a, uint32_t index, uint8_t number) {
+  ((uint8_t *)sm_ui8_array_get_start(a))[index] = number;
 }
 
 // Print to a cstring buffer the description of array
@@ -71,7 +75,7 @@ uint32_t sm_f64_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
   uint32_t i      = 0;
 
   for (i = 0; i < array->size; i++) {
-    f64 value = sm_f64_array_get_bare(array, i);
+    double value = sm_f64_array_get_bare(array, i);
     // Estimate maximum buffer size needed for one float
     char num_buf[36]; // Enough to hold any formatted float
     int  len = snprintf(num_buf, sizeof(num_buf), "%.16g", value);

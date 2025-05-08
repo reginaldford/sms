@@ -9,12 +9,12 @@ typedef struct sm_array {
 } sm_array;
 
 sm_array  *sm_new_array(uint32_t type, uint32_t size, sm_object *content, uint32_t offset);
-f64       *sm_f64_array_get_start(sm_array *a);
+double    *sm_f64_array_get_start(sm_array *a);
 uint32_t   sm_array_sprint(sm_array *a, char *buffer, bool fake);
 uint32_t   sm_array_contents_sprint(sm_array *a, char *buffer, bool fake);
-void       sm_f64_array_set(sm_array *a, uint32_t index, f64 number);
-void       sm_ui8_array_set(sm_array *a, uint32_t index, ui8 number);
-f64        sm_f64_array_get_bare(sm_array *a, uint32_t index);
-ui8       *sm_ui8_array_get_start(sm_array *a);
-ui8        sm_ui8_array_get_bare(sm_array *a, uint32_t index);
+void       sm_f64_array_set(sm_array *a, uint32_t index, double number);
+void       sm_ui8_array_set(sm_array *a, uint32_t index, uint8_t number);
+double     sm_f64_array_get_bare(sm_array *a, uint32_t index);
+uint8_t   *sm_ui8_array_get_start(sm_array *a);
+uint8_t    sm_ui8_array_get_bare(sm_array *a, uint32_t index);
 sm_object *sm_array_get(sm_array *a, uint32_t index);

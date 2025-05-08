@@ -20,11 +20,6 @@
 #include <dlfcn.h>
 #include <ffi.h>
 
-#define f64 double
-#define i64 int64_t
-#define ui64 uint64_t
-#define ui8 uint8_t
-
 // We use __builtin_popcount_ll in sm_node.c
 #if defined(__x86intrin__)
 #include <x86intrin.h>
