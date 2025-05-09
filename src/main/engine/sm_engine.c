@@ -2634,16 +2634,16 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_IS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       if (sm_pop() == sm_pop())
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
       break;
     }
     case SM_GT_EQ_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_gteq();
       break;
     }
