@@ -150,6 +150,7 @@ sm_object *execute_fun(sm_fun *fun) {
 }
 
 
+// Recursive eager eval engine
 sm_object *sm_eval(sm_object *input) {
   switch (input->my_type) {
   case SM_EXPR_TYPE: {
@@ -161,7 +162,6 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_NEW_F64_EXPR: {
-      // TODO stack push to sms_stack every such var:
       sm_object *fromObj = eager_type_check3(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, SM_STRING_TYPE);
       switch (fromObj->my_type) {
       case SM_F64_TYPE:

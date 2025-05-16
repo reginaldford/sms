@@ -11,13 +11,13 @@ extern sm_object *(*sm_gt_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_lt_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_pow_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_gteq_functions[])(sm_object *o0, sm_object *o1);
-
+extern sm_stack2 *sms_stack;
 // Types: ui8 ui64 i64 f64 cx
 
 // Add operations
 sm_object *sm_add() {
-  sm_object *o0 = sm_pop();
-  sm_object *o1 = sm_pop();
+  sm_object *o0 = sm_pop(sms_stack);
+  sm_object *o1 = sm_pop(sms_stack);
   return sm_add_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 
@@ -137,8 +137,8 @@ sm_object *sm_add_cx_and_number(sm_object *cx, sm_object *number) {
 // Minus operations
 
 sm_object *sm_minus() {
-  sm_object *o0 = sm_pop();
-  sm_object *o1 = sm_pop();
+  sm_object *o0 = sm_pop(sms_stack);
+  sm_object *o1 = sm_pop(sms_stack);
   return sm_minus_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 
@@ -249,8 +249,8 @@ sm_object *sm_minus_f64_and_f64(sm_object *o0, sm_object *o1) {
 
 // Times operations
 sm_object *sm_times() {
-  sm_object *o0 = sm_pop();
-  sm_object *o1 = sm_pop();
+  sm_object *o0 = sm_pop(sms_stack);
+  sm_object *o1 = sm_pop(sms_stack);
   return sm_times_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 
@@ -361,8 +361,8 @@ sm_object *sm_times_f64_and_f64(sm_object *o0, sm_object *o1) {
 
 // Divide operations
 sm_object *sm_divide() {
-  sm_object *o0 = sm_pop();
-  sm_object *o1 = sm_pop();
+  sm_object *o0 = sm_pop(sms_stack);
+  sm_object *o1 = sm_pop(sms_stack);
   return sm_divide_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 // uint8
@@ -480,8 +480,8 @@ sm_object *sm_divide_cx_and_number(sm_object *cx, sm_object *number) {
 
 // GT operations
 sm_object *sm_gt() {
-  sm_object *o0 = sm_pop();
-  sm_object *o1 = sm_pop();
+  sm_object *o0 = sm_pop(sms_stack);
+  sm_object *o1 = sm_pop(sms_stack);
   return sm_gt_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 
@@ -632,8 +632,8 @@ sm_object *sm_gt_cx_and_number(sm_object *cx, sm_object *number) {
 
 // lt operations
 sm_object *sm_lt() {
-  sm_object *o0 = sm_pop();
-  sm_object *o1 = sm_pop();
+  sm_object *o0 = sm_pop(sms_stack);
+  sm_object *o1 = sm_pop(sms_stack);
   return sm_lt_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 
@@ -785,8 +785,8 @@ sm_object *sm_lt_cx_and_number(sm_object *cx, sm_object *number) {
 // POW operations
 
 sm_object *sm_pow() {
-  sm_object *o0 = sm_pop();
-  sm_object *o1 = sm_pop();
+  sm_object *o0 = sm_pop(sms_stack);
+  sm_object *o1 = sm_pop(sms_stack);
   return sm_pow_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 
@@ -953,8 +953,8 @@ sm_object *sm_pow_cx_and_number(sm_object *cx, sm_object *number) {
 
 // gteq operations
 sm_object *sm_gteq() {
-  sm_object *o0 = sm_pop();
-  sm_object *o1 = sm_pop();
+  sm_object *o0 = sm_pop(sms_stack);
+  sm_object *o1 = sm_pop(sms_stack);
   return sm_gteq_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 
