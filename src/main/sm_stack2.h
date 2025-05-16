@@ -11,8 +11,8 @@ typedef struct sm_stack2 {
 /// Create a new stack
 sm_stack2 *sm_new_stack2(uint32_t capacity);
 /// Return first element of the stack
-sm_object **sm_stack2_content();
+sm_object **sm_stack2_content(sm_stack2 *stack);
 /// Push a pointer onto the stack
-void sm_push(sm_object *ptr);
+sm_stack2 *sm_push(sm_stack2 *stack, sm_object *ptr);
 /// Push a pointer onto the stack
-sm_object *sm_pop();
+sm_object *sm_pop(sm_stack2 *stack);

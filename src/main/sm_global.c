@@ -20,6 +20,7 @@ sm_object *return_obj;
 // 2 virtual machine  stacks
 sm_stack2 *sms_stack;
 sm_stack2 *sms_cx_stack;
+sm_stack2 *sms_sf;
 // function pointers for numbers
 // f64, i64, ui64, ui8
 

@@ -12,9 +12,9 @@ extern sm_symbol   *sms_true;
 extern sm_symbol   *sms_false;
 extern sm_stack2   *sms_stack;
 extern sm_stack2   *sms_cx_stack;
+extern sm_stack2   *sms_sf;
 
-sm_object *sf;
-sm_cx     *current_cx;
+sm_cx *current_cx;
 
 // Basic type checking
 
@@ -104,9 +104,9 @@ sm_object *execute_fun(sm_fun *fun) {
     break;
   }
   case SM_SO_FUN_TYPE: {
-    sm_so_fun *f                        = (sm_so_fun *)fun;
-    sm_object *(*ff)(sm_object * input) = f->function;
-    sm_object *output                   = ff((sm_object *)sf);
+    sm_so_fun *f                       = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object *input) = f->function;
+    sm_object *output                  = ff((sm_object *)sf);
     return output;
     break;
   }
@@ -1231,9 +1231,10 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sm_new_string(strlen(line), line);
     }
     case SM_ARGS_EXPR: {
-      if (sf)
-        return (sm_object *)sf;
-      return (sm_object *)sms_false;
+      // I need stack as param in these ops
+      if (sms_sf->size)
+        // return (sm_object *)sm_pop();
+        return (sm_object *)sms_false;
     }
     case SM_OR_EXPR: {
       sm_object *obj0 = sm_eval(sm_expr_get_arg(sme, 0));
@@ -2340,30 +2341,30 @@ sm_object *sm_eval(sm_object *input) {
 
 
     case SM_PLUS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_add();
     }
     case SM_MINUS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_minus();
     }
     case SM_TIMES_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_times();
     }
     case SM_DIVIDE_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_divide();
     }
 
 
     case SM_POW_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_pow();
     }
     case SM_SIN_EXPR: {
@@ -2615,35 +2616,35 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_LT_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_lt();
       break;
     }
     case SM_GT_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_gt();
     }
     case SM_EQEQ_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-      if (sm_object_eq(sm_pop(), sm_pop()))
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      if (sm_object_eq(sm_pop(sms_stack), sm_pop(sms_stack)))
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
       break;
     }
     case SM_IS_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
-      if (sm_pop() == sm_pop())
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      if (sm_pop(sms_stack) == sm_pop(sms_stack))
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
       break;
     }
     case SM_GT_EQ_EXPR: {
-      sm_push(sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_gteq();
       break;
     }
@@ -2729,7 +2730,7 @@ break;
 }
             */
     } // end of switch on expression op value
-  }   // end of expression case
-  }   // end of switch on input type
+  } // end of expression case
+  } // end of switch on input type
   return input;
 }
