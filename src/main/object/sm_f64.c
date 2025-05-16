@@ -41,14 +41,3 @@ uint32_t sm_f64_sprint(sm_f64 *self, char *buffer, bool fake) {
     count++;
   return count;
 }
-
-sm_f64 *sm_f64_from(sm_object *input) {
-  switch (input->my_type) {
-  case SM_F64_TYPE:
-    return sm_new_f64(((sm_f64 *)input)->value);
-    break;
-  case SM_UI8_TYPE:
-    return sm_new_f64((double)((sm_ui8 *)input)->value);
-    break;
-  }
-}
