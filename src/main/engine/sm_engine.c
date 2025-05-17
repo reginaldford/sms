@@ -2670,73 +2670,67 @@ sm_object *sm_eval(sm_object *input) {
       return sm_lteq();
       break;
     }
+    case SM_ISNAN_EXPR: {
+      sm_object *num0 = eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
+      if (isnan(((sm_f64 *)num0)->value))
+        return (sm_object *)sms_true;
+      else
+        return (sm_object *)sms_false;
+    }
+    case SM_ISINF_EXPR: {
+      sm_object *num0 = eager_type_check(sme, 0, SM_F64_TYPE);
+      if (num0->my_type == SM_ERR_TYPE)
+        return (sm_object *)num0;
+      if (isinf(((sm_f64 *)num0)->value))
+        return (sm_object *)sms_true;
+      else
+        return (sm_object *)sms_false;
+    }
       /*
-      case SM_ISNAN_EXPR: {
-      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0);
-      if (num0->my_type == SM_ERR_TYPE) {
-      return (sm_object *)num0;
-      }
-      if (isnan(num0->value)) {
-      return (sm_object *)sms_true;
-      } else {
-      return (sm_object *)sms_false;
-      }
-      break;
-      }
-      case SM_ISINF_EXPR: {
-      sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0);
-      if (num0->my_type == SM_ERR_TYPE) {
-      return (sm_object *)num0;
-      }
-      if (isinf(num0->value)) {
-      return (sm_object *)sms_true;
-      } else {
-      return (sm_object *)sms_false;
-      }
-      break;
-      }
-      case SM_RUNTIME_META_EXPR: {
-      return (sm_object *)sm_new_meta(sm_eval(sm_expr_get_arg(sme, 0));
-      break;
-      }
-      case SM_ISERR_EXPR: {
-      sm_object *output = sm_eval(sm_expr_get_arg(sme, 0));
-      if (output->my_type == SM_ERR_TYPE) {
-      return (sm_object *)sms_true;
-      }
-      return (sm_object *)sms_false;
-      break;
-      }
-      case SM_ERRTITLE_EXPR: {
-      sm_error *e = (sm_error *)eager_type_check(sme, 0);
-      return (sm_object *)e->title;
-      break;
-      }
-      case SM_ERRLINE_EXPR: {
-      sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
-      return (sm_object *)sm_new_f64(obj0->line);
-      break;
-      }
-      case SM_ERRSOURCE_EXPR: {
-      sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
-      return (sm_object *)obj0->source;
-      break;
-      }
-      case SM_ERRMESSAGE_EXPR: {
-      sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
-      if (obj0->message)
-      return (sm_object *)obj0->message;
-      return (sm_object *)sms_false;
-      break;
-      }
-      case SM_ERRNOTES_EXPR: {
-      sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
-      if (obj0->notes)
-      return (sm_object *)obj0->notes;
-      return (sm_object *)sms_false;
-      break;
-      }
-                  */
+case SM_RUNTIME_META_EXPR: {
+return (sm_object *)sm_new_meta(sm_eval(sm_expr_get_arg(sme, 0));
+break;
+}
+case SM_ISERR_EXPR: {
+sm_object *output = sm_eval(sm_expr_get_arg(sme, 0));
+if (output->my_type == SM_ERR_TYPE) {
+return (sm_object *)sms_true;
+}
+return (sm_object *)sms_false;
+break;
+}
+case SM_ERRTITLE_EXPR: {
+sm_error *e = (sm_error *)eager_type_check(sme, 0);
+return (sm_object *)e->title;
+break;
+}
+case SM_ERRLINE_EXPR: {
+sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
+return (sm_object *)sm_new_f64(obj0->line);
+break;
+}
+case SM_ERRSOURCE_EXPR: {
+sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
+return (sm_object *)obj0->source;
+break;
+}
+case SM_ERRMESSAGE_EXPR: {
+sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
+if (obj0->message)
+return (sm_object *)obj0->message;
+return (sm_object *)sms_false;
+break;
+}
+case SM_ERRNOTES_EXPR: {
+sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
+if (obj0->notes)
+return (sm_object *)obj0->notes;
+return (sm_object *)sms_false;
+break;
+}
+*/
     } // end of switch on expression op value
   } // end of expression case
   } // end of switch on input type
