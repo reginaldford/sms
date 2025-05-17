@@ -6,12 +6,11 @@
 typedef struct sm_meta {
   int        my_type;
   sm_object *address;
-  sm_cx     *scope;
   sm_cx     *data;
 } sm_meta;
 
 /// Construct a new meta
-sm_meta *sm_new_meta(sm_object *address, sm_cx *context);
+sm_meta *sm_new_meta(sm_object *address);
 /// Convert this meta to a string (ignores data field for now)
 sm_string *sm_meta_to_string(sm_meta *meta);
 /// Print this meta to the string buffer

@@ -2687,50 +2687,50 @@ sm_object *sm_eval(sm_object *input) {
         return (sm_object *)sms_true;
       else
         return (sm_object *)sms_false;
+    } break;
+    case SM_RUNTIME_META_EXPR: {
+      // TODO: context
+      // return (sm_object *)sm_new_meta(sm_eval(sm_expr_get_arg(sme, 0)));
+      break;
     }
-      /*
-case SM_RUNTIME_META_EXPR: {
-return (sm_object *)sm_new_meta(sm_eval(sm_expr_get_arg(sme, 0));
-break;
-}
-case SM_ISERR_EXPR: {
-sm_object *output = sm_eval(sm_expr_get_arg(sme, 0));
-if (output->my_type == SM_ERR_TYPE) {
-return (sm_object *)sms_true;
-}
-return (sm_object *)sms_false;
-break;
-}
-case SM_ERRTITLE_EXPR: {
-sm_error *e = (sm_error *)eager_type_check(sme, 0);
-return (sm_object *)e->title;
-break;
-}
-case SM_ERRLINE_EXPR: {
-sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
-return (sm_object *)sm_new_f64(obj0->line);
-break;
-}
-case SM_ERRSOURCE_EXPR: {
-sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
-return (sm_object *)obj0->source;
-break;
-}
-case SM_ERRMESSAGE_EXPR: {
-sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
-if (obj0->message)
-return (sm_object *)obj0->message;
-return (sm_object *)sms_false;
-break;
-}
-case SM_ERRNOTES_EXPR: {
-sm_error *obj0 = (sm_error *)eager_type_check(sme, 0);
-if (obj0->notes)
-return (sm_object *)obj0->notes;
-return (sm_object *)sms_false;
-break;
-}
-*/
+    case SM_ISERR_EXPR: {
+      sm_object *output = sm_eval(sm_expr_get_arg(sme, 0));
+      if (output->my_type == SM_ERR_TYPE) {
+        return (sm_object *)sms_true;
+      }
+      return (sm_object *)sms_false;
+      break;
+    }
+    case SM_ERRTITLE_EXPR: {
+      sm_error *e = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE);
+      return (sm_object *)e->title;
+      break;
+    }
+    case SM_ERRLINE_EXPR: {
+      sm_error *e = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE);
+      return (sm_object *)sm_new_f64(e->line);
+      break;
+    }
+    case SM_ERRSOURCE_EXPR: {
+      sm_error *e = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE);
+      return (sm_object *)e->source;
+      break;
+    }
+    case SM_ERRMESSAGE_EXPR: {
+      sm_error *e = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE);
+      if (e->message)
+        return (sm_object *)e->message;
+      return (sm_object *)sms_false;
+      break;
+    }
+    case SM_ERRNOTES_EXPR: {
+      sm_error *e = (sm_error *)eager_type_check(sme, 0, SM_ERR_TYPE);
+      if (e->notes)
+        return (sm_object *)e->notes;
+      return (sm_object *)sms_false;
+      break;
+    }
+
     } // end of switch on expression op value
   } // end of expression case
   } // end of switch on input type
