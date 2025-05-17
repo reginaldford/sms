@@ -76,6 +76,12 @@ sm_object *(*sm_gteq_functions[])(sm_object *o1, sm_object *o2) = {
   &sm_gteq_i64_and_ui8,  &sm_gteq_i64_and_ui64,  &sm_gteq_i64_and_i64,  &sm_gteq_i64_and_f64,
   &sm_gteq_f64_and_ui8,  &sm_gteq_f64_and_ui64,  &sm_gteq_f64_and_i64,  &sm_gteq_f64_and_f64};
 
+sm_object *(*sm_lteq_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_lteq_ui8_and_ui8,  &sm_lteq_ui8_and_ui64,  &sm_lteq_ui8_and_i64,  &sm_lteq_ui8_and_f64,
+  &sm_lteq_ui64_and_ui8, &sm_lteq_ui64_and_ui64, &sm_lteq_ui64_and_i64, &sm_lteq_ui64_and_f64,
+  &sm_lteq_i64_and_ui8,  &sm_lteq_i64_and_ui64,  &sm_lteq_i64_and_i64,  &sm_lteq_i64_and_f64,
+  &sm_lteq_f64_and_ui8,  &sm_lteq_f64_and_ui64,  &sm_lteq_f64_and_i64,  &sm_lteq_f64_and_f64};
+
 /* GLOBALS as functions
  The following globals use functions f(x):
   - If x is NULL, the static field is returned.
