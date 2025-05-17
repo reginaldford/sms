@@ -92,9 +92,9 @@ sm_object *sm_add_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_add_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  uint64_t a = ((sm_f64 *)o0)->value;
-  double   b = ((sm_ui64 *)o1)->value;
-  return (sm_object *)sm_new_f64(a + b);
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  double   b = ((sm_f64 *)o1)->value;
+  return (sm_object *)sm_new_f64((double)a + b);
 }
 
 // i64
@@ -183,7 +183,7 @@ sm_object *sm_minus_f64_and_ui8(sm_object *o0, sm_object *o1) {
 sm_object *sm_minus_ui8_and_f64(sm_object *o0, sm_object *o1) {
   uint8_t a = ((sm_ui8 *)o0)->value;
   double  b = ((sm_f64 *)o1)->value;
-  return (sm_object *)sm_new_f64(a - b);
+  return (sm_object *)sm_new_f64((double)a - b);
 }
 
 // ui64
@@ -213,8 +213,8 @@ sm_object *sm_minus_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_minus_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  uint64_t a = ((sm_f64 *)o0)->value;
-  double   b = ((sm_ui64 *)o1)->value;
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  double   b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a - b);
 }
 
@@ -436,8 +436,8 @@ sm_object *sm_divide_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_divide_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  uint64_t a = ((sm_f64 *)o0)->value;
-  double   b = ((sm_ui64 *)o1)->value;
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  double   b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a / b);
 }
 
@@ -578,8 +578,8 @@ sm_object *sm_gt_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_gt_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  uint64_t a = ((sm_f64 *)o0)->value;
-  double   b = ((sm_ui64 *)o1)->value;
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  double   b = ((sm_f64 *)o1)->value;
   if (a > b)
     return (sm_object *)sms_true;
   return (sm_object *)sms_false;
@@ -730,8 +730,8 @@ sm_object *sm_lt_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_lt_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  uint64_t a = ((sm_f64 *)o0)->value;
-  double   b = ((sm_ui64 *)o1)->value;
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  double   b = ((sm_f64 *)o1)->value;
   if (a < b)
     return (sm_object *)sms_true;
   return (sm_object *)sms_false;
@@ -894,8 +894,8 @@ sm_object *sm_pow_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_pow_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  uint64_t a      = ((sm_f64 *)o0)->value;
-  double   b      = ((sm_ui64 *)o1)->value;
+  uint64_t a      = ((sm_ui64 *)o0)->value;
+  double   b      = ((sm_f64 *)o1)->value;
   double   output = a;
   for (double i = 1; i < b; i++)
     output *= a;
@@ -1051,8 +1051,8 @@ sm_object *sm_gteq_f64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_gteq_ui64_and_f64(sm_object *o0, sm_object *o1) {
-  uint64_t a = ((sm_f64 *)o0)->value;
-  double   b = ((sm_ui64 *)o1)->value;
+  uint64_t a = ((sm_ui64 *)o0)->value;
+  double   b = ((sm_f64 *)o1)->value;
   if (a >= b)
     return (sm_object *)sms_true;
   return (sm_object *)sms_false;

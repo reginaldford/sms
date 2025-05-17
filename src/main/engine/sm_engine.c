@@ -236,10 +236,14 @@ sm_object *sm_eval(sm_object *input) {
       // TODO stack push to sms_stack every such var:
       sm_object *fromObj = eager_type_check3(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, SM_STRING_TYPE);
       switch (fromObj->my_type) {
-      case SM_F64_TYPE:
-        return (sm_object *)sm_new_ui64(((sm_f64 *)fromObj)->value);
       case SM_UI8_TYPE:
         return (sm_object *)sm_new_ui64(((sm_ui8 *)fromObj)->value);
+      case SM_UI64_TYPE:
+        return (sm_object *)sm_new_ui64(((sm_ui64 *)fromObj)->value);
+      case SM_I64_TYPE:
+        return (sm_object *)sm_new_ui64(((sm_i64 *)fromObj)->value);
+      case SM_F64_TYPE:
+        return (sm_object *)sm_new_ui64(((sm_f64 *)fromObj)->value);
       case SM_STRING_TYPE: {
         char       *endptr      = NULL;
         const char *str_content = &((sm_string *)fromObj)->content;
@@ -269,10 +273,14 @@ sm_object *sm_eval(sm_object *input) {
       if (fromObj->my_type == SM_ERR_TYPE)
         return fromObj;
       switch (fromObj->my_type) {
-      case SM_F64_TYPE:
-        return (sm_object *)sm_new_ui8(((sm_f64 *)fromObj)->value);
       case SM_UI8_TYPE:
         return (sm_object *)sm_new_ui8(((sm_ui8 *)fromObj)->value);
+      case SM_UI64_TYPE:
+        return (sm_object *)sm_new_ui8(((sm_ui64 *)fromObj)->value);
+      case SM_I64_TYPE:
+        return (sm_object *)sm_new_ui8(((sm_i64 *)fromObj)->value);
+      case SM_F64_TYPE:
+        return (sm_object *)sm_new_ui8(((sm_f64 *)fromObj)->value);
       case SM_STRING_TYPE: {
         char       *endptr;
         const char *str_content = &((sm_string *)fromObj)->content;
