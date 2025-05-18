@@ -40,34 +40,34 @@ enum sm_object_type {
   SM_I64_TYPE,
   /// 3: f64 precision floating point (sm_f64.h)
   SM_F64_TYPE,
-  /// 4: Expression (sm_expr.h)
-  SM_EXPR_TYPE,
-  /// 5: Primitive is not used yet
-  SM_PRIMITIVE_TYPE,
-  /// 6: Strings (sm_string.h)
-  SM_STRING_TYPE,
-  /// 7: Symbols (sm_symbol.h)
-  SM_SYMBOL_TYPE,
-  /// 8: Contexts (sm_cx.h)
+  /// 4: Contexts (sm_cx.h)
   SM_CX_TYPE,
-  /// 9: Nodes (sm_node.h)
-  SM_NODE_TYPE,
-  /// 10: Pointers (for gc) (sm_pointer.h)
-  SM_POINTER_TYPE,
-  /// 11: Meta objects (sm_meta.h)
-  SM_META_TYPE,
-  /// 12: Space objects (sm_space.h)
-  SM_SPACE_TYPE,
-  /// 13: Functions (sm_fun.h)
-  SM_FUN_TYPE,
-  /// 14: Function parameters (sm_fun.h)
-  SM_FUN_PARAM_TYPE,
-  /// 15: Local variable reference (sm_local.h)
-  SM_LOCAL_TYPE,
-  /// 16: Linked list objects (not used yet) (sm_link.h)
-  SM_LINK_TYPE,
-  /// 17: Error objects
+  /// 5: Error objects
   SM_ERR_TYPE,
+  /// 6: Expression (sm_expr.h)
+  SM_EXPR_TYPE,
+  /// 7: Primitive is not used yet
+  SM_PRIMITIVE_TYPE,
+  /// 8: Strings (sm_string.h)
+  SM_STRING_TYPE,
+  /// 9: Symbols (sm_symbol.h)
+  SM_SYMBOL_TYPE,
+  /// 10: Nodes (sm_node.h)
+  SM_NODE_TYPE,
+  /// 11: Pointers (for gc) (sm_pointer.h)
+  SM_POINTER_TYPE,
+  /// 12: Meta objects (sm_meta.h)
+  SM_META_TYPE,
+  /// 13: Space objects (sm_space.h)
+  SM_SPACE_TYPE,
+  /// 14: Functions (sm_fun.h)
+  SM_FUN_TYPE,
+  /// 15: Function parameters (sm_fun.h)
+  SM_FUN_PARAM_TYPE,
+  /// 16: Local variable reference (sm_local.h)
+  SM_LOCAL_TYPE,
+  /// 17: Linked list objects (not used yet) (sm_link.h)
+  SM_LINK_TYPE,
   /// 18: Reference to current scope. (sm_self.h)
   SM_SELF_TYPE,
   /// 19: Acts as return statement. (sm_return.h)

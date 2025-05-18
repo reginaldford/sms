@@ -13,13 +13,25 @@ extern sm_object *(*sm_pow_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_gteq_functions[])(sm_object *o0, sm_object *o1);
 extern sm_object *(*sm_lteq_functions[])(sm_object *o0, sm_object *o1);
 extern sm_stack2 *sms_stack;
-// Types: ui8 ui64 i64 f64 cx
+
+// Types: ui8 ui64 i64 f64 cx err
 
 // Add operations
 sm_object *sm_add() {
-  sm_object *o0 = sm_pop(sms_stack);
-  sm_object *o1 = sm_pop(sms_stack);
-  return sm_add_functions[o0->my_type * 4 + o1->my_type](o0, o1);
+  sm_object          *o0 = sm_pop(sms_stack);
+  sm_object          *o1 = sm_pop(sms_stack);
+  enum sm_object_type t0 = MIN(o0->my_type, SM_ERR_TYPE);
+  enum sm_object_type t1 = MIN(o1->my_type, SM_ERR_TYPE);
+  //return sm_add_functions[t0 * SM_ERR_TYPE + t1](o0, o1);
+  return sm_add_functions[t0 * 4 + t1](o0, o1);
+}
+
+// cx
+sm_object *sm_add_cx_and_number(sm_object *cx, sm_object *number) {
+  sm_cx     *cx_number    = (sm_cx *)cx;
+  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_", 5));
+  // TODO: you have to push the stack frame , execute_fun, then pop stack frame
+  return cx;
 }
 
 // uint8
@@ -65,6 +77,7 @@ sm_object *sm_add_ui8_and_f64(sm_object *o0, sm_object *o1) {
   double  b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a + b);
 }
+
 
 // ui64
 
@@ -124,14 +137,6 @@ sm_object *sm_add_f64_and_f64(sm_object *o0, sm_object *o1) {
   double a = ((sm_f64 *)o0)->value;
   double b = ((sm_f64 *)o1)->value;
   return (sm_object *)sm_new_f64(a + b);
-}
-
-// cx
-sm_object *sm_add_cx_and_number(sm_object *cx, sm_object *number) {
-  sm_cx     *cx_number    = (sm_cx *)cx;
-  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_", 5));
-  // TODO: you have to push the stack frame and cx ,and then execute_fun
-  return cx;
 }
 
 

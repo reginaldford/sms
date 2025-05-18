@@ -22,7 +22,7 @@ sm_stack2 *sms_stack;
 sm_stack2 *sms_cx_stack;
 sm_stack2 *sms_sf;
 // function pointers for numbers
-// f64, i64, ui64, ui8
+// ui8, ui64, i64, f64, cx, err
 
 
 sm_object *(*sm_add_functions[])(sm_object *o1, sm_object *o2) = {

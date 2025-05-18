@@ -1,6 +1,10 @@
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 sm_object *sm_add();
+sm_object *sm_add_err_and_cx(sm_object *ui8_o0, sm_object *ui8_o1);
+sm_object *sm_add_cx_and_err(sm_object *ui8_o0, sm_object *ui8_o1);
+sm_object *sm_add_number_and_cx(sm_object *ui8_o0, sm_object *ui8_o1);
+sm_object *sm_add_cx_and_number(sm_object *ui8_o0, sm_object *ui8_o1);
 sm_object *sm_add_ui8_and_ui8(sm_object *ui8_o0, sm_object *ui8_o1);
 sm_object *sm_add_ui8_and_ui64(sm_object *ui8_o0, sm_object *ui64_o1);
 sm_object *sm_add_ui8_and_i64(sm_object *ui8_o0, sm_object *i64_o1);
