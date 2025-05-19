@@ -5,9 +5,9 @@
 /// Return the name of this type.
 /// Must be synchronized with enum sm_object_type in sms.h
 char *sm_type_name(uint32_t which) {
-  static char *response[]   = {"f64",  "ui8",    "xp",    "prim",  "str",   "sym",   "cx",   "node",
-                               "ptr",  "meta",   "space", "fun",   "param", "local", "link", "error",
-                               "self", "return", "block", "stack", "array", "?"};
+  static char *response[]   = {"ui8",   "ui64", "i64",  "f64",    "cx",    "err",   "xp",    "prim",
+                               "str",   "sym",  "node", "ptr",    "meta",  "space", "fun",   "param",
+                               "local", "link", "self", "return", "block", "stack", "array", "?"};
   uint16_t     numResponses = sizeof(response) / sizeof(response[0]);
   if (which >= numResponses)
     which = numResponses - 1;

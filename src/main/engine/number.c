@@ -20,18 +20,26 @@ extern sm_stack2 *sms_stack;
 sm_object *sm_add() {
   sm_object          *o0 = sm_pop(sms_stack);
   sm_object          *o1 = sm_pop(sms_stack);
-  enum sm_object_type t0 = MIN(o0->my_type, SM_ERR_TYPE);
-  enum sm_object_type t1 = MIN(o1->my_type, SM_ERR_TYPE);
-  //return sm_add_functions[t0 * SM_ERR_TYPE + t1](o0, o1);
+  enum sm_object_type t0 = o0->my_type;
+  enum sm_object_type t1 = o1->my_type;
+  if (t0 > SM_F64_TYPE) {
+  }
+  if (t1 > SM_F64_TYPE) {
+  }
+
   return sm_add_functions[t0 * 4 + t1](o0, o1);
 }
 
 // cx
+
 sm_object *sm_add_cx_and_number(sm_object *cx, sm_object *number) {
-  sm_cx     *cx_number    = (sm_cx *)cx;
-  sm_object *add_function = sm_cx_get_far(cx_number, sm_new_symbol("_add_", 5));
-  // TODO: you have to push the stack frame , execute_fun, then pop stack frame
-  return cx;
+  sm_object *add_function = sm_cx_get_far((sm_cx *)cx, sm_new_symbol("_add_", 5));
+  return execute_fun(add_function);
+}
+
+sm_object *sm_add_number_and_cx(sm_object *number, sm_object *cx) {
+  sm_object *add_function = sm_cx_get_far((sm_cx *)cx, sm_new_symbol("_add_", 5));
+  return execute_fun(add_function);
 }
 
 // uint8

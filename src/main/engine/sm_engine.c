@@ -30,9 +30,23 @@ static inline sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32
       __FILE__, __LINE__);
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    if (param_type == SM_ERR_TYPE) {
-      err->origin = err;
-    }
+    return (sm_object *)err;
+  }
+  return (sm_object *)obj;
+}
+
+static inline sm_object *eager_number_or_cx(sm_expr *sme, uint32_t operand) {
+  sm_object *obj = sm_eval(sm_expr_get_arg(sme, operand));
+  if (obj->my_type > SM_CX_TYPE) {
+    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message = sm_new_fstring_at(sms_heap,
+                                           "Wrong type for argument %i on %s. Argument type is: %s "
+                                           ", but Expected a number or cx (%s:%i)",
+                                           operand, sm_global_fn_name(sme->op),
+                                           sm_type_name(obj->my_type), __FILE__, __LINE__);
+    sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
+                                 &source->content, (uint32_t)line->value);
     return (sm_object *)err;
   }
   return (sm_object *)obj;
@@ -81,18 +95,19 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
   }
   return obj;
 }
+
 // Execute a function
-sm_object *execute_fun(sm_fun *fun) {
+sm_object *execute_fun(sm_object *fun) {
   sm_expr *sf; // TODO: this would come from the stack
   sm_cx   *current_cx;
   switch (fun->my_type) {
   case SM_FUN_TYPE: {
-    sm_object *content = fun->content;
+    sm_object *content = ((sm_fun *)fun)->content;
     sm_object *result;
     // TODO: cx gets pushed to cx stack
     // sm_cx *new_cx = sm_new_cx(fun->parent);
     if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
-      sm_expr *content_sme = (sm_expr *)fun->content;
+      sm_expr *content_sme = (sm_expr *)((sm_fun *)fun)->content;
       for (uint32_t i = 1; i < content_sme->size; i++) {
         result = sm_eval(sm_expr_get_arg(content_sme, i));
         if (result->my_type == SM_RETURN_TYPE)
@@ -2100,18 +2115,16 @@ sm_object *sm_eval(sm_object *input) {
       return sm_simplify(evaluated0);
     }
     case SM_FUN_CALL_EXPR: {
-      sm_fun  *function_to_call = (sm_fun *)sm_eval(sm_expr_get_arg(sme, 0));
-      sm_expr *args             = (sm_expr *)sm_eval(sm_expr_get_arg(sme, 1));
-      // if (function_to_cal->my_type == SM_ERR_TYPE)
-      // return (sm_object*)function_to_call; // return the return
-      //  TODO: stack
+      sm_object *function_to_call = sm_eval(sm_expr_get_arg(sme, 0));
+      sm_expr   *args             = (sm_expr *)sm_eval(sm_expr_get_arg(sme, 1));
+      if (function_to_call->my_type == SM_ERR_TYPE)
+        return (sm_object *)function_to_call; // return the return
       return execute_fun(function_to_call);
       break;
     }
     case SM_BLOCK_EXPR: {
       sm_cx     *new_cx = sm_new_cx(current_cx);
       sm_object *output = (sm_object *)sms_false;
-      // TODO: stack
       for (uint32_t i = 1; i < sme->size && output->my_type != SM_RETURN_TYPE; i++)
         output = sm_eval(sm_expr_get_arg(sme, i));
       return output;
@@ -2354,11 +2367,15 @@ sm_object *sm_eval(sm_object *input) {
 
       return (result);
     }
-
-
     case SM_PLUS_EXPR: {
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_object *o1 = eager_number_or_cx(sme, 1);
+      if (o1->my_type == SM_ERR_TYPE)
+        return o1;
+      sm_push(sms_stack, o1);
+      sm_object *o0 = eager_number_or_cx(sme, 0);
+      if (o0->my_type == SM_ERR_TYPE)
+        return o0;
+      sm_push(sms_stack, o0);
       return sm_add();
     }
     case SM_MINUS_EXPR: {
