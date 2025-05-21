@@ -31,9 +31,9 @@ sm_string *sm_i64_to_string(sm_i64 *self) {
 uint32_t sm_i64_sprint(sm_i64 *self, char *buffer, bool fake) {
   char internal_buf[30];
   if (!fake)
-    snprintf(buffer, 30, "i64(%lli)", self->value);
+    snprintf(buffer, 30, "i64(%li)", self->value);
   else {
-    snprintf(internal_buf, 30, "i64(%lli)", self->value);
+    snprintf(internal_buf, 30, "i64(%li)", self->value);
     buffer = internal_buf;
   }
   uint16_t count = 0;

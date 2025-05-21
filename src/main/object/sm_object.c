@@ -107,6 +107,12 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 
 uint32_t sm_sizeof(sm_object *obj1) {
   switch (obj1->my_type) {
+  case SM_UI8_TYPE:
+    return sizeof(sm_ui8);
+  case SM_UI64_TYPE:
+    return sizeof(sm_ui64);
+  case SM_I64_TYPE:
+    return sizeof(sm_i64);
   case SM_F64_TYPE:
     return sizeof(sm_f64);
   case SM_EXPR_TYPE:
@@ -144,8 +150,6 @@ uint32_t sm_sizeof(sm_object *obj1) {
     return sizeof(sm_stack_obj) + sizeof(void *) * ((sm_stack_obj *)obj1)->capacity;
   case SM_ARRAY_TYPE:
     return sizeof(sm_array);
-  case SM_UI8_TYPE:
-    return sizeof(sm_ui8);
   case SM_SO_TYPE:
     return sizeof(sm_so);
   case SM_SO_FUN_TYPE:

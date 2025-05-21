@@ -179,10 +179,10 @@ clear        {return CLEAR;}
 parent       {return PARENT;}
 rm           {return RM;}
 
-"f64["       {return F64_ARRAY_OPEN;}
-"i64["       {return I64_ARRAY_OPEN;}
-"ui64["       {return UI64_ARRAY_OPEN;}
 "ui8["       {return UI8_ARRAY_OPEN;}
+"ui64["       {return UI64_ARRAY_OPEN;}
+"i64["       {return I64_ARRAY_OPEN;}
+"f64["       {return F64_ARRAY_OPEN;}
 
 newCx        {return NEW_CX;}
 cxSetParent  {return CX_SETPARENT;}

@@ -13,16 +13,29 @@ sm_array *sm_new_array(uint32_t type, uint32_t size, sm_object *content, uint32_
 }
 
 double *sm_f64_array_get_start(sm_array *a) { return (double *)(&((sm_space *)a->content)[1]); }
-
-double sm_f64_array_get_bare(sm_array *a, uint32_t index) {
+double  sm_f64_array_get_bare(sm_array *a, uint32_t index) {
   return sm_f64_array_get_start(a)[index];
 }
 
 uint8_t *sm_ui8_array_get_start(sm_array *a) { return (uint8_t *)(&((sm_space *)a->content)[1]); }
-
-uint8_t sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
+uint8_t  sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
   return sm_ui8_array_get_start(a)[index];
 }
+
+
+uint64_t *sm_ui64_array_get_start(sm_array *a) {
+  return (uint64_t *)(&((sm_space *)a->content)[1]);
+}
+uint64_t sm_ui64_array_get_bare(sm_array *a, uint32_t index) {
+  return sm_ui64_array_get_start(a)[index];
+}
+
+
+int64_t *sm_i64_array_get_start(sm_array *a) { return (int64_t *)(&((sm_space *)a->content)[1]); }
+int64_t  sm_i64_array_get_bare(sm_array *a, uint32_t index) {
+  return sm_i64_array_get_start(a)[index];
+}
+
 
 sm_object *sm_array_get(sm_array *a, uint32_t index) {
   switch (a->inner_type) {
@@ -31,6 +44,12 @@ sm_object *sm_array_get(sm_array *a, uint32_t index) {
   }
   case SM_UI8_TYPE: {
     return (sm_object *)sm_new_ui8(sm_ui8_array_get_bare(a, index));
+  }
+  case SM_UI64_TYPE: {
+    return (sm_object *)sm_new_ui64(sm_ui64_array_get_bare(a, index));
+  }
+  case SM_I64_TYPE: {
+    return (sm_object *)sm_new_i64(sm_i64_array_get_bare(a, index));
   }
   }
   return (sm_object *)sms_false;
@@ -49,22 +68,37 @@ void sm_ui8_array_set(sm_array *a, uint32_t index, uint8_t number) {
 uint32_t sm_array_sprint(sm_array *a, char *buffer, bool fake) {
   uint32_t len = 0;
   char    *part1;
-  char     f64_header[] = "f64[";
-  char     ui8_header[] = "ui8[";
+  char     f64_header[]  = "f64[";
+  char     ui8_header[]  = "ui8[";
+  char     ui64_header[] = "ui64[";
+  char     i64_header[]  = "i64[";
+  uint32_t headerLen     = 0;
   switch (a->inner_type) {
   case SM_F64_TYPE:
-    part1 = f64_header;
-    len += 4;
+    part1     = f64_header;
+    headerLen = 4;
+    len += headerLen;
     break;
   case SM_UI8_TYPE:
-    part1 = ui8_header;
-    len += 4;
+    part1     = ui8_header;
+    headerLen = 4;
+    len += headerLen;
+    break;
+  case SM_UI64_TYPE:
+    part1     = ui64_header;
+    headerLen = 5;
+    len += headerLen;
+    break;
+  case SM_I64_TYPE:
+    part1     = i64_header;
+    headerLen = 4;
+    len += headerLen;
     break;
   }
   if (!fake)
     for (uint8_t i = 0; i < len; i++)
       buffer[i] = part1[i];
-  len += sm_array_contents_sprint(a, &(buffer[4]), fake);
+  len += sm_array_contents_sprint(a, &(buffer[headerLen]), fake);
   if (!fake)
     buffer[len] = ']';
   return ++len;
@@ -127,6 +161,60 @@ uint32_t sm_ui8_array_contents_sprint(sm_array *array, char *buffer, bool fake) 
   return cursor;
 }
 
+uint32_t sm_ui64_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
+  if (array->size == 0)
+    return 0;
+  uint32_t cursor = 0;
+  uint32_t i      = 0;
+  for (i = 0; i < array->size; i++) {
+    uint64_t value = sm_ui64_array_get_bare(array, i);
+    // Calculate the length needed to print the integer
+    uint32_t len = (value == 0) ? 1 : (uint32_t)log10(value) + 1;
+    if (!fake)
+      cursor += sprintf(&buffer[cursor], "%ul", value);
+    else
+      cursor += len; // Only increment cursor by the length if faking
+
+    // Add a comma if it's not the last element
+    if (i + 1 < array->size) {
+      if (!fake)
+        buffer[cursor] = ',';
+      cursor++;
+    }
+  }
+  // Null-terminate the buffer if not faking
+  if (!fake)
+    buffer[cursor] = '\0';
+  return cursor;
+}
+
+uint32_t sm_i64_array_contents_sprint(sm_array *array, char *buffer, bool fake) {
+  if (array->size == 0)
+    return 0;
+  uint32_t cursor = 0;
+  uint32_t i      = 0;
+  for (i = 0; i < array->size; i++) {
+    int64_t value = sm_i64_array_get_bare(array, i);
+    // Calculate the length needed to print the integer
+    uint32_t len = (value == 0) ? 1 : (uint32_t)log10(value) + 1;
+    if (!fake)
+      cursor += sprintf(&buffer[cursor], "%u", value);
+    else
+      cursor += len; // Only increment cursor by the length if faking
+
+    // Add a comma if it's not the last element
+    if (i + 1 < array->size) {
+      if (!fake)
+        buffer[cursor] = ',';
+      cursor++;
+    }
+  }
+  // Null-terminate the buffer if not faking
+  if (!fake)
+    buffer[cursor] = '\0';
+  return cursor;
+}
+
 
 uint32_t sm_array_contents_sprint(sm_array *a, char *buffer, bool fake) {
   switch (a->inner_type) {
@@ -135,6 +223,12 @@ uint32_t sm_array_contents_sprint(sm_array *a, char *buffer, bool fake) {
   }
   case SM_UI8_TYPE: {
     return sm_ui8_array_contents_sprint(a, buffer, fake);
+  }
+  case SM_UI64_TYPE: {
+    return sm_ui64_array_contents_sprint(a, buffer, fake);
+  }
+  case SM_I64_TYPE: {
+    return sm_i64_array_contents_sprint(a, buffer, fake);
   }
   }
   return 0;
