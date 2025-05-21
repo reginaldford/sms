@@ -65,9 +65,6 @@ static inline sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint3
       sm_type_name(param_type2));
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    if (param_type1 == SM_ERR_TYPE || param_type2 == SM_ERR_TYPE) {
-      err->origin = err;
-    }
     return (sm_object *)err;
   }
   return obj;
@@ -88,9 +85,6 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
       sm_type_name(param_type2), sm_type_name(param_type3), __FILE__, __LINE__);
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    if (param_type1 == SM_ERR_TYPE || param_type2 == SM_ERR_TYPE || param_type3 == SM_ERR_TYPE) {
-      err->origin = err;
-    }
     return (sm_object *)err;
   }
   return obj;
