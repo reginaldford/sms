@@ -686,14 +686,14 @@ UI64_ARRAY_LIST : UI64_ARRAY_OPEN UI64 {
  $$ = sm_new_array(SM_UI64_TYPE,1,NULL,sizeof(sm_space));
  sm_space* space= sm_new_space(sizeof(double));
  $$->content=(sm_object*)space;
- sm_f64_array_set($$,0,$2);
+ sm_ui64_array_set($$,0,$2);
 }
 | UI64_ARRAY_LIST ',' F64 {
    $$->size++;
    sm_space * space = (sm_space*)$$->content;
    space->size+=sizeof(double);
-   sm_f64_array_set($$,$$->size-1,(double)$3);
-   sms_heap->used+=sizeof(double);
+   sm_ui64_array_set($$,$$->size-1,(uint64_t)$3);
+   sms_heap->used+=sizeof(uint64_t);
 }
 | UI64_ARRAY_LIST ',' UI64 {
    $$->size++;
