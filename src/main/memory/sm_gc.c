@@ -8,6 +8,7 @@ extern bool       evaluating;
 extern sm_object *return_obj;
 extern sm_stack2 *sms_stack;
 extern sm_stack2 *sms_cx_stack;
+extern sm_stack2 *sms_sf;
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
@@ -179,7 +180,6 @@ inline void sm_inflate_heap(sm_heap *from, sm_heap *to) {
   }
 }
 
-void **lowestPointer(intptr_t x) { return x + __builtin_frame_address(0); }
 
 // Copying GC
 inline void sm_garbage_collect() {
@@ -207,12 +207,21 @@ inline void sm_garbage_collect() {
   } else
     sm_global_parser_output((sm_object *)sms_false);
   // Data stack as root:
-  void *current_ptr = &(sms_stack[1]);
   for (void **curr_ptr = (void **)&(sms_stack[1]);
        curr_ptr < (void **)&(sms_stack[sms_stack->size]); curr_ptr++) {
     *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
   }
-
+  // CX stack as root:
+  sm_object **cx_stack_content = sm_stack2_content(sms_cx_stack);
+  for (sm_object **curr_ptr = cx_stack_content; curr_ptr < &(cx_stack_content[sms_cx_stack->size]);
+       curr_ptr++) {
+    *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
+  }
+  // Frame Stack as root:
+  for (void **curr_ptr = (void **)&(sms_sf[1]); curr_ptr < (void **)&(sms_sf[sms_sf->size]);
+       curr_ptr++) {
+    *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
+  }
 
   // Inflate
   sm_inflate_heap(sms_heap, sms_other_heap);

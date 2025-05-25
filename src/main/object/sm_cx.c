@@ -77,7 +77,7 @@ sm_object *sm_cx_get_far(sm_cx *self, sm_symbol *sym) {
 
 // Add a key_value with this key and value
 // sym_name is not managed by gc, so should be from sms_symbol_name_heap
-bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
+void sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
   sm_node *current_node;
   if (self->content == NULL)
     self->content = sm_new_node(NULL, NULL, 0LL, NULL, 0);
@@ -100,7 +100,6 @@ bool sm_cx_let(sm_cx *self, sm_symbol *sym, sm_object *val) {
   }
   current_node->value     = (sm_object *)val;
   current_node->symbol_id = sym - (sm_symbol *)sms_symbol_heap->storage;
-  return val;
 }
 
 // We return the last node in the path to the node addressed by needle

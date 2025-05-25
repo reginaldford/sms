@@ -92,7 +92,7 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
 
 // Execute a function
 sm_object *execute_fun(sm_object *obj) {
-  sm_expr *sf = (sm_expr *)sm_pop(sms_sf); // TODO: this would come from the stack
+  sm_expr *sf = (sm_expr *)sm_pop(sms_sf);
   sm_cx   *current_cx;
   sm_fun  *fun = (sm_fun *)obj;
   switch (fun->my_type) {
@@ -965,8 +965,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_symbol *sym   = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
       // If an error occurred, it is stored in the mapping
-      // TODO: use cx stack!
-      // sm_cx_let(current_cx, sym, value);
+      sm_cx_let((sm_cx *)sm_peek(sms_cx_stack), sym, value);
       return value;
     }
     case SM_CX_SETPARENT_EXPR: {
@@ -2138,9 +2137,8 @@ sm_object *sm_eval(sm_object *input) {
       sm_cx     *predot  = (sm_cx *)sm_eval(sm_expr_get_arg(sme, 0));
       sm_symbol *postdot = (sm_symbol *)sm_expr_get_arg(sme, 1);
       sm_object *value   = sm_eval(sm_expr_get_arg(sme, 2));
-      if (!sm_cx_let(predot, postdot, value))
-        return (sm_object *)sms_false;
-      return (sm_object *)sms_true;
+      sm_cx_let(predot, postdot, value);
+      return value;
     }
     case SM_ASSIGN_LOCAL_EXPR: {
       sm_object *lcl   = eager_type_check(sme, 0, SM_LOCAL_TYPE);
@@ -2745,6 +2743,26 @@ sm_object *sm_eval(sm_object *input) {
 
     } // end of switch on expression op value
   } // end of expression case
+  case SM_SYMBOL_TYPE: {
+    sm_symbol *sym        = (sm_symbol *)input;
+    sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+    sm_object *sr         = sm_cx_get_far(current_cx, sym);
+    if (sr)
+      return (sr);
+    sm_symbol *title   = sm_new_symbol("varNotFound", 11);
+    sm_string *message = sm_new_fstring_at(
+      sms_heap, "%s was not found in cx saved to :noted on this err", &sym->name->content);
+    sm_cx *notes = sm_new_cx(NULL);
+    sm_cx_let(notes, sm_new_symbol("noted", 5), (sm_object *)current_cx);
+    sm_error *e = sm_new_error_blank();
+    e->title    = title;
+    e->message  = message;
+    e->source   = sm_new_string(9, "(runtime)");
+    e->line     = 0;
+    e->notes    = notes;
+    return ((sm_object *)e);
+  }
+
   } // end of switch on input type
   return input;
 }
