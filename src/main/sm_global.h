@@ -17,7 +17,7 @@ extern sm_stack *sms_callstack;
 /// Increase the global garbage collection count by 1, report the result
 int sm_gc_count(int increase);
 /// If replacement is non-zero, stores the new value. Returns the previous value regardless
-f64 sm_global_growth_factor(f64 replacement);
+double sm_global_growth_factor(double replacement);
 /// Global (primitive) function names
 char *sm_global_fn_name(uint32_t which);
 /// Global function name lengths

@@ -16,27 +16,39 @@ sm_stack2 *sm_new_stack2(uint32_t capacity) {
   return new_stack2;
 }
 
-inline sm_object **sm_stack2_content() { return (sm_object **)&(sms_stack[1]); }
+inline sm_object **sm_stack2_content(sm_stack2 *stack) { return (sm_object **)&(stack[1]); }
 
-void sm_push(sm_object *ptr) {
-  sm_stack2 *current_stack = sms_stack;
-  if (sms_stack->size == sms_stack->capacity) {
-    uint32_t old_size   = sms_stack->capacity;
-    sms_stack->capacity = sms_stack->capacity * sm_global_growth_factor(0) + 1;
-    current_stack       = malloc(sizeof(sm_stack2) + sizeof(void *) * sms_stack->capacity);
-    memcpy(current_stack, sms_stack, sizeof(sm_stack2) + sizeof(void *) * old_size);
+sm_stack2 *sm_push(sm_stack2 *stack, sm_object *ptr) {
+  sm_stack2 *current_stack = stack;
+  if (stack->size == stack->capacity) {
+    uint32_t old_size = stack->capacity;
+    // We mutate the stack capacity before free, so that memcpy includes accurate capacity
+    stack->capacity = stack->capacity * sm_global_growth_factor(0) + 1;
+    current_stack   = malloc(sizeof(sm_stack2) + sizeof(void *) * stack->capacity);
+    memcpy(current_stack, stack, sizeof(sm_stack2) + sizeof(void *) * old_size);
+    free(stack);
   }
-  sm_object **tuple          = sm_stack2_content();
+  sm_object **tuple          = sm_stack2_content(current_stack);
   tuple[current_stack->size] = ptr;
   current_stack->size += 1;
+  return current_stack;
 }
 
-sm_object *sm_pop() {
-  if (!sms_stack->size) {
-    printf("stack underflow\n");
+sm_object *sm_pop(sm_stack2 *stack) {
+  if (!stack->size) {
+    printf("stack underflow %s:%i \n", __FILE__, __LINE__);
     return (sm_object *)sms_false;
   }
-  sm_object *to_return = sm_stack2_content()[sms_stack->size - 1];
-  sms_stack->size--;
+  sm_object *to_return = sm_stack2_content(stack)[sms_stack->size - 1];
+  stack->size--;
+  return to_return;
+}
+
+sm_object *sm_peek(sm_stack2 *stack) {
+  if (!stack->size) {
+    printf("stack underflow %s:%i \n", __FILE__, __LINE__);
+    return (sm_object *)sms_false;
+  }
+  sm_object *to_return = sm_stack2_content(stack)[stack->size - 1];
   return to_return;
 }

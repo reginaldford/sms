@@ -1,5 +1,5 @@
-# Standard testing to maintain working-state on the repo
-cd ..
-make clean
-cd scripts
-./clang-format-all.sh
+#!/usr/bin/bash
+# To be run from top directory
+make clean  &&
+cd scripts  &&
+clang-format --verbose -i ../src/**/*.c ../src/**/*.h ../src/**/**/*.c ../src/**/**/*.h
