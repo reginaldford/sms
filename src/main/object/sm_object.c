@@ -37,6 +37,12 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
   case SM_F64_TYPE:
     len += sm_f64_sprint((sm_f64 *)obj1, buffer, fake);
     break;
+  case SM_I64_TYPE:
+    len += sm_i64_sprint((sm_i64 *)obj1, buffer, fake);
+    break;
+  case SM_UI64_TYPE:
+    len += sm_ui64_sprint((sm_ui64 *)obj1, buffer, fake);
+    break;
   case SM_STRING_TYPE:
     len += sm_string_sprint((sm_string *)obj1, buffer, fake);
     break;
@@ -101,6 +107,12 @@ uint32_t sm_object_sprint(sm_object *obj1, char *buffer, bool fake) {
 
 uint32_t sm_sizeof(sm_object *obj1) {
   switch (obj1->my_type) {
+  case SM_UI8_TYPE:
+    return sizeof(sm_ui8);
+  case SM_UI64_TYPE:
+    return sizeof(sm_ui64);
+  case SM_I64_TYPE:
+    return sizeof(sm_i64);
   case SM_F64_TYPE:
     return sizeof(sm_f64);
   case SM_EXPR_TYPE:
@@ -138,8 +150,6 @@ uint32_t sm_sizeof(sm_object *obj1) {
     return sizeof(sm_stack_obj) + sizeof(void *) * ((sm_stack_obj *)obj1)->capacity;
   case SM_ARRAY_TYPE:
     return sizeof(sm_array);
-  case SM_UI8_TYPE:
-    return sizeof(sm_ui8);
   case SM_SO_TYPE:
     return sizeof(sm_so);
   case SM_SO_FUN_TYPE:
@@ -161,16 +171,16 @@ bool sm_object_eq(sm_object *self, sm_object *other) {
     return false;
   switch (self->my_type) {
   case SM_F64_TYPE: {
-    f64 value1 = ((sm_f64 *)self)->value;
-    f64 value2 = ((sm_f64 *)other)->value;
+    double value1 = ((sm_f64 *)self)->value;
+    double value2 = ((sm_f64 *)other)->value;
     if (value1 == value2)
       return true;
     else
       return false;
   }
   case SM_UI8_TYPE: {
-    ui8 value1 = ((sm_ui8 *)self)->value;
-    ui8 value2 = ((sm_ui8 *)other)->value;
+    uint8_t value1 = ((sm_ui8 *)self)->value;
+    uint8_t value2 = ((sm_ui8 *)other)->value;
     if (value1 == value2)
       return true;
     else

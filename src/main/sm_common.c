@@ -76,7 +76,7 @@ uint64_t sm_bytelength_parse(char *str, int length) {
     if (current_char == 0) {
       buffer[j] = 0;
       // If no unit is given, assume megabytes (m)
-      return (f64)atof(buffer) * 1024 * 1024;
+      return (double)atof(buffer) * 1024 * 1024;
     }
     if (sm_is_digit(current_char) || current_char == '.') {
       buffer[j] = current_char;

@@ -20,16 +20,67 @@ sm_object *return_obj;
 // 2 virtual machine  stacks
 sm_stack2 *sms_stack;
 sm_stack2 *sms_cx_stack;
+sm_stack2 *sms_sf;
 // function pointers for numbers
-// f64, ui8
-sm_object *(*sm_add_functions[])()    = {&sm_add_f64_and_f64, &sm_add_f64_and_uint8,
-                                         &sm_add_uint8_and_f64, &sm_add_uint8_and_uint8};
-sm_object *(*sm_minus_functions[])()  = {&sm_minus_f64_and_f64, &sm_minus_f64_and_uint8,
-                                         &sm_minus_uint8_and_f64, &sm_minus_uint8_and_uint8};
-sm_object *(*sm_times_functions[])()  = {&sm_times_f64_and_f64, &sm_times_f64_and_uint8,
-                                         &sm_times_uint8_and_f64, &sm_times_uint8_and_uint8};
-sm_object *(*sm_divide_functions[])() = {&sm_divide_f64_and_f64, &sm_divide_f64_and_uint8,
-                                         &sm_divide_uint8_and_f64, &sm_divide_uint8_and_uint8};
+// ui8, ui64, i64, f64, cx, err
+
+
+sm_object *(*sm_add_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_add_ui8_and_ui8,  &sm_add_ui8_and_ui64,  &sm_add_ui8_and_i64,  &sm_add_ui8_and_f64,
+  &sm_add_ui64_and_ui8, &sm_add_ui64_and_ui64, &sm_add_ui64_and_i64, &sm_add_ui64_and_f64,
+  &sm_add_i64_and_ui8,  &sm_add_i64_and_ui64,  &sm_add_i64_and_i64,  &sm_add_i64_and_f64,
+  &sm_add_f64_and_ui8,  &sm_add_f64_and_ui64,  &sm_add_f64_and_i64,  &sm_add_f64_and_f64};
+
+sm_object *(*sm_minus_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_minus_ui8_and_ui8,  &sm_minus_ui8_and_ui64,  &sm_minus_ui8_and_i64,  &sm_minus_ui8_and_f64,
+  &sm_minus_ui64_and_ui8, &sm_minus_ui64_and_ui64, &sm_minus_ui64_and_i64, &sm_minus_ui64_and_f64,
+  &sm_minus_i64_and_ui8,  &sm_minus_i64_and_ui64,  &sm_minus_i64_and_i64,  &sm_minus_i64_and_f64,
+  &sm_minus_f64_and_ui8,  &sm_minus_f64_and_ui64,  &sm_minus_f64_and_i64,  &sm_minus_f64_and_f64};
+
+sm_object *(*sm_times_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_times_ui8_and_ui8,  &sm_times_ui8_and_ui64,  &sm_times_ui8_and_i64,  &sm_times_ui8_and_f64,
+  &sm_times_ui64_and_ui8, &sm_times_ui64_and_ui64, &sm_times_ui64_and_i64, &sm_times_ui64_and_f64,
+  &sm_times_i64_and_ui8,  &sm_times_i64_and_ui64,  &sm_times_i64_and_i64,  &sm_times_i64_and_f64,
+  &sm_times_f64_and_ui8,  &sm_times_f64_and_ui64,  &sm_times_f64_and_i64,  &sm_times_f64_and_f64};
+
+sm_object *(*sm_divide_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_divide_ui8_and_ui8,  &sm_divide_ui8_and_ui64, &sm_divide_ui8_and_i64,
+  &sm_divide_ui8_and_f64,  &sm_divide_ui64_and_ui8, &sm_divide_ui64_and_ui64,
+  &sm_divide_ui64_and_i64, &sm_divide_ui64_and_f64, &sm_divide_i64_and_ui8,
+  &sm_divide_i64_and_ui64, &sm_divide_i64_and_i64,  &sm_divide_i64_and_f64,
+  &sm_divide_f64_and_ui8,  &sm_divide_f64_and_ui64, &sm_divide_f64_and_i64,
+  &sm_divide_f64_and_f64};
+
+
+sm_object *(*sm_gt_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_gt_ui8_and_ui8,  &sm_gt_ui8_and_ui64,  &sm_gt_ui8_and_i64,  &sm_gt_ui8_and_f64,
+  &sm_gt_ui64_and_ui8, &sm_gt_ui64_and_ui64, &sm_gt_ui64_and_i64, &sm_gt_ui64_and_f64,
+  &sm_gt_i64_and_ui8,  &sm_gt_i64_and_ui64,  &sm_gt_i64_and_i64,  &sm_gt_i64_and_f64,
+  &sm_gt_f64_and_ui8,  &sm_gt_f64_and_ui64,  &sm_gt_f64_and_i64,  &sm_gt_f64_and_f64};
+
+sm_object *(*sm_lt_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_lt_ui8_and_ui8,  &sm_lt_ui8_and_ui64,  &sm_lt_ui8_and_i64,  &sm_lt_ui8_and_f64,
+  &sm_lt_ui64_and_ui8, &sm_lt_ui64_and_ui64, &sm_lt_ui64_and_i64, &sm_lt_ui64_and_f64,
+  &sm_lt_i64_and_ui8,  &sm_lt_i64_and_ui64,  &sm_lt_i64_and_i64,  &sm_lt_i64_and_f64,
+  &sm_lt_f64_and_ui8,  &sm_lt_f64_and_ui64,  &sm_lt_f64_and_i64,  &sm_lt_f64_and_f64};
+
+sm_object *(*sm_pow_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_pow_ui8_and_ui8,  &sm_pow_ui8_and_ui64,  &sm_pow_ui8_and_i64,  &sm_pow_ui8_and_f64,
+  &sm_pow_ui64_and_ui8, &sm_pow_ui64_and_ui64, &sm_pow_ui64_and_i64, &sm_pow_ui64_and_f64,
+  &sm_pow_i64_and_ui8,  &sm_pow_i64_and_ui64,  &sm_pow_i64_and_i64,  &sm_pow_i64_and_f64,
+  &sm_pow_f64_and_ui8,  &sm_pow_f64_and_ui64,  &sm_pow_f64_and_i64,  &sm_pow_f64_and_f64};
+
+sm_object *(*sm_gteq_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_gteq_ui8_and_ui8,  &sm_gteq_ui8_and_ui64,  &sm_gteq_ui8_and_i64,  &sm_gteq_ui8_and_f64,
+  &sm_gteq_ui64_and_ui8, &sm_gteq_ui64_and_ui64, &sm_gteq_ui64_and_i64, &sm_gteq_ui64_and_f64,
+  &sm_gteq_i64_and_ui8,  &sm_gteq_i64_and_ui64,  &sm_gteq_i64_and_i64,  &sm_gteq_i64_and_f64,
+  &sm_gteq_f64_and_ui8,  &sm_gteq_f64_and_ui64,  &sm_gteq_f64_and_i64,  &sm_gteq_f64_and_f64};
+
+sm_object *(*sm_lteq_functions[])(sm_object *o1, sm_object *o2) = {
+  &sm_lteq_ui8_and_ui8,  &sm_lteq_ui8_and_ui64,  &sm_lteq_ui8_and_i64,  &sm_lteq_ui8_and_f64,
+  &sm_lteq_ui64_and_ui8, &sm_lteq_ui64_and_ui64, &sm_lteq_ui64_and_i64, &sm_lteq_ui64_and_f64,
+  &sm_lteq_i64_and_ui8,  &sm_lteq_i64_and_ui64,  &sm_lteq_i64_and_i64,  &sm_lteq_i64_and_f64,
+  &sm_lteq_f64_and_ui8,  &sm_lteq_f64_and_ui64,  &sm_lteq_f64_and_i64,  &sm_lteq_f64_and_f64};
 
 /* GLOBALS as functions
  The following globals use functions f(x):
@@ -48,8 +99,8 @@ int sm_gc_count(int increase) {
 // New capacity of tuples that need to grow:
 // Replacement is ignored if less than 1.
 // new_capacity = old_capacity * growth_factor + 1;
-f64 sm_global_growth_factor(f64 replacement) {
-  static f64 factor = 1.5;
+double sm_global_growth_factor(double replacement) {
+  static double factor = 1.5;
   if (replacement >= 1.0) {
     int previous_factor = factor;
     factor              = replacement;
@@ -95,8 +146,12 @@ char *sm_global_fn_name(uint32_t which) {
     "pwd",           // SM_PWD_EXPR
     "let",           // SM_LET_EXPR
     "f64",           // SM_NEW_F64_EXPR
-    "f64Repeat",     // SM_F64_REPEAT_EXPR
+    "i64",           // SM_NEW_I64_EXPR
+    "ui64",          // SM_NEW_UI64_EXPR
     "ui8",           // SM_NEW_UI8_EXPR
+    "f64Repeat",     // SM_F64_REPEAT_EXPR
+    "i64Repeat",     // SM_I64_REPEAT_EXPR
+    "ui64Repeat",    // SM_UI64_REPEAT_EXPR
     "ui8Repeat",     // SM_UI8_REPEAT_EXPR
     "=",             // SM_ASSIGN_EXPR
     "=",             // SM_ASSIGN_DOT_EXPR
@@ -317,15 +372,16 @@ char *sm_global_fn_name(uint32_t which) {
 // Corresponding string length of the string that would come from the sm_global_fn_name(which)
 uint32_t sm_global_fn_name_len(uint32_t which) {
   static uint16_t response_len[] = {
-    8,  4, 4,  5, 4,  2, 2, 3,  3, 3, 9, 3, 9, 1, 1,  1,  1, 1, 2,  1, 1, 1,  1,  1,  2,
-    2,  2, 2,  2, 3,  1, 1, 1,  2, 3, 2, 2, 2, 2, 2,  2,  2, 3, 3,  3, 3, 3,  4,  3,  3,
-    3,  4, 4,  4, 4,  4, 4, 5,  5, 5, 3, 3, 3, 4, 4,  4,  4, 4, 4,  5, 5, 5,  2,  3,  3,
-    4,  3, 2,  2, 2,  2, 3, 3,  3, 3, 4, 4, 3, 2, 2,  3,  6, 6, 5,  3, 5, 10, 7,  6,  4,
-    6,  8, 12, 5, 5,  4, 2, 2,  2, 1, 1, 2, 2, 5, 5,  5,  5, 5, 3,  5, 4, 5,  2,  11, 5,
-    5,  5, 8,  8, 12, 5, 4, 7,  6, 8, 6, 8, 5, 9, 11, 8,  7, 8, 10, 8, 6, 6,  6,  12, 12,
-    10, 5, 4,  4, 3,  6, 6, 4,  5, 5, 4, 3, 1, 2, 2,  2,  2, 3, 3,  3, 4, 7,  8,  11, 8,
-    11, 4, 7,  7, 7,  6, 6, 6,  6, 7, 8, 4, 8, 7, 9,  11, 8, 6, 9,  3, 6, 12, 13, 8,  9,
-    7,  4, 4,  5, 6,  6, 6, 11, 8, 8, 9, 8, 3, 5, 8,  10, 9, 7, 8,  6, 6, 5,  1};
+    8, 4, 4,  5,  4, 2, 2, 3, 3, 3, 3, 4,  3,  9,  9, 10, 9, 1,  1,  1,  1, 1,  2,  1,  1,  1,
+    1, 1, 2,  2,  2, 2, 2, 3, 1, 1, 1, 2,  3,  2,  2, 2,  2, 2,  2,  2,  3, 3,  3,  3,  3,  4,
+    3, 3, 3,  4,  4, 4, 4, 4, 4, 5, 5, 5,  3,  3,  3, 4,  4, 4,  4,  4,  4, 5,  5,  5,  2,  3,
+    3, 4, 3,  2,  2, 2, 2, 3, 3, 3, 3, 4,  4,  3,  2, 2,  3, 6,  6,  5,  3, 5,  10, 7,  6,  4,
+    6, 8, 12, 5,  5, 4, 2, 2, 2, 1, 1, 2,  2,  5,  5, 5,  5, 5,  3,  5,  4, 5,  2,  11, 5,  5,
+    5, 8, 8,  12, 5, 4, 7, 6, 8, 6, 8, 5,  9,  11, 8, 7,  8, 10, 8,  6,  6, 6,  12, 12, 10, 5,
+    4, 4, 3,  6,  6, 4, 5, 5, 4, 3, 1, 2,  2,  2,  2, 3,  3, 3,  4,  7,  8, 11, 8,  11, 4,  7,
+    7, 7, 6,  6,  6, 6, 7, 8, 4, 8, 7, 9,  11, 8,  6, 9,  3, 6,  12, 13, 8, 9,  7,  4,  4,  5,
+    6, 6, 6,  11, 8, 8, 9, 8, 3, 5, 8, 10, 9,  7,  8, 6,  6, 5,  1};
+
 
   if (which >= sm_global_num_fns())
     return 1; // "?"

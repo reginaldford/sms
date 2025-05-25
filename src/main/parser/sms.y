@@ -17,10 +17,12 @@ int parsing_fpath_len;
 %}
 
 // All of the possible literals
+
 %union {
-  uint32_t         integer;
-  f64              num;
-  ui8              ui8;
+  double           f64;
+  uint64_t         ui64;
+  int64_t          i64;
+  uint8_t          ui8;
   sm_symbol        *sym;
   sm_expr          *expr;
   sm_string        *str;
@@ -43,6 +45,12 @@ int parsing_fpath_len;
 %type <array> F64_ARRAY
 %type <array> F64_ARRAY_OPEN
 %type <array> F64_ARRAY_LIST
+%type <array> I64_ARRAY
+%type <array> I64_ARRAY_OPEN
+%type <array> I64_ARRAY_LIST
+%type <array> UI64_ARRAY
+%type <array> UI64_ARRAY_OPEN
+%type <array> UI64_ARRAY_LIST
 %type <array> UI8_ARRAY
 %type <array> UI8_ARRAY_OPEN
 %type <array> UI8_ARRAY_LIST
@@ -86,25 +94,17 @@ int parsing_fpath_len;
 %token WHERE
 
 %token <expr> NEW_F64
-%token <expr> F64_REPEAT
-%token <num> F64
-%token <ui8> UI8
+%token <expr> NEW_I64
+%token <expr> NEW_UI64
 %token <ui8> NEW_UI8
+%token <f64> F64
+%token <i64> I64
+%token <ui64> UI64
+%token <ui8> UI8
+%token <expr> F64_REPEAT
+%token <expr> I64_REPEAT
+%token <expr> UI64_REPEAT
 %token <expr> UI8_REPEAT
-%token <integer> INTEGER
-
-
-%token <expr> IPLUS
-%token <expr> IMINUS
-%token <expr> ITIMES
-%token <expr> IDIVIDE
-%token <expr> IPOW
-
-%token <expr> IPLUSEQ
-%token <expr> IMINUSEQ
-%token <expr> ITIMESEQ
-%token <expr> IDIVIDEEQ
-%token <expr> IPOWEREQ
 
 %token <expr> PLUS
 %token <expr> MINUS
@@ -160,6 +160,8 @@ int parsing_fpath_len;
 %token <expr> RM
 
 %token F64_ARRAY_OPEN
+%token I64_ARRAY_OPEN
+%token UI64_ARRAY_OPEN
 %token UI8_ARRAY_OPEN
 
 %token <expr> LET
@@ -354,9 +356,6 @@ int parsing_fpath_len;
 %left DOT PLUS MINUS
 %left TIMES DIVIDE
 %left POW
-%left IPLUS IMINUS
-%left ITIMES IDIVIDE
-%left IPOW
 %left ';'
 
 %%
@@ -385,34 +384,27 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | EXPR TIMES EXPR { $$ = sm_new_expr_2(SM_TIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR DIVIDE EXPR { $$ = sm_new_expr_2(SM_DIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | EXPR POW EXPR { $$ = sm_new_expr_2(SM_POW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IPLUS EXPR { $$ = sm_new_expr_2(SM_IPLUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IMINUS EXPR { $$ = sm_new_expr_2(SM_IMINUS_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR ITIMES EXPR { $$ = sm_new_expr_2(SM_ITIMES_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IDIVIDE EXPR { $$ = sm_new_expr_2(SM_IDIVIDE_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IPOW EXPR { $$ = sm_new_expr_2(SM_IPOW_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IXOR EXPR { $$ = sm_new_expr_2(SM_IXOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IXOR_EQ EXPR { $$ = sm_new_expr_2(SM_IXOREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IOR EXPR { $$ = sm_new_expr_2(SM_IOR_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IOR_EQ EXPR { $$ = sm_new_expr_2(SM_IOREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IAND_EQ EXPR { $$ = sm_new_expr_2(SM_IANDEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| EXPR IAND EXPR { $$ = sm_new_expr_2(SM_IAND_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| INOT EXPR { $$ = sm_new_expr(SM_INOT_EXPR, (sm_object *)$2, _note()); }
-| EXPR INOT_EQ EXPR { $$ = sm_new_expr_2(SM_INOTEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM IPLUSEQ EXPR { $$ = sm_new_expr_2(SM_IPLUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM IMINUSEQ EXPR { $$ = sm_new_expr_2(SM_IMINUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM ITIMESEQ EXPR { $$ = sm_new_expr_2(SM_ITIMESEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM IDIVIDEEQ EXPR { $$ = sm_new_expr_2(SM_IDIVIDEEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
-| SYM IPOWEREQ EXPR { $$ = sm_new_expr_2(SM_IPOWEREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM PLUSEQ EXPR { $$ = sm_new_expr_2(SM_PLUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM MINUSEQ EXPR { $$ = sm_new_expr_2(SM_MINUSEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM TIMESEQ EXPR { $$ = sm_new_expr_2(SM_TIMESEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM DIVIDEEQ EXPR { $$ = sm_new_expr_2(SM_DIVIDEEQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | SYM POWEREQ EXPR { $$ = sm_new_expr_2(SM_POWEREQ_EXPR, (sm_object *)$1, (sm_object *)$3, _note()); }
 | F64 { $$ = (sm_expr*)sm_new_f64($1);}
+| I64 { $$ = (sm_expr*)sm_new_i64($1);}
+| UI64 { $$ = (sm_expr*)sm_new_ui64($1);}
 | UI8 { $$ = (sm_expr*)sm_new_ui8($1);}
+| NEW_F64 '(' EXPR ')' {$$ = sm_new_expr(SM_NEW_F64_EXPR, (sm_object *)$3, _note()); }
+| NEW_I64 '(' EXPR ')' {$$ = sm_new_expr(SM_NEW_I64_EXPR, (sm_object *)$3, _note()); }
+| NEW_UI64 '(' EXPR ')' {$$ = sm_new_expr(SM_NEW_UI64_EXPR, (sm_object *)$3, _note()); }
 | NEW_UI8 '(' EXPR ')' {$$ = sm_new_expr(SM_NEW_UI8_EXPR, (sm_object *)$3, _note()); }
+| F64_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_F64_REPEAT_EXPR, (sm_object *)$3, (sm_object*)$5, _note()); }
+| I64_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_I64_REPEAT_EXPR, (sm_object *)$3, (sm_object*)$5, _note()); }
+| UI64_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_UI64_REPEAT_EXPR, (sm_object *)$3, (sm_object*)$5, _note()); }
 | UI8_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_UI8_REPEAT_EXPR, (sm_object *)$3, (sm_object*)$5, _note()); }
-| INTEGER { $$ = (sm_expr*)sm_new_f64($1);}
+| F64_ARRAY { }
+| I64_ARRAY { }
+| UI64_ARRAY { }
+| UI8_ARRAY { }
 | SYM INC { $$ = sm_new_expr(SM_INC_EXPR,(sm_object*)$1,_note()); }
 | SYM DEC { $$ = sm_new_expr(SM_DEC_EXPR,(sm_object*)$1,_note()); }
 | INC SYM { $$ = sm_new_expr(SM_PREINC_EXPR,(sm_object*)$2,_note()); }
@@ -531,10 +523,6 @@ EXPR : SELF { $$ = (sm_expr*)sm_new_self(); }
 | XP_OP '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_EXPR,(sm_object*)$3, _note());}
 | XP_SETOP '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_XP_SET_OP_EXPR,(sm_object*)$3,(sm_object*)$5, _note());}
 | XP_OPSYM '(' EXPR ')' {$$ = sm_new_expr(SM_XP_OP_SYM_EXPR,(sm_object*)$3, _note());}
-| NEW_F64 '(' EXPR ')' { $$ = sm_new_expr(SM_NEW_F64_EXPR, (sm_object*)$3 , _note()); }
-| F64_REPEAT '(' EXPR ',' EXPR ')' {$$ = sm_new_expr_2(SM_F64_REPEAT_EXPR, (sm_object *)$3, (sm_object*)$5, _note()); }
-| F64_ARRAY { }
-| UI8_ARRAY { }
 | FILE_PARSE '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_PARSE_EXPR,(sm_object*)$3, _note());}
 | FILE_READSTR '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READSTR_EXPR,(sm_object*)$3, _note());}
 | FILE_READ '(' EXPR ')' {$$ = sm_new_expr(SM_FILE_READ_EXPR,(sm_object*)$3, _note());}
@@ -639,30 +627,82 @@ F64_ARRAY : F64_ARRAY_LIST ']' {};
 
 F64_ARRAY_LIST : F64_ARRAY_OPEN F64 {
  $$ = sm_new_array(SM_F64_TYPE,1,NULL,sizeof(sm_space));
- sm_space* space= sm_new_space(sizeof(f64));
+ sm_space* space= sm_new_space(sizeof(double));
  $$->content=(sm_object*)space;
  sm_f64_array_set($$,0,$2);
-}
-| F64_ARRAY_OPEN INTEGER {
- $$ = sm_new_array(SM_F64_TYPE,1,NULL,sizeof(sm_space));
- sm_space* space= sm_new_space(sizeof(f64));
- $$->content=(sm_object*)space;
- sm_f64_array_set($$,0,$2);
-}
-| F64_ARRAY_LIST ',' INTEGER {
-   $$->size++;
-   sm_space * space = (sm_space*)$$->content;
-   space->size+=sizeof(f64);
-   sm_f64_array_set($$,$$->size-1,(f64)$3);
-   sms_heap->used+=sizeof(f64);
 }
 | F64_ARRAY_LIST ',' F64 {
    $$->size++;
+   sm_space * space = (sm_space*)$$->content;
+   space->size+=sizeof(double);
+   sm_f64_array_set($$,$$->size-1,(double)$3);
+   sms_heap->used+=sizeof(double);
+}
+
+
+I64_ARRAY : I64_ARRAY_LIST ']' {};
+| I64_ARRAY_LIST ',' ']' {};
+| I64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_I64_TYPE, 0,NULL,0) ;} 
+
+I64_ARRAY_LIST : I64_ARRAY_OPEN I64 {
+ $$ = sm_new_array(SM_I64_TYPE,1,NULL,sizeof(sm_space));
+ sm_space* space= sm_new_space(sizeof(int64_t));
+ $$->content=(sm_object*)space;
+ sm_f64_array_set($$,0,$2);
+}
+| I64_ARRAY_OPEN F64 {
+ $$ = sm_new_array(SM_I64_TYPE,1,NULL,sizeof(sm_space));
+ sm_space* space= sm_new_space(sizeof(int64_t));
+ $$->content=(sm_object*)space;
+ sm_i64_array_set($$,0,(int64_t)$2);
+}
+| I64_ARRAY_LIST ',' F64 {
+   $$->size++;
+   sm_space * space = (sm_space*)$$->content;
+   space->size+=sizeof(int64_t);
+   sm_i64_array_set($$,$$->size-1,(int64_t)$3);
+   sms_heap->used+=sizeof(int64_t);
+}
+| I64_ARRAY_LIST ',' I64 {
+   $$->size++;
    sm_space* space = (sm_space*)$$->content;
-   space->size+=sizeof(f64);
-   sm_f64_array_set($$,$$->size-1,$3);
-   sms_heap->used+=sizeof(f64);
+   space->size+=sizeof(int64_t);
+   sm_i64_array_set($$,$$->size-1,$3);
+   sms_heap->used+=sizeof(int64_t);
 };
+
+
+UI64_ARRAY : UI64_ARRAY_LIST ']' {};
+| UI64_ARRAY_LIST ',' ']' {};
+| UI64_ARRAY_OPEN  ']' { $$ = sm_new_array(SM_UI64_TYPE, 0,NULL,0) ;} 
+
+UI64_ARRAY_LIST : UI64_ARRAY_OPEN UI64 {
+ $$ = sm_new_array(SM_UI64_TYPE,1,NULL,sizeof(sm_space));
+ sm_space* space= sm_new_space(sizeof(uint64_t));
+ $$->content=(sm_object*)space;
+ sm_ui64_array_set($$,0,$2);
+}
+| UI64_ARRAY_OPEN F64 {
+ $$ = sm_new_array(SM_UI64_TYPE,1,NULL,sizeof(sm_space));
+ sm_space* space= sm_new_space(sizeof(uint64_t));
+ $$->content=(sm_object*)space;
+ sm_ui64_array_set($$,0,(uint64_t)$2);
+}
+| UI64_ARRAY_LIST ',' F64 {
+   $$->size++;
+   sm_space * space = (sm_space*)$$->content;
+   space->size+=sizeof(uint64_t);
+   sm_ui64_array_set($$,$$->size-1,(uint64_t)$3);
+   sms_heap->used+=sizeof(uint64_t);
+}
+| UI64_ARRAY_LIST ',' UI64 {
+   $$->size++;
+   sm_space* space = (sm_space*)$$->content;
+   space->size+=sizeof(uint64_t);
+   sm_ui64_array_set($$,$$->size-1,(uint64_t)$3);
+   sms_heap->used+=sizeof(uint64_t);
+};
+
 
 UI8_ARRAY : UI8_ARRAY_LIST ']' {};
 | UI8_ARRAY_LIST ',' ']' {};
@@ -670,29 +710,29 @@ UI8_ARRAY : UI8_ARRAY_LIST ']' {};
 
 UI8_ARRAY_LIST : UI8_ARRAY_OPEN UI8 {
  $$ = sm_new_array(SM_UI8_TYPE,1,NULL,sizeof(sm_space));
- sm_space* space= sm_new_space(sizeof(ui8));
+ sm_space* space= sm_new_space(sizeof(uint8_t));
  $$->content=(sm_object*)space;
  sm_ui8_array_set($$,0,$2);
 }
-| UI8_ARRAY_OPEN INTEGER {
+| UI8_ARRAY_OPEN F64 {
  $$ = sm_new_array(SM_UI8_TYPE,1,NULL,sizeof(sm_space));
- sm_space* space= sm_new_space(sizeof(ui8));
+ sm_space* space= sm_new_space(sizeof(uint8_t));
  $$->content=(sm_object*)space;
  sm_ui8_array_set($$,0,$2);
 }
-| UI8_ARRAY_LIST ',' INTEGER {
+| UI8_ARRAY_LIST ',' F64 {
    $$->size++;
    sm_space * space = (sm_space*)$$->content;
-   space->size+=sizeof(ui8);
-   sm_ui8_array_set($$,$$->size-1,(ui8)$3);
-   sms_heap->used+=sizeof(ui8);
+   space->size+=sizeof(uint8_t);
+   sm_ui8_array_set($$,$$->size-1,(uint8_t)$3);
+   sms_heap->used+=sizeof(uint8_t);
 }
 | UI8_ARRAY_LIST ',' UI8 {
    $$->size++;
    sm_space* space = (sm_space*)$$->content;
-   space->size+=sizeof(ui8);
+   space->size+=sizeof(uint8_t);
    sm_ui8_array_set($$,$$->size-1,$3);
-   sms_heap->used+=sizeof(ui8);
+   sms_heap->used+=sizeof(uint8_t);
 };
 
 PARAM_LIST : '(' ')' {
@@ -806,7 +846,7 @@ FUN_CALL_OPEN : EXPR '(' EXPR {
   $$=sm_expr_set_arg($1,1,(sm_object*)args);
 }
 
-META_EXPR : '@' EXPR { $$ = sm_new_meta((sm_object *)$2, *(sm_global_lex_stack(NULL))->top); }
+META_EXPR : '@' EXPR { $$ = sm_new_meta((sm_object *)$2); }
 
 TUPLE : TUPLE_LIST ']' {};
 | TUPLE_LIST ',' ']' {};

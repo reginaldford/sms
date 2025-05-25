@@ -19,11 +19,45 @@ _version     {return VERSION;}
 exit         {return EXIT;}
 help         {return HELP;}
 
-f64 {return NEW_F64;}
-f64Repeat {return F64_REPEAT;}
-
-ui8 { return NEW_UI8; }
-ui8\((-?{digit}+)\) {
+f64  { return NEW_F64;  }
+i64  { return NEW_I64;  }
+i64\(\ +(-?{digit}+)\ +\) {
+    char *num_str = yytext + 4;  // Skip "i64("
+    // Find the position of the closing parenthesis
+    char *end_paren = strchr(num_str, ')');
+    if (!end_paren) {
+        fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
+        return 0;
+    } 
+    // Temporarily terminate the string at the closing parenthesis
+    *end_paren = '\0';
+    // Trim spaces from the start and end of num_str
+    char *end = num_str + strlen(num_str) - 1;
+    end[1] = '\0';  // Null-terminate the trimmed string
+    int64_t number = strtoll(num_str,NULL,10);  // Convert the trimmed number string to an integer
+    yylval.i64 = number;
+    return I64;
+}
+ui64 { return NEW_UI64; }
+ui64\(\ +(-?{digit}+)\ +\) {
+    char *num_str = yytext + 5;  // Skip "ui64("
+    // Find the position of the closing parenthesis
+    char *end_paren = strchr(num_str, ')');
+    if (!end_paren) {
+        fprintf(stderr, "Syntax error: Missing closing parenthesis\n");
+        return 0;
+    }   
+    // Temporarily terminate the string at the closing parenthesis
+    *end_paren = '\0';
+    // Trim spaces from the start and end of num_str
+    char *end = num_str + strlen(num_str) - 1;
+    end[1] = '\0';  // Null-terminate the trimmed string
+    uint64_t number = strtoull(num_str,NULL,10);  // Convert the trimmed number string to an integer
+    yylval.ui64 = number;
+    return UI64;
+}
+ui8  { return NEW_UI8;  }
+ui8\(\ +(-?{digit}+)\ +\) {
     char *num_str = yytext + 4;  // Skip "ui8("
     // Find the position of the closing parenthesis
     char *end_paren = strchr(num_str, ')');
@@ -40,28 +74,15 @@ ui8\((-?{digit}+)\) {
     yylval.ui8 = number;
     return UI8;
 }
-ui8Repeat { return UI8_REPEAT ; }
+
+f64Repeat  { return F64_REPEAT;  }
+i64Repeat  { return I64_REPEAT;  }
+ui64Repeat { return UI64_REPEAT; }
+ui8Repeat  { return UI8_REPEAT ; }
 
 "&" {return IAND;}
 "|" {return IOR;}
 "^" {return IXOR;}
-
-"&=" {return IAND_EQ;}
-"|=" {return IOR_EQ;}
-"^=" {return IXOR_EQ;}
-"_~=" {return INOT_EQ;}
-
-"!+"  {return IPLUS;}
-"!-"  {return IMINUS;}
-"!*"  {return ITIMES;}
-"!/"  {return IDIVIDE;}
-"!**" {return IPOW;}
-
-"!+="   {return IPLUSEQ;}
-"!-="   {return IMINUSEQ;}
-"!*="   {return ITIMESEQ;}
-"!/="   {return IDIVIDEEQ;}
-"!**="  {return IPOWEREQ;}
 
 "+"  {return PLUS;}
 "-"  {return MINUS;}
@@ -158,8 +179,10 @@ clear        {return CLEAR;}
 parent       {return PARENT;}
 rm           {return RM;}
 
-"f64["       {return F64_ARRAY_OPEN;}
 "ui8["       {return UI8_ARRAY_OPEN;}
+"ui64["       {return UI64_ARRAY_OPEN;}
+"i64["       {return I64_ARRAY_OPEN;}
+"f64["       {return F64_ARRAY_OPEN;}
 
 newCx        {return NEW_CX;}
 cxSetParent  {return CX_SETPARENT;}
@@ -284,21 +307,16 @@ _imgSave       {return HEAPSAVE;}
 <<EOF>>     {return ENDOFFILE;}
 '\0'        {return DONE;}
 
-({digit}+) {
- yylval.integer = atoi(yytext);
- return INTEGER;
-}
-
 \.?{digit}+(\.{digit}+)?([eE]-?{digit}+)?  {
-   yylval.num = atof(yytext);
+   yylval.f64 = atof(yytext);
    return F64;
-  }
+}
 
 [\<\>\=] { return yytext[0]; }
 
 [-+*/=\^\;\[\]\(\)\{\},\@\<\>] { return yytext[0];}
 
-({alpha}?+{digit}?+_?+\'?+)?+ {
+({alpha}+{digit}?+_?+\'?+)?+ {
     yylval.sym = sm_new_symbol(yytext,yyleng);
     return SYM;
   }

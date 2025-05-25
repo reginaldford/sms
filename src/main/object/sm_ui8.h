@@ -3,11 +3,11 @@
 /// A boxed ui8-precision floating point value
 typedef struct sm_ui8 {
   uint32_t my_type;
-  ui8      value;
+  uint8_t  value;
 } sm_ui8;
 
 /// Create a new number
-sm_ui8 *sm_new_ui8(ui8 value);
+sm_ui8 *sm_new_ui8(uint8_t value);
 /// Convert the ui8 to a string
 sm_string *sm_ui8_to_string(sm_ui8 *self);
 /// If !fake, print the ui8 to a string buffer. Return length regardlessly

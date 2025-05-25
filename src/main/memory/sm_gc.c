@@ -6,6 +6,8 @@ extern void     **memory_marker1;
 extern void     **memory_marker2;
 extern bool       evaluating;
 extern sm_object *return_obj;
+extern sm_stack2 *sms_stack;
+extern sm_stack2 *sms_cx_stack;
 
 // Copy the object
 sm_object *sm_copy(sm_object *obj) {
@@ -204,18 +206,13 @@ inline void sm_garbage_collect() {
       return_obj = sm_pointer_deref((sm_pointer *)return_obj, sms_other_heap);
   } else
     sm_global_parser_output((sm_object *)sms_false);
-
-
-  // Handle the C Callstack as a root
-  if (evaluating) {
-    memory_marker2   = lowestPointer(0);
-    void **lowerPtr  = memory_marker1 < memory_marker2 ? memory_marker1 : memory_marker2;
-    void **higherPtr = memory_marker1 < memory_marker2 ? memory_marker2 : memory_marker1;
-    higherPtr += (intptr_t)__builtin_frame_address(0) - (intptr_t)memory_marker2;
-    for (void **ptr = (void **)(((uintptr_t)lowerPtr)); ptr < higherPtr; ptr++)
-      if (sm_heap_has_object(sms_heap, *ptr))
-        *ptr = (void *)sm_meet_object(sms_heap, sms_other_heap, (sm_object *)*ptr);
+  // Data stack as root:
+  void *current_ptr = &(sms_stack[1]);
+  for (void **curr_ptr = (void **)&(sms_stack[1]);
+       curr_ptr < (void **)&(sms_stack[sms_stack->size]); curr_ptr++) {
+    *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
   }
+
 
   // Inflate
   sm_inflate_heap(sms_heap, sms_other_heap);

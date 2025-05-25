@@ -23,7 +23,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   sm_register_signals();
   sms_all_heaps = sm_new_heap_set(1024, 0, malloc(sizeof(sm_heap *) * 1024));
   // Default (inner) environment variables
-  f64 mem_bytes      = 64 * 1024 * 1024;
+  double mem_bytes   = 64 * 1024 * 1024;
   env->script_fp[0]  = '\0';
   env->script_fp_len = 0;
   env->eval_cmd[0]   = '\0';
