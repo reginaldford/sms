@@ -91,15 +91,16 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
 }
 
 // Execute a function
-sm_object *execute_fun(sm_object *fun) {
-  sm_expr *sf; // TODO: this would come from the stack
+sm_object *execute_fun(sm_object *obj) {
+  sm_expr *sf = (sm_expr *)sm_pop(sms_sf); // TODO: this would come from the stack
   sm_cx   *current_cx;
+  sm_fun  *fun = (sm_fun *)obj;
   switch (fun->my_type) {
   case SM_FUN_TYPE: {
     sm_object *content = ((sm_fun *)fun)->content;
     sm_object *result;
-    // TODO: cx gets pushed to cx stack
-    // sm_cx *new_cx = sm_new_cx(fun->parent);
+    sm_cx     *new_cx = sm_new_cx(fun->parent);
+    sm_push(sms_cx_stack, (sm_object *)new_cx);
     if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
       sm_expr *content_sme = (sm_expr *)((sm_fun *)fun)->content;
       for (uint32_t i = 1; i < content_sme->size; i++) {
