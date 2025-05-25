@@ -16,3 +16,5 @@ sm_object **sm_stack2_content(sm_stack2 *stack);
 sm_stack2 *sm_push(sm_stack2 *stack, sm_object *ptr);
 /// Push a pointer onto the stack
 sm_object *sm_pop(sm_stack2 *stack);
+/// Get the last pushed object or return NULL
+sm_object *sm_peek(sm_stack2 *stack);
