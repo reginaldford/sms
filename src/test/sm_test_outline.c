@@ -70,7 +70,7 @@ test_outline *parse_test_outline(char *filepath) {
       graceful_exit(result_outline, -1);
     }
     // successfully collected number of subchapters
-    f64 num_subchapters = ((sm_f64 *)num_subchapters_obj)->value;
+    double num_subchapters = ((sm_f64 *)num_subchapters_obj)->value;
     result_outline->num_chapters++;
     result_outline->num_subchapters[i] = num_subchapters;
     result_outline->chapter_names[i]   = &(ch_name_str->content);
