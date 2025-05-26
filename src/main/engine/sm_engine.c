@@ -2109,11 +2109,14 @@ sm_object *sm_eval(sm_object *input) {
       return sm_simplify(evaluated0);
     }
     case SM_FUN_CALL_EXPR: {
-      sm_object *function_to_call = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_expr   *args             = (sm_expr *)sm_eval(sm_expr_get_arg(sme, 1));
+      // Push the evaluated tuple of input args to frame stack
+      sm_push(sms_sf, sm_eval(sm_expr_get_arg(sme, 1)));
+      // Push the evaluated first argument to data stack (function_to_eval)
+      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      sm_object *function_to_call = sm_peek(sms_stack);
       if (function_to_call->my_type == SM_ERR_TYPE)
         return (sm_object *)function_to_call; // return the return
-      return execute_fun(function_to_call);
+      sm_object *output = execute_fun(sm_peek(sms_stack));
       break;
     }
     case SM_BLOCK_EXPR: {
@@ -2129,6 +2132,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
       if (value->my_type == SM_ERR_TYPE)
         return (sm_object *)value;
+      // TODO: return an error
       if (!sm_cx_set(current_cx, sym, value))
         return (sm_object *)sms_false;
       return value;
