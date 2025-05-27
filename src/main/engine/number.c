@@ -26,7 +26,6 @@ sm_object *sm_add() {
   }
   if (t1 > SM_F64_TYPE) {
   }
-
   return sm_add_functions[t0 * 4 + t1](o0, o1);
 }
 
@@ -799,8 +798,16 @@ sm_object *sm_lt_cx_and_number(sm_object *cx, sm_object *number) {
 // POW operations
 
 sm_object *sm_pow() {
-  sm_object *o0 = sm_pop(sms_stack);
-  sm_object *o1 = sm_pop(sms_stack);
+  sm_object          *o0 = sm_pop(sms_stack);
+  sm_object          *o1 = sm_pop(sms_stack);
+  enum sm_object_type t0 = o0->my_type;
+  enum sm_object_type t1 = o1->my_type;
+  if (t0 > SM_F64_TYPE) {
+    printf("bad type 0!: %i\n", t0);
+  }
+  if (t1 > SM_F64_TYPE) {
+    printf("bad type 1!: %i\n", t1);
+  }
   return sm_pow_functions[o0->my_type * 4 + o1->my_type](o0, o1);
 }
 
