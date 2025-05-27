@@ -5,7 +5,6 @@
 // New capacity is sm_global_growth_factor*old_capacity + 1
 
 #include "sms.h"
-extern sm_stack2 *sms_stack;
 
 // New stack (is an object) with size 0
 sm_stack2 *sm_new_stack2(uint32_t capacity) {
@@ -39,7 +38,7 @@ sm_object *sm_pop(sm_stack2 *stack) {
     printf("stack underflow %s:%i \n", __FILE__, __LINE__);
     return (sm_object *)sms_false;
   }
-  sm_object *to_return = sm_stack2_content(stack)[sms_stack->size - 1];
+  sm_object *to_return = sm_stack2_content(stack)[stack->size - 1];
   stack->size--;
   return to_return;
 }

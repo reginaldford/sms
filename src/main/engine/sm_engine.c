@@ -92,9 +92,8 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
 
 // Execute a function
 sm_object *execute_fun(sm_object *obj) {
-  sm_expr *sf = (sm_expr *)sm_pop(sms_sf);
-  sm_cx   *current_cx;
-  sm_fun  *fun = (sm_fun *)obj;
+  sm_cx  *current_cx;
+  sm_fun *fun = (sm_fun *)obj;
   switch (fun->my_type) {
   case SM_FUN_TYPE: {
     sm_object *content = ((sm_fun *)fun)->content;
@@ -114,6 +113,7 @@ sm_object *execute_fun(sm_object *obj) {
     break;
   }
   case SM_SO_FUN_TYPE: {
+    sm_expr   *sf                      = (sm_expr *)sm_peek(sms_stack);
     sm_so_fun *f                       = (sm_so_fun *)fun;
     sm_object *(*ff)(sm_object *input) = f->function;
     sm_object *output                  = ff((sm_object *)sf);
@@ -121,9 +121,11 @@ sm_object *execute_fun(sm_object *obj) {
     break;
   }
   case SM_FF_TYPE: {
-    sm_ff *ff = (sm_ff *)fun;
+    sm_ff   *ff = (sm_ff *)fun;
+    sm_expr *sf = (sm_expr *)sm_peek(sms_stack);
     if (sf->size < ff->cif.nargs) {
       printf("!not enough arguments for ffi call.\n");
+      // TODO: return error
       return (sm_object *)sms_false;
     }
     void *args[ff->cif.nargs];
@@ -147,7 +149,6 @@ sm_object *execute_fun(sm_object *obj) {
         return (sm_object *)sms_false;
       }
     }
-
     double return_val = 0;
     ffi_call(&ff->cif, FFI_FN(ff->fptr), &return_val, args);
     return (sm_object *)sm_new_f64(return_val);
@@ -2115,8 +2116,11 @@ sm_object *sm_eval(sm_object *input) {
       sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       sm_object *function_to_call = sm_peek(sms_stack);
       if (function_to_call->my_type == SM_ERR_TYPE)
-        return (sm_object *)function_to_call; // return the return
-      sm_object *output = execute_fun(sm_peek(sms_stack));
+        return (sm_object *)function_to_call;
+      sm_push(sms_sf, (sm_object *)args);
+      sm_object *to_return = execute_fun(function_to_call);
+      sm_pop(sms_sf);
+      return to_return;
       break;
     }
     case SM_BLOCK_EXPR: {
@@ -2766,6 +2770,28 @@ sm_object *sm_eval(sm_object *input) {
     e->notes    = notes;
     return ((sm_object *)e);
   }
+  case SM_LOCAL_TYPE: {
+    sm_local *local = (sm_local *)input;
+    sm_expr  *sf    = (sm_expr *)sm_peek(sms_sf);
+    if (local->index >= sf->size) {
+      sm_symbol *title   = sm_new_symbol("invalidLocal", 12);
+      sm_string *message = sm_new_fstring_at(
+        sms_heap,
+        "This local variable points to element %i when the stack frame only has %i elements.",
+        local->index, sf->size);
+      sm_cx *notes = sm_new_cx(NULL);
+      sm_cx_let(notes, sm_new_symbol("noted", 5), input);
+      sm_error *e = sm_new_error_blank();
+      e->title    = title;
+      e->message  = message;
+      e->source   = sm_new_string(9, "(runtime)");
+      e->line     = 0;
+      e->notes    = notes;
+      return ((sm_object *)e);
+    }
+    return (sm_expr_get_arg(sf, local->index));
+  }
+
 
   } // end of switch on input type
   return input;
