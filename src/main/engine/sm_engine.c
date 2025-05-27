@@ -2117,7 +2117,6 @@ sm_object *sm_eval(sm_object *input) {
       sm_object *function_to_call = sm_peek(sms_stack);
       if (function_to_call->my_type == SM_ERR_TYPE)
         return (sm_object *)function_to_call;
-      sm_push(sms_sf, (sm_object *)args);
       sm_object *to_return = execute_fun(function_to_call);
       sm_pop(sms_sf);
       return to_return;
