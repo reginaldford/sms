@@ -94,19 +94,23 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
 sm_object *execute_fun(sm_object *obj) {
   sm_cx  *current_cx;
   sm_fun *fun = (sm_fun *)obj;
+  sm_expr *sf = (sm_expr *)sm_peek(sms_sf);
   switch (fun->my_type) {
   case SM_FUN_TYPE: {
     sm_object *content = ((sm_fun *)fun)->content;
     sm_object *result;
     sm_cx     *new_cx = sm_new_cx(fun->parent);
-    sm_push(sms_cx_stack, (sm_object *)new_cx);
     if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
       sm_expr *content_sme = (sm_expr *)((sm_fun *)fun)->content;
+      sm_push(sms_cx_stack, (sm_object *)new_cx);
       for (uint32_t i = 1; i < content_sme->size; i++) {
         result = sm_eval(sm_expr_get_arg(content_sme, i));
-        if (result->my_type == SM_RETURN_TYPE)
+        if (result->my_type == SM_RETURN_TYPE) {
+          sm_pop(sms_cx_stack);
           return ((sm_return *)result)->address;
+        }
       }
+      sm_pop(sms_cx_stack);
       return result;
     } else
       return sm_eval(content);
@@ -2110,16 +2114,15 @@ sm_object *sm_eval(sm_object *input) {
       return sm_simplify(evaluated0);
     }
     case SM_FUN_CALL_EXPR: {
-      // Push the evaluated tuple of input args to frame stack
-      sm_push(sms_sf, sm_eval(sm_expr_get_arg(sme, 1)));
       // Push the evaluated first argument to data stack (function_to_eval)
       sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       sm_object *function_to_call = sm_peek(sms_stack);
       if (function_to_call->my_type == SM_ERR_TYPE)
-        return (sm_object *)function_to_call;
-      sm_object *to_return = execute_fun(function_to_call);
+        return (sm_object *)function_to_call; // return the return
+      // Push the evaluated tuple of input args to frame stack
+      sm_push(sms_sf, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_object *output = execute_fun(sm_peek(sms_stack));
       sm_pop(sms_sf);
-      return to_return;
       break;
     }
     case SM_BLOCK_EXPR: {
