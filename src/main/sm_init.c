@@ -55,9 +55,9 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   sms_heap = sm_new_heap(mem_bytes / 2, true);
 
   // Virual machine stacks
-  sms_stack    = sm_new_stack2(128);
-  sms_cx_stack = sm_new_stack2(128);
-  sms_sf       = sm_new_stack2(128);
+  sms_stack    = sm_new_stack2(1024);
+  sms_cx_stack = sm_new_stack2(1024);
+  sms_sf       = sm_new_stack2(1024);
 
   // Initialize the lexical stack
   sm_global_lex_stack(sm_new_stack(128));
