@@ -14,7 +14,6 @@ extern sm_stack2   *sms_stack;
 extern sm_stack2   *sms_cx_stack;
 extern sm_stack2   *sms_sf;
 
-sm_cx *current_cx;
 
 // Basic type checking
 
@@ -1094,10 +1093,9 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sm_new_f64(size);
     }
     case SM_RM_EXPR: {
-      sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 0, SM_SYMBOL_TYPE);
-      // TODO: use cx stack here
-      // bool success = sm_cx_rm(current_cx, sym);
-      bool success = false;
+      sm_symbol *sym        = (sm_symbol *)eager_type_check(sme, 0, SM_SYMBOL_TYPE);
+      sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      bool       success    = sm_cx_rm(current_cx, sym);
       if (success == true)
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
@@ -1306,6 +1304,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_OREQ_EXPR: {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
       sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
 
@@ -1323,6 +1322,7 @@ sm_object *sm_eval(sm_object *input) {
 
     case SM_ANDEQ_EXPR: {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
       sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
 
@@ -1339,6 +1339,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_XOREQ_EXPR: {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
       sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
 
@@ -1846,9 +1847,11 @@ sm_object *sm_eval(sm_object *input) {
       sm_object *output             = (sm_object *)sms_false;
       switch (evalResult->my_type) {
       case SM_ARRAY_TYPE: {
-        sm_cx     *inner_cx = sm_new_cx(current_cx);
-        sm_object *result   = (sm_object *)sms_false;
-        sm_array  *arr      = (sm_array *)evalResult;
+        sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+        sm_cx *inner_cx   = sm_new_cx(current_cx);
+        sm_push(sms_cx_stack, (sm_object *)inner_cx);
+        sm_object *result = (sm_object *)sms_false;
+        sm_array  *arr    = (sm_array *)evalResult;
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         sm_object *output = (sm_object *)sms_false;
         for (uint32_t i = 0; i < arr->size; i++) {
@@ -1860,6 +1863,7 @@ sm_object *sm_eval(sm_object *input) {
         break;
       }
       case SM_EXPR_TYPE: {
+        sm_cx   *current_cx     = (sm_cx *)sm_peek(sms_cx_stack);
         sm_cx   *inner_cx       = sm_new_cx(current_cx);
         sm_expr *collectionExpr = (sm_expr *)evalResult;
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
@@ -1872,8 +1876,9 @@ sm_object *sm_eval(sm_object *input) {
         break;
       }
       case SM_STRING_TYPE: {
-        sm_cx     *inner_cx = sm_new_cx(current_cx);
-        sm_string *str      = (sm_string *)evalResult;
+        sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+        sm_cx     *inner_cx   = sm_new_cx(current_cx);
+        sm_string *str        = (sm_string *)evalResult;
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         sm_object *output = (sm_object *)sms_false;
         for (uint32_t i = 0; i < str->size; i++) {
@@ -1897,6 +1902,7 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_FOR_IN_WHERE_EXPR: {
+      sm_cx     *current_cx         = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *handle             = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *possibleCollection = sm_expr_get_arg(sme, 1);
       sm_expr   *expression         = (sm_expr *)sm_expr_get_arg(sme, 3);
@@ -2077,7 +2083,8 @@ sm_object *sm_eval(sm_object *input) {
       }
     }
     case SM_DOT_EXPR: {
-      sm_cx *base_cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
+      sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      sm_cx *base_cx    = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
       if (base_cx->my_type == SM_ERR_TYPE)
         return (sm_object *)base_cx;
       sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
@@ -2124,16 +2131,18 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_BLOCK_EXPR: {
-      sm_cx     *new_cx = sm_new_cx(current_cx);
-      sm_object *output = (sm_object *)sms_false;
+      sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      sm_cx     *new_cx     = sm_new_cx(current_cx);
+      sm_object *output     = (sm_object *)sms_false;
       for (uint32_t i = 1; i < sme->size && output->my_type != SM_RETURN_TYPE; i++)
         output = sm_eval(sm_expr_get_arg(sme, i));
       return output;
       break;
     }
     case SM_ASSIGN_EXPR: {
-      sm_symbol *sym   = (sm_symbol *)eager_type_check(sme, 0, SM_SYMBOL_TYPE);
-      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
+      sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      sm_symbol *sym        = (sm_symbol *)eager_type_check(sme, 0, SM_SYMBOL_TYPE);
+      sm_object *value      = sm_eval(sm_expr_get_arg(sme, 1));
       if (value->my_type == SM_ERR_TYPE)
         return (sm_object *)value;
       // TODO: return an error
@@ -2223,6 +2232,7 @@ sm_object *sm_eval(sm_object *input) {
 
 
     case SM_PLUSEQ_EXPR: {
+      sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
       sm_object *current_value = sm_cx_get(current_cx, sym);
@@ -2249,6 +2259,7 @@ sm_object *sm_eval(sm_object *input) {
       return ((result));
     }
     case SM_MINUSEQ_EXPR: {
+      sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
       sm_object *current_value = sm_cx_get(current_cx, sym);
@@ -2277,6 +2288,7 @@ sm_object *sm_eval(sm_object *input) {
 
 
     case SM_TIMESEQ_EXPR: {
+      sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
       sm_object *current_value = sm_cx_get(current_cx, sym);
@@ -2303,6 +2315,7 @@ sm_object *sm_eval(sm_object *input) {
       return ((result));
     }
     case SM_DIVIDEEQ_EXPR: {
+      sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
       sm_object *current_value = sm_cx_get(current_cx, sym);
@@ -2334,6 +2347,7 @@ sm_object *sm_eval(sm_object *input) {
       return ((result));
     }
     case SM_POWEREQ_EXPR: {
+      sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
       sm_object *current_value = sm_cx_get(current_cx, sym);
@@ -2546,6 +2560,8 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_INC_EXPR: {
+      sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+
       sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (sym->my_type != SM_SYMBOL_TYPE) {
         sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
@@ -2563,7 +2579,8 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_DEC_EXPR: {
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      sm_symbol *sym        = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (sym->my_type != SM_SYMBOL_TYPE) {
         sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
         sm_string *message =
@@ -2580,7 +2597,8 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_PREINC_EXPR: {
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      sm_symbol *sym        = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (sym->my_type != SM_SYMBOL_TYPE) {
         sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
         sm_string *message =
@@ -2597,7 +2615,8 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_PREDEC_EXPR: {
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      sm_symbol *sym        = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (sym->my_type != SM_SYMBOL_TYPE) {
         sm_symbol *title = sm_new_symbol("cannotDecNonSymbol", 18);
         sm_string *message =
@@ -2751,6 +2770,15 @@ sm_object *sm_eval(sm_object *input) {
 
     } // end of switch on expression op value
   } // end of expression case
+  case SM_META_TYPE: {
+    return (((sm_meta *)input)->address);
+    break;
+  }
+  case SM_SELF_TYPE: {
+    sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+    return ((sm_object *)current_cx);
+    break;
+  }
   case SM_SYMBOL_TYPE: {
     sm_symbol *sym        = (sm_symbol *)input;
     sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
@@ -2791,7 +2819,42 @@ sm_object *sm_eval(sm_object *input) {
     }
     return (sm_expr_get_arg(sf, local->index));
   }
-
+  case SM_FUN_TYPE: {
+    // TODO: was this necessary for closures??
+    sm_fun *f         = (sm_fun *)input;
+    f                 = (sm_fun *)sm_copy((sm_object *)f);
+    sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+    f->parent         = current_cx;
+    return (sm_object *)f;
+    break;
+  }
+  case SM_ERR_TYPE: {
+    // Run the error handler if it exists
+    sm_cx   *scratch = *sm_global_lex_stack(NULL)->top;
+    sm_fun  *fun     = (sm_fun *)sm_cx_get_far(scratch, sm_new_symbol("_errHandler", 11));
+    sm_expr *sf      = sm_new_expr(SM_PARAM_LIST_EXPR, sm_copy(input), NULL);
+    // _errHandler(e) , where e is the object of type SM_ERR_TYPE
+    if (fun) {
+      return execute_fun((sm_object *)fun);
+    } else {
+      return input;
+    }
+    break;
+  }
+  case SM_POINTER_TYPE: {
+    printf("Pointer found in heap. exiting. (%s:%i)\n", __FILE__, __LINE__);
+    exit(1);
+    /*sm_heap    *pointeeH     = sm_is_within_heap(input, sms_heap) ? sms_other_heap : sms_heap;
+    sm_heap    *oppositeHeap = pointeeH == sms_heap ? sms_other_heap : sms_heap;
+    sm_pointer *p            = (sm_pointer *)input;
+    sm_object  *pointee      = sm_pointer_deref(p, pointeeH);
+    // copy + inflate = deep copy
+    sm_copy(pointee);
+    sm_inflate_heap(oppositeHeap, pointeeH);
+    // Now, we do the evaluation that was initially intended
+    sm_engine_eval(pointee, current_cx, sf);*/
+    return (sm_object *)sms_false;
+  }
 
   } // end of switch on input type
   return input;
