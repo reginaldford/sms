@@ -1257,10 +1257,9 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sm_new_string(strlen(line), line);
     }
     case SM_ARGS_EXPR: {
-      // I need stack as param in these ops
       if (sms_sf->size)
-        // return (sm_object *)sm_pop();
-        return (sm_object *)sms_false;
+        return sm_peek(sms_sf);
+      return (sm_object *)sm_new_expr(SM_FN_PARAMS_EXPR, 0, 0);
     }
     case SM_OR_EXPR: {
       sm_object *obj0 = sm_eval(sm_expr_get_arg(sme, 0));
