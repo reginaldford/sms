@@ -1093,7 +1093,7 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sm_new_f64(size);
     }
     case SM_RM_EXPR: {
-      sm_symbol *sym        = (sm_symbol *)eager_type_check(sme, 0, SM_SYMBOL_TYPE);
+      sm_symbol *sym        = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
       bool       success    = sm_cx_rm(current_cx, sym);
       if (success == true)
