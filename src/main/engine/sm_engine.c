@@ -174,7 +174,7 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_NEW_F64_EXPR: {
-      sm_object *fromObj = eager_type_check3(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, SM_STRING_TYPE);
+      sm_object *fromObj = sm_eval(sm_expr_get_arg(sme, 0));
       switch (fromObj->my_type) {
       case SM_UI8_TYPE:
         return (sm_object *)sm_new_f64((double)((sm_ui8 *)fromObj)->value);
@@ -209,8 +209,7 @@ sm_object *sm_eval(sm_object *input) {
       }
     }
     case SM_NEW_I64_EXPR: {
-      // TODO stack push to sms_stack every such var:
-      sm_object *fromObj = eager_type_check3(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, SM_STRING_TYPE);
+      sm_object *fromObj = sm_eval(sm_expr_get_arg(sme, 0));
       switch (fromObj->my_type) {
       case SM_UI8_TYPE:
         return (sm_object *)sm_new_i64((double)((sm_ui8 *)fromObj)->value);
@@ -245,8 +244,7 @@ sm_object *sm_eval(sm_object *input) {
       }
     }
     case SM_NEW_UI64_EXPR: {
-      // TODO stack push to sms_stack every such var:
-      sm_object *fromObj = eager_type_check3(sme, 0, SM_F64_TYPE, SM_UI8_TYPE, SM_STRING_TYPE);
+      sm_object *fromObj = sm_eval(sm_expr_get_arg(sme, 0));
       switch (fromObj->my_type) {
       case SM_UI8_TYPE:
         return (sm_object *)sm_new_ui64(((sm_ui8 *)fromObj)->value);
@@ -281,7 +279,7 @@ sm_object *sm_eval(sm_object *input) {
       }
     }
     case SM_NEW_UI8_EXPR: {
-      sm_object *fromObj = eager_type_check3(sme, 0, SM_UI8_TYPE, SM_F64_TYPE, SM_STRING_TYPE);
+      sm_object *fromObj = sm_eval(sm_expr_get_arg(sme, 0));
       if (fromObj->my_type == SM_ERR_TYPE)
         return fromObj;
       switch (fromObj->my_type) {
