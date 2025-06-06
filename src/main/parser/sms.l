@@ -316,7 +316,7 @@ _imgSave       {return HEAPSAVE;}
 
 [-+*/=\^\;\[\]\(\)\{\},\@\<\>] { return yytext[0];}
 
-({alpha}+{digit}?+_?+\'?+)?+ {
+(_?+{alpha}+{digit}?+_?+\'?+)?+ {
     yylval.sym = sm_new_symbol(yytext,yyleng);
     return SYM;
   }
