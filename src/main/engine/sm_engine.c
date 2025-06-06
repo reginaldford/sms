@@ -1770,8 +1770,12 @@ sm_object *sm_eval(sm_object *input) {
     case SM_CX_EVAL_EXPR: {
       sm_object *obj1      = sm_eval(sm_expr_get_arg(sme, 1));
       sm_object *evaluated = eager_type_check(sme, 0, SM_CX_TYPE);
-      // TODO cx stack push
-      return sm_eval(obj1);
+      if (evaluated->my_type != SM_CX_TYPE)
+        return evaluated;
+      sm_push(sms_cx_stack, evaluated);
+      sm_object *outcome = sm_eval(obj1);
+      sm_pop(sms_cx_stack);
+      return outcome;
     }
     case SM_PUT_EXPR: {
       sm_string *str;
@@ -1850,10 +1854,8 @@ sm_object *sm_eval(sm_object *input) {
         sm_object *result = (sm_object *)sms_false;
         sm_array  *arr    = (sm_array *)evalResult;
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
-        sm_object *output = (sm_object *)sms_false;
         for (uint32_t i = 0; i < arr->size; i++) {
           sm_cx_set(inner_cx, handle, sm_array_get(arr, i));
-          // TODO: inner_cx, sf stack work
           output = sm_eval((sm_object *)expression);
         }
         return output;
@@ -1866,7 +1868,6 @@ sm_object *sm_eval(sm_object *input) {
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < collectionExpr->size; i++) {
           sm_cx_set(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
-          // TODO: cx stack push
           output = sm_eval((sm_object *)expression);
         }
         return output;
@@ -1881,7 +1882,6 @@ sm_object *sm_eval(sm_object *input) {
         for (uint32_t i = 0; i < str->size; i++) {
           sm_cx_set(inner_cx, handle,
                     (sm_object *)sm_new_fstring_at(sms_heap, "%c", (&str->content)[i]));
-          // TODO: cx stack push
           output = sm_eval((sm_object *)expression);
         }
         return output;
@@ -1915,7 +1915,6 @@ sm_object *sm_eval(sm_object *input) {
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < arr->size; i++) {
           sm_cx_set(inner_cx, handle, sm_array_get(arr, i));
-          // TODO: stack work
           sm_object *conditionResult = sm_eval((sm_object *)whereCondition);
           if ((sm_object *)sms_false != (conditionResult))
             output = sm_eval((sm_object *)expression);
@@ -1929,7 +1928,6 @@ sm_object *sm_eval(sm_object *input) {
         sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < collectionExpr->size; i++) {
           sm_cx_set(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
-          // TODO: stack push
           sm_object *conditionResult = sm_eval((sm_object *)whereCondition);
           if ((sm_object *)sms_false != (conditionResult))
             output = sm_eval((sm_object *)expression);
@@ -1945,7 +1943,6 @@ sm_object *sm_eval(sm_object *input) {
           sm_cx_set(inner_cx, handle,
                     (sm_object *)sm_new_fstring_at(sms_heap, "%c", (&str->content)[i]));
           sm_object *conditionResult = sm_eval((sm_object *)whereCondition);
-          // TODO: ditto
           if ((sm_object *)sms_false != (conditionResult))
             output = sm_eval((sm_object *)expression);
         }
@@ -2011,7 +2008,7 @@ sm_object *sm_eval(sm_object *input) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj, NULL);
         // Call the function with the new expression
-        // TODO: stack stuff
+        sm_push(sms_sf, (sm_object *)new_sf);
         sm_object *map_result = sm_eval(fun->content);
         // If the result is a return type, dereference it
         if (map_result->my_type == SM_RETURN_TYPE) {
@@ -2040,7 +2037,6 @@ sm_object *sm_eval(sm_object *input) {
       for (uint32_t i = 0; i < arr->size; i++) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr_set_arg(reusable, 1, current_obj);
-        // TODO: stack
         result = sm_eval(fun->content);
         sm_expr_set_arg(reusable, 0, result);
       }
