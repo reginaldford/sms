@@ -2155,12 +2155,12 @@ sm_object *sm_eval(sm_object *input) {
       return value;
     }
     case SM_ASSIGN_LOCAL_EXPR: {
+      sm_expr   *sf    = (sm_expr *)sm_pop(sms_sf);
       sm_object *lcl   = eager_type_check(sme, 0, SM_LOCAL_TYPE);
       sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
       if (lcl->my_type != SM_LOCAL_TYPE)
         return lcl;
-      // TODO: stack
-      // sm_expr_set_arg(sf, lcl->index, value);
+      sm_expr_set_arg(sf, ((sm_local *)lcl)->index, value);
       return value;
       break;
     }
@@ -2226,8 +2226,6 @@ sm_object *sm_eval(sm_object *input) {
       }
       return value;
     } break;
-
-
     case SM_PLUSEQ_EXPR: {
       sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
@@ -2282,8 +2280,6 @@ sm_object *sm_eval(sm_object *input) {
       }
       return ((result));
     }
-
-
     case SM_TIMESEQ_EXPR: {
       sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
@@ -2405,8 +2401,6 @@ sm_object *sm_eval(sm_object *input) {
       sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_divide();
     }
-
-
     case SM_POW_EXPR: {
       sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
       sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
@@ -2447,7 +2441,6 @@ sm_object *sm_eval(sm_object *input) {
       return ((sm_object *)sm_new_f64(acos(num0->value)));
       break;
     }
-
     case SM_ATAN_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
       if (num0->my_type == SM_ERR_TYPE)
@@ -2762,6 +2755,89 @@ sm_object *sm_eval(sm_object *input) {
       if (e->notes)
         return (sm_object *)e->notes;
       return (sm_object *)sms_false;
+      break;
+    }
+    case SM_IMPORT_EXPR: {
+      // Type check the argument and ensure it is a string
+      sm_string *filePath = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
+      if (filePath->my_type != SM_STRING_TYPE) {
+        sm_symbol *title = sm_new_symbol("invalidImportArgument", 21);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Import argument must be a string. Object type is %s instead",
+                            sm_type_name(filePath->my_type));
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      // If sm_path_find returns a string, the file was found
+      // If it returns sms_false, the file was not fount
+      sm_string *searchResult = (sm_string *)sm_path_find(filePath);
+      if (searchResult->my_type != SM_STRING_TYPE) {
+        fprintf(stderr, "search didnt find file in current working directory or SMS_PATH\n");
+        sm_symbol *title = sm_new_symbol("importError", 11);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap,
+                            "could not find file after searching current working directory and "
+                            "paths in SMS_PATH environment variable: %s",
+                            &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+        return (sm_object *)sms_false;
+      }
+      // Attempt to parse the file
+      sm_parse_result presult = sm_parse_file(&searchResult->content);
+      switch (presult.return_val) {
+      case 0:
+        // Return the parsed object if successful
+        return sm_eval(presult.parsed_object);
+      case 1: {
+        sm_symbol *title = sm_new_symbol("semanticError", 13);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Semantic error encountered in file: %s", &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      case 2: {
+        sm_symbol *title = sm_new_symbol("parsingFailed", 13);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "Parsing failed for file: %s", &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      default: {
+        sm_symbol *title = sm_new_symbol("parsingError", 12);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, "A parsing error occurred for file: %s", &filePath->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      }
+      break;
+    }
+    case SM_SO_LOAD_EXPR: {
+      sm_string *path = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
+      if (path->my_type != SM_STRING_TYPE) {
+        return (sm_object *)path;
+      }
+      void *handle = dlopen(&path->content, RTLD_LAZY);
+      if (!handle) {
+        sm_symbol *title = sm_new_symbol("soLoadFailed", 12);
+        sm_string *message =
+          sm_new_fstring_at(sms_heap, ".so file failed to load: %s", &path->content);
+        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
+      }
+      return (sm_object *)sm_new_so(handle);
+      break;
+    }
+    case SM_SO_FUN_EXPR: {
+      // soFun(so,nameStr,numInputs)
+      sm_so *so = (sm_so *)eager_type_check(sme, 0, SM_SO_TYPE);
+      if (so->my_type != SM_SO_TYPE) {
+        return (sm_object *)so;
+      }
+      void *handle = so->handle;
+      // function name is a string
+      sm_string *funcName = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE);
+      if (funcName->my_type != SM_STRING_TYPE) {
+        return (sm_object *)funcName;
+      }
+      void *fnPtr = dlsym(handle, &funcName->content);
+      // number of inputs is provided as an f64
+      return (sm_object *)sm_new_so_fun(fnPtr);
       break;
     }
 
