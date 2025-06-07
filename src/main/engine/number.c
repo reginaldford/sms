@@ -22,10 +22,6 @@ sm_object *sm_add() {
   sm_object          *o1 = sm_pop(sms_stack);
   enum sm_object_type t0 = o0->my_type;
   enum sm_object_type t1 = o1->my_type;
-  if (t0 > SM_F64_TYPE) {
-  }
-  if (t1 > SM_F64_TYPE) {
-  }
   return sm_add_functions[t0 * 4 + t1](o0, o1);
 }
 
