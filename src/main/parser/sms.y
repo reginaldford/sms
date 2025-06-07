@@ -1,7 +1,7 @@
 %{
 // Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
 
-#include "../main/sms.h"
+#include "main/sms.h"
 
 extern int yylex();
 extern int yylineno;

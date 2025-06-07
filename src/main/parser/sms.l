@@ -1,7 +1,7 @@
 %{
 // The following file is provided under the BSD 2-clause license. For more info, read LICENSE.txt.
 
-#include "../main/sms.h"
+#include "main/sms.h"
 #include "y.tab.h"
 
 %}
