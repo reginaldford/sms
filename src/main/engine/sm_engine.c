@@ -14,7 +14,6 @@ extern sm_stack2   *sms_stack;
 extern sm_stack2   *sms_cx_stack;
 extern sm_stack2   *sms_sf;
 
-
 // Basic type checking
 
 // Evaluate the argument, then run type check
@@ -1851,39 +1850,41 @@ sm_object *sm_eval(sm_object *input) {
         sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
         sm_cx *inner_cx   = sm_new_cx(current_cx);
         sm_push(sms_cx_stack, (sm_object *)inner_cx);
-        sm_object *result = (sm_object *)sms_false;
         sm_array  *arr    = (sm_array *)evalResult;
-        sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < arr->size; i++) {
-          sm_cx_set(inner_cx, handle, sm_array_get(arr, i));
+          sm_cx_let(inner_cx, handle, sm_array_get(arr, i));
           output = sm_eval((sm_object *)expression);
         }
+        sm_pop(sms_cx_stack);
         return output;
         break;
       }
       case SM_EXPR_TYPE: {
         sm_cx   *current_cx     = (sm_cx *)sm_peek(sms_cx_stack);
         sm_cx   *inner_cx       = sm_new_cx(current_cx);
+        sm_push(sms_cx_stack, (sm_object *)inner_cx);
+      sm_push(sms_cx_stack, (sm_object*)inner_cx);
         sm_expr *collectionExpr = (sm_expr *)evalResult;
-        sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         for (uint32_t i = 0; i < collectionExpr->size; i++) {
-          sm_cx_set(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
+          sm_cx_let(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
           output = sm_eval((sm_object *)expression);
         }
+      sm_pop(sms_cx_stack);
         return output;
         break;
       }
       case SM_STRING_TYPE: {
         sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
         sm_cx     *inner_cx   = sm_new_cx(current_cx);
+        sm_push(sms_cx_stack, (sm_object *)inner_cx);
         sm_string *str        = (sm_string *)evalResult;
-        sm_cx_let(inner_cx, handle, (sm_object *)sms_false);
         sm_object *output = (sm_object *)sms_false;
         for (uint32_t i = 0; i < str->size; i++) {
-          sm_cx_set(inner_cx, handle,
+          sm_cx_let(inner_cx, handle,
                     (sm_object *)sm_new_fstring_at(sms_heap, "%c", (&str->content)[i]));
           output = sm_eval((sm_object *)expression);
         }
+      sm_pop(sms_cx_stack);
         return output;
         break;
       }
@@ -2126,9 +2127,11 @@ sm_object *sm_eval(sm_object *input) {
     case SM_BLOCK_EXPR: {
       sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
       sm_cx     *new_cx     = sm_new_cx(current_cx);
+      sm_push(sms_cx_stack,(sm_object*)new_cx);
       sm_object *output     = (sm_object *)sms_false;
       for (uint32_t i = 1; i < sme->size && output->my_type != SM_RETURN_TYPE; i++)
         output = sm_eval(sm_expr_get_arg(sme, i));
+      sm_pop(sms_cx_stack);
       return output;
       break;
     }
