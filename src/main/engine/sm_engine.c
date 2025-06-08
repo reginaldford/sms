@@ -16,23 +16,6 @@ extern sm_stack2   *sms_sf;
 
 // Basic type checking
 
-// Evaluate the argument, then run type check
-static inline sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
-  sm_object *obj = sm_eval(sm_expr_get_arg(sme, operand));
-  if (param_type != obj->my_type) {
-    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
-    sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
-    sm_string *message = sm_new_fstring_at(
-      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s (%s:%i)",
-      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type),
-      __FILE__, __LINE__);
-    sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
-                                 &source->content, (uint32_t)line->value);
-    return (sm_object *)err;
-  }
-  return (sm_object *)obj;
-}
-
 static inline sm_object *eager_number_or_cx(sm_expr *sme, uint32_t operand) {
   sm_object *obj = sm_eval(sm_expr_get_arg(sme, operand));
   if (obj->my_type > SM_CX_TYPE) {
@@ -45,10 +28,31 @@ static inline sm_object *eager_number_or_cx(sm_expr *sme, uint32_t operand) {
                                            sm_type_name(obj->my_type), __FILE__, __LINE__);
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    return (sm_object *)err;
+    sm_return * return_obj = sm_new_return((sm_object*)err);
+    return (sm_object *)return_obj;
   }
   return (sm_object *)obj;
 }
+
+
+// Evaluate the argument, then run type check
+static inline sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32_t param_type) {
+  sm_object *obj = sm_eval(sm_expr_get_arg(sme, operand));
+  if (param_type != obj->my_type) {
+    sm_string *source  = (sm_string *)sm_cx_get(sme->notes, sm_new_symbol("source", 6));
+    sm_f64    *line    = (sm_f64 *)sm_cx_get(sme->notes, sm_new_symbol("line", 4));
+    sm_string *message = sm_new_fstring_at(
+      sms_heap, "Wrong type for argument %i on %s. Argument type is: %s , but Expected: %s (%s:%i)",
+      operand, sm_global_fn_name(sme->op), sm_type_name(obj->my_type), sm_type_name(param_type),
+      __FILE__, __LINE__);
+    sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
+                                 &source->content, (uint32_t)line->value);
+    sm_return * return_obj = sm_new_return((sm_object*)err);
+    return (sm_object *)return_obj;
+  }
+  return (sm_object *)obj;
+}
+
 
 // Evaluate the argument, then run type check. 2 possibilities allowed
 static inline sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint32_t param_type1,
@@ -63,7 +67,8 @@ static inline sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint3
       sm_type_name(param_type2));
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    return (sm_object *)err;
+    sm_return * return_obj = sm_new_return((sm_object*)err);
+    return (sm_object *)return_obj;
   }
   return obj;
 }
@@ -83,7 +88,8 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
       sm_type_name(param_type2), sm_type_name(param_type3), __FILE__, __LINE__);
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    return (sm_object *)err;
+    sm_return * return_obj = sm_new_return((sm_object*)err);
+    return (sm_object *)return_obj;
   }
   return obj;
 }
@@ -201,7 +207,7 @@ sm_object *sm_eval(sm_object *input) {
         sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to f64.",
                                                sm_type_name(fromObj->my_type));
         sm_error  *err     = sm_new_error_from_expr(title, message, sme, NULL);
-        if (fromObj->my_type == SM_ERR_TYPE)
+        if (fromObj->my_type == SM_RETURN_TYPE)
           err->origin = (sm_error *)fromObj;
         return (sm_object *)err;
       }
@@ -236,7 +242,7 @@ sm_object *sm_eval(sm_object *input) {
         sm_string *message = sm_new_fstring_at(sms_heap, "Cannot convert object of type %s to i64.",
                                                sm_type_name(fromObj->my_type));
         sm_error  *err     = sm_new_error_from_expr(title, message, sme, NULL);
-        if (fromObj->my_type == SM_ERR_TYPE)
+        if (fromObj->my_type == SM_RETURN_TYPE)
           err->origin = (sm_error *)fromObj;
         return (sm_object *)err;
       }
@@ -271,7 +277,7 @@ sm_object *sm_eval(sm_object *input) {
         sm_string *message = sm_new_fstring_at(
           sms_heap, "Cannot convert object of type %s to ui64.", sm_type_name(fromObj->my_type));
         sm_error *err = sm_new_error_from_expr(title, message, sme, NULL);
-        if (fromObj->my_type == SM_ERR_TYPE)
+        if (fromObj->my_type == SM_RETURN_TYPE)
           err->origin = (sm_error *)fromObj;
         return (sm_object *)err;
       }
@@ -279,7 +285,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_NEW_UI8_EXPR: {
       sm_object *fromObj = sm_eval(sm_expr_get_arg(sme, 0));
-      if (fromObj->my_type == SM_ERR_TYPE)
+      if (fromObj->my_type == SM_RETURN_TYPE)
         return fromObj;
       switch (fromObj->my_type) {
       case SM_UI8_TYPE:
@@ -326,7 +332,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_HEAPSAVE_EXPR: {
       // Obtain the file name using eager_type_check
       sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (fname_str->my_type == SM_ERR_TYPE)
+      if (fname_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)fname_str; // return(the error if type check fails;
       char *fname_cstr = &(fname_str->content);
       return (sm_object *)sm_new_f64(sm_mem_dump(sms_heap, fname_cstr));
@@ -334,7 +340,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_IMAGESAVE_EXPR: {
       // Obtain the file name using eager_type_check
       sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (fname_str->my_type == SM_ERR_TYPE)
+      if (fname_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)fname_str; // return(the error if type check fails;
 
       char *fname_cstr = &(fname_str->content);
@@ -442,7 +448,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_EXEC_EXPR: {
       sm_string *path = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (path->my_type == SM_ERR_TYPE)
+      if (path->my_type == SM_RETURN_TYPE)
         return (sm_object *)path;
       // The system command leaves 8 bits for extra information
       // We do not need it, so we shift away the 8 bits
@@ -452,7 +458,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_EXECTOSTR_EXPR: {
       sm_string *path = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (path->my_type == SM_ERR_TYPE)
+      if (path->my_type == SM_RETURN_TYPE)
         return (sm_object *)path;
       FILE  *fp;
       char   buffer[128]; // Buffer size to read the command output in chunks
@@ -495,7 +501,7 @@ sm_object *sm_eval(sm_object *input) {
 
     case SM_OS_GETENV_EXPR: {
       sm_string *key = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (key->my_type == SM_ERR_TYPE)
+      if (key->my_type == SM_RETURN_TYPE)
         return (sm_object *)key;
       char *result = getenv(&key->content);
       if (!result) {
@@ -509,10 +515,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_OS_SETENV_EXPR: {
       sm_string *key = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (key->my_type == SM_ERR_TYPE)
+      if (key->my_type == SM_RETURN_TYPE)
         return (sm_object *)key;
       sm_string *value = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE);
-      if (value->my_type == SM_ERR_TYPE)
+      if (value->my_type == SM_RETURN_TYPE)
         return (sm_object *)value;
       uint32_t result = setenv(&key->content, &value->content, 1);
       return (sm_object *)sm_new_f64(result);
@@ -611,43 +617,43 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_STR_FIND_EXPR: {
       sm_string *haystack = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (haystack->my_type == SM_ERR_TYPE)
+      if (haystack->my_type == SM_RETURN_TYPE)
         return (sm_object *)haystack;
       sm_string *needle = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE);
-      if (needle->my_type == SM_ERR_TYPE)
+      if (needle->my_type == SM_RETURN_TYPE)
         return (sm_object *)needle;
       return sm_str_find(haystack, needle);
       break;
     }
     case SM_STR_FINDR_EXPR: {
       sm_string *haystack = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (haystack->my_type == SM_ERR_TYPE)
+      if (haystack->my_type == SM_RETURN_TYPE)
         return (sm_object *)haystack;
       sm_string *needle = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE);
-      if (needle->my_type == SM_ERR_TYPE)
+      if (needle->my_type == SM_RETURN_TYPE)
         return (sm_object *)needle;
       return sm_str_findr(haystack, needle);
       break;
     }
     case SM_STR_SPLIT_EXPR: {
       sm_string *haystack = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (haystack->my_type == SM_ERR_TYPE)
+      if (haystack->my_type == SM_RETURN_TYPE)
         return (sm_object *)haystack;
       sm_string *needle = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE);
-      if (needle->my_type == SM_ERR_TYPE)
+      if (needle->my_type == SM_RETURN_TYPE)
         return (sm_object *)needle;
       return (sm_object *)sm_str_split(haystack, needle);
       break;
     }
     case SM_STR_PART_EXPR: {
       sm_string *str0 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (str0->my_type == SM_ERR_TYPE)
+      if (str0->my_type == SM_RETURN_TYPE)
         return (sm_object *)str0;
       sm_f64 *start = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (start->my_type == SM_ERR_TYPE)
+      if (start->my_type == SM_RETURN_TYPE)
         return (sm_object *)start;
       sm_f64 *len = (sm_f64 *)eager_type_check(sme, 2, SM_F64_TYPE);
-      if (len->my_type == SM_ERR_TYPE)
+      if (len->my_type == SM_RETURN_TYPE)
         return (sm_object *)len;
       if (start->value < 0 || start->value >= str0->size) {
         sm_symbol *title   = sm_new_symbol("strPartIndexErr", 15);
@@ -669,13 +675,13 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_STR_MUT_EXPR: {
       sm_string *original_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (original_str->my_type == SM_ERR_TYPE)
+      if (original_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)original_str;
       sm_f64 *start_index = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (start_index->my_type == SM_ERR_TYPE)
+      if (start_index->my_type == SM_RETURN_TYPE)
         return (sm_object *)start_index;
       sm_string *replacement_str = (sm_string *)eager_type_check(sme, 2, SM_STRING_TYPE);
-      if (replacement_str->my_type == SM_ERR_TYPE)
+      if (replacement_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)replacement_str;
       // Check if new size exceeds original size
       if (original_str->size - (uint32_t)start_index->value < (uint32_t)replacement_str->size) {
@@ -709,17 +715,17 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_STR_SIZE_EXPR: {
       sm_string *str0 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (str0->my_type == SM_ERR_TYPE)
+      if (str0->my_type == SM_RETURN_TYPE)
         return (sm_object *)str0;
       return (sm_object *)sm_new_f64(str0->size);
       break;
     }
     case SM_STR_REPEAT_EXPR: {
       sm_string *str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (str->my_type == SM_ERR_TYPE)
+      if (str->my_type == SM_RETURN_TYPE)
         return (sm_object *)str;
       sm_f64 *reps = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (reps->my_type == SM_ERR_TYPE)
+      if (reps->my_type == SM_RETURN_TYPE)
         return (sm_object *)reps;
       double     repetitions   = reps->value;
       uint32_t   original_size = str->size;
@@ -748,13 +754,13 @@ sm_object *sm_eval(sm_object *input) {
 
     case SM_PART_EXPR: {
       sm_expr *list0 = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE);
-      if (list0->my_type == SM_ERR_TYPE)
+      if (list0->my_type == SM_RETURN_TYPE)
         return (sm_object *)list0;
       sm_f64 *start = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (start->my_type == SM_ERR_TYPE)
+      if (start->my_type == SM_RETURN_TYPE)
         return (sm_object *)start;
       sm_f64 *len = (sm_f64 *)eager_type_check(sme, 2, SM_F64_TYPE);
-      if (len->my_type == SM_ERR_TYPE)
+      if (len->my_type == SM_RETURN_TYPE)
         return (sm_object *)len;
       if (start->value < 0 || start->value >= list0->size) {
         sm_symbol *title   = sm_new_symbol("partIndexErr", 12);
@@ -778,10 +784,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_UI8_REPEAT_EXPR: {
       sm_expr *obj = (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE);
-      if (obj->my_type == SM_ERR_TYPE)
+      if (obj->my_type == SM_RETURN_TYPE)
         return (sm_object *)obj;
       sm_f64 *repeat_count_obj = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (repeat_count_obj->my_type == SM_ERR_TYPE)
+      if (repeat_count_obj->my_type == SM_RETURN_TYPE)
         return (sm_object *)repeat_count_obj;
       uint32_t repeat_count = (uint32_t)repeat_count_obj->value;
       if (repeat_count == 0)
@@ -856,10 +862,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_F64_REPEAT_EXPR: {
       sm_expr *obj = (sm_expr *)eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE);
-      if (obj->my_type == SM_ERR_TYPE)
+      if (obj->my_type == SM_RETURN_TYPE)
         return (sm_object *)obj;
       sm_f64 *repeat_count_obj = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (repeat_count_obj->my_type == SM_ERR_TYPE)
+      if (repeat_count_obj->my_type == SM_RETURN_TYPE)
         return (sm_object *)repeat_count_obj;
       uint32_t repeat_count = (uint32_t)repeat_count_obj->value;
 
@@ -918,10 +924,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_CAT_EXPR: {
       sm_expr *list0 = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE);
-      if (list0->my_type == SM_ERR_TYPE)
+      if (list0->my_type == SM_RETURN_TYPE)
         return (sm_object *)list0;
       sm_expr *list1 = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE);
-      if (list1->my_type == SM_ERR_TYPE)
+      if (list1->my_type == SM_RETURN_TYPE)
         return (sm_object *)list1;
       uint32_t size0     = list0->size;
       uint32_t size1     = list1->size;
@@ -942,7 +948,7 @@ sm_object *sm_eval(sm_object *input) {
       uint32_t exit_code = 0;
       if (sme->size != 0) {
         sm_f64 *num0 = (sm_f64 *)eager_type_check2(sme, 0, SM_F64_TYPE, SM_UI8_TYPE);
-        if (num0->my_type == SM_ERR_TYPE) {
+        if (num0->my_type == SM_RETURN_TYPE) {
           return (sm_object *)num0;
         }
         // We have already verified the type class
@@ -969,10 +975,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_CX_SETPARENT_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (cx->my_type == SM_ERR_TYPE)
+      if (cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)cx;
       sm_cx *new_parent = (sm_cx *)eager_type_check(sme, 1, SM_CX_TYPE);
-      if (new_parent->my_type == SM_ERR_TYPE)
+      if (new_parent->my_type == SM_RETURN_TYPE)
         return (sm_object *)new_parent;
       cx         = (sm_cx *)sm_copy((sm_object *)cx);
       cx->parent = new_parent;
@@ -980,10 +986,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_CX_LET_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (cx->my_type == SM_ERR_TYPE)
+      if (cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)cx;
       sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
-      if (sym->my_type == SM_ERR_TYPE)
+      if (sym->my_type == SM_RETURN_TYPE)
         return (sm_object *)sym;
       sm_object *value = (sm_object *)sm_eval(sm_expr_get_arg(sme, 2));
       sm_cx_let(cx, sym, value);
@@ -992,10 +998,10 @@ sm_object *sm_eval(sm_object *input) {
 
     case SM_CX_GET_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (cx->my_type == SM_ERR_TYPE)
+      if (cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)cx;
       sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
-      if (sym->my_type == SM_ERR_TYPE)
+      if (sym->my_type == SM_RETURN_TYPE)
         return (sm_object *)sym;
       sm_object *result = sm_cx_get(cx, sym);
       if (result)
@@ -1007,10 +1013,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_CX_HAS_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (cx->my_type == SM_ERR_TYPE)
+      if (cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)cx;
       sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
-      if (sym->my_type == SM_ERR_TYPE)
+      if (sym->my_type == SM_RETURN_TYPE)
         return (sm_object *)sym;
       sm_object *result = sm_cx_get(cx, sym);
       if (result)
@@ -1019,10 +1025,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_CX_GET_FAR_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (cx->my_type == SM_ERR_TYPE)
+      if (cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)cx;
       sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
-      if (sym->my_type == SM_ERR_TYPE)
+      if (sym->my_type == SM_RETURN_TYPE)
         return (sm_object *)sym;
       sm_object *result = sm_cx_get_far(cx, sym);
       if (!result)
@@ -1031,10 +1037,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_CX_HAS_FAR_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (cx->my_type == SM_ERR_TYPE)
+      if (cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)cx;
       sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
-      if (sym->my_type == SM_ERR_TYPE)
+      if (sym->my_type == SM_RETURN_TYPE)
         return (sm_object *)sym;
       sm_object *result = sm_cx_get_far(cx, sym);
       if (!result)
@@ -1043,10 +1049,10 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_CX_SET_EXPR: {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (cx->my_type == SM_ERR_TYPE)
+      if (cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)cx;
       sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
-      if (sym->my_type == SM_ERR_TYPE)
+      if (sym->my_type == SM_RETURN_TYPE)
         return (sm_object *)sym;
       sm_object *value = sm_eval(sm_expr_get_arg(sme, 2));
       if (sm_cx_set(cx, sym, value))
@@ -1200,7 +1206,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_FN_SETPARENT_EXPR: {
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
-      if (fun->my_type == SM_ERR_TYPE)
+      if (fun->my_type == SM_RETURN_TYPE)
         return (sm_object *)fun;
       sm_cx *new_parent = (sm_cx *)eager_type_check(sme, 1, SM_CX_TYPE);
       if (new_parent->my_type == SM_CX_TYPE)
@@ -1211,16 +1217,16 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_XP_OP_EXPR: {
       sm_expr *expression = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE);
-      if (expression->my_type == SM_ERR_TYPE)
+      if (expression->my_type == SM_RETURN_TYPE)
         return (sm_object *)expression;
       return (sm_object *)sm_new_ui64(expression->op);
     }
     case SM_XP_SET_OP_EXPR: {
       sm_expr *expression = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE);
-      if (expression->my_type == SM_ERR_TYPE)
+      if (expression->my_type == SM_RETURN_TYPE)
         return (sm_object *)expression;
       sm_f64 *given = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (given->my_type == SM_ERR_TYPE)
+      if (given->my_type == SM_RETURN_TYPE)
         return (sm_object *)given;
       expression     = (sm_expr *)sm_copy((sm_object *)expression);
       expression->op = (uint32_t)((sm_f64 *)given)->value;
@@ -1229,7 +1235,7 @@ sm_object *sm_eval(sm_object *input) {
       // start
     case SM_XP_OP_SYM_EXPR: {
       sm_object *obj0 = eager_type_check(sme, 0, SM_EXPR_TYPE);
-      if (obj0->my_type == SM_ERR_TYPE)
+      if (obj0->my_type == SM_RETURN_TYPE)
         return (sm_object *)sms_false;
       uint32_t op_num = ((sm_expr *)obj0)->op;
       return (
@@ -1237,7 +1243,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_STR_ESCAPE_EXPR: {
       sm_string *str0 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (str0->my_type == SM_ERR_TYPE)
+      if (str0->my_type == SM_RETURN_TYPE)
         return (sm_object *)str0;
       return (sm_object *)sm_string_escape(str0);
     }
@@ -1410,12 +1416,12 @@ sm_object *sm_eval(sm_object *input) {
     case SM_FILE_WRITESTR_EXPR: {
       // Obtain the file name using eager_type_check
       sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (fname_str->my_type == SM_ERR_TYPE)
+      if (fname_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)fname_str; // return(the error if type check fails;
       char *fname_cstr = &(fname_str->content);
       // Obtain the content to write using eager_type_check
       sm_string *content_str = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE);
-      if (content_str->my_type == SM_ERR_TYPE)
+      if (content_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)content_str; // return(the error if type check fails;
       char *content_cstr = &(content_str->content);
       // Open the file for writing
@@ -1452,12 +1458,12 @@ sm_object *sm_eval(sm_object *input) {
     case SM_FILE_WRITEARR_EXPR: {
       // Obtain the file name using eager_type_check
       sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (fname_str->my_type == SM_ERR_TYPE)
+      if (fname_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)fname_str; // return(the error if type check fails;
       char *fname_cstr = &(fname_str->content);
       // Obtain the sm_array content to write using eager_type_check
       sm_array *content_array = (sm_array *)eager_type_check(sme, 1, SM_ARRAY_TYPE);
-      if (content_array->my_type == SM_ERR_TYPE)
+      if (content_array->my_type == SM_RETURN_TYPE)
         return (sm_object *)content_array; // return(the error if type check fails;
       // Determine the content type and set up the appropriate pointer and size
       char  *content_cstr = NULL;
@@ -1537,7 +1543,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_FILE_READSTR_EXPR: {
       // Evaluate and check if the first argument is a string (file name)
       sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (fname_str->my_type == SM_ERR_TYPE)
+      if (fname_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)fname_str; // return(the error if type check fails;
       char *fname_cstr = &(fname_str->content);
       // Check if the file exists
@@ -1587,7 +1593,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_FILE_READ_EXPR: {
       // Evaluate and check if the first argument is a string (file name)
       sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (fname_str->my_type == SM_ERR_TYPE)
+      if (fname_str->my_type == SM_RETURN_TYPE)
         return (sm_object *)fname_str; // Return the error if type check fails
 
       char *fname_cstr = &(fname_str->content);
@@ -1793,7 +1799,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_PUTLN_EXPR: {
       sm_string *str;
       sm_object *evaluated = eager_type_check(sme, 0, SM_STRING_TYPE);
-      if (evaluated->my_type == SM_ERR_TYPE)
+      if (evaluated->my_type == SM_RETURN_TYPE)
         return evaluated;
       str = (sm_string *)evaluated;
       for (uint32_t i = 0; i < str->size; i++)
@@ -1829,7 +1835,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_object *eval_result;
       while ((sm_object *)sms_false != (condition_result)) {
         eval_result = sm_eval(expression);
-        if (eval_result->my_type == SM_RETURN_TYPE || eval_result->my_type == SM_ERR_TYPE)
+        if (eval_result->my_type == SM_RETURN_TYPE || eval_result->my_type == SM_RETURN_TYPE)
           return eval_result;
         // Run increment after each loop
         sm_eval((sm_object *)increment);
@@ -1979,7 +1985,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_SIZE_EXPR: {
       sm_object *base_obj = eager_type_check2(sme, 0, SM_EXPR_TYPE, SM_ARRAY_TYPE);
-      if (base_obj->my_type == SM_ERR_TYPE)
+      if (base_obj->my_type == SM_RETURN_TYPE)
         return base_obj;
       switch (base_obj->my_type) {
       case SM_EXPR_TYPE: {
@@ -1997,10 +2003,10 @@ sm_object *sm_eval(sm_object *input) {
     case SM_MAP_EXPR: {
       // expecting a unary func
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
-      if (fun->my_type == SM_ERR_TYPE)
+      if (fun->my_type == SM_RETURN_TYPE)
         return (sm_object *)fun; // Return the function object if type check fails
       sm_expr *arr = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE);
-      if (arr->my_type == SM_ERR_TYPE)
+      if (arr->my_type == SM_RETURN_TYPE)
         return (sm_object *)arr;
       // Create a new output expression with the same operation type and size
       sm_expr *output = sm_new_expr_n(arr->op, arr->size, arr->size, NULL);
@@ -2024,7 +2030,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_REDUCE_EXPR: {
       // expecting a binary function
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
-      if (fun->my_type == SM_ERR_TYPE)
+      if (fun->my_type == SM_RETURN_TYPE)
         return (sm_object *)fun;
       // evaluating the expression to reduce
       sm_object *obj1 = sm_eval(sm_expr_get_arg(sme, 1));
@@ -2079,7 +2085,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_DOT_EXPR: {
       sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
       sm_cx *base_cx    = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (base_cx->my_type == SM_ERR_TYPE)
+      if (base_cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)base_cx;
       sm_symbol *field_sym  = (sm_symbol *)sm_expr_get_arg(sme, 1);
       sm_string *field_name = field_sym->name;
@@ -2115,7 +2121,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_FUN_CALL_EXPR: {
       // Push the evaluated first argument to data stack (function_to_eval)
       sm_object *function_to_call = sm_eval(sm_expr_get_arg(sme, 0));
-      if (function_to_call->my_type == SM_ERR_TYPE)
+      if (function_to_call->my_type == SM_RETURN_TYPE)
         return (sm_object *)function_to_call; // return the return
       // Push the evaluated tuple of input args to frame stack
       sm_push(sms_sf, sm_eval(sm_expr_get_arg(sme, 1)));
@@ -2139,7 +2145,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
       sm_symbol *sym        = (sm_symbol *)eager_type_check(sme, 0, SM_SYMBOL_TYPE);
       sm_object *value      = sm_eval(sm_expr_get_arg(sme, 1));
-      if (value->my_type == SM_ERR_TYPE)
+      if (value->my_type == SM_RETURN_TYPE)
         return (sm_object *)value;
       if (!sm_cx_set(current_cx, sym, value))
         return (sm_object *)sms_false;
@@ -2375,198 +2381,198 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_PLUS_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
-      if (o1->my_type == SM_ERR_TYPE)
+      if (o1->my_type == SM_RETURN_TYPE)
         return o1;
       sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
-      if (o0->my_type == SM_ERR_TYPE)
+      if (o0->my_type == SM_RETURN_TYPE)
         return o0;
       sm_push(sms_stack, o0);
       return sm_add();
     }
     case SM_MINUS_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
-      if (o1->my_type == SM_ERR_TYPE)
+      if (o1->my_type == SM_RETURN_TYPE)
         return o1;
       sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
-      if (o0->my_type == SM_ERR_TYPE)
+      if (o0->my_type == SM_RETURN_TYPE)
         return o0;
       sm_push(sms_stack, o0);
       return sm_minus();
     }
     case SM_TIMES_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
-      if (o1->my_type == SM_ERR_TYPE)
+      if (o1->my_type == SM_RETURN_TYPE)
         return o1;
       sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
-      if (o0->my_type == SM_ERR_TYPE)
+      if (o0->my_type == SM_RETURN_TYPE)
         return o0;
       sm_push(sms_stack, o0);
       return sm_times();
     }
     case SM_DIVIDE_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
-      if (o1->my_type == SM_ERR_TYPE)
+      if (o1->my_type == SM_RETURN_TYPE)
         return o1;
       sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
-      if (o0->my_type == SM_ERR_TYPE)
+      if (o0->my_type == SM_RETURN_TYPE)
         return o0;
       sm_push(sms_stack, o0);
       return sm_divide();
     }
     case SM_POW_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
-      if (o1->my_type == SM_ERR_TYPE)
+      if (o1->my_type == SM_RETURN_TYPE)
         return o1;
       sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
-      if (o0->my_type == SM_ERR_TYPE)
+      if (o0->my_type == SM_RETURN_TYPE)
         return o0;
       sm_push(sms_stack, o0);
       return sm_pow();
     }
     case SM_SIN_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(sin(num0->value)));
       break;
     }
     case SM_COS_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(cos(num0->value)));
       break;
     }
     case SM_TAN_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(tan(num0->value)));
       break;
     }
     case SM_ASIN_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(asin(num0->value)));
       break;
     }
     case SM_ACOS_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(acos(num0->value)));
       break;
     }
     case SM_ATAN_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(atan(num0->value)));
       break;
     }
     case SM_SEC_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(1.0 / cos(num0->value)));
       break;
     }
     case SM_CSC_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(1.0 / sin(num0->value)));
       break;
     }
     case SM_COT_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(1.0 / tan(num0->value)));
       break;
     }
     case SM_SINH_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(sinh(num0->value)));
       break;
     }
     case SM_COSH_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(cosh(num0->value)));
       break;
     }
     case SM_TANH_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(tanh(num0->value)));
       break;
     }
     case SM_SECH_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(1.0 / cosh(num0->value)));
       break;
     }
     case SM_CSCH_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(1.0 / sinh(num0->value)));
       break;
     }
     case SM_COTH_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(1.0 / tanh(num0->value)));
       break;
     }
     case SM_LN_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(log(num0->value)));
       break;
     }
     case SM_LOG_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       sm_f64 *num1 = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (num1->my_type == SM_ERR_TYPE)
+      if (num1->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num1);
       return ((sm_object *)sm_new_f64(log(num1->value) / log(num0->value)));
       break;
     }
     case SM_EXP_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(exp(num0->value)));
       break;
     }
     case SM_SQRT_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(sqrt(num0->value)));
       break;
     }
     case SM_ABS_EXPR: {
       sm_f64 *num0 = (sm_f64 *)eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return ((sm_object *)num0);
       return ((sm_object *)sm_new_f64(num0->value < 0 ? -1 * num0->value : num0->value));
       break;
@@ -2721,7 +2727,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_ISNAN_EXPR: {
       sm_object *num0 = eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return (sm_object *)num0;
       if (isnan(((sm_f64 *)num0)->value))
         return (sm_object *)sms_true;
@@ -2730,7 +2736,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_ISINF_EXPR: {
       sm_object *num0 = eager_type_check(sme, 0, SM_F64_TYPE);
-      if (num0->my_type == SM_ERR_TYPE)
+      if (num0->my_type == SM_RETURN_TYPE)
         return (sm_object *)num0;
       if (isinf(((sm_f64 *)num0)->value))
         return (sm_object *)sms_true;
@@ -2744,7 +2750,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_ISERR_EXPR: {
       sm_object *output = sm_eval(sm_expr_get_arg(sme, 0));
-      if (output->my_type == SM_ERR_TYPE) {
+      if (output->my_type == SM_RETURN_TYPE) {
         return (sm_object *)sms_true;
       }
       return (sm_object *)sms_false;
