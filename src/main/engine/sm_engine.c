@@ -113,10 +113,19 @@ sm_object *execute_fun(sm_object *obj) {
         }
       }
       sm_pop(sms_cx_stack);
+        if (result->my_type == SM_RETURN_TYPE) {
+          sm_pop(sms_cx_stack);
+          return ((sm_return *)result)->address;
+        }
       return result;
-    } else
-      return sm_eval(content);
-    break;
+    } else{
+        result = sm_eval(content);
+        if (result->my_type == SM_RETURN_TYPE) {
+          return ((sm_return *)result)->address;
+        }
+      return result;
+}    
+break;
   }
   case SM_SO_FUN_TYPE: {
     sm_expr   *sf                      = (sm_expr *)sm_peek(sms_stack);
