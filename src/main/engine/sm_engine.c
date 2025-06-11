@@ -1824,10 +1824,10 @@ sm_object *sm_eval(sm_object *input) {
       sm_object *condition_result = sm_eval((sm_object *)condition);
       sm_object *eval_result;
       while ((sm_object *)sms_false != (condition_result)) {
-        eval_result      = sm_eval(expression);
-        condition_result = sm_eval((sm_object *)condition);
+        eval_result = sm_eval(expression);
         if (eval_result->my_type == SM_RETURN_TYPE)
           return eval_result;
+        condition_result = sm_eval((sm_object *)condition);
       }
       return eval_result;
       break;
@@ -2152,10 +2152,11 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_ASSIGN_EXPR: {
       sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
-      sm_symbol *sym        = (sm_symbol *)eager_type_check(sme, 0, SM_SYMBOL_TYPE);
+      sm_symbol *sym        = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value      = sm_eval(sm_expr_get_arg(sme, 1));
       if (value->my_type == SM_RETURN_TYPE)
         return (sm_object *)value;
+      // TODO: err here
       if (!sm_cx_set(current_cx, sym, value))
         return (sm_object *)sms_false;
       return value;
@@ -2587,9 +2588,8 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_INC_EXPR: {
-      sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
-
-      sm_symbol *sym = (sm_symbol *)sm_expr_get_arg(sme, 0);
+      sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      sm_symbol *sym        = (sm_symbol *)sm_expr_get_arg(sme, 0);
       if (sym->my_type != SM_SYMBOL_TYPE) {
         sm_symbol *title = sm_new_symbol("cannotIncNonSymbol", 18);
         sm_string *message =
