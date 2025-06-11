@@ -951,12 +951,9 @@ sm_object *sm_pow_f64_and_i64(sm_object *o0, sm_object *o1) {
 // f64
 
 sm_object *sm_pow_f64_and_f64(sm_object *o0, sm_object *o1) {
-  double a      = ((sm_f64 *)o0)->value;
-  double b      = ((sm_f64 *)o1)->value;
-  double output = a;
-  for (double i = 1; i < b; i++)
-    output *= a;
-  return (sm_object *)sm_new_f64(output);
+  double a = ((sm_f64 *)o0)->value;
+  double b = ((sm_f64 *)o1)->value;
+  return (sm_object *)sm_new_f64(pow(a, b));
 }
 
 // cx
