@@ -28,7 +28,7 @@ static inline sm_object *eager_number_or_cx(sm_expr *sme, uint32_t operand) {
                                            sm_type_name(obj->my_type), __FILE__, __LINE__);
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    sm_return * return_obj = sm_new_return((sm_object*)err);
+    sm_return *return_obj = sm_new_return((sm_object *)err);
     return (sm_object *)return_obj;
   }
   return (sm_object *)obj;
@@ -47,7 +47,7 @@ static inline sm_object *eager_type_check(sm_expr *sme, uint32_t operand, uint32
       __FILE__, __LINE__);
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    sm_return * return_obj = sm_new_return((sm_object*)err);
+    sm_return *return_obj = sm_new_return((sm_object *)err);
     return (sm_object *)return_obj;
   }
   return (sm_object *)obj;
@@ -67,7 +67,7 @@ static inline sm_object *eager_type_check2(sm_expr *sme, uint32_t operand, uint3
       sm_type_name(param_type2));
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    sm_return * return_obj = sm_new_return((sm_object*)err);
+    sm_return *return_obj = sm_new_return((sm_object *)err);
     return (sm_object *)return_obj;
   }
   return obj;
@@ -88,7 +88,7 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
       sm_type_name(param_type2), sm_type_name(param_type3), __FILE__, __LINE__);
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
-    sm_return * return_obj = sm_new_return((sm_object*)err);
+    sm_return *return_obj = sm_new_return((sm_object *)err);
     return (sm_object *)return_obj;
   }
   return obj;
@@ -113,19 +113,19 @@ sm_object *execute_fun(sm_object *obj) {
         }
       }
       sm_pop(sms_cx_stack);
-        if (result->my_type == SM_RETURN_TYPE) {
-          sm_pop(sms_cx_stack);
-          return ((sm_return *)result)->address;
-        }
+      if (result->my_type == SM_RETURN_TYPE) {
+        sm_pop(sms_cx_stack);
+        return ((sm_return *)result)->address;
+      }
       return result;
-    } else{
-        result = sm_eval(content);
-        if (result->my_type == SM_RETURN_TYPE) {
-          return ((sm_return *)result)->address;
-        }
+    } else {
+      result = sm_eval(content);
+      if (result->my_type == SM_RETURN_TYPE) {
+        return ((sm_return *)result)->address;
+      }
       return result;
-}    
-break;
+    }
+    break;
   }
   case SM_SO_FUN_TYPE: {
     sm_expr   *sf                      = (sm_expr *)sm_peek(sms_stack);
@@ -1801,7 +1801,6 @@ sm_object *sm_eval(sm_object *input) {
         for (uint32_t i = 0; i < str->size; i++)
           putchar((&str->content)[i]);
       }
-      fflush(stdout);
       return (sm_object *)sms_true;
       break;
     }
@@ -1814,7 +1813,6 @@ sm_object *sm_eval(sm_object *input) {
       for (uint32_t i = 0; i < str->size; i++)
         putchar((&str->content)[i]);
       putchar('\n');
-      fflush(stdout);
       return (sm_object *)sms_true;
       break;
     }
@@ -1865,7 +1863,7 @@ sm_object *sm_eval(sm_object *input) {
         sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
         sm_cx *inner_cx   = sm_new_cx(current_cx);
         sm_push(sms_cx_stack, (sm_object *)inner_cx);
-        sm_array  *arr    = (sm_array *)evalResult;
+        sm_array *arr = (sm_array *)evalResult;
         for (uint32_t i = 0; i < arr->size; i++) {
           sm_cx_let(inner_cx, handle, sm_array_get(arr, i));
           output = sm_eval((sm_object *)expression);
@@ -1875,31 +1873,31 @@ sm_object *sm_eval(sm_object *input) {
         break;
       }
       case SM_EXPR_TYPE: {
-        sm_cx   *current_cx     = (sm_cx *)sm_peek(sms_cx_stack);
-        sm_cx   *inner_cx       = sm_new_cx(current_cx);
+        sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+        sm_cx *inner_cx   = sm_new_cx(current_cx);
         sm_push(sms_cx_stack, (sm_object *)inner_cx);
-      sm_push(sms_cx_stack, (sm_object*)inner_cx);
+        sm_push(sms_cx_stack, (sm_object *)inner_cx);
         sm_expr *collectionExpr = (sm_expr *)evalResult;
         for (uint32_t i = 0; i < collectionExpr->size; i++) {
           sm_cx_let(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
           output = sm_eval((sm_object *)expression);
         }
-      sm_pop(sms_cx_stack);
+        sm_pop(sms_cx_stack);
         return output;
         break;
       }
       case SM_STRING_TYPE: {
-        sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
-        sm_cx     *inner_cx   = sm_new_cx(current_cx);
+        sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+        sm_cx *inner_cx   = sm_new_cx(current_cx);
         sm_push(sms_cx_stack, (sm_object *)inner_cx);
-        sm_string *str        = (sm_string *)evalResult;
+        sm_string *str    = (sm_string *)evalResult;
         sm_object *output = (sm_object *)sms_false;
         for (uint32_t i = 0; i < str->size; i++) {
           sm_cx_let(inner_cx, handle,
                     (sm_object *)sm_new_fstring_at(sms_heap, "%c", (&str->content)[i]));
           output = sm_eval((sm_object *)expression);
         }
-      sm_pop(sms_cx_stack);
+        sm_pop(sms_cx_stack);
         return output;
         break;
       }
@@ -2140,10 +2138,10 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_BLOCK_EXPR: {
-      sm_cx     *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
-      sm_cx     *new_cx     = sm_new_cx(current_cx);
-      sm_push(sms_cx_stack,(sm_object*)new_cx);
-      sm_object *output     = (sm_object *)sms_false;
+      sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
+      sm_cx *new_cx     = sm_new_cx(current_cx);
+      sm_push(sms_cx_stack, (sm_object *)new_cx);
+      sm_object *output = (sm_object *)sms_false;
       for (uint32_t i = 1; i < sme->size && output->my_type != SM_RETURN_TYPE; i++)
         output = sm_eval(sm_expr_get_arg(sme, i));
       sm_pop(sms_cx_stack);
@@ -2169,8 +2167,8 @@ sm_object *sm_eval(sm_object *input) {
       return value;
     }
     case SM_ASSIGN_LOCAL_EXPR: {
-      sm_expr   *sf    = (sm_expr *)sm_peek(sms_sf);
-      sm_object *lcl   = eager_type_check(sme, 0, SM_LOCAL_TYPE);
+      sm_expr   *sf  = (sm_expr *)sm_peek(sms_sf);
+      sm_object *lcl = eager_type_check(sme, 0, SM_LOCAL_TYPE);
       if (lcl->my_type != SM_LOCAL_TYPE)
         return lcl;
       sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
