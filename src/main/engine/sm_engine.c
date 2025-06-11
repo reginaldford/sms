@@ -1817,15 +1817,13 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_WHILE_EXPR: {
-      sm_expr   *condition        = (sm_expr *)sm_expr_get_arg(sme, 0);
-      sm_object *expression       = sm_expr_get_arg(sme, 1);
-      sm_object *condition_result = sm_eval((sm_object *)condition);
-      sm_object *eval_result;
-      while ((sm_object *)sms_false != (condition_result)) {
+      sm_expr   *condition   = (sm_expr *)sm_expr_get_arg(sme, 0);
+      sm_object *expression  = sm_expr_get_arg(sme, 1);
+      sm_object *eval_result = (sm_object *)sms_false;
+      while (sm_eval((sm_object *)condition) != (sm_object *)sms_false) {
         eval_result = sm_eval(expression);
         if (eval_result->my_type == SM_RETURN_TYPE)
           return eval_result;
-        condition_result = sm_eval((sm_object *)condition);
       }
       return eval_result;
       break;

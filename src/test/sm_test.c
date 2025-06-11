@@ -3,11 +3,10 @@
 #include "../main/sms.h"
 #include "sm_test.h"
 #include "sm_test_outline.h"
-#include <ctype.h>
 
 extern int yylineno;
 #define DISPLAY_WIDTH 85
-extern sm_object *return_obj;
+extern sm_stack2 *sms_cx_stack;
 
 // Global for the test outline structure
 test_outline *global_test_outline(test_outline *replacement) {
@@ -159,54 +158,59 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
   if (chapter >= num_chapters()) {
     printf("Test chapter: %i out of range.\n", chapter);
     printf("Valid test chapters are from 0 to %i.\n", num_chapters() - 1);
+    return -1;
   } else if (subchapter >= num_subchapters(chapter)) {
     printf("Subchapter: %i out of range (max acceptable value is: %i).\n", subchapter,
            num_subchapters(chapter) - 1);
+    return -1;
+  }
+  sm_env env;
+  env.mem_flag   = false;
+  env.quiet_mode = true;
+  sm_init(&env, 0, NULL);
+  char buf[64];
+  int  len = 0;
+  if (subchapter != 0)
+    len =
+      7 + strlen(test_zone_path) + strlen(chapter_name(chapter)) + 1 + log(subchapter) / log(10);
+  else
+    len = 7 + strlen(test_zone_path) + strlen(chapter_name(chapter)) + 1;
+
+  snprintf(buf, len + 1, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
+  // If test_zone_path is empty string, then we need to remove the leading "/" from buf
+  if (test_zone_path[0] == '\0') {
+    for (int i = 0; buf[i] != '\0' && i <= 62; i++) {
+      buf[i] = buf[i + 1];
+    }
+  }
+  printf("Parsing: %s... \n", buf);
+  yylineno           = 1;
+  sm_parse_result pr = sm_parse_file(buf);
+  if (pr.return_val != 0) {
+    printf("Error parsing the subchapter. Parser returned %i\n", pr.return_val);
+    return -1;
+  }
+  // exits the program if there is a problem
+  sm_cx *test_env = check_parsed_object(pr);
+  if (test_env == NULL) {
+    printf("Something was wrong with the format of the file.\n");
+    return -1;
+  }
+  sm_symbol *tests_sym = sm_new_symbol("tests", 5);
+  sm_expr   *test_list = (sm_expr *)sm_cx_get(test_env, tests_sym);
+
+  // push this environment into cx stack
+  sm_push(sms_cx_stack, (sm_object *)test_env);
+
+  // test == -1 means do all tests
+  if (test == -1) {
+    global_num_tests(test_list->size);
+    for (uint32_t i = 0; i < test_list->size; i++) {
+      num_fails += perform_specific_test(test_env, test_list, chapter, subchapter, i);
+    }
   } else {
-    sm_env env;
-    env.mem_flag   = false;
-    env.quiet_mode = true;
-    sm_init(&env, 0, NULL);
-    char buf[64];
-    int  len = 0;
-    if (subchapter != 0)
-      len =
-        7 + strlen(test_zone_path) + strlen(chapter_name(chapter)) + 1 + log(subchapter) / log(10);
-    else
-      len = 7 + strlen(test_zone_path) + strlen(chapter_name(chapter)) + 1;
-
-    snprintf(buf, len + 1, "%s/%s/%i.sms", test_zone_path, chapter_name(chapter), subchapter);
-    // If test_zone_path is empty string, then we need to remove the leading "/" from buf
-    if (test_zone_path[0] == '\0') {
-      for (int i = 0; buf[i] != '\0' && i <= 62; i++) {
-        buf[i] = buf[i + 1];
-      }
-    }
-    printf("Parsing: %s... \n", buf);
-    yylineno           = 1;
-    sm_parse_result pr = sm_parse_file(buf);
-    if (pr.return_val != 0) {
-      printf("Error parsing the subchapter. Parser returned %i\n", pr.return_val);
-      return -1;
-    }
-    // exits the program if there is a problem
-    sm_cx *test_env = check_parsed_object(pr);
-    if (test_env == NULL) {
-      printf("Something was wrong with the format of the file.\n");
-      return -1;
-    }
-    sm_symbol *tests_sym = sm_new_symbol("tests", 5);
-    sm_expr   *test_list = (sm_expr *)sm_cx_get(test_env, tests_sym);
-
-    if (test == -1) {
-      global_num_tests(test_list->size);
-      for (uint32_t i = 0; i < test_list->size; i++) {
-        num_fails += perform_specific_test(test_env, test_list, chapter, subchapter, i);
-      }
-    } else {
-      global_num_tests(1);
-      num_fails += perform_specific_test(test_env, test_list, chapter, subchapter, test);
-    }
+    global_num_tests(1);
+    num_fails += perform_specific_test(test_env, test_list, chapter, subchapter, test);
   }
   return num_fails;
 }
