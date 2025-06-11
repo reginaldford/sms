@@ -5,7 +5,6 @@
 extern void     **memory_marker1;
 extern void     **memory_marker2;
 extern bool       evaluating;
-extern sm_object *return_obj;
 extern sm_stack2 *sms_stack;
 extern sm_stack2 *sms_cx_stack;
 extern sm_stack2 *sms_sf;
@@ -200,15 +199,13 @@ inline void sm_garbage_collect() {
   if (evaluating) {
     sm_global_parser_output(
       sm_meet_object(sms_heap, sms_other_heap, sm_global_parser_output(NULL)));
-    // Handle the global return_obj ptr as a root
-    return_obj = sm_meet_object(sms_heap, sms_other_heap, return_obj);
-    if (return_obj->my_type == SM_POINTER_TYPE)
-      return_obj = sm_pointer_deref((sm_pointer *)return_obj, sms_other_heap);
   } else
     sm_global_parser_output((sm_object *)sms_false);
+
   // Data stack as root:
-  for (void **curr_ptr = (void **)&(sms_stack[1]);
-       curr_ptr < (void **)&(sms_stack[sms_stack->size]); curr_ptr++) {
+  sm_object **sms_stack_content = sm_stack2_content(sms_stack);
+  for (sm_object **curr_ptr = sms_stack_content; curr_ptr < &(sms_stack_content[sms_stack->size]);
+       curr_ptr++) {
     *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
   }
   // CX stack as root:
@@ -218,8 +215,8 @@ inline void sm_garbage_collect() {
     *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
   }
   // Frame Stack as root:
-  for (void **curr_ptr = (void **)&(sms_sf[1]); curr_ptr < (void **)&(sms_sf[sms_sf->size]);
-       curr_ptr++) {
+  sm_object **sf_content = sm_stack2_content(sms_sf);
+  for (sm_object **curr_ptr = sf_content; curr_ptr < &(sf_content[sms_sf->size]); curr_ptr++) {
     *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
   }
 

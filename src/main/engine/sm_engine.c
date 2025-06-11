@@ -1829,24 +1829,23 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_FOR_EXPR: {
-      sm_expr   *init       = (sm_expr *)sm_expr_get_arg(sme, 0);
-      sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
-      sm_expr   *increment  = (sm_expr *)sm_expr_get_arg(sme, 2);
-      sm_object *expression = sm_expr_get_arg(sme, 3);
+      // The sme should have these 4 expressions:
+      // 0) initialization 1) condition 2) increment 3) iteration
+      sm_push(sms_stack, (sm_object *)sme);        // push the whole expression!
+      sm_object *outcome = (sm_object *)sms_false; // remains accurate if 0 iterations occur
       // Run init 1 time
-      sm_eval((sm_object *)init);
-      sm_object *result           = (sm_object *)sms_false;
-      sm_object *condition_result = sm_eval((sm_object *)condition);
-      sm_object *eval_result;
-      while ((sm_object *)sms_false != (condition_result)) {
-        eval_result = sm_eval(expression);
-        if (eval_result->my_type == SM_RETURN_TYPE || eval_result->my_type == SM_RETURN_TYPE)
-          return eval_result;
+      sm_eval(sm_expr_get_arg(sme, 0));
+      while ((sm_object *)sms_false != sm_eval(sm_expr_get_arg((sm_expr *)sm_peek(sms_stack), 1))) {
+        outcome = sm_eval(sm_expr_get_arg((sm_expr *)sm_peek(sms_stack), 3));
+        if (outcome->my_type == SM_RETURN_TYPE) {
+          sm_pop(sms_stack);
+          return outcome;
+        }
         // Run increment after each loop
-        sm_eval((sm_object *)increment);
-        condition_result = sm_eval((sm_object *)condition);
+        sm_eval(sm_expr_get_arg((sm_expr *)sm_peek(sms_stack), 2));
       }
-      return eval_result;
+      sm_pop(sms_stack);
+      return outcome;
       break;
     }
     case SM_FOR_IN_EXPR: {
