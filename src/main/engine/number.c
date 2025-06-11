@@ -855,12 +855,9 @@ sm_object *sm_pow_i64_and_ui8(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_pow_f64_and_ui8(sm_object *o0, sm_object *o1) {
-  double  a      = ((sm_f64 *)o0)->value;
-  uint8_t b      = ((sm_ui8 *)o1)->value;
-  double  output = a;
-  for (double i = 1; i < b; i++)
-    output *= a;
-  return (sm_object *)sm_new_f64(output);
+  double  a = ((sm_f64 *)o0)->value;
+  uint8_t b = ((sm_ui8 *)o1)->value;
+  return (sm_object *)sm_new_f64(pow(a, b));
 }
 
 sm_object *sm_pow_ui8_and_f64(sm_object *o0, sm_object *o1) {
@@ -902,12 +899,9 @@ sm_object *sm_pow_i64_and_ui64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_pow_f64_and_ui64(sm_object *o0, sm_object *o1) {
-  double   a      = ((sm_f64 *)o0)->value;
-  uint64_t b      = ((sm_ui64 *)o1)->value;
-  double   output = a;
-  for (double i = 1; i < b; i++)
-    output *= a;
-  return (sm_object *)sm_new_f64(output);
+  double   a = ((sm_f64 *)o0)->value;
+  uint64_t b = ((sm_ui64 *)o1)->value;
+  return (sm_object *)sm_new_f64(pow(a, b));
 }
 
 sm_object *sm_pow_ui64_and_f64(sm_object *o0, sm_object *o1) {
@@ -940,12 +934,9 @@ sm_object *sm_pow_i64_and_f64(sm_object *o0, sm_object *o1) {
 }
 
 sm_object *sm_pow_f64_and_i64(sm_object *o0, sm_object *o1) {
-  double  a      = ((sm_f64 *)o0)->value;
-  int64_t b      = ((sm_i64 *)o1)->value;
-  double  output = a;
-  for (double i = 1; i < b; i++)
-    output *= a;
-  return (sm_object *)sm_new_f64(output);
+  double  a = ((sm_f64 *)o0)->value;
+  int64_t b = ((sm_i64 *)o1)->value;
+  return (sm_object *)sm_new_f64(pow(a, b));
 }
 
 // f64
