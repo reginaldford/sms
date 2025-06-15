@@ -18,3 +18,5 @@ sm_stack2 *sm_push(sm_stack2 *stack, sm_object *ptr);
 sm_object *sm_pop(sm_stack2 *stack);
 /// Get the last pushed object or return NULL
 sm_object *sm_peek(sm_stack2 *stack);
+sm_object *sm_peek2(sm_stack2 *stack);
+sm_object *sm_peek3(sm_stack2 *stack);

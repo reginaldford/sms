@@ -51,3 +51,19 @@ sm_object *sm_peek(sm_stack2 *stack) {
   sm_object *to_return = sm_stack2_content(stack)[stack->size - 1];
   return to_return;
 }
+sm_object *sm_peek2(sm_stack2 *stack) {
+  if (!stack->size) {
+    printf("stack underflow %s:%i \n", __FILE__, __LINE__);
+    return (sm_object *)sms_false;
+  }
+  sm_object *to_return = sm_stack2_content(stack)[stack->size - 2];
+  return to_return;
+}
+sm_object *sm_peek3(sm_stack2 *stack) {
+  if (!stack->size) {
+    printf("stack underflow %s:%i \n", __FILE__, __LINE__);
+    return (sm_object *)sms_false;
+  }
+  sm_object *to_return = sm_stack2_content(stack)[stack->size - 1];
+  return to_return;
+}

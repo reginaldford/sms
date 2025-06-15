@@ -15,7 +15,6 @@ extern sm_stack2   *sms_cx_stack;
 extern sm_stack2   *sms_sf;
 
 // Basic type checking
-
 static inline sm_object *eager_number_or_cx(sm_expr *sme, uint32_t operand) {
   sm_object *obj = sm_eval(sm_expr_get_arg(sme, operand));
   if (obj->my_type > SM_CX_TYPE) {
@@ -90,6 +89,16 @@ static inline sm_object *eager_type_check3(sm_expr *sme, uint32_t operand, uint3
                                  &source->content, (uint32_t)line->value);
     sm_return *return_obj = sm_new_return((sm_object *)err);
     return (sm_object *)return_obj;
+  }
+  return obj;
+}
+
+// Follow Pointer If Necessary
+// allows avoiding sms_stack
+sm_object *fpin(sm_object *obj) {
+  if (obj->my_type == SM_POINTER_TYPE) {
+    sm_pointer *p = (sm_pointer *)obj;
+    return sm_pointer_deref(p, sms_other_heap);
   }
   return obj;
 }
@@ -707,18 +716,27 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_STR_CAT_EXPR: {
+      sm_push(sms_stack, (sm_object *)sme);
+      // str0
       sm_string *str0 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
       if (str0->my_type != SM_STRING_TYPE)
         return (sm_object *)str0;
+      sm_push(sms_stack, (sm_object *)str0);
+      // str1
+      sme             = (sm_expr *)sm_peek2(sms_stack);
       sm_string *str1 = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE);
       if (str1->my_type != SM_STRING_TYPE)
         return (sm_object *)str1;
-      uint32_t   s0      = str0->size;
-      uint32_t   s1      = str1->size;
+      uint32_t s0 = ((sm_string *)sm_peek(sms_stack))->size;
+      uint32_t s1 = str1->size;
+      sm_push(sms_stack, (sm_object *)str1);
       sm_string *new_str = sm_new_string_manual(s0 + s1);
-      char      *content = &(new_str->content);
+      str1               = (sm_string *)sm_pop(sms_stack);
+      str0               = (sm_string *)sm_pop(sms_stack);
+      char *content      = &(new_str->content);
       sm_strncpy_unsafe(content, &(str0->content), str0->size);
       sm_strncpy(content + s0, &(str1->content), s1);
+      sm_pop(sms_stack); // pop sme
       return (sm_object *)new_str;
       break;
     }
