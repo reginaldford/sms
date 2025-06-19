@@ -950,14 +950,15 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)cx;
     }
     case SM_CX_LET_EXPR: {
-      sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
-      if (cx->my_type == SM_RETURN_TYPE)
-        return (sm_object *)cx;
       sm_symbol *sym = (sm_symbol *)eager_type_check(sme, 1, SM_SYMBOL_TYPE);
       if (sym->my_type == SM_RETURN_TYPE)
         return (sm_object *)sym;
+      sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
+      if (cx->my_type == SM_RETURN_TYPE)
+        return (sm_object *)cx;
+      sm_push(sms_stack, (sm_object *)cx);
       sm_object *value = (sm_object *)sm_eval(sm_expr_get_arg(sme, 2));
-      sm_cx_let(cx, sym, value);
+      sm_cx_let((sm_cx *)sm_pop(sms_stack), sym, value);
       return value;
     }
 
