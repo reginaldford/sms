@@ -931,6 +931,7 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_LET_EXPR: {
       // Trust the parser for now regarding element 0 being a symbol
+      // Since symbols do not move durin gc, this is gc safe
       sm_symbol *sym   = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
       // If an error occurred, it is stored in the mapping
