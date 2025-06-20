@@ -1092,14 +1092,9 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sms_false;
     }
     case SM_CX_VALUES_EXPR: {
-      sm_cx *cx = (sm_cx *)sm_eval(sm_expr_get_arg(sme, 0));
-      if (cx->my_type != SM_CX_TYPE) {
-        sm_symbol *title   = sm_new_symbol("typeMismatch", 12);
-        sm_string *message = sm_new_fstring_at(
-          sms_heap, "Passed value of type %s to argument 0 of cxValues call. Expected Cx.",
-          sm_type_name(cx->my_type));
-        return (sm_object *)sm_new_error_from_expr(title, message, sme, NULL);
-      }
+      sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
+      if (cx->my_type != SM_CX_TYPE)
+        return (sm_object *)cx;
       return (sm_object *)sm_node_values(cx->content, sm_new_expr_n(SM_TUPLE_EXPR, 0, 0, NULL));
     }
     case SM_FN_XP_EXPR: {
@@ -1112,8 +1107,9 @@ sm_object *sm_eval(sm_object *input) {
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
       if (fun->my_type != SM_FUN_TYPE)
         return (sm_object *)fun;
-      fun                  = (sm_fun *)sm_copy((sm_object *)fun); // functional
+      sm_push(sms_stack, sm_copy((sm_object *)fun)); // functional design
       sm_object *evaluated = sm_eval(sm_expr_get_arg(sme, 1));
+      fun                  = ((sm_fun *)sm_pop(sms_stack));
       fun->content         = sm_localize(evaluated, fun);
       return (sm_object *)fun;
     }
@@ -1132,9 +1128,11 @@ sm_object *sm_eval(sm_object *input) {
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
       if (fun->my_type != SM_FUN_TYPE)
         return (sm_object *)fun;
+      sm_push(sms_stack, (sm_object *)fun);
       sm_expr *params = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE);
       if (params->my_type != SM_EXPR_TYPE)
         return (sm_object *)params;
+      fun = (sm_fun *)sm_pop(sms_stack);
       // Make a new function with the right size (params are part of a function)
       sm_fun *new_fun = sm_new_fun(fun->parent, params->size, fun->content);
       // Checking the parameters
@@ -1174,9 +1172,11 @@ sm_object *sm_eval(sm_object *input) {
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
       if (fun->my_type == SM_RETURN_TYPE)
         return (sm_object *)fun;
+      sm_push(sms_stack, (sm_object *)fun);
       sm_cx *new_parent = (sm_cx *)eager_type_check(sme, 1, SM_CX_TYPE);
       if (new_parent->my_type == SM_CX_TYPE)
         return (sm_object *)sms_false;
+      fun         = (sm_fun *)sm_pop(sms_stack);
       fun         = (sm_fun *)sm_copy((sm_object *)fun);
       fun->parent = new_parent;
       return (sm_object *)fun;
