@@ -1130,8 +1130,10 @@ sm_object *sm_eval(sm_object *input) {
         return (sm_object *)fun;
       sm_push(sms_stack, (sm_object *)fun);
       sm_expr *params = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE);
-      if (params->my_type != SM_EXPR_TYPE)
+      if (params->my_type != SM_EXPR_TYPE) {
+        sm_pop(sms_stack);
         return (sm_object *)params;
+      }
       fun = (sm_fun *)sm_pop(sms_stack);
       // Make a new function with the right size (params are part of a function)
       sm_fun *new_fun = sm_new_fun(fun->parent, params->size, fun->content);
@@ -1174,10 +1176,11 @@ sm_object *sm_eval(sm_object *input) {
         return (sm_object *)fun;
       sm_push(sms_stack, (sm_object *)fun);
       sm_cx *new_parent = (sm_cx *)eager_type_check(sme, 1, SM_CX_TYPE);
-      if (new_parent->my_type == SM_CX_TYPE)
+      if (new_parent->my_type == SM_CX_TYPE) {
+        sm_pop(sms_stack);
         return (sm_object *)sms_false;
-      fun         = (sm_fun *)sm_pop(sms_stack);
-      fun         = (sm_fun *)sm_copy((sm_object *)fun);
+      }
+      fun         = (sm_fun *)sm_copy(sm_pop(sms_stack));
       fun->parent = new_parent;
       return (sm_object *)fun;
     }
@@ -1191,10 +1194,13 @@ sm_object *sm_eval(sm_object *input) {
       sm_expr *expression = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE);
       if (expression->my_type == SM_RETURN_TYPE)
         return (sm_object *)expression;
+      sm_push(sms_stack, (sm_object *)expression);
       sm_f64 *given = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (given->my_type == SM_RETURN_TYPE)
+      if (given->my_type == SM_RETURN_TYPE) {
+        sm_pop(sms_stack);
         return (sm_object *)given;
-      expression     = (sm_expr *)sm_copy((sm_object *)expression);
+      }
+      expression     = (sm_expr *)sm_copy(sm_pop(sms_stack));
       expression->op = (uint32_t)((sm_f64 *)given)->value;
       return (sm_object *)expression;
     }
@@ -1251,18 +1257,15 @@ sm_object *sm_eval(sm_object *input) {
       return (sm_object *)sms_true;
     }
     case SM_XOR_EXPR: {
-      sm_object *obj0 = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_object *obj1 = sm_eval(sm_expr_get_arg(sme, 1));
-
+      sm_object *obj0         = sm_eval(sm_expr_get_arg(sme, 0));
+      bool       is_obj0_true = (sm_object *)sms_false != (obj0);
+      sm_object *obj1         = sm_eval(sm_expr_get_arg(sme, 1));
+      bool       is_obj1_true = (sm_object *)sms_false != (obj1);
       // XOR is true if exactly one of obj0 or obj1 is true
-      bool is_obj0_true = (sm_object *)sms_false != (obj0);
-      bool is_obj1_true = (sm_object *)sms_false != (obj1);
-
-      if (is_obj0_true != is_obj1_true) {
+      if (is_obj0_true != is_obj1_true)
         return (sm_object *)sms_true;
-      } else {
+      else
         return (sm_object *)sms_false;
-      }
     }
     case SM_NOT_EXPR: {
       sm_object *obj0 = sm_eval(sm_expr_get_arg(sme, 0));
