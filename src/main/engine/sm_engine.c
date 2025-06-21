@@ -2715,8 +2715,11 @@ sm_object *sm_eval(sm_object *input) {
     case SM_ISERR_EXPR: {
       sm_object *output = sm_eval(sm_expr_get_arg(sme, 0));
       if (output->my_type == SM_RETURN_TYPE) {
+        sm_return *r = (sm_return *)output;
+        if (r->address->my_type == SM_ERR_TYPE)
+          return (sm_object *)sms_true;
+      } else if (output->my_type == SM_ERR_TYPE)
         return (sm_object *)sms_true;
-      }
       return (sm_object *)sms_false;
       break;
     }
