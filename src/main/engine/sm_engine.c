@@ -2092,11 +2092,14 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_FUN_CALL_EXPR: {
       // Push the evaluated first argument to data stack (function_to_eval)
+      sm_push(sms_stack, (sm_object *)sme);
       sm_object *function_to_call = sm_eval(sm_expr_get_arg(sme, 0));
-      if (function_to_call->my_type == SM_RETURN_TYPE)
-        return (sm_object *)function_to_call; // return the return
+      if (function_to_call->my_type == SM_RETURN_TYPE) {
+        sm_pop(sms_stack);
+        return (sm_object *)function_to_call;
+      } // return the return
       // Push the evaluated tuple of input args to frame stack
-      sm_push(sms_sf, sm_eval(sm_expr_get_arg(sme, 1)));
+      sm_push(sms_sf, sm_eval(sm_expr_get_arg((sm_expr *)sm_pop(sms_stack), 1)));
       sm_object *output = execute_fun(function_to_call);
       sm_pop(sms_sf);
       return output;
@@ -2650,7 +2653,9 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_PARAM_LIST_EXPR: {
+      sm_push(sms_stack, (sm_object *)sme);
       sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size, NULL);
+      sme              = (sm_expr *)sm_pop(sms_stack);
       for (uint32_t i = 0; i < sme->size; i++) {
         sm_object *new_val = sm_eval(sm_expr_get_arg(sme, i));
         sm_expr_set_arg(new_arr, i, new_val);
