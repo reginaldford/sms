@@ -1630,15 +1630,15 @@ sm_object *sm_eval(sm_object *input) {
     }
 
     case SM_FILE_PART_EXPR: {
-      sm_string *fname_str = (sm_string *)sm_eval(sm_expr_get_arg(sme, 0));
+      sm_string *fname_str = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
       if (fname_str->my_type != SM_STRING_TYPE)
         return (sm_object *)fname_str;
       char   *fname_cstr = &(fname_str->content);
-      sm_f64 *start_pos  = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
-      if (start_pos->my_type != SM_F64_TYPE)
+      sm_f64 *start_pos  = (sm_f64 *)eager_number_or_cx(sme, 1);
+      if (start_pos->my_type == SM_ERR_TYPE)
         return (sm_object *)start_pos;
-      sm_f64 *length = (sm_f64 *)eager_type_check(sme, 2, SM_F64_TYPE);
-      if (length->my_type != SM_STRING_TYPE)
+      sm_f64 *length = (sm_f64 *)eager_number_or_cx(sme, 2);
+      if (length->my_type == SM_ERR_TYPE)
         return (sm_object *)length;
       if (access(fname_cstr, F_OK) != 0) {
         printf("filePart failed because the file, %s ,does not exist.\n", fname_cstr);
