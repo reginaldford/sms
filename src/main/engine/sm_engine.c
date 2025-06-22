@@ -1277,8 +1277,10 @@ sm_object *sm_eval(sm_object *input) {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
-      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
-
+      sm_push(sms_stack, current_value);
+      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
+      current_value    = sm_pop(sms_stack);
+      current_cx       = (sm_cx *)sm_peek(sms_cx_stack);
       if (current_value != (sm_object *)sms_false || value != (sm_object *)sms_false) {
         if (!sm_cx_set(current_cx, sym, (sm_object *)sms_true)) {
           sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
@@ -1295,8 +1297,10 @@ sm_object *sm_eval(sm_object *input) {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
-      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
-
+      sm_push(sms_stack, current_value);
+      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
+      current_value    = sm_pop(sms_stack);
+      current_cx       = (sm_cx *)sm_peek(sms_cx_stack);
       if (current_value == (sm_object *)sms_false || value == (sm_object *)sms_false) {
         if (!sm_cx_set(current_cx, sym, (sm_object *)sms_false)) {
           sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
@@ -1312,7 +1316,9 @@ sm_object *sm_eval(sm_object *input) {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
-      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      sm_push(sms_stack, current_value);
+      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
+      current_value    = sm_pop(sms_stack);
 
       bool is_current_true = (current_value != (sm_object *)sms_false);
       bool is_value_true   = (value != (sm_object *)sms_false);
@@ -1331,7 +1337,9 @@ sm_object *sm_eval(sm_object *input) {
     case SM_NOTEQ_EXPR: {
       // Perform eager type checking for both arguments
       sm_object *obj0 = sm_eval(sm_expr_get_arg(sme, 0));
+      sm_push(sms_stack, obj0);
       sm_object *obj1 = sm_eval(sm_expr_get_arg(sme, 1));
+      obj0            = sm_pop(sms_stack);
       // Check if the two objects are equal
       if (sm_object_eq(obj0, obj1)) {
         // They are equal, return sms_false
