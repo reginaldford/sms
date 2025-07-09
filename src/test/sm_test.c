@@ -200,7 +200,7 @@ int perform_test_subchapter(uint32_t chapter, uint32_t subchapter, int test, cha
   sm_expr   *test_list = (sm_expr *)sm_cx_get(test_env, tests_sym);
 
   // push this environment into cx stack
-  sm_push(sms_cx_stack, (sm_object *)test_env);
+  sms_cx_stack = sm_push(sms_cx_stack, (sm_object *)test_env);
 
   // test == -1 means do all tests
   if (test == -1) {

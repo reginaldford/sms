@@ -85,7 +85,7 @@ void sm_init(sm_env *env, int num_args, char **argv) {
   // Initialize the global context
   sm_cx *scratch = sm_new_cx(parent_cx);
   sm_stack_push(sm_global_lex_stack(NULL), scratch);
-  sm_push(sms_cx_stack, (sm_object *)scratch);
+  sms_cx_stack = sm_push(sms_cx_stack, (sm_object *)scratch);
 
   // _scratch global cx variable
   sm_cx_let(parent_cx, sm_new_symbol("_scratch", 8), (sm_object *)scratch);

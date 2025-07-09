@@ -113,17 +113,21 @@ sm_object *execute_fun(sm_object *obj) {
     if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
       sm_expr *content_sme = (sm_expr *)((sm_fun *)fun)->content;
       sm_cx   *new_cx      = sm_new_cx(fun->parent);
-      sm_push(sms_cx_stack, (sm_object *)new_cx);
+      sms_cx_stack         = sm_push(sms_cx_stack, (sm_object *)new_cx);
+      sms_stack            = sm_push(sms_stack, (sm_object *)content_sme);
       for (uint32_t i = 1; i < content_sme->size; i++) {
-        result = sm_eval(sm_expr_get_arg(content_sme, i));
+        result = sm_eval(sm_expr_get_arg((sm_expr *)sm_peek(sms_stack), i));
         if (result->my_type == SM_RETURN_TYPE) {
           sm_pop(sms_cx_stack);
+          sm_pop(sms_stack);
           return ((sm_return *)result)->address;
         }
       }
       sm_pop(sms_cx_stack);
+      sm_pop(sms_stack);
       if (result->my_type == SM_RETURN_TYPE) {
         sm_pop(sms_cx_stack);
+        sm_pop(sms_stack);
         return ((sm_return *)result)->address;
       }
       return result;
@@ -653,20 +657,20 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_STR_CAT_EXPR: {
-      sm_push(sms_stack, (sm_object *)sme);
+      sms_stack = sm_push(sms_stack, (sm_object *)sme);
       // str0
       sm_string *str0 = (sm_string *)eager_type_check(sme, 0, SM_STRING_TYPE);
       if (str0->my_type != SM_STRING_TYPE)
         return (sm_object *)str0;
-      sm_push(sms_stack, (sm_object *)str0);
+      sms_stack = sm_push(sms_stack, (sm_object *)str0);
       // str1
       sme             = (sm_expr *)sm_peek2(sms_stack);
       sm_string *str1 = (sm_string *)eager_type_check(sme, 1, SM_STRING_TYPE);
       if (str1->my_type != SM_STRING_TYPE)
         return (sm_object *)str1;
-      uint32_t s0 = ((sm_string *)sm_peek(sms_stack))->size;
-      uint32_t s1 = str1->size;
-      sm_push(sms_stack, (sm_object *)str1);
+      uint32_t s0        = ((sm_string *)sm_peek(sms_stack))->size;
+      uint32_t s1        = str1->size;
+      sms_stack          = sm_push(sms_stack, (sm_object *)str1);
       sm_string *new_str = sm_new_string_manual(s0 + s1);
       str1               = (sm_string *)sm_pop(sms_stack);
       str0               = (sm_string *)sm_pop(sms_stack);
@@ -956,7 +960,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_cx *cx = (sm_cx *)eager_type_check(sme, 0, SM_CX_TYPE);
       if (cx->my_type == SM_RETURN_TYPE)
         return (sm_object *)cx;
-      sm_push(sms_stack, (sm_object *)cx);
+      sms_stack        = sm_push(sms_stack, (sm_object *)cx);
       sm_object *value = (sm_object *)sm_eval(sm_expr_get_arg(sme, 2));
       sm_cx_let((sm_cx *)sm_pop(sms_stack), sym, value);
       return value;
@@ -1107,7 +1111,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
       if (fun->my_type != SM_FUN_TYPE)
         return (sm_object *)fun;
-      sm_push(sms_stack, sm_copy((sm_object *)fun)); // functional design
+      sms_stack            = sm_push(sms_stack, sm_copy((sm_object *)fun)); // functional design
       sm_object *evaluated = sm_eval(sm_expr_get_arg(sme, 1));
       fun                  = ((sm_fun *)sm_pop(sms_stack));
       fun->content         = sm_localize(evaluated, fun);
@@ -1128,7 +1132,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
       if (fun->my_type != SM_FUN_TYPE)
         return (sm_object *)fun;
-      sm_push(sms_stack, (sm_object *)fun);
+      sms_stack       = sm_push(sms_stack, (sm_object *)fun);
       sm_expr *params = (sm_expr *)eager_type_check(sme, 1, SM_EXPR_TYPE);
       if (params->my_type != SM_EXPR_TYPE) {
         sm_pop(sms_stack);
@@ -1174,7 +1178,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_fun *fun = (sm_fun *)eager_type_check(sme, 0, SM_FUN_TYPE);
       if (fun->my_type == SM_RETURN_TYPE)
         return (sm_object *)fun;
-      sm_push(sms_stack, (sm_object *)fun);
+      sms_stack         = sm_push(sms_stack, (sm_object *)fun);
       sm_cx *new_parent = (sm_cx *)eager_type_check(sme, 1, SM_CX_TYPE);
       if (new_parent->my_type == SM_CX_TYPE) {
         sm_pop(sms_stack);
@@ -1194,7 +1198,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_expr *expression = (sm_expr *)eager_type_check(sme, 0, SM_EXPR_TYPE);
       if (expression->my_type == SM_RETURN_TYPE)
         return (sm_object *)expression;
-      sm_push(sms_stack, (sm_object *)expression);
+      sms_stack     = sm_push(sms_stack, (sm_object *)expression);
       sm_f64 *given = (sm_f64 *)eager_type_check(sme, 1, SM_F64_TYPE);
       if (given->my_type == SM_RETURN_TYPE) {
         sm_pop(sms_stack);
@@ -1277,10 +1281,10 @@ sm_object *sm_eval(sm_object *input) {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
-      sm_push(sms_stack, current_value);
-      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
-      current_value    = sm_pop(sms_stack);
-      current_cx       = (sm_cx *)sm_peek(sms_cx_stack);
+      sms_stack                = sm_push(sms_stack, current_value);
+      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      current_value            = sm_pop(sms_stack);
+      current_cx               = (sm_cx *)sm_peek(sms_cx_stack);
       if (current_value != (sm_object *)sms_false || value != (sm_object *)sms_false) {
         if (!sm_cx_set(current_cx, sym, (sm_object *)sms_true)) {
           sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
@@ -1297,10 +1301,10 @@ sm_object *sm_eval(sm_object *input) {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
-      sm_push(sms_stack, current_value);
-      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
-      current_value    = sm_pop(sms_stack);
-      current_cx       = (sm_cx *)sm_peek(sms_cx_stack);
+      sms_stack                = sm_push(sms_stack, current_value);
+      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      current_value            = sm_pop(sms_stack);
+      current_cx               = (sm_cx *)sm_peek(sms_cx_stack);
       if (current_value == (sm_object *)sms_false || value == (sm_object *)sms_false) {
         if (!sm_cx_set(current_cx, sym, (sm_object *)sms_false)) {
           sm_symbol *title   = sm_new_symbol("contextUpdateFailed", 19);
@@ -1316,9 +1320,9 @@ sm_object *sm_eval(sm_object *input) {
       sm_symbol *sym           = (sm_symbol *)sm_expr_get_arg(sme, 0);
       sm_cx     *current_cx    = (sm_cx *)sm_peek(sms_cx_stack);
       sm_object *current_value = sm_cx_get(current_cx, sym);
-      sm_push(sms_stack, current_value);
-      sm_object *value = sm_eval(sm_expr_get_arg(sme, 1));
-      current_value    = sm_pop(sms_stack);
+      sms_stack                = sm_push(sms_stack, current_value);
+      sm_object *value         = sm_eval(sm_expr_get_arg(sme, 1));
+      current_value            = sm_pop(sms_stack);
 
       bool is_current_true = (current_value != (sm_object *)sms_false);
       bool is_value_true   = (value != (sm_object *)sms_false);
@@ -1337,7 +1341,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_NOTEQ_EXPR: {
       // Perform eager type checking for both arguments
       sm_object *obj0 = sm_eval(sm_expr_get_arg(sme, 0));
-      sm_push(sms_stack, obj0);
+      sms_stack       = sm_push(sms_stack, obj0);
       sm_object *obj1 = sm_eval(sm_expr_get_arg(sme, 1));
       obj0            = sm_pop(sms_stack);
       // Check if the two objects are equal
@@ -1754,7 +1758,7 @@ sm_object *sm_eval(sm_object *input) {
       sm_object *evaluated = eager_type_check(sme, 0, SM_CX_TYPE);
       if (evaluated->my_type != SM_CX_TYPE)
         return evaluated;
-      sm_push(sms_cx_stack, evaluated);
+      sms_cx_stack       = sm_push(sms_cx_stack, evaluated);
       sm_object *outcome = sm_eval(obj1);
       sm_pop(sms_cx_stack);
       return outcome;
@@ -1799,7 +1803,7 @@ sm_object *sm_eval(sm_object *input) {
     case SM_FOR_EXPR: {
       // The sme should have these 4 expressions:
       // 0) initialization 1) condition 2) increment 3) iteration
-      sm_push(sms_stack, (sm_object *)sme);        // push the whole expression!
+      sms_stack          = sm_push(sms_stack, (sm_object *)sme); // push the whole expression!
       sm_object *outcome = (sm_object *)sms_false; // remains accurate if 0 iterations occur
       // Run init 1 time
       sm_eval(sm_expr_get_arg(sme, 0));
@@ -1827,8 +1831,8 @@ sm_object *sm_eval(sm_object *input) {
       case SM_ARRAY_TYPE: {
         sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
         sm_cx *inner_cx   = sm_new_cx(current_cx);
-        sm_push(sms_cx_stack, (sm_object *)inner_cx);
-        sm_array *arr = (sm_array *)evalResult;
+        sms_cx_stack      = sm_push(sms_cx_stack, (sm_object *)inner_cx);
+        sm_array *arr     = (sm_array *)evalResult;
         for (uint32_t i = 0; i < arr->size; i++) {
           sm_cx_let(inner_cx, handle, sm_array_get(arr, i));
           output = sm_eval((sm_object *)expression);
@@ -1838,10 +1842,10 @@ sm_object *sm_eval(sm_object *input) {
         break;
       }
       case SM_EXPR_TYPE: {
-        sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
-        sm_cx *inner_cx   = sm_new_cx(current_cx);
-        sm_push(sms_cx_stack, (sm_object *)inner_cx);
-        sm_push(sms_cx_stack, (sm_object *)inner_cx);
+        sm_cx *current_cx       = (sm_cx *)sm_peek(sms_cx_stack);
+        sm_cx *inner_cx         = sm_new_cx(current_cx);
+        sms_cx_stack            = sm_push(sms_cx_stack, (sm_object *)inner_cx);
+        sms_cx_stack            = sm_push(sms_cx_stack, (sm_object *)inner_cx);
         sm_expr *collectionExpr = (sm_expr *)evalResult;
         for (uint32_t i = 0; i < collectionExpr->size; i++) {
           sm_cx_let(inner_cx, handle, sm_expr_get_arg(collectionExpr, i));
@@ -1854,7 +1858,7 @@ sm_object *sm_eval(sm_object *input) {
       case SM_STRING_TYPE: {
         sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
         sm_cx *inner_cx   = sm_new_cx(current_cx);
-        sm_push(sms_cx_stack, (sm_object *)inner_cx);
+        sms_cx_stack      = sm_push(sms_cx_stack, (sm_object *)inner_cx);
         sm_string *str    = (sm_string *)evalResult;
         sm_object *output = (sm_object *)sms_false;
         for (uint32_t i = 0; i < str->size; i++) {
@@ -1987,7 +1991,7 @@ sm_object *sm_eval(sm_object *input) {
         sm_object *current_obj = sm_expr_get_arg(arr, i);
         sm_expr   *new_sf      = sm_new_expr(SM_PARAM_LIST_EXPR, current_obj, NULL);
         // Call the function with the new expression
-        sm_push(sms_sf, (sm_object *)new_sf);
+        sms_sf                = sm_push(sms_sf, (sm_object *)new_sf);
         sm_object *map_result = sm_eval(fun->content);
         // If the result is a return type, dereference it
         if (map_result->my_type == SM_RETURN_TYPE) {
@@ -2092,27 +2096,30 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_FUN_CALL_EXPR: {
       // Push the evaluated first argument to data stack (function_to_eval)
-      sm_push(sms_stack, (sm_object *)sme);
+      sms_stack                   = sm_push(sms_stack, (sm_object *)sme);
       sm_object *function_to_call = sm_eval(sm_expr_get_arg(sme, 0));
       if (function_to_call->my_type == SM_RETURN_TYPE) {
         sm_pop(sms_stack);
         return (sm_object *)function_to_call;
       } // return the return
       // Push the evaluated tuple of input args to frame stack
-      sm_push(sms_sf, sm_eval(sm_expr_get_arg((sm_expr *)sm_pop(sms_stack), 1)));
-      sm_object *output = execute_fun(function_to_call);
+      sm_object *evaluated = sm_eval(sm_expr_get_arg((sm_expr *)sm_pop(sms_stack), 1));
+      sms_sf               = sm_push(sms_sf, evaluated);
+      sm_object *output    = execute_fun(function_to_call);
       sm_pop(sms_sf);
       return output;
       break;
     }
     case SM_BLOCK_EXPR: {
-      sm_cx *current_cx = (sm_cx *)sm_peek(sms_cx_stack);
-      sm_cx *new_cx     = sm_new_cx(current_cx);
-      sm_push(sms_cx_stack, (sm_object *)new_cx);
+      sm_cx *new_cx     = sm_new_cx((sm_cx *)sm_peek(sms_stack));
+      sms_cx_stack      = sm_push(sms_cx_stack, (sm_object *)new_cx);
       sm_object *output = (sm_object *)sms_false;
-      for (uint32_t i = 1; i < sme->size && output->my_type != SM_RETURN_TYPE; i++)
-        output = sm_eval(sm_expr_get_arg(sme, i));
+      sms_stack         = sm_push(sms_stack, (sm_object *)sme);
+      uint32_t smeSize  = sme->size;
+      for (uint32_t i = 1; i < smeSize && output->my_type != SM_RETURN_TYPE; i++)
+        output = sm_eval(sm_expr_get_arg((sm_expr *)sm_peek(sms_stack), i));
       sm_pop(sms_cx_stack);
+      sm_pop(sms_stack);
       return output;
       break;
     }
@@ -2359,55 +2366,55 @@ sm_object *sm_eval(sm_object *input) {
       sm_object *o1 = eager_number_or_cx(sme, 1);
       if (o1->my_type == SM_RETURN_TYPE)
         return o1;
-      sm_push(sms_stack, o1);
+      sms_stack     = sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
       if (o0->my_type == SM_RETURN_TYPE)
         return o0;
-      sm_push(sms_stack, o0);
+      sms_stack = sm_push(sms_stack, o0);
       return sm_add();
     }
     case SM_MINUS_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
       if (o1->my_type == SM_RETURN_TYPE)
         return o1;
-      sm_push(sms_stack, o1);
+      sms_stack     = sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
       if (o0->my_type == SM_RETURN_TYPE)
         return o0;
-      sm_push(sms_stack, o0);
+      sms_stack = sm_push(sms_stack, o0);
       return sm_minus();
     }
     case SM_TIMES_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
       if (o1->my_type == SM_RETURN_TYPE)
         return o1;
-      sm_push(sms_stack, o1);
+      sms_stack     = sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
       if (o0->my_type == SM_RETURN_TYPE)
         return o0;
-      sm_push(sms_stack, o0);
+      sms_stack = sm_push(sms_stack, o0);
       return sm_times();
     }
     case SM_DIVIDE_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
       if (o1->my_type == SM_RETURN_TYPE)
         return o1;
-      sm_push(sms_stack, o1);
+      sms_stack     = sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
       if (o0->my_type == SM_RETURN_TYPE)
         return o0;
-      sm_push(sms_stack, o0);
+      sms_stack = sm_push(sms_stack, o0);
       return sm_divide();
     }
     case SM_POW_EXPR: {
       sm_object *o1 = eager_number_or_cx(sme, 1);
       if (o1->my_type == SM_RETURN_TYPE)
         return o1;
-      sm_push(sms_stack, o1);
+      sms_stack     = sm_push(sms_stack, o1);
       sm_object *o0 = eager_number_or_cx(sme, 0);
       if (o0->my_type == SM_RETURN_TYPE)
         return o0;
-      sm_push(sms_stack, o0);
+      sms_stack = sm_push(sms_stack, o0);
       return sm_pow();
     }
     case SM_SIN_EXPR: {
@@ -2653,7 +2660,7 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_PARAM_LIST_EXPR: {
-      sm_push(sms_stack, (sm_object *)sme);
+      sms_stack        = sm_push(sms_stack, (sm_object *)sme);
       sm_expr *new_arr = sm_new_expr_n(SM_PARAM_LIST_EXPR, sme->size, sme->size, NULL);
       sme              = (sm_expr *)sm_pop(sms_stack);
       for (uint32_t i = 0; i < sme->size; i++) {
@@ -2664,41 +2671,41 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_LT_EXPR: {
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_lt();
       break;
     }
     case SM_GT_EXPR: {
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_gt();
     }
     case SM_EQEQ_EXPR: {
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       if (sm_object_eq(sm_pop(sms_stack), sm_pop(sms_stack)))
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
       break;
     }
     case SM_IS_EXPR: {
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       if (sm_pop(sms_stack) == sm_pop(sms_stack))
         return (sm_object *)sms_true;
       return (sm_object *)sms_false;
       break;
     }
     case SM_GT_EQ_EXPR: {
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_gteq();
       break;
     }
     case SM_LT_EQ_EXPR: {
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
-      sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 1)));
+      sms_stack = sm_push(sms_stack, sm_eval(sm_expr_get_arg(sme, 0)));
       return sm_lteq();
       break;
     }
