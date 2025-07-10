@@ -2111,7 +2111,7 @@ sm_object *sm_eval(sm_object *input) {
       break;
     }
     case SM_BLOCK_EXPR: {
-      sm_cx *new_cx     = sm_new_cx((sm_cx *)sm_peek(sms_stack));
+      sm_cx *new_cx     = sm_new_cx((sm_cx *)sm_peek(sms_cx_stack));
       sms_cx_stack      = sm_push(sms_cx_stack, (sm_object *)new_cx);
       sm_object *output = (sm_object *)sms_false;
       sms_stack         = sm_push(sms_stack, (sm_object *)sme);
