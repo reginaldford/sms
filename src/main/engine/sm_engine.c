@@ -25,6 +25,11 @@ static inline sm_object *eager_number_or_cx(sm_expr *sme, uint32_t operand) {
                                            ", but Expected a number or cx (%s:%i)",
                                            operand, sm_global_fn_name(sme->op),
                                            sm_type_name(obj->my_type), __FILE__, __LINE__);
+
+    sm_error *err1 = (sm_error *)obj;
+    printf("msg: %s\nsrc: %s line: %i\n", &err1->message->content, &err1->source->content,
+           err1->line);
+
     sm_error *err = sm_new_error(12, "typeMismatch", message->size, &message->content, source->size,
                                  &source->content, (uint32_t)line->value);
     sm_return *return_obj = sm_new_return((sm_object *)err);
@@ -112,9 +117,9 @@ sm_object *execute_fun(sm_object *obj) {
     sm_object *result;
     if (content->my_type == SM_EXPR_TYPE && ((sm_expr *)content)->op == SM_BLOCK_EXPR) {
       sm_expr *content_sme = (sm_expr *)((sm_fun *)fun)->content;
-      sm_cx   *new_cx      = sm_new_cx(fun->parent);
-      sms_cx_stack         = sm_push(sms_cx_stack, (sm_object *)new_cx);
       sms_stack            = sm_push(sms_stack, (sm_object *)content_sme);
+      sm_cx *new_cx        = sm_new_cx(fun->parent);
+      sms_cx_stack         = sm_push(sms_cx_stack, (sm_object *)new_cx);
       for (uint32_t i = 1; i < content_sme->size; i++) {
         result = sm_eval(sm_expr_get_arg((sm_expr *)sm_peek(sms_stack), i));
         if (result->my_type == SM_RETURN_TYPE) {
@@ -126,8 +131,6 @@ sm_object *execute_fun(sm_object *obj) {
       sm_pop(sms_cx_stack);
       sm_pop(sms_stack);
       if (result->my_type == SM_RETURN_TYPE) {
-        sm_pop(sms_cx_stack);
-        sm_pop(sms_stack);
         return ((sm_return *)result)->address;
       }
       return result;

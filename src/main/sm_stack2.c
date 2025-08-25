@@ -18,13 +18,27 @@ sm_stack2 *sm_new_stack2(uint32_t capacity) {
 inline sm_object **sm_stack2_content(sm_stack2 *stack) { return (sm_object **)&(stack[1]); }
 
 sm_stack2 *sm_push(sm_stack2 *stack, sm_object *ptr) {
+  if (!stack || !ptr)
+    return NULL;
   sm_stack2 *current_stack = stack;
   if (stack->size == stack->capacity) {
-    uint32_t old_size = stack->capacity;
-    // We mutate the stack capacity before free, so that memcpy includes accurate capacity
-    stack->capacity = stack->capacity * sm_global_growth_factor(0) + 1;
-    current_stack   = malloc(sizeof(sm_stack2) + sizeof(void *) * stack->capacity);
+    uint32_t old_size      = stack->capacity;
+    uint32_t growth_factor = sm_global_growth_factor(0);
+    // Prevent potential overflow
+    if (stack->capacity > UINT32_MAX / growth_factor)
+      return NULL;
+    uint32_t new_capacity = stack->capacity * growth_factor + 1;
+    // Check for overflow in allocation size
+    size_t alloc_size;
+    if (__builtin_mul_overflow(sizeof(void *), new_capacity, &alloc_size) ||
+        __builtin_add_overflow(sizeof(sm_stack2), alloc_size, &alloc_size)) {
+      return NULL;
+    }
+    current_stack = malloc(alloc_size);
+    if (!current_stack)
+      return NULL;
     memcpy(current_stack, stack, sizeof(sm_stack2) + sizeof(void *) * old_size);
+    current_stack->capacity = new_capacity;
     free(stack);
   }
   sm_object **tuple          = sm_stack2_content(current_stack);
@@ -32,6 +46,7 @@ sm_stack2 *sm_push(sm_stack2 *stack, sm_object *ptr) {
   current_stack->size += 1;
   return current_stack;
 }
+
 
 sm_object *sm_pop(sm_stack2 *stack) {
   if (!stack->size) {

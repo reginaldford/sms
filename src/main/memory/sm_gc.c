@@ -204,20 +204,34 @@ inline void sm_garbage_collect() {
 
   // Data stack as root:
   sm_object **sms_stack_content = sm_stack2_content(sms_stack);
-  for (sm_object **curr_ptr = sms_stack_content; curr_ptr < &(sms_stack_content[sms_stack->size]);
-       curr_ptr++) {
-    *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
+  size_t      size              = sms_stack->size;
+  if (size > 0 && sms_stack_content != NULL) {
+    sm_object **end_ptr = sms_stack_content + size; // one past last element
+    for (sm_object **curr_ptr = sms_stack_content; curr_ptr < end_ptr; curr_ptr++) {
+      *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
+    }
   }
+
   // CX stack as root:
   sm_object **cx_stack_content = sm_stack2_content(sms_cx_stack);
-  for (sm_object **curr_ptr = cx_stack_content; curr_ptr < &(cx_stack_content[sms_cx_stack->size]);
-       curr_ptr++) {
-    *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
+  size                         = sms_cx_stack->size;
+
+  if (size > 0 && cx_stack_content != NULL) {
+    sm_object **end_ptr = cx_stack_content + size; // one past last element
+    for (sm_object **curr_ptr = cx_stack_content; curr_ptr < end_ptr; curr_ptr++) {
+      *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
+    }
   }
+
   // Frame Stack as root:
   sm_object **sf_content = sm_stack2_content(sms_sf);
-  for (sm_object **curr_ptr = sf_content; curr_ptr < &(sf_content[sms_sf->size]); curr_ptr++) {
-    *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
+  size                   = sms_sf->size;
+
+  if (size > 0 && sf_content != NULL) {
+    sm_object **end_ptr = sf_content + size; // one past last element
+    for (sm_object **curr_ptr = sf_content; curr_ptr < end_ptr; curr_ptr++) {
+      *curr_ptr = sm_meet_object(sms_heap, sms_other_heap, *curr_ptr);
+    }
   }
 
   // Inflate
