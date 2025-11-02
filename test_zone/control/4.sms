@@ -12,12 +12,12 @@
       a;
     }, 1, "basic for loop, 10 to 0"],
     [{
-      putln("");
+      putLn("");
       for(let x=0;x<9;x=x+1){
         for(let y=0;y<10;y=y+1){
           if(x+y>9) put("x") else put("_");    
         };
-        putln("");
+        putLn("");
         true;
       };
       #true
