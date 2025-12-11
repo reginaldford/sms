@@ -62,7 +62,7 @@ $(MAKE) $(SRC_MAIN)/linenoise/linenoise.c:
 
 # Rule to build the shared library
 build/clib/fib.so:
-	$(CC) $(CFLAGS) -shared  -I ./src/main/ clib/fib.c -o $@ $^
+	$(CC) $(CFLAGS) -shared -fPIC  -I ./src/main/ clib/fib.c -o $@ $^
 
 # Rule to compile each source file to an object file
 $(OBJDIR)/%.so: $(SRCDIR)/%.c
