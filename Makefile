@@ -43,7 +43,7 @@ BIN_NAME_DBG    := sms_dbg
 BIN_NAME_TEST   := sms_test
 BIN_NAME_KT     := sms_kernel_test
 BIN_NAME_PROF   := sms_prof
-THREADS         := 8 #match the number of threads on your machine
+THREADS         := $(shell nproc) # expects that you have nproc
 DOCS_CONFIG     := docs/docs.conf
 
 # sms executable

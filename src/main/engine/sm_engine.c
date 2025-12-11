@@ -1768,14 +1768,18 @@ sm_object *sm_eval(sm_object *input) {
     }
     case SM_PUT_EXPR: {
       sm_string *str;
+      sms_stack = sm_push(sms_stack, (sm_object *)sme);
       for (int i = 0; i < sme->size; i++) {
         sm_object *evaluated = eager_type_check(sme, i, SM_STRING_TYPE);
-        if (evaluated->my_type != SM_STRING_TYPE)
+        if (evaluated->my_type != SM_STRING_TYPE) {
+          sm_pop(sms_stack); // pop sme
           return evaluated;
+        }
         str = (sm_string *)evaluated;
         for (uint32_t i = 0; i < str->size; i++)
           putchar((&str->content)[i]);
       }
+      sm_pop(sms_stack); // pop sme
       return (sm_object *)sms_true;
       break;
     }
@@ -1795,11 +1799,15 @@ sm_object *sm_eval(sm_object *input) {
       sm_expr   *condition   = (sm_expr *)sm_expr_get_arg(sme, 0);
       sm_object *expression  = sm_expr_get_arg(sme, 1);
       sm_object *eval_result = (sm_object *)sms_false;
+      sms_stack              = sm_push(sms_stack, (sm_object *)sme);
       while (sm_eval((sm_object *)condition) != (sm_object *)sms_false) {
         eval_result = sm_eval(expression);
-        if (eval_result->my_type == SM_RETURN_TYPE)
+        if (eval_result->my_type == SM_RETURN_TYPE) {
+          sm_pop(sms_stack); // pop sme
           return eval_result;
+        }
       }
+      sm_pop(sms_stack); // pop sme
       return eval_result;
       break;
     }
@@ -1950,12 +1958,16 @@ sm_object *sm_eval(sm_object *input) {
       sm_expr   *condition  = (sm_expr *)sm_expr_get_arg(sme, 1);
       sm_object *expression = sm_expr_get_arg(sme, 0);
       sm_object *evaluated;
+      sms_stack = sm_push(sms_stack, (sm_object *)sme); // push the whole expression!
       do {
         evaluated = sm_eval(expression);
-        if (evaluated->my_type == SM_RETURN_TYPE)
+        if (evaluated->my_type == SM_RETURN_TYPE) {
+          sm_pop(sms_stack);
           return evaluated;
+        }
         sm_object *evaluated = sm_eval((sm_object *)condition);
       } while ((sm_object *)sms_false != evaluated);
+      sm_pop(sms_stack);
       return (sm_object *)sms_true;
       break;
     }
