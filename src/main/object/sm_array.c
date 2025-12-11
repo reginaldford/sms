@@ -15,12 +15,12 @@ sm_array *sm_new_array(uint32_t type, uint32_t size, sm_object *content, uint32_
 
 double *sm_f64_array_get_start(sm_array *a) { return (double *)(&((sm_space *)a->content)[1]); }
 double  sm_f64_array_get_bare(sm_array *a, uint32_t index) {
-  return sm_f64_array_get_start(a)[index];
+   return sm_f64_array_get_start(a)[index];
 }
 
 uint8_t *sm_ui8_array_get_start(sm_array *a) { return (uint8_t *)(&((sm_space *)a->content)[1]); }
 uint8_t  sm_ui8_array_get_bare(sm_array *a, uint32_t index) {
-  return sm_ui8_array_get_start(a)[index];
+   return sm_ui8_array_get_start(a)[index];
 }
 
 
@@ -34,7 +34,7 @@ uint64_t sm_ui64_array_get_bare(sm_array *a, uint32_t index) {
 
 int64_t *sm_i64_array_get_start(sm_array *a) { return (int64_t *)(&((sm_space *)a->content)[1]); }
 int64_t  sm_i64_array_get_bare(sm_array *a, uint32_t index) {
-  return sm_i64_array_get_start(a)[index];
+   return sm_i64_array_get_start(a)[index];
 }
 
 
