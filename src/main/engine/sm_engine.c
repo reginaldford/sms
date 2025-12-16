@@ -2650,10 +2650,15 @@ sm_object *sm_eval(sm_object *input) {
 
     case SM_IF_EXPR: {
       sm_object *a0 = sm_expr_get_arg(sme, 0);
+      sms_stack     = sm_push(sms_stack, (sm_object *)sme);
       a0            = sm_eval(a0);
+      sm_pop(sms_stack); // pop sme
       if (a0 != (sm_object *)sms_false) {
-        a0 = sm_expr_get_arg(sme, 1);
-        return sm_eval(a0);
+        a0                 = sm_expr_get_arg(sme, 1);
+        sms_stack          = sm_push(sms_stack, (sm_object *)sme);
+        sm_object *outcome = sm_eval(a0);
+        sm_pop(sms_stack); // pop sme
+        return outcome;
       }
       return (sm_object *)sms_false;
       break;
