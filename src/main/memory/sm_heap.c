@@ -190,7 +190,7 @@ void sm_sprint_dump() {
     if (current_obj->my_type < SM_UNKNOWN_TYPE)
       scan_cursor += sm_sizeof(current_obj);
     else {
-      DEBUG("Error: Stopping on unrecognized object type.");
+      DEBUGLOG("Error: Stopping on unrecognized object type.");
       return;
     }
   }

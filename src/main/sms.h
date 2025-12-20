@@ -1,4 +1,4 @@
-// Read https://raw.githubusercontent.com/reginaldford/sms/main/LICENSE.txt for license information
+// Read https://raw.githubusercmntent.com/reginaldford/sms/main/LICENSE.txt for license information
 
 #include <ctype.h>
 #include <dirent.h>
@@ -95,9 +95,18 @@ enum sm_object_type {
 // Useful macros
 #define MIN(x, y) (x < y ? x : y)
 #define MAX(x, y) (x > y ? x : y)
-#define DEBUG(note)                                                                                \
+
+// UNCOMMENT FOR DEBUG STATEMENTS:
+// #define DEBUGGING 1
+
+#ifdef DEBUGGING
+#define DEBUGLOG(note)                                                                             \
   fprintf(stderr, "\n%s:%i %s : %s \n", __FILE__, __LINE__, __FUNCTION__, note);                   \
   fflush(stdout);
+#else
+#define DEBUGLOG(note)
+#endif
+
 #include "linenoise/linenoise.h"
 #include "sm_common.h"
 #include "memory/sm_heap.h"

@@ -144,10 +144,10 @@ sm_object *execute_fun(sm_object *obj) {
     break;
   }
   case SM_SO_FUN_TYPE: {
-    sm_expr   *sf                       = (sm_expr *)sm_peek(sms_stack);
-    sm_so_fun *f                        = (sm_so_fun *)fun;
-    sm_object *(*ff)(sm_object * input) = f->function;
-    sm_object *output                   = ff((sm_object *)sf);
+    sm_expr   *sf                      = (sm_expr *)sm_peek(sms_stack);
+    sm_so_fun *f                       = (sm_so_fun *)fun;
+    sm_object *(*ff)(sm_object *input) = f->function;
+    sm_object *output                  = ff((sm_object *)sf);
     return output;
     break;
   }
@@ -2877,7 +2877,7 @@ sm_object *sm_eval(sm_object *input) {
     }
 
     } // end of switch on expression op value
-  }   // end of expression case
+  } // end of expression case
   case SM_META_TYPE: {
     return (((sm_meta *)input)->address);
     break;

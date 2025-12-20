@@ -182,6 +182,7 @@ inline void sm_inflate_heap(sm_heap *from, sm_heap *to) {
 
 // Copying GC
 inline void sm_garbage_collect() {
+  DEBUGLOG("Garbage Collection Started")
   if (!sms_heap->used)
     return;
   // Fill in the heap map for callstack scan if necessary
